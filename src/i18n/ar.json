@@ -1,0 +1,134 @@
+{
+  "common": {
+    "begin": "ابدأ",
+    "continue": "متابعة",
+    "back": "رجوع",
+    "share": "مشاركة",
+    "save": "حفظ",
+    "retry": "حاول مجدداً",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "close": "إغلاق",
+    "skip": "تخطي"
+  },
+  "onboarding": {
+    "slide1Title": "افك شفرة الطاقة من حولك",
+    "slide1Subtitle": "قراءات نفسية لعلاقاتك وأسلوب تعلقك وعالمك الداخلي.",
+    "slide2Title": "كيف تعمل النجوم",
+    "slide2Subtitle": "النجوم تفتح قراءاتك. يمكنك دائماً كسب المزيد.",
+    "beginButton": "ابدأ رحلتي",
+    "earnStars": "اكسب نجوماً",
+    "spendStars": "أنفق نجوماً",
+    "dailyBonus": "المكافأة اليومية"
+  },
+  "modules": {
+    "who_loves_me": { "title": "من يحبني", "subtitle": "اكتشف من يهتم حقاً", "description": "استناداً إلى نظرية التعلق، هذه القراءة ترسم خريطة من في حياتك يظهر باهتمام ثابت وغير مشروط.", "poweredBy": "نظرية التعلق", "time": "٥–٧ دقائق", "cost": "من ١" },
+    "who_hates_me": { "title": "من يكرهني", "subtitle": "اقرأ التوترات الخفية", "description": "تحليل سوسيومتري لمن في محيطك يحمل طاقة سلبية أو ضغينة تجاهك.", "poweredBy": "السوسيومتري", "time": "٥–٧ دقائق", "cost": "من ١" },
+    "who_jealous": { "title": "من يغار مني", "subtitle": "اكتشف الحسد قبل أن يكلفك", "description": "الحسد كثيراً ما يرتدي قناع الصداقة. هذه القراءة تكشف من يتنافس معك خلف ظهرك.", "poweredBy": "السوسيومتري", "time": "٥–٧ دقائق", "cost": "من ١" },
+    "who_cut_off": { "title": "من يبتعد عني", "subtitle": "سمِّ الصمت", "description": "حين ينسحب شخص ما، فهذا يقول شيئاً. هذه القراءة ترسم من ينفصل عاطفياً ولماذا.", "poweredBy": "علم النفس العلائقي", "time": "٥–٧ دقائق", "cost": "من ١" },
+    "energy_reading": { "title": "قراءة الطاقة", "subtitle": "اشعر بمن يضيئك", "description": "قراءة مبنية على عجلة الألوان تحدد طاقة من هي الأكثر توافقاً مع طاقتك.", "poweredBy": "سيكولوجية الألوان", "time": "٥–٧ دقائق", "cost": "من ١" },
+    "attachment_style": { "title": "أسلوب التعلق", "subtitle": "افهم كيف تحب", "description": "استناداً لعقود من البحث، أسلوب تعلقك يشكل كل علاقة لديك. اكتشف أسلوبك.", "poweredBy": "نظرية التعلق", "time": "٥–٧ دقائق", "cost": "١" },
+    "am_i_problem": { "title": "هل أنا المشكلة؟", "subtitle": "مرآة صادقة", "description": "أحياناً النمط هو نحن. هذه القراءة تساعدك على رؤية نقاطك العمياء في العلاقات بتعاطف.", "poweredBy": "علم النفس الذاتي", "time": "٥–٧ دقائق", "cost": "١" }
+  },
+  "readingModes": {
+    "solo": { "title": "فردي", "subtitle": "اقرأ شخصاً واحداً", "persons": "١ شخص" },
+    "compare": { "title": "مقارنة", "subtitle": "وجهاً لوجه", "persons": "٢ شخصان" },
+    "triangle": { "title": "مثلث", "subtitle": "قراءة ثلاثية", "persons": "٣ أشخاص" },
+    "circle": { "title": "دائرة", "subtitle": "قراءة جماعية", "persons": "٤+ أشخاص" }
+  },
+  "quiz": {
+    "progressLabel": "السؤال {{current}} من {{total}}",
+    "tapToAnswer": "اضغط للاختيار",
+    "frameworks": {
+      "attachment": "نظرية التعلق",
+      "loveLanguages": "لغات الحب",
+      "sociometry": "السوسيومتري",
+      "colorWheel": "سيكولوجية الألوان",
+      "intuition": "الحدس",
+      "mixed": "علم النفس"
+    }
+  },
+  "result": {
+    "confidenceLabel": "{{confidence}}% ثقة",
+    "attachmentStyle": "ديناميكية التعلق",
+    "loveLanguage": "إشارة لغة الحب",
+    "shareButton": "مشاركة النتيجة",
+    "saveButton": "حفظ والخروج",
+    "retryButton": "جرب قراءة أخرى",
+    "disclaimer": "لأغراض التأمل الذاتي والترفيه فقط.",
+    "insightPrefix": "✦",
+    "comparison": "كيف يقارن الجميع",
+    "whatThisMeans": "ماذا يعني هذا"
+  },
+  "stars": {
+    "walletTitle": "نجومك",
+    "balanceLabel": "{{balance}} نجوم",
+    "earnTitle": "اكسب المزيد من النجوم",
+    "watchVideo": "شاهد مقطعاً",
+    "watchVideoAmount": "+١",
+    "dailyBonus": "المكافأة اليومية",
+    "dailyBonusAmount": "+٢",
+    "streakBonus": "سلسلة ٧ أيام",
+    "streakBonusAmount": "+١٠",
+    "shareApp": "شارك Aurafy",
+    "shareAppAmount": "+١",
+    "watchNow": "شاهد الآن",
+    "claim": "احصل",
+    "share": "شارك",
+    "readyIn": "جاهز في {{hours}}س {{minutes}}د",
+    "dayProgress": "اليوم {{streak}} من ٧",
+    "activityTitle": "النشاط الأخير",
+    "earnReason": "مكتسب",
+    "spendReason": "منفق"
+  },
+  "history": {
+    "title": "قراءاتك",
+    "emptyTitle": "قراءاتك ستعيش هنا",
+    "emptyMessage": "أكمل قراءة لرؤية تاريخك.",
+    "ctaButton": "ابدأ قراءة",
+    "modeLabel": "قراءة {{mode}}"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "appearance": "المظهر",
+    "theme": "السمة",
+    "haptics": "التغذية الراجعة اللمسية",
+    "animations": "رسوم الخلفية",
+    "language": "اللغة",
+    "sound": "الصوت",
+    "soundEffects": "المؤثرات الصوتية",
+    "about": "حول",
+    "aboutPsychology": "حول علم النفس",
+    "privacyPolicy": "سياسة الخصوصية",
+    "rateApp": "قيّم Aurafy",
+    "shareApp": "شارك Aurafy",
+    "data": "البيانات",
+    "resetData": "إعادة تعيين جميع البيانات",
+    "resetConfirmTitle": "إعادة تعيين كل شيء؟",
+    "resetConfirmMessage": "سيؤدي هذا إلى مسح جميع القراءات والنجوم والإعدادات. لا يمكن التراجع عن هذا.",
+    "version": "Aurafy v1.0.0"
+  },
+  "daily": {
+    "title": "السؤال اليومي",
+    "dateFormat": "dddd، D MMMM",
+    "doneButton": "تم — أراك غداً",
+    "alreadyAnsweredTitle": "لقد أجبت اليوم بالفعل",
+    "alreadyAnsweredMessage": "عد غداً لسؤال جديد.",
+    "returnLabel": "عد غداً",
+    "streakBadge": "{{streak}} يوم متتالي",
+    "bonusClaimed": "+٢ تم الحصول عليهم!"
+  },
+  "errors": {
+    "notEnoughStars": "نجوم غير كافية — زر قسم النجوم لكسب المزيد",
+    "adFailed": "فشل تحميل الإعلان",
+    "adNotAvailable": "الإعلان غير متاح الآن",
+    "generic": "حدث خطأ ما. يرجى المحاولة مجدداً."
+  },
+  "personEntry": {
+    "title": "من تقرأ؟",
+    "addPerson": "أضف شخصاً",
+    "startButton": "ابدأ القراءة — {{cost}}",
+    "balanceAfter": "الرصيد بعد: {{balance}}",
+    "namePlaceholder": "أدخل الاسم..."
+  }
+}

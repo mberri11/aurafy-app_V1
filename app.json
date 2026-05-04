@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Aurafy",
+    "slug": "aurafy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "aurafy",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#07091A"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "backgroundColor": "#07091A"
+    },
+    "android": {
+      "softwareKeyboardLayoutMode": "pan",
+      "backgroundColor": "#07091A",
+      "package": "com.simobr.aurafy"
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png",
+      "backgroundColor": "#07091A"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "00ce7c28-5a3d-4318-a8c0-bd3644bcbe92"
+      }
+    }
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "common": {
+    "begin": "Comenzar",
+    "continue": "Continuar",
+    "back": "Atrás",
+    "share": "Compartir",
+    "save": "Guardar",
+    "retry": "Intentar de nuevo",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "skip": "Omitir"
+  },
+  "onboarding": {
+    "slide1Title": "Descifra la energía a tu alrededor",
+    "slide1Subtitle": "Lecturas basadas en psicología para tus relaciones, estilo de apego y mundo interior.",
+    "slide2Title": "Cómo funcionan las estrellas",
+    "slide2Subtitle": "Las estrellas desbloquean tus lecturas. Siempre puedes ganar más.",
+    "beginButton": "Comenzar mi viaje",
+    "earnStars": "Ganar estrellas",
+    "spendStars": "Gastar estrellas",
+    "dailyBonus": "Bono diario"
+  },
+  "modules": {
+    "who_loves_me": { "title": "Quién me ama", "subtitle": "Descifra quién genuinamente se preocupa", "description": "Basado en la teoría del apego, esta lectura mapea quién en tu vida aparece con cuidado constante e incondicional.", "poweredBy": "Teoría del apego", "time": "5–7 min", "cost": "Desde 1" },
+    "who_hates_me": { "title": "Quién me resiente", "subtitle": "Lee las tensiones ocultas", "description": "Análisis sociométrico de quién en tu órbita lleva energía negativa o resentimiento hacia ti.", "poweredBy": "Sociometría", "time": "5–7 min", "cost": "Desde 1" },
+    "who_jealous": { "title": "Quién tiene envidia", "subtitle": "Detecta la envidia antes de que te cueste", "description": "La envidia suele llevar la máscara de la amistad. Esta lectura revela quién compite contigo a tus espaldas.", "poweredBy": "Sociometría", "time": "5–7 min", "cost": "Desde 1" },
+    "who_cut_off": { "title": "Quién se aleja", "subtitle": "Nombra el silencio", "description": "Cuando alguien se retira, dice algo. Esta lectura mapea quién se está desconectando emocionalmente.", "poweredBy": "Psicología relacional", "time": "5–7 min", "cost": "Desde 1" },
+    "energy_reading": { "title": "Lectura de energía", "subtitle": "Siente quién te ilumina", "description": "Una lectura basada en la rueda de colores que identifica cuya energía está más alineada con la tuya.", "poweredBy": "Psicología del color", "time": "5–7 min", "cost": "Desde 1" },
+    "attachment_style": { "title": "Estilo de apego", "subtitle": "Entiende cómo amas", "description": "Basado en décadas de investigación, tu estilo de apego da forma a cada relación. Descubre el tuyo.", "poweredBy": "Teoría del apego", "time": "5–7 min", "cost": "1" },
+    "am_i_problem": { "title": "¿Soy el problema?", "subtitle": "Un espejo honesto", "description": "A veces el patrón somos nosotros. Esta lectura te ayuda a ver tus puntos ciegos relacionales con compasión.", "poweredBy": "Auto-psicología", "time": "5–7 min", "cost": "1" }
+  },
+  "readingModes": {
+    "solo": { "title": "Solo", "subtitle": "Leer una persona", "persons": "1 persona" },
+    "compare": { "title": "Comparar", "subtitle": "Cara a cara", "persons": "2 personas" },
+    "triangle": { "title": "Triángulo", "subtitle": "Lectura de tres", "persons": "3 personas" },
+    "circle": { "title": "Círculo", "subtitle": "Lectura grupal", "persons": "4+ personas" }
+  },
+  "quiz": {
+    "progressLabel": "Pregunta {{current}} de {{total}}",
+    "tapToAnswer": "Toca para seleccionar",
+    "frameworks": {
+      "attachment": "Teoría del apego",
+      "loveLanguages": "Lenguajes del amor",
+      "sociometry": "Sociometría",
+      "colorWheel": "Psicología del color",
+      "intuition": "Intuición",
+      "mixed": "Psicología"
+    }
+  },
+  "result": {
+    "confidenceLabel": "{{confidence}}% de confianza",
+    "attachmentStyle": "Dinámica de apego",
+    "loveLanguage": "Señal de lenguaje amoroso",
+    "shareButton": "Compartir resultado",
+    "saveButton": "Guardar y salir",
+    "retryButton": "Intentar otra",
+    "disclaimer": "Solo para reflexión personal y entretenimiento.",
+    "insightPrefix": "✦",
+    "comparison": "Cómo se compara cada uno",
+    "whatThisMeans": "Qué significa esto"
+  },
+  "stars": {
+    "walletTitle": "Tus estrellas",
+    "balanceLabel": "{{balance}} estrellas",
+    "earnTitle": "Ganar más estrellas",
+    "watchVideo": "Ver un video",
+    "watchVideoAmount": "+1",
+    "dailyBonus": "Bono diario",
+    "dailyBonusAmount": "+2",
+    "streakBonus": "Racha de 7 días",
+    "streakBonusAmount": "+10",
+    "shareApp": "Compartir Aurafy",
+    "shareAppAmount": "+1",
+    "watchNow": "Ver ahora",
+    "claim": "Reclamar",
+    "share": "Compartir",
+    "readyIn": "Listo en {{hours}}h {{minutes}}m",
+    "dayProgress": "Día {{streak}} de 7",
+    "activityTitle": "Actividad reciente",
+    "earnReason": "Ganado",
+    "spendReason": "Gastado"
+  },
+  "history": {
+    "title": "Tus lecturas",
+    "emptyTitle": "Tus lecturas vivirán aquí",
+    "emptyMessage": "Completa una lectura para ver tu historial.",
+    "ctaButton": "Comenzar una lectura",
+    "modeLabel": "Lectura {{mode}}"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "appearance": "Apariencia",
+    "theme": "Tema",
+    "haptics": "Retroalimentación háptica",
+    "animations": "Animaciones de fondo",
+    "language": "Idioma",
+    "sound": "Sonido",
+    "soundEffects": "Efectos de sonido",
+    "about": "Acerca de",
+    "aboutPsychology": "Sobre la psicología",
+    "privacyPolicy": "Política de privacidad",
+    "rateApp": "Calificar Aurafy",
+    "shareApp": "Compartir Aurafy",
+    "data": "Datos",
+    "resetData": "Restablecer todos los datos",
+    "resetConfirmTitle": "¿Restablecer todo?",
+    "resetConfirmMessage": "Esto borrará todas las lecturas, estrellas y ajustes. No se puede deshacer.",
+    "version": "Aurafy v1.0.0"
+  },
+  "daily": {
+    "title": "Pregunta diaria",
+    "dateFormat": "dddd, D [de] MMMM",
+    "doneButton": "Listo — hasta mañana",
+    "alreadyAnsweredTitle": "Ya respondiste hoy",
+    "alreadyAnsweredMessage": "Vuelve mañana para una nueva pregunta.",
+    "returnLabel": "Volver mañana",
+    "streakBadge": "{{streak}} días seguidos",
+    "bonusClaimed": "+2 reclamados!"
+  },
+  "errors": {
+    "notEnoughStars": "Estrellas insuficientes — visita Estrellas para ganar más",
+    "adFailed": "Error al cargar el anuncio",
+    "adNotAvailable": "Anuncio no disponible ahora mismo",
+    "generic": "Algo salió mal. Por favor intenta de nuevo."
+  },
+  "personEntry": {
+    "title": "¿A quién estás leyendo?",
+    "addPerson": "Agregar persona",
+    "startButton": "Comenzar lectura — {{cost}}",
+    "balanceAfter": "Saldo después: {{balance}}",
+    "namePlaceholder": "Ingresa un nombre..."
+  }
+}

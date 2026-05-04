@@ -1,0 +1,199 @@
+{
+  "common": {
+    "begin": "Begin",
+    "continue": "Continue",
+    "back": "Back",
+    "share": "Share",
+    "save": "Save",
+    "retry": "Try Again",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "skip": "Skip"
+  },
+  "onboarding": {
+    "slide1Title": "Decode the energy around you",
+    "slide1Subtitle": "Psychology-based readings for your relationships, attachment style, and inner world.",
+    "slide2Title": "How Stars work",
+    "slide2Subtitle": "Stars unlock your readings. You can always earn more.",
+    "beginButton": "Begin my journey",
+    "earnStars": "Earn Stars",
+    "spendStars": "Spend Stars",
+    "dailyBonus": "Daily Bonus"
+  },
+  "modules": {
+    "who_loves_me": {
+      "title": "Who Loves Me",
+      "subtitle": "Decode who genuinely cares",
+      "description": "Based on attachment theory, this reading maps who in your life shows up with consistent, unconditional care — even when you don't ask.",
+      "poweredBy": "Attachment Theory",
+      "time": "5–7 min",
+      "cost": "From 1"
+    },
+    "who_hates_me": {
+      "title": "Who Resents Me",
+      "subtitle": "Read the hidden tensions",
+      "description": "Sociometric analysis of who in your orbit is carrying negative energy or resentment toward you — even when they smile.",
+      "poweredBy": "Sociometry",
+      "time": "5–7 min",
+      "cost": "From 1"
+    },
+    "who_jealous": {
+      "title": "Who's Jealous of Me",
+      "subtitle": "Spot envy before it costs you",
+      "description": "Envy often wears the mask of friendship. This reading surfaces who is competing with you behind your back.",
+      "poweredBy": "Sociometry",
+      "time": "5–7 min",
+      "cost": "From 1"
+    },
+    "who_cut_off": {
+      "title": "Who's Pulling Away",
+      "subtitle": "Name the silence",
+      "description": "When someone withdraws, it says something. This reading maps who is emotionally disconnecting — and why.",
+      "poweredBy": "Relational Psychology",
+      "time": "5–7 min",
+      "cost": "From 1"
+    },
+    "energy_reading": {
+      "title": "Energy Reading",
+      "subtitle": "Feel who lights you up",
+      "description": "A color-wheel based reading that identifies whose energy is most aligned with yours — and who drains you.",
+      "poweredBy": "Color Psychology",
+      "time": "5–7 min",
+      "cost": "From 1"
+    },
+    "attachment_style": {
+      "title": "Attachment Style",
+      "subtitle": "Understand how you love",
+      "description": "Based on decades of research, your attachment style shapes every relationship you have. Find out yours.",
+      "poweredBy": "Attachment Theory",
+      "time": "5–7 min",
+      "cost": "1"
+    },
+    "am_i_problem": {
+      "title": "Am I the Problem?",
+      "subtitle": "An honest mirror",
+      "description": "Sometimes the pattern is us. This reading helps you see your relational blind spots with compassion and clarity.",
+      "poweredBy": "Self-Psychology",
+      "time": "5–7 min",
+      "cost": "1"
+    }
+  },
+  "readingModes": {
+    "solo": {
+      "title": "Solo",
+      "subtitle": "Read one person",
+      "persons": "1 person"
+    },
+    "compare": {
+      "title": "Compare",
+      "subtitle": "Head-to-head",
+      "persons": "2 people"
+    },
+    "triangle": {
+      "title": "Triangle",
+      "subtitle": "Three-way reading",
+      "persons": "3 people"
+    },
+    "circle": {
+      "title": "Circle",
+      "subtitle": "Group reading",
+      "persons": "4+ people"
+    }
+  },
+  "quiz": {
+    "progressLabel": "Question {{current}} of {{total}}",
+    "tapToAnswer": "Tap to select",
+    "frameworks": {
+      "attachment": "Attachment Theory",
+      "loveLanguages": "Love Languages",
+      "sociometry": "Sociometry",
+      "colorWheel": "Color Psychology",
+      "intuition": "Intuition",
+      "mixed": "Psychology"
+    }
+  },
+  "result": {
+    "confidenceLabel": "{{confidence}}% confidence",
+    "attachmentStyle": "Attachment dynamic",
+    "loveLanguage": "Love language signal",
+    "shareButton": "Share result",
+    "saveButton": "Save & exit",
+    "retryButton": "Try another",
+    "disclaimer": "For self-reflection and entertainment purposes only.",
+    "insightPrefix": "✦",
+    "comparison": "How everyone compares",
+    "whatThisMeans": "What this means"
+  },
+  "stars": {
+    "walletTitle": "Your Stars",
+    "balanceLabel": "{{balance}} Stars",
+    "earnTitle": "Earn more stars",
+    "watchVideo": "Watch a Video",
+    "watchVideoAmount": "+1",
+    "dailyBonus": "Daily Bonus",
+    "dailyBonusAmount": "+2",
+    "streakBonus": "7-Day Streak",
+    "streakBonusAmount": "+10",
+    "shareApp": "Share Aurafy",
+    "shareAppAmount": "+1",
+    "watchNow": "Watch Now",
+    "claim": "Claim",
+    "share": "Share",
+    "readyIn": "Ready in {{hours}}h {{minutes}}m",
+    "dayProgress": "Day {{streak}} of 7",
+    "activityTitle": "Recent activity",
+    "earnReason": "Earned",
+    "spendReason": "Spent"
+  },
+  "history": {
+    "title": "Your Readings",
+    "emptyTitle": "Your readings will live here",
+    "emptyMessage": "Complete a reading to see your history.",
+    "ctaButton": "Start a reading",
+    "modeLabel": "{{mode}} reading"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "haptics": "Haptic feedback",
+    "animations": "Background animations",
+    "language": "Language",
+    "sound": "Sound",
+    "soundEffects": "Sound effects",
+    "about": "About",
+    "aboutPsychology": "About the psychology",
+    "privacyPolicy": "Privacy policy",
+    "rateApp": "Rate Aurafy",
+    "shareApp": "Share Aurafy",
+    "data": "Data",
+    "resetData": "Reset all data",
+    "resetConfirmTitle": "Reset everything?",
+    "resetConfirmMessage": "This will erase all readings, stars, and settings. This cannot be undone.",
+    "version": "Aurafy v1.0.0"
+  },
+  "daily": {
+    "title": "Daily Question",
+    "dateFormat": "dddd, MMMM D",
+    "doneButton": "Done — see you tomorrow",
+    "alreadyAnsweredTitle": "You've already answered today",
+    "alreadyAnsweredMessage": "Come back tomorrow for a new question.",
+    "returnLabel": "Return tomorrow",
+    "streakBadge": "{{streak}} day streak",
+    "bonusClaimed": "+2 claimed!"
+  },
+  "errors": {
+    "notEnoughStars": "Not enough stars — visit Stars to earn more",
+    "adFailed": "Ad failed to load",
+    "adNotAvailable": "Ad not available right now",
+    "generic": "Something went wrong. Please try again."
+  },
+  "personEntry": {
+    "title": "Who are you reading?",
+    "addPerson": "Add person",
+    "startButton": "Start Reading — {{cost}}",
+    "balanceAfter": "Balance after: {{balance}}",
+    "namePlaceholder": "Enter name..."
+  }
+}
