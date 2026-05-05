@@ -23,7 +23,7 @@ type LanguagePill = { code: Language; label: string; flag: string };
 const LANGUAGES: LanguagePill[] = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'ar', label: 'العربية', flag: '🇲🇦' },
+  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
   { code: 'es', label: 'Español', flag: '🇪🇸' },
 ];
 
@@ -39,9 +39,9 @@ type Silhouette = {
 };
 
 const SILHOUETTES: Silhouette[] = [
-  { colors: ['#F472B6', '#E05FA0'], headSize: 40, bodyWidth: 64, bodyHeight: 48 },
-  { colors: ['#A78BFA', '#7C5FCF'], headSize: 52, bodyWidth: 80, bodyHeight: 60 },
-  { colors: ['#34D399', '#2FEAAC'], headSize: 40, bodyWidth: 64, bodyHeight: 48 },
+  { colors: ['#F9A8D4', '#F472B6'], headSize: 44, bodyWidth: 68, bodyHeight: 52 },
+  { colors: ['#C4B5FD', '#7C3AED'], headSize: 58, bodyWidth: 88, bodyHeight: 66 },
+  { colors: ['#67E8F9', '#0D9488'], headSize: 44, bodyWidth: 68, bodyHeight: 52 },
 ];
 
 function HeroAvatars() {
@@ -55,13 +55,13 @@ function HeroAvatars() {
               height: s.headSize,
               borderRadius: s.headSize / 2,
               overflow: 'hidden',
-              marginBottom: 4,
+              marginBottom: 18,
             }}
           >
             <LinearGradient
               colors={s.colors}
-              start={{ x: 0.2, y: 0 }}
-              end={{ x: 1, y: 1 }}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
           </View>
@@ -76,8 +76,8 @@ function HeroAvatars() {
           >
             <LinearGradient
               colors={s.colors}
-              start={{ x: 0.2, y: 0 }}
-              end={{ x: 1, y: 1 }}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
           </View>
@@ -97,27 +97,27 @@ const heroStyles = StyleSheet.create({
 });
 
 /* -------------------------------------------------------------------------- */
-/*           Slide 2 hero — gold star inside solid dark filled circle         */
-/*           No halo / no border — flat filled disc only.                     */
+/*           Slide 2 hero — ggold star with soft glow (no plate)   */
 /* -------------------------------------------------------------------------- */
 
 function HeroStar() {
   const theme = useTheme();
   return (
     <View style={starStyles.wrap}>
-      <View style={[starStyles.plate, { backgroundColor: theme.bg2 }]} />
-      <MaterialCommunityIcons name="star" size={64} color={theme.gold} />
+    <View style={[starStyles.glow, { backgroundColor: `${theme.gold}26` }]} />
+    <MaterialCommunityIcons name="star" size={92} color={theme.gold} />
     </View>
   );
 }
 
 const starStyles = StyleSheet.create({
-  wrap: { width: 140, height: 140, alignItems: 'center', justifyContent: 'center' },
-  plate: {
+  wrap: { width: 160, height: 160, alignItems: 'center', justifyContent: 'center' },
+  glow: {
     position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    opacity: 0.35,
   },
 });
 
@@ -134,7 +134,7 @@ type EarnTile = {
 
 function EarnCardsRow() {
   const theme = useTheme();
-  const iconOnTint = '#0B0E25';
+  const iconOnTint = 'undefined';
 
   const tiles: EarnTile[] = [
     {
@@ -169,9 +169,9 @@ function EarnCardsRow() {
             { borderColor: theme.surfaceBorder, backgroundColor: theme.surface },
           ]}
         >
-          <View style={[cardsStyles.iconCircle, { backgroundColor: tile.tint }]}>
-            {tile.renderIcon(iconOnTint)}
-          </View>
+    <View style={[cardsStyles.iconRing, { borderColor: tile.tint }]}>
+      {tile.renderIcon(tile.tint)}
+    </View>
           <Text style={[cardsStyles.label, { color: tile.tint }]}>{tile.label}</Text>
           <Text style={[cardsStyles.amount, { color: theme.textMuted }]}>{tile.amount}</Text>
         </View>
@@ -191,10 +191,11 @@ const cardsStyles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  iconRing: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -278,7 +279,7 @@ export default function OnboardingScreen() {
       <View
         style={[
           styles.column,
-          { paddingTop: insets.top + 56, paddingBottom: insets.bottom + 16 },
+          { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 16 },
         ]}
       >
         {/* Hero — fixed height */}
@@ -369,7 +370,7 @@ export default function OnboardingScreen() {
 
         {/* Primary CTA */}
         <GradientButton
-          label={activeSlide === 0 ? t('common.continue') : t('onboarding.beginButton')}
+          label={activeSlide === 0 ? t('common.continue') : t('common.begin')}
           onPress={() => (activeSlide === 0 ? setActiveSlide(1) : handleBegin())}
         />
       </View>
@@ -394,10 +395,10 @@ const styles = StyleSheet.create({
   },
 
   heroSlot: {
-    height: 160,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
+  height: 200,
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  paddingTop: 12,
   },
 
   textBlock: {
@@ -406,8 +407,8 @@ const styles = StyleSheet.create({
   },
 
   h1: {
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 36,
+    lineHeight: 43,
     letterSpacing: -0.4,
     textAlign: 'left',
   },
@@ -430,7 +431,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    borderRadius: 14,
+    borderRadius: 16,
     paddingVertical: 10,
     paddingHorizontal: 4,
     minHeight: 60,

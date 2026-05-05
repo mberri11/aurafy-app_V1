@@ -19,7 +19,7 @@ export default function SplashScreen() {
       if (navigated.current) return;
       navigated.current = true;
       router.replace(hasOnboarded ? '/(tabs)' : '/onboarding');
-    }, 2000);
+    }, 10000);
     return () => clearTimeout(timer);
   }, [hasOnboarded]);
 
@@ -40,11 +40,18 @@ export default function SplashScreen() {
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       />
+      {/* Bottom teal aurora glow — visible in design reference */}
+      <LinearGradient
+        colors={['transparent', 'rgba(47,234,172,0.07)']}
+        start={{ x: 0.5, y: 0.4 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
 
       <View style={styles.center}>
         <View style={styles.logoWrap}>
-          <View style={styles.logoGlow} />
-          <AurafyLogo size={100} />
+          <AurafyLogo size={64} />
         </View>
         <Text style={[styles.wordmark, { color: theme.text }]}>Aurafy</Text>
         <Text style={[styles.tagline, { color: theme.textMuted }]}>
@@ -74,17 +81,8 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   logoWrap: {
-    width: 160,
-    height: 160,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoGlow: {
-    position: 'absolute',
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(139, 92, 246, 0.15)',
   },
   wordmark: {
     fontSize: 48,

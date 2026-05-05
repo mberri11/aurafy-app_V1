@@ -16,7 +16,6 @@ interface ModuleCardProps {
   module: Module;
   title: string;
   subtitle: string;
-  starsCost: number;
   onPress: () => void;
   locked?: boolean;
 }
@@ -25,7 +24,6 @@ const ModuleCard = memo(function ModuleCard({
   module,
   title,
   subtitle,
-  starsCost,
   onPress,
   locked = false,
 }: ModuleCardProps) {
@@ -53,8 +51,6 @@ const ModuleCard = memo(function ModuleCard({
         activeOpacity={1}
       >
         <GlassCard glowColor={`${module.color}66`} style={styles.card}>
-          {/* Radial color halo behind everything — matches the design's
-              "radial-gradient(circle, <color> 0%, transparent 70%)" recipe. */}
           <LinearGradient
             pointerEvents="none"
             colors={[`${module.color}55`, `${module.color}1A`, 'transparent']}
@@ -63,8 +59,6 @@ const ModuleCard = memo(function ModuleCard({
             style={StyleSheet.absoluteFill}
           />
 
-          {/* Square tinted icon tile — uses module.icon emoji as content
-              (data-driven content emoji, not a UI affordance icon). */}
           <View
             style={[
               styles.iconTile,
@@ -74,27 +68,14 @@ const ModuleCard = memo(function ModuleCard({
             <Text style={styles.iconChar}>{module.icon}</Text>
           </View>
 
-          <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+          <View style={styles.spacer} />
+
+          <Text style={[styles.title, { color: theme.text }]} numberOfLines={2}>
             {title}
           </Text>
           <Text style={[styles.subtitle, { color: theme.textMuted }]} numberOfLines={2}>
             {subtitle}
           </Text>
-
-          <View style={styles.footerRow}>
-            <View style={[styles.accentLine, { backgroundColor: module.color }]} />
-            <View
-              style={[
-                styles.costChip,
-                {
-                  backgroundColor: `${theme.gold}1F`,
-                  borderColor: `${theme.gold}55`,
-                },
-              ]}
-            >
-              <Text style={[styles.costText, { color: theme.gold }]}>{starsCost} ★</Text>
-            </View>
-          </View>
 
           {locked ? (
             <View
@@ -115,8 +96,7 @@ export default ModuleCard;
 const styles = StyleSheet.create({
   card: {
     padding: 16,
-    minHeight: 142,
-    gap: 8,
+    minHeight: 180,
   },
   iconTile: {
     width: 44,
@@ -125,39 +105,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
   },
   iconChar: { fontSize: 22 },
+  spacer: { flex: 1, minHeight: 24 },
   title: {
-    fontSize: 15,
-    fontFamily: 'Fraunces_600SemiBold',
+    fontSize: 16,
+    fontFamily: 'Fraunces_700Bold',
+    marginBottom: 4,
   },
   subtitle: {
     fontSize: 12,
     lineHeight: 16,
     fontFamily: 'Inter_400Regular',
-  },
-  footerRow: {
-    marginTop: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  accentLine: {
-    flex: 1,
-    height: 2,
-    borderRadius: 999,
-  },
-  costChip: {
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  costText: {
-    fontSize: 11,
-    fontFamily: 'Inter_700Bold',
   },
   lockedOverlay: {
     ...StyleSheet.absoluteFillObject,
