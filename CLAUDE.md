@@ -33,6 +33,8 @@ Native builds via EAS (`eas.json`). Android package: `com.simobr.aurafy`.
 
 **Design reference:** All UI work must match `design-reference/screenshots/` and use tokens from `design-reference/tokens.md`. Always pull colors/spacing/fonts from `useTheme()` or the token file — never hardcode.
 
+**Pixel-perfect mandate:** Every screen MUST match the design reference screenshots EXACTLY — same text, same fonts, same font weights, same dimensions, same icons, same spacing, same colors, same layout. If matching the design requires editing other files (importing fonts, installing packages, updating i18n strings, modifying shared components, adding assets), DO IT without asking. There are no "out of scope" files during UI work — whatever it takes to match the design is in scope. Never say "out of scope" or "would need to" — just do it. If the design shows bold text, load the bold font. If the design shows a specific icon, install the icon library. If the design shows specific copy, update the i18n file. Zero compromises on visual accuracy.
+
 ---
 
 ## Architecture
@@ -101,8 +103,8 @@ Match every screen to `design-reference/screenshots/` exactly.
 
 | Screen | Status | Notes |
 |---|---|---|
-| Splash (index.tsx) | 🔲 todo | |
-| Onboarding | 🔲 todo | |
+| Splash (index.tsx) | ✅ done | Diagonal aurora gradient + wordmark sized to 48 / spacing 0. Verified on device. |
+| Onboarding | 🔄 in progress | Pixel-perfect pass: Fraunces_700Bold titles, hero vertically centered in top half, solid filled dark plate behind star, ✨ on slide-2 title, gradient pagination pill, filled-circle icon backgrounds on earn cards, en/fr/ar/es subtitles updated. Pending device verification. |
 | Home tab (module list) | 🔲 todo | |
 | Person entry | 🔲 todo | |
 | Quiz screen | 🔲 todo | |

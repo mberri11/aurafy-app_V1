@@ -5,7 +5,11 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
-import { Fraunces_400Regular } from "@expo-google-fonts/fraunces";
+import {
+  Fraunces_400Regular,
+  Fraunces_600SemiBold,
+  Fraunces_700Bold,
+} from "@expo-google-fonts/fraunces";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { Component, useEffect } from "react";
@@ -155,6 +159,8 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
     Fraunces_400Regular,
+    Fraunces_600SemiBold,
+    Fraunces_700Bold,
   });
 
   useEffect(() => {

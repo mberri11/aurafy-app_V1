@@ -25,15 +25,27 @@ export default function SplashScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Vertical bg-2 wash to subtly lift the upper half of the screen */}
+      {/* Diagonal aurora: violet wash from top-left, deepening to navy. */}
       <LinearGradient
-        colors={[theme.background, theme.bg2, theme.background]}
-        locations={[0, 0.45, 1]}
+        colors={[theme.bg2, theme.background, theme.background]}
+        locations={[0, 0.55, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
+      />
+      <LinearGradient
+        colors={['rgba(139,92,246,0.08)', 'transparent', 'rgba(47,234,172,0.05)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
       />
 
       <View style={styles.center}>
-        <AurafyLogo size={140} />
+        <View style={styles.logoWrap}>
+          <View style={styles.logoGlow} />
+          <AurafyLogo size={100} />
+        </View>
         <Text style={[styles.wordmark, { color: theme.text }]}>Aurafy</Text>
         <Text style={[styles.tagline, { color: theme.textMuted }]}>
           Decode the energy around you
@@ -61,11 +73,24 @@ const styles = StyleSheet.create({
     gap: 18,
     paddingTop: 40,
   },
+  logoWrap: {
+    width: 160,
+    height: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoGlow: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+  },
   wordmark: {
-    fontSize: 56,
-    fontFamily: 'Fraunces_400Regular',
+    fontSize: 48,
+    fontFamily: 'Fraunces_700Bold',
     marginTop: -8,
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   tagline: {
     fontSize: 15,
