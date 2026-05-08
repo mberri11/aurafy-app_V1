@@ -1,4 +1,3 @@
-// STUB — expand to 20 questions before production
 import { Question } from '../../types';
 
 export const whoCutOffQuestions: Question[] = [
@@ -62,5 +61,184 @@ export const whoCutOffQuestions: Question[] = [
     dimension: 'withdrawal',
     personWeight: 2,
   },
-  // TODO: add 15 more questions
+  {
+    id: 'who_cut_off_q06',
+    text: {
+      en: "Who used to text you every week and now goes silent for months without explanation?",
+      fr: "Qui te textait chaque semaine et reste maintenant silencieux pendant des mois sans explication ?",
+      ar: "من كان يراسلك كل أسبوع وأصبح الآن يصمت لشهور دون تفسير؟",
+      es: "¿Quién solía escribirte cada semana y ahora desaparece por meses sin explicación?",
+    },
+    framework: 'mixed',
+    dimension: 'passive_withdrawal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q07',
+    text: {
+      en: "Who replies, but always shorter, slower, and emptier than before?",
+      fr: "Qui répond, mais toujours plus court, plus lent et plus vide qu'avant ?",
+      ar: "من يرد، لكن دائماً بشكل أقصر وأبطأ وأكثر فراغاً من قبل؟",
+      es: "¿Quién responde, pero siempre más corto, más lento y más vacío que antes?",
+    },
+    framework: 'mixed',
+    dimension: 'passive_withdrawal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q08',
+    text: {
+      en: "Who declines plans with you with a politeness that feels rehearsed?",
+      fr: "Qui décline tes plans avec une politesse qui semble répétée ?",
+      ar: "من يرفض خططك بأدب يبدو محفوظاً مسبقاً؟",
+      es: "¿Quién rechaza tus planes con una cortesía que parece ensayada?",
+    },
+    framework: 'mixed',
+    dimension: 'withdrawal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q09',
+    text: {
+      en: "Who acts like a stranger when you cross paths in person?",
+      fr: "Qui se comporte comme un étranger quand vous vous croisez en personne ?",
+      ar: "من يتصرف كغريب عندما تلتقيان وجهاً لوجه؟",
+      es: "¿Quién actúa como un extraño cuando se cruzan en persona?",
+    },
+    framework: 'attachment',
+    dimension: 'withdrawal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q10',
+    text: {
+      en: "Who holds on to a small grievance from years ago instead of addressing it?",
+      fr: "Qui s'accroche à un petit grief d'il y a des années au lieu de l'aborder ?",
+      ar: "من يتمسك بمظلمة صغيرة من سنوات بدلاً من التحدث عنها؟",
+      es: "¿Quién sostiene un pequeño rencor de años atrás en lugar de abordarlo?",
+    },
+    framework: 'attachment',
+    dimension: 'emotional_exit',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q11',
+    text: {
+      en: "Who decided you'd grown apart without ever telling you?",
+      fr: "Qui a décidé que vous vous étiez éloignés sans jamais te le dire ?",
+      ar: "من قرر أنكما ابتعدتما دون أن يخبرك أبداً؟",
+      es: "¿Quién decidió que se habían distanciado sin nunca decírtelo?",
+    },
+    framework: 'attachment',
+    dimension: 'emotional_exit',
+    personWeight: 2,
+  },
+  {
+    id: 'who_cut_off_q12',
+    text: {
+      en: "Who started 'protecting their peace' by quietly removing you from theirs?",
+      fr: "Qui a commencé à 'protéger sa paix' en te retirant discrètement de la sienne ?",
+      ar: "من بدأ \"يحمي سلامه\" عبر إخراجك بهدوء منه؟",
+      es: "¿Quién empezó a 'proteger su paz' sacándote calladamente de la suya?",
+    },
+    framework: 'attachment',
+    dimension: 'emotional_exit',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q13',
+    text: {
+      en: "Who keeps you at the edge of their life — close enough to see, far enough to forget?",
+      fr: "Qui te maintient en marge de sa vie — assez proche pour voir, assez loin pour oublier ?",
+      ar: "من يبقيك على حافة حياته — قريباً بما يكفي لتُرى، بعيداً بما يكفي لتُنسى؟",
+      es: "¿Quién te mantiene al borde de su vida — lo suficientemente cerca para verte, lo suficientemente lejos para olvidarte?",
+    },
+    framework: 'attachment',
+    dimension: 'passive_withdrawal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q14',
+    text: {
+      en: "Who shifted from calling you a friend to calling you 'someone I used to know'?",
+      fr: "Qui est passé de t'appeler ami à t'appeler 'quelqu'un que j'ai connu' ?",
+      ar: "من انتقل من وصفك بالصديق إلى وصفك بـ\"شخص كنت أعرفه\"؟",
+      es: "¿Quién pasó de llamarte amigo a llamarte 'alguien que conocí'?",
+    },
+    framework: 'attachment',
+    dimension: 'withdrawal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q15',
+    text: {
+      en: "Who pulled mutual friends to one side, leaving you on the other?",
+      fr: "Qui a tiré les amis communs d'un côté, en te laissant de l'autre ?",
+      ar: "من سحب الأصدقاء المشتركين إلى جانب واحد، وتركك في الجانب الآخر؟",
+      es: "¿Quién tiró de los amigos en común hacia un lado, dejándote del otro?",
+    },
+    framework: 'sociometry',
+    dimension: 'withdrawal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q16',
+    text: {
+      en: "Who stops liking, watching, or commenting on what you share publicly?",
+      fr: "Qui cesse d'aimer, de regarder ou de commenter ce que tu partages publiquement ?",
+      ar: "من توقف عن الإعجاب أو المشاهدة أو التعليق على ما تنشره علناً؟",
+      es: "¿Quién deja de dar me gusta, ver o comentar lo que compartes públicamente?",
+    },
+    framework: 'sociometry',
+    dimension: 'passive_withdrawal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q17',
+    text: {
+      en: "Whose absence at your important moments said more than words?",
+      fr: "Dont l'absence à tes moments importants a dit plus que des mots ?",
+      ar: "من غيابه في لحظاتك المهمة قال أكثر من الكلمات؟",
+      es: "¿Cuya ausencia en tus momentos importantes dijo más que las palabras?",
+    },
+    framework: 'sociometry',
+    dimension: 'emotional_exit',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q18',
+    text: {
+      en: "If you both happened to be in the same room tomorrow, who would pretend not to see you?",
+      fr: "Si vous étiez tous les deux dans la même pièce demain, qui ferait semblant de ne pas te voir ?",
+      ar: "لو وجدتما نفسيكما غداً في الغرفة نفسها، من سيتظاهر بعدم رؤيتك؟",
+      es: "Si ambos estuvieran mañana en la misma habitación, ¿quién fingiría no verte?",
+    },
+    framework: 'intuition',
+    dimension: 'emotional_exit',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q19',
+    text: {
+      en: "Who feels far even when they're sitting right next to you?",
+      fr: "Qui semble loin même quand il est assis juste à côté de toi ?",
+      ar: "من يبدو بعيداً حتى وهو جالس بجانبك تماماً؟",
+      es: "¿Quién se siente lejos incluso cuando está sentado justo a tu lado?",
+    },
+    framework: 'intuition',
+    dimension: 'emotional_exit',
+    personWeight: 1,
+  },
+  {
+    id: 'who_cut_off_q20',
+    text: {
+      en: "If you stopped reaching out tomorrow, who would let the silence become permanent?",
+      fr: "Si tu cessais de prendre contact demain, qui laisserait le silence devenir permanent ?",
+      ar: "لو توقفت عن التواصل غداً، من سيدع الصمت يصبح دائماً؟",
+      es: "Si dejaras de comunicarte mañana, ¿quién dejaría que el silencio se volviera permanente?",
+    },
+    framework: 'intuition',
+    dimension: 'withdrawal',
+    personWeight: 2,
+  },
 ];

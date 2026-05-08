@@ -1,4 +1,4 @@
-// STUB — expand to 20 questions before production
+
 import { Question } from '../../types';
 
 export const whoJealousQuestions: Question[] = [
@@ -62,5 +62,184 @@ export const whoJealousQuestions: Question[] = [
     dimension: 'envy_mirroring',
     personWeight: 1,
   },
-  // TODO: add 15 more questions
+  {
+    id: 'who_jealous_q06',
+    text: {
+      en: "Who responds to your good news with a story about themselves?",
+      fr: "Qui répond à tes bonnes nouvelles par une histoire sur lui-même ?",
+      ar: "من يرد على أخبارك الجيدة بقصة عن نفسه؟",
+      es: "¿Quién responde a tus buenas noticias con una historia sobre sí mismo?",
+    },
+    framework: 'sociometry',
+    dimension: 'competitive_resentment',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q07',
+    text: {
+      en: "Who keeps comparing your path to theirs in ways that always make them look ahead?",
+      fr: "Qui compare sans cesse ton parcours au sien d'une manière qui le fait toujours paraître en avance ?",
+      ar: "من يقارن باستمرار مسارك بمساره بطرق تجعله يبدو دائماً متقدماً؟",
+      es: "¿Quién compara constantemente tu camino con el suyo de formas que lo hacen parecer siempre por delante?",
+    },
+    framework: 'sociometry',
+    dimension: 'competitive_resentment',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q08',
+    text: {
+      en: "Who needles you with 'just kidding' lines aimed at things you secretly worry about?",
+      fr: "Qui te taquine par des 'c'est une blague' visant des choses qui te préoccupent secrètement ?",
+      ar: "من يستخدم \"أمزح فقط\" ليطعنك في أشياء تقلقك سراً؟",
+      es: "¿Quién te pincha con frases de 'solo bromeaba' apuntando a cosas que te preocupan en secreto?",
+    },
+    framework: 'sociometry',
+    dimension: 'competitive_resentment',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q09',
+    text: {
+      en: "Who tries to gather information about your private life under the guise of caring?",
+      fr: "Qui essaie de recueillir des informations sur ta vie privée sous prétexte de se soucier de toi ?",
+      ar: "من يحاول جمع معلومات عن حياتك الخاصة تحت ستار الاهتمام؟",
+      es: "¿Quién intenta recolectar información sobre tu vida privada bajo el pretexto de preocuparse?",
+    },
+    framework: 'sociometry',
+    dimension: 'envy_mirroring',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q10',
+    text: {
+      en: "Who follows your moves online more closely than they admit out loud?",
+      fr: "Qui suit tes mouvements en ligne plus attentivement qu'il ne l'admet à voix haute ?",
+      ar: "من يتابع تحركاتك على الإنترنت بدقة أكبر مما يعترف به علناً؟",
+      es: "¿Quién sigue tus movimientos en línea más de cerca de lo que admite en voz alta?",
+    },
+    framework: 'attachment',
+    dimension: 'possessive_orbit',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q11',
+    text: {
+      en: "Who acts territorial about people, places, or opportunities that aren't really theirs?",
+      fr: "Qui se comporte de façon territoriale envers des personnes, des lieux ou des opportunités qui ne sont pas vraiment les siens ?",
+      ar: "من يتصرف بسيطرة على أشخاص أو أماكن أو فرص لا تعود إليه فعلاً؟",
+      es: "¿Quién actúa territorialmente sobre personas, lugares u oportunidades que no son realmente suyos?",
+    },
+    framework: 'attachment',
+    dimension: 'possessive_orbit',
+    personWeight: 2,
+  },
+  {
+    id: 'who_jealous_q12',
+    text: {
+      en: "Who reacts to your other relationships with subtle disapproval?",
+      fr: "Qui réagit à tes autres relations avec une désapprobation subtile ?",
+      ar: "من يقابل علاقاتك الأخرى بعدم استحسان خفي؟",
+      es: "¿Quién reacciona a tus otras relaciones con una desaprobación sutil?",
+    },
+    framework: 'attachment',
+    dimension: 'possessive_orbit',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q13',
+    text: {
+      en: "Who tries to insert themselves between you and people who are good for you?",
+      fr: "Qui essaie de s'insérer entre toi et les gens qui te sont bénéfiques ?",
+      ar: "من يحاول أن يدسّ نفسه بينك وبين أشخاص هم خير لك؟",
+      es: "¿Quién intenta meterse entre tú y las personas que son buenas para ti?",
+    },
+    framework: 'attachment',
+    dimension: 'envy_mirroring',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q14',
+    text: {
+      en: "Who behaves more warmly toward you in private than in public, where there's an audience?",
+      fr: "Qui se comporte plus chaleureusement envers toi en privé qu'en public, où il y a un auditoire ?",
+      ar: "من يتعامل معك بدفء أكبر في الخفاء منه في العلن حيث يوجد جمهور؟",
+      es: "¿Quién se comporta más cálidamente contigo en privado que en público, donde hay audiencia?",
+    },
+    framework: 'mixed',
+    dimension: 'competitive_resentment',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q15',
+    text: {
+      en: "Who 'forgets' to share information with you that would have helped you progress?",
+      fr: "Qui 'oublie' de partager avec toi une information qui t'aurait aidé à progresser ?",
+      ar: "من \"ينسى\" أن يطلعك على معلومة كانت ستساعدك على التقدم؟",
+      es: "¿Quién 'olvida' compartir contigo información que te habría ayudado a avanzar?",
+    },
+    framework: 'mixed',
+    dimension: 'envy_mirroring',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q16',
+    text: {
+      en: "Who frames your wins as luck and their wins as merit?",
+      fr: "Qui présente tes succès comme de la chance et les siens comme du mérite ?",
+      ar: "من يصف انتصاراتك بأنها حظ وانتصاراته بأنها استحقاق؟",
+      es: "¿Quién enmarca tus triunfos como suerte y los suyos como mérito?",
+    },
+    framework: 'mixed',
+    dimension: 'competitive_resentment',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q17',
+    text: {
+      en: "Who has a stronger emotional reaction to your good news than to their own?",
+      fr: "Qui a une réaction émotionnelle plus forte à tes bonnes nouvelles qu'aux siennes ?",
+      ar: "من يكون رد فعله العاطفي تجاه أخبارك الجيدة أقوى من رد فعله تجاه أخباره؟",
+      es: "¿Quién tiene una reacción emocional más fuerte ante tus buenas noticias que ante las suyas?",
+    },
+    framework: 'mixed',
+    dimension: 'envy_mirroring',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q18',
+    text: {
+      en: "Who, in your gut, feels lighter when you fail and heavier when you shine?",
+      fr: "Qui, au fond, semble plus léger quand tu échoues et plus lourd quand tu brilles ?",
+      ar: "من، في حدسك، يصبح أخف حين تفشل وأثقل حين تتألق؟",
+      es: "¿Quién, en tu intuición, se siente más liviano cuando fallas y más pesado cuando brillas?",
+    },
+    framework: 'intuition',
+    dimension: 'competitive_resentment',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q19',
+    text: {
+      en: "Whose attention feels less like love and more like surveillance?",
+      fr: "Dont l'attention ressemble moins à de l'amour et plus à de la surveillance ?",
+      ar: "من اهتمامه يشبه المراقبة أكثر من الحب؟",
+      es: "¿Cuya atención se siente menos como amor y más como vigilancia?",
+    },
+    framework: 'intuition',
+    dimension: 'possessive_orbit',
+    personWeight: 1,
+  },
+  {
+    id: 'who_jealous_q20',
+    text: {
+      en: "Who would not want you to read this question with their name in mind?",
+      fr: "Qui ne voudrait pas que tu lises cette question en pensant à lui ?",
+      ar: "من لن يرضى أن تقرأ هذا السؤال واسمه في بالك؟",
+      es: "¿Quién no querría que leyeras esta pregunta pensando en él?",
+    },
+    framework: 'intuition',
+    dimension: 'possessive_orbit',
+    personWeight: 2,
+  },
 ];

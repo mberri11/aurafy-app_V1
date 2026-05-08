@@ -1,4 +1,3 @@
-// STUB — expand insight pools to 6 variants per dimension before production
 import { MultiResults } from '../../types';
 
 export const whoLovesMeResults: MultiResults = {
@@ -28,6 +27,24 @@ export const whoLovesMeResults: MultiResults = {
         ar: 'هناك دفء وقائي في طريقة تفكيرهم فيك — كإبقاء اسمك قريباً.',
         es: 'Hay una calidez protectora en cómo piensan en ti — como mantener tu nombre cerca.',
       },
+      {
+        en: 'You can disappear for a while and they will still be standing where you left them.',
+        fr: 'Tu peux disparaître un moment et ils seront toujours là où tu les as laissés.',
+        ar: 'يمكنك أن تختفي فترة، وستجدهم حيث تركتهم.',
+        es: 'Puedes desaparecer un tiempo y seguirán parados donde los dejaste.',
+      },
+      {
+        en: 'They make safety feel ordinary, which is the rarest love there is.',
+        fr: 'Ils rendent la sécurité ordinaire, ce qui est l\'amour le plus rare.',
+        ar: 'يجعلون الأمان أمراً عادياً، وهذا أندر أنواع الحب.',
+        es: 'Hacen que la seguridad se sienta normal, que es el amor más raro que hay.',
+      },
+      {
+        en: 'You don\'t have to perform for their love. You only have to exist.',
+        fr: 'Tu n\'as pas à jouer un rôle pour leur amour. Tu n\'as qu\'à exister.',
+        ar: 'لا يلزمك أن تتقمص دوراً لتنال حبهم. يكفي أن توجد.',
+        es: 'No tienes que actuar para tener su amor. Solo necesitas existir.',
+      },
     ],
     attunement: [
       {
@@ -48,6 +65,24 @@ export const whoLovesMeResults: MultiResults = {
         ar: 'تشعر بأنك مرئي معهم — لا مجرد منظور إليه.',
         es: 'Te sientes visto con ellos — no solo mirado.',
       },
+      {
+        en: 'They remember the throwaway lines — the small things that revealed how you actually feel.',
+        fr: 'Ils se souviennent des phrases jetées — les petites choses qui révélaient comment tu te sentais vraiment.',
+        ar: 'يتذكرون العبارات العابرة — الأشياء الصغيرة التي كشفت كيف تشعر فعلاً.',
+        es: 'Recuerdan las frases sueltas — las pequeñas cosas que revelaron cómo te sientes realmente.',
+      },
+      {
+        en: 'They read your silence as carefully as your sentences.',
+        fr: 'Ils lisent ton silence aussi attentivement que tes phrases.',
+        ar: 'يقرؤون صمتك بدقة كما يقرؤون كلامك.',
+        es: 'Leen tu silencio con tanto cuidado como tus frases.',
+      },
+      {
+        en: 'When you change, they notice — and they don\'t hold you to who you used to be.',
+        fr: 'Quand tu changes, ils le remarquent — et ne te retiennent pas à qui tu étais.',
+        ar: 'حين تتغيّر، يلاحظون — ولا يكبّلونك بمن كنت.',
+        es: 'Cuando cambias, lo notan — y no te atan a quien solías ser.',
+      },
     ],
     emotional_safety: [
       {
@@ -67,6 +102,24 @@ export const whoLovesMeResults: MultiResults = {
         fr: 'Ils font de la place pour la version de toi que le monde ne voit jamais.',
         ar: 'يخصصون مساحة للنسخة منك التي لا يراها العالم أبداً.',
         es: 'Sostienen espacio para la versión de ti que el mundo nunca ve.',
+      },
+      {
+        en: 'They don\'t use what you trusted them with against you.',
+        fr: 'Ils n\'utilisent pas ce que tu leur as confié contre toi.',
+        ar: 'لا يستخدمون ما ائتمنتهم عليه ضدك.',
+        es: 'No usan lo que les confiaste en tu contra.',
+      },
+      {
+        en: 'Their love does not need you to shrink to fit.',
+        fr: 'Leur amour n\'exige pas que tu te rétrécisses pour t\'adapter.',
+        ar: 'حبهم لا يطلب منك أن تتقلّص لتتناسب.',
+        es: 'Su amor no te pide encogerte para encajar.',
+      },
+      {
+        en: 'They are the reason you know what calm feels like in another person.',
+        fr: 'Ils sont la raison pour laquelle tu sais à quoi ressemble le calme chez quelqu\'un.',
+        ar: 'هم سبب معرفتك كيف يكون الهدوء عند شخص آخر.',
+        es: 'Son la razón por la que sabes cómo se siente la calma en otra persona.',
       },
     ],
   },

@@ -1,4 +1,3 @@
-// STUB — expand to 20 questions before production
 import { Question } from '../../types';
 
 export const energyReadingQuestions: Question[] = [
@@ -62,5 +61,184 @@ export const energyReadingQuestions: Question[] = [
     dimension: 'calm_energy',
     personWeight: 1,
   },
-  // TODO: add 15 more questions
+  {
+    id: 'energy_reading_q06',
+    text: {
+      en: "Whose laugh changes the temperature of the day for you?",
+      fr: "Dont le rire change la température de ta journée ?",
+      ar: "من ضحكته تغير درجة حرارة يومك؟",
+      es: "¿Cuya risa cambia la temperatura de tu día?",
+    },
+    framework: 'colorWheel',
+    dimension: 'vitality',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q07',
+    text: {
+      en: "Who has a steadiness in their voice that makes problems feel smaller?",
+      fr: "Qui a une stabilité dans la voix qui fait paraître les problèmes plus petits ?",
+      ar: "من في صوته ثبات يجعل المشاكل تبدو أصغر؟",
+      es: "¿Quién tiene una firmeza en la voz que hace que los problemas se sientan más pequeños?",
+    },
+    framework: 'colorWheel',
+    dimension: 'calm_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q08',
+    text: {
+      en: "Who pulls bigger ideas out of you than you'd come up with alone?",
+      fr: "Qui fait sortir de toi des idées plus grandes que celles que tu aurais seules ?",
+      ar: "من يستخرج منك أفكاراً أكبر مما كنت ستصل إليه بمفردك؟",
+      es: "¿Quién saca de ti ideas más grandes de las que se te ocurrirían solo?",
+    },
+    framework: 'colorWheel',
+    dimension: 'inspirational_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q09',
+    text: {
+      en: "After whom do you feel like writing, building, or creating something?",
+      fr: "Après qui as-tu envie d'écrire, de construire ou de créer quelque chose ?",
+      ar: "من بعد لقائه تشعر برغبة في الكتابة أو البناء أو الإبداع؟",
+      es: "¿Después de quién te dan ganas de escribir, construir o crear algo?",
+    },
+    framework: 'intuition',
+    dimension: 'inspirational_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q10',
+    text: {
+      en: "Who makes ten minutes feel like an exhale you didn't know you needed?",
+      fr: "Qui fait que dix minutes ressemblent à un soupir dont tu ne savais pas avoir besoin ?",
+      ar: "من يجعل عشر دقائق تبدو وكأنها زفير لم تكن تعرف أنك بحاجة إليه؟",
+      es: "¿Quién hace que diez minutos se sientan como un suspiro que no sabías que necesitabas?",
+    },
+    framework: 'intuition',
+    dimension: 'calm_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q11',
+    text: {
+      en: "Whose color, if their energy were a hue, would feel warm and steady to you?",
+      fr: "Dont la couleur, si son énergie était une teinte, te semblerait chaude et stable ?",
+      ar: "من، لو كانت طاقته لوناً، يبدو لك دافئاً وثابتاً؟",
+      es: "¿Cuyo color, si su energía fuera un tono, te parecería cálido y estable?",
+    },
+    framework: 'intuition',
+    dimension: 'calm_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q12',
+    text: {
+      en: "Who do you instinctively gravitate toward in a crowded room without deciding to?",
+      fr: "Vers qui graviter instinctivement dans une pièce bondée sans le décider ?",
+      ar: "من تنجذب إليه غريزياً في غرفة مزدحمة دون أن تختار ذلك؟",
+      es: "¿Hacia quién gravitas instintivamente en una habitación llena sin decidirlo?",
+    },
+    framework: 'intuition',
+    dimension: 'vitality',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q13',
+    text: {
+      en: "Who appears in your daydreams as a future you're walking toward?",
+      fr: "Qui apparaît dans tes rêveries comme un avenir vers lequel tu marches ?",
+      ar: "من يظهر في أحلام يقظتك كأنه مستقبل تتجه إليه؟",
+      es: "¿Quién aparece en tus ensueños como un futuro hacia el que caminas?",
+    },
+    framework: 'intuition',
+    dimension: 'inspirational_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q14',
+    text: {
+      en: "Who do you feel safer breathing slowly around?",
+      fr: "Avec qui te sens-tu plus en sécurité pour respirer lentement ?",
+      ar: "مع من تشعر بأمان أكبر يسمح لك بأن تتنفس ببطء؟",
+      es: "¿Con quién te sientes más seguro respirando lentamente?",
+    },
+    framework: 'attachment',
+    dimension: 'calm_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q15',
+    text: {
+      en: "Whose attention pulls you forward instead of pinning you in place?",
+      fr: "Dont l'attention te tire en avant au lieu de te clouer sur place ?",
+      ar: "من اهتمامه يدفعك إلى الأمام بدلاً من أن يثبتك في مكانك؟",
+      es: "¿Cuya atención te empuja hacia adelante en vez de fijarte en el lugar?",
+    },
+    framework: 'attachment',
+    dimension: 'inspirational_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q16',
+    text: {
+      en: "Who do you think of when you remember feeling fully alive recently?",
+      fr: "À qui penses-tu quand tu te souviens d'avoir été pleinement vivant récemment ?",
+      ar: "من يخطر ببالك عندما تتذكر شعوراً حقيقياً بالحياة مؤخراً؟",
+      es: "¿En quién piensas cuando recuerdas haberte sentido plenamente vivo recientemente?",
+    },
+    framework: 'attachment',
+    dimension: 'vitality',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q17',
+    text: {
+      en: "Who feels like home to your nervous system, not just to your heart?",
+      fr: "Qui semble être un foyer pour ton système nerveux, pas seulement pour ton cœur ?",
+      ar: "من يشعر جهازك العصبي بأنه وطن، لا قلبك فقط؟",
+      es: "¿Quién se siente como hogar para tu sistema nervioso, no solo para tu corazón?",
+    },
+    framework: 'attachment',
+    dimension: 'calm_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q18',
+    text: {
+      en: "Whose name, said out loud at a table, makes the group lean in?",
+      fr: "Dont le nom, dit à voix haute à une table, fait pencher le groupe ?",
+      ar: "من إذا ذُكر اسمه بصوت عالٍ على الطاولة، انجذب نحوه الجميع؟",
+      es: "¿Cuyo nombre, dicho en voz alta en una mesa, hace que el grupo se incline?",
+    },
+    framework: 'sociometry',
+    dimension: 'vitality',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q19',
+    text: {
+      en: "Who tends to redirect group conversations toward something more meaningful?",
+      fr: "Qui a tendance à orienter les conversations de groupe vers quelque chose de plus significatif ?",
+      ar: "من يميل إلى توجيه أحاديث المجموعة نحو شيء أكثر معنى؟",
+      es: "¿Quién tiende a redirigir las conversaciones grupales hacia algo más significativo?",
+    },
+    framework: 'sociometry',
+    dimension: 'inspirational_energy',
+    personWeight: 1,
+  },
+  {
+    id: 'energy_reading_q20',
+    text: {
+      en: "If you could keep only one person's energy in your life going forward, whose would it be?",
+      fr: "Si tu ne pouvais garder qu'une seule énergie dans ta vie à partir de maintenant, ce serait celle de qui ?",
+      ar: "لو لم يكن بوسعك الاحتفاظ إلا بطاقة شخص واحد في حياتك من الآن فصاعداً، فطاقة من ستكون؟",
+      es: "Si solo pudieras conservar la energía de una persona en tu vida de ahora en adelante, ¿de quién sería?",
+    },
+    framework: 'sociometry',
+    dimension: 'inspirational_energy',
+    personWeight: 2,
+  },
 ];

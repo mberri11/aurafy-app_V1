@@ -39,9 +39,9 @@ type Silhouette = {
 };
 
 const SILHOUETTES: Silhouette[] = [
-  { colors: ['#F9A8D4', '#F472B6'], headSize: 44, bodyWidth: 68, bodyHeight: 52 },
-  { colors: ['#C4B5FD', '#7C3AED'], headSize: 58, bodyWidth: 88, bodyHeight: 66 },
-  { colors: ['#67E8F9', '#0D9488'], headSize: 44, bodyWidth: 68, bodyHeight: 52 },
+  { colors: ['#F9A8D4', '#F472B6'], headSize: 40, bodyWidth: 66, bodyHeight: 50 },
+  { colors: ['#C4B5FD', '#7C3AED'], headSize: 54, bodyWidth: 86, bodyHeight: 64 },
+  { colors: ['#67E8F9', '#0D9488'], headSize: 40, bodyWidth: 66, bodyHeight: 50 },
 ];
 
 function HeroAvatars() {
@@ -92,6 +92,8 @@ const heroStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 14,
+    // borderWidth: 2,
+    // borderColor: "white",
   },
   figure: { alignItems: 'center' },
 });
@@ -201,6 +203,7 @@ const cardsStyles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
+    
     fontFamily: 'Inter_600SemiBold',
   },
   amount: {
@@ -279,7 +282,7 @@ export default function OnboardingScreen() {
       <View
         style={[
           styles.column,
-          { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 16 },
+          { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 12 },
         ]}
       >
         {/* Hero — fixed height */}
@@ -319,6 +322,7 @@ export default function OnboardingScreen() {
                   style={({ pressed }) => [
                     styles.langTile,
                     {
+
                       backgroundColor: active ? theme.surface : 'rgba(255,255,255,0.02)',
                       borderColor: active ? theme.text : theme.surfaceBorder,
                       borderWidth: active ? 1.5 : 1,
@@ -379,9 +383,10 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: { flex: 1},
 
   skipBar: {
+    
     position: 'absolute',
     right: 24,
     zIndex: 10,
@@ -390,15 +395,23 @@ const styles = StyleSheet.create({
   skipText: { fontSize: 15, fontFamily: 'Inter_500Medium' },
 
   column: {
+    // borderWidth: 2,
+    // borderColor: "white",
     flex: 1,
     paddingHorizontal: 28,
   },
 
   heroSlot: {
-  height: 200,
+  // borderWidth: 2,
+  // borderColor: "red",
+  height: 160,
   alignItems: 'center',
   justifyContent: 'flex-start',
   paddingTop: 12,
+  marginHorizontal: 48,
+  marginBottom: 20,
+  marginTop: 60,
+
   },
 
   textBlock: {
@@ -407,9 +420,11 @@ const styles = StyleSheet.create({
   },
 
   h1: {
-    fontSize: 36,
-    lineHeight: 43,
+    fontSize: 32,
+    lineHeight: 42,
     letterSpacing: -0.4,
+    marginBottom: 6,
+    // fontFamily: 'Fraunces_700Bold',
     textAlign: 'left',
   },
   body: {
@@ -422,22 +437,26 @@ const styles = StyleSheet.create({
   flexSpacer: { flex: 1, minHeight: 16 },
 
   langGrid: {
+    // borderWidth: 2,
+    // borderColor: "white",
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
   },
   langTile: {
+    // borderWidth: 2,
+    // borderColor: 'green',
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    borderRadius: 16,
+    borderRadius: 14,
     paddingVertical: 10,
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
     minHeight: 60,
   },
-  langFlag: { fontSize: 20 },
-  langLabel: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
+  langFlag: { fontSize: 16 },
+  langLabel: { fontSize: 10, fontFamily: 'Inter_600SemiBold' },
 
   dotsRow: {
     flexDirection: 'row',

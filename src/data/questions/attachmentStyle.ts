@@ -1,4 +1,3 @@
-// STUB — expand to 20 questions before production
 import { Question } from '../../types';
 
 export const attachmentStyleQuestions: Question[] = [
@@ -87,5 +86,259 @@ export const attachmentStyleQuestions: Question[] = [
       { label: { en: 'I shut down and need significant time alone', fr: 'Je me ferme et j\'ai besoin d\'un temps seul significatif', ar: 'أغلق على نفسي وأحتاج إلى وقت طويل بمفردي', es: 'Me cierro y necesito mucho tiempo a solas' }, score: -2 },
     ],
   },
-  // TODO: add 15 more questions
+  {
+    id: 'attachment_style_q06',
+    text: {
+      en: "When a partner expresses a need, how do you usually receive it?",
+      fr: "Quand un partenaire exprime un besoin, comment l'accueilles-tu généralement ?",
+      ar: "حين يعبّر شريك عن حاجة، كيف تستقبلها عادةً؟",
+      es: "Cuando una pareja expresa una necesidad, ¿cómo la recibes normalmente?",
+    },
+    framework: 'attachment',
+    dimension: 'secure_base',
+    soloAnswers: [
+      { label: { en: 'As information I want — I lean in', fr: 'Comme une info que je veux — je m\'engage', ar: 'كمعلومة أردتها — أنخرط', es: 'Como información que quiero — me involucro' }, score: 2 },
+      { label: { en: 'A bit awkward but I try to meet it', fr: 'Un peu gênant mais j\'essaie d\'y répondre', ar: 'غريبة قليلاً لكنني أحاول تلبيتها', es: 'Un poco incómodo pero trato de responder' }, score: 1 },
+      { label: { en: 'As pressure I have to manage', fr: 'Comme une pression que je dois gérer', ar: 'كضغط يجب أن أتعامل معه', es: 'Como una presión que debo manejar' }, score: -1 },
+      { label: { en: 'As criticism — I get defensive', fr: 'Comme une critique — je deviens défensif', ar: 'كنقد — أصبح دفاعياً', es: 'Como una crítica — me pongo a la defensiva' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q07',
+    text: {
+      en: "How quickly do you trust a new person who treats you well?",
+      fr: "À quelle vitesse fais-tu confiance à une nouvelle personne qui te traite bien ?",
+      ar: "كم بسرعة تثق بشخص جديد يعاملك بلطف؟",
+      es: "¿Qué tan rápido confías en una persona nueva que te trata bien?",
+    },
+    framework: 'attachment',
+    dimension: 'avoidant_response',
+    soloAnswers: [
+      { label: { en: 'I let trust build naturally over time', fr: 'Je laisse la confiance se construire naturellement', ar: 'أدع الثقة تنمو طبيعياً عبر الوقت', es: 'Dejo que la confianza crezca naturalmente con el tiempo' }, score: 2 },
+      { label: { en: 'I\'m open but I keep watching', fr: 'Je suis ouvert mais je reste attentif', ar: 'منفتح لكنني أراقب', es: 'Estoy abierto pero sigo observando' }, score: 1 },
+      { label: { en: 'I assume there\'s a catch and stay guarded', fr: 'Je suppose qu\'il y a un piège et reste sur mes gardes', ar: 'أفترض أن هناك مكيدة وأظل حذراً', es: 'Asumo que hay una trampa y me mantengo en guardia' }, score: -1 },
+      { label: { en: 'I push them away to test if they stay', fr: 'Je les repousse pour tester s\'ils restent', ar: 'أبعدهم لأختبر إن كانوا سيبقون', es: 'Los aparto para probar si se quedan' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q08',
+    text: {
+      en: "When you say something hard and the room goes quiet, what do you do?",
+      fr: "Quand tu dis quelque chose de difficile et que la pièce devient silencieuse, que fais-tu ?",
+      ar: "حين تقول شيئاً صعباً ويعمّ الصمت، ماذا تفعل؟",
+      es: "Cuando dices algo difícil y la habitación queda en silencio, ¿qué haces?",
+    },
+    framework: 'mixed',
+    dimension: 'anxious_response',
+    soloAnswers: [
+      { label: { en: 'Hold the silence — it means it landed', fr: 'Je tiens le silence — ça veut dire que c\'est passé', ar: 'أتقبّل الصمت — يعني أن الكلام وصل', es: 'Sostengo el silencio — significa que llegó' }, score: 2 },
+      { label: { en: 'Soften it slightly to ease the room', fr: 'Je l\'adoucis légèrement pour détendre la pièce', ar: 'أخففه قليلاً لتلطيف الجو', es: 'Lo suavizo un poco para calmar la sala' }, score: 1 },
+      { label: { en: 'Backpedal: "Sorry, never mind"', fr: 'Je recule : « Désolé, oublie »', ar: 'أتراجع: \"آسف، انسَ الأمر\"', es: 'Retrocedo: "Perdón, olvídalo"' }, score: -1 },
+      { label: { en: 'Disappear — leave the room or shut down', fr: 'Disparaître — quitter la pièce ou me fermer', ar: 'أختفي — أغادر الغرفة أو أنسحب', es: 'Desaparezco — salgo de la habitación o me cierro' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q09',
+    text: {
+      en: "What do you do with compliments from people who matter to you?",
+      fr: "Que fais-tu des compliments de personnes qui comptent pour toi ?",
+      ar: "ماذا تفعل بإطراء الأشخاص الذين يهمونك؟",
+      es: "¿Qué haces con los cumplidos de personas que te importan?",
+    },
+    framework: 'mixed',
+    dimension: 'secure_base',
+    soloAnswers: [
+      { label: { en: 'Take them in — say thank you', fr: 'Je les reçois — je remercie', ar: 'أتقبّلها — أقول شكراً', es: 'Los recibo — digo gracias' }, score: 2 },
+      { label: { en: 'Accept lightly, with a smile', fr: 'Je les accepte légèrement, avec un sourire', ar: 'أتقبّلها بخفة مع ابتسامة', es: 'Los acepto con una sonrisa' }, score: 1 },
+      { label: { en: 'Deflect with a joke', fr: 'Je les détourne avec une blague', ar: 'أتجاوزها بمزحة', es: 'Los desvío con una broma' }, score: -1 },
+      { label: { en: 'Suspect they want something', fr: 'Je soupçonne qu\'ils veulent quelque chose', ar: 'أشكّ أنهم يريدون شيئاً', es: 'Sospecho que quieren algo' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q10',
+    text: {
+      en: "How do you handle being told 'I love you' early in a connection?",
+      fr: "Comment gères-tu d'entendre « je t'aime » tôt dans une connexion ?",
+      ar: "كيف تتعامل مع سماع \"أحبك\" مبكراً في علاقة؟",
+      es: "¿Cómo manejas que te digan 'te amo' al inicio de una conexión?",
+    },
+    framework: 'mixed',
+    dimension: 'avoidant_response',
+    soloAnswers: [
+      { label: { en: 'Receive it warmly and stay open', fr: 'Je le reçois chaleureusement et reste ouvert', ar: 'أستقبلها بدفء وأبقى منفتحاً', es: 'Lo recibo con calidez y me mantengo abierto' }, score: 2 },
+      { label: { en: 'Feel touched, but go slowly', fr: 'Je suis touché, mais j\'avance lentement', ar: 'أتأثر، لكنني أتقدم ببطء', es: 'Me conmuevo, pero voy lento' }, score: 1 },
+      { label: { en: 'Feel a bit smothered', fr: 'Je me sens un peu étouffé', ar: 'أشعر بالاختناق قليلاً', es: 'Me siento un poco asfixiado' }, score: -1 },
+      { label: { en: 'Want to immediately create distance', fr: 'J\'ai envie de mettre immédiatement de la distance', ar: 'أرغب فوراً في وضع مسافة', es: 'Quiero crear distancia inmediatamente' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q11',
+    text: {
+      en: "When you've hurt someone, how do you typically repair it?",
+      fr: "Quand tu as blessé quelqu'un, comment répares-tu habituellement ?",
+      ar: "حين تجرح شخصاً، كيف تُصلح ذلك عادةً؟",
+      es: "Cuando has lastimado a alguien, ¿cómo lo reparas usualmente?",
+    },
+    framework: 'mixed',
+    dimension: 'repair_behavior',
+    soloAnswers: [
+      { label: { en: 'Name it directly, apologize, change the behavior', fr: 'Je le nomme directement, je m\'excuse, je change', ar: 'أسميه مباشرة، أعتذر، وأغير السلوك', es: 'Lo nombro directo, me disculpo, cambio el comportamiento' }, score: 2 },
+      { label: { en: 'Apologize and try to do better next time', fr: 'Je m\'excuse et j\'essaie de mieux faire ensuite', ar: 'أعتذر وأحاول أن أكون أفضل في المرة القادمة', es: 'Me disculpo e intento hacerlo mejor la próxima' }, score: 1 },
+      { label: { en: 'Act extra nice without naming what happened', fr: 'Je suis extra gentil sans nommer ce qui s\'est passé', ar: 'أكون لطيفاً جداً دون أن أسمي ما حدث', es: 'Soy extra amable sin nombrar lo que pasó' }, score: -1 },
+      { label: { en: 'Wait for it to blow over', fr: 'J\'attends que ça passe', ar: 'أنتظر أن ينتهي الأمر', es: 'Espero a que pase' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q12',
+    text: {
+      en: "How do you treat your own needs when they conflict with someone else's?",
+      fr: "Comment traites-tu tes propres besoins quand ils entrent en conflit avec ceux d'un autre ?",
+      ar: "كيف تتعامل مع احتياجاتك عندما تتعارض مع احتياجات شخص آخر؟",
+      es: "¿Cómo tratas tus propias necesidades cuando chocan con las de otra persona?",
+    },
+    framework: 'mixed',
+    dimension: 'secure_base',
+    soloAnswers: [
+      { label: { en: 'Voice them and look for a real compromise', fr: 'Je les exprime et cherche un vrai compromis', ar: 'أعبّر عنها وأبحث عن حل وسط حقيقي', es: 'Los expreso y busco un compromiso real' }, score: 2 },
+      { label: { en: 'Mention them softly so it isn\'t a fight', fr: 'Je les mentionne doucement pour éviter une dispute', ar: 'أذكرها بلطف كي لا يحدث شجار', es: 'Los menciono suavemente para que no haya pelea' }, score: 1 },
+      { label: { en: 'Quietly drop them to keep the peace', fr: 'Je les abandonne discrètement pour garder la paix', ar: 'أتخلى عنها بهدوء حفاظاً على السلام', es: 'Los dejo callado para mantener la paz' }, score: -1 },
+      { label: { en: 'Resent them later for not noticing', fr: 'Je leur en veux plus tard de ne pas avoir remarqué', ar: 'أحقد عليهم لاحقاً لأنهم لم يلاحظوا', es: 'Les guardo rencor después por no notarlo' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q13',
+    text: {
+      en: "Do friends describe you as someone who is easy to be close with?",
+      fr: "Tes amis te décrivent-ils comme quelqu'un avec qui il est facile d'être proche ?",
+      ar: "هل يصفك أصدقاؤك بأنك شخص يسهل أن يقترب منه؟",
+      es: "¿Tus amigos te describen como alguien con quien es fácil estar cerca?",
+    },
+    framework: 'sociometry',
+    dimension: 'secure_base',
+    soloAnswers: [
+      { label: { en: 'Yes — they say I\'m easy to talk to', fr: 'Oui — ils disent que je suis facile à parler', ar: 'نعم — يقولون إنه يسهل التحدث معي', es: 'Sí — dicen que soy fácil de hablar' }, score: 2 },
+      { label: { en: 'Mostly — once they know me', fr: 'Surtout — une fois qu\'ils me connaissent', ar: 'في الغالب — بعد أن يعرفوني', es: 'Mayormente — una vez que me conocen' }, score: 1 },
+      { label: { en: 'Some say I\'m hard to read', fr: 'Certains disent que je suis difficile à cerner', ar: 'البعض يقول إنني صعب الفهم', es: 'Algunos dicen que soy difícil de leer' }, score: -1 },
+      { label: { en: 'I\'ve been called distant or intense', fr: 'On m\'a dit distant ou intense', ar: 'وُصفتُ بأنني بعيد أو حاد', es: 'Me han dicho distante o intenso' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q14',
+    text: {
+      en: "Have multiple partners told you the same complaint about how you connect?",
+      fr: "Plusieurs partenaires t'ont-ils fait le même reproche sur ta façon de te connecter ?",
+      ar: "هل أخبرك عدة شركاء بنفس الشكوى عن طريقتك في التواصل العاطفي؟",
+      es: "¿Varias parejas te han dicho la misma queja sobre cómo te conectas?",
+    },
+    framework: 'sociometry',
+    dimension: 'avoidant_response',
+    soloAnswers: [
+      { label: { en: 'No — feedback has been varied', fr: 'Non — les retours ont été variés', ar: 'لا — الملاحظات كانت متنوعة', es: 'No — los comentarios han sido variados' }, score: 2 },
+      { label: { en: 'A theme exists but I\'m working on it', fr: 'Il y a un thème mais j\'y travaille', ar: 'هناك نمط لكنني أعمل عليه', es: 'Hay un patrón pero trabajo en eso' }, score: 1 },
+      { label: { en: 'Yes — I\'ve heard it more than once', fr: 'Oui — je l\'ai entendu plus d\'une fois', ar: 'نعم — سمعتها أكثر من مرة', es: 'Sí — lo he escuchado más de una vez' }, score: -1 },
+      { label: { en: 'It\'s the same complaint every time', fr: 'C\'est la même plainte à chaque fois', ar: 'إنها نفس الشكوى في كل مرة', es: 'Es la misma queja cada vez' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q15',
+    text: {
+      en: "How do people closest to you describe asking you for emotional support?",
+      fr: "Comment les personnes les plus proches décrivent-elles le fait de te demander un soutien émotionnel ?",
+      ar: "كيف يصف أقرب الناس إليك طلب الدعم العاطفي منك؟",
+      es: "¿Cómo describen las personas más cercanas a ti pedirte apoyo emocional?",
+    },
+    framework: 'sociometry',
+    dimension: 'secure_base',
+    soloAnswers: [
+      { label: { en: 'They say it feels safe and easy', fr: 'Ils disent que c\'est sûr et facile', ar: 'يقولون إن ذلك آمن وسهل', es: 'Dicen que se siente seguro y fácil' }, score: 2 },
+      { label: { en: 'They feel a bit awkward but try', fr: 'Ils trouvent ça un peu gênant mais essayent', ar: 'يشعرون بالحرج قليلاً لكنهم يحاولون', es: 'Se sienten un poco incómodos pero lo intentan' }, score: 1 },
+      { label: { en: 'They hesitate before bringing it up', fr: 'Ils hésitent avant de l\'aborder', ar: 'يترددون قبل الحديث', es: 'Dudan antes de mencionarlo' }, score: -1 },
+      { label: { en: 'They go to someone else instead', fr: 'Ils vont vers quelqu\'un d\'autre', ar: 'يلجؤون إلى شخص آخر بدلاً من ذلك', es: 'Acuden a otra persona en su lugar' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q16',
+    text: {
+      en: "When you scroll through messages from people who love you, what do you feel?",
+      fr: "Quand tu fais défiler les messages des gens qui t'aiment, que ressens-tu ?",
+      ar: "حين تتصفح رسائل من يحبونك، بماذا تشعر؟",
+      es: "Cuando ojeas los mensajes de la gente que te quiere, ¿qué sientes?",
+    },
+    framework: 'sociometry',
+    dimension: 'anxious_response',
+    soloAnswers: [
+      { label: { en: 'Warm and grounded', fr: 'Chaleureux et ancré', ar: 'دافئ وثابت', es: 'Cálido y arraigado' }, score: 2 },
+      { label: { en: 'Grateful, with a small ache', fr: 'Reconnaissant, avec une légère douleur', ar: 'ممتن، مع وجع خفيف', es: 'Agradecido, con una leve molestia' }, score: 1 },
+      { label: { en: 'A weight — like I owe them', fr: 'Un poids — comme si je leur devais quelque chose', ar: 'ثقل — كأنني مدين لهم', es: 'Un peso — como si les debiera' }, score: -1 },
+      { label: { en: 'Numb — I almost don\'t feel it', fr: 'Engourdi — je ne le ressens presque pas', ar: 'تخدّر — لا أكاد أشعر', es: 'Adormecido — casi no lo siento' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q17',
+    text: {
+      en: "When someone says they need space, what's the truest thing you feel?",
+      fr: "Quand quelqu'un dit avoir besoin d'espace, quelle est la chose la plus vraie que tu ressens ?",
+      ar: "حين يقول أحدهم إنه بحاجة إلى مساحة، ما أصدق شعور يأتيك؟",
+      es: "Cuando alguien dice que necesita espacio, ¿qué es lo más verdadero que sientes?",
+    },
+    framework: 'intuition',
+    dimension: 'anxious_response',
+    soloAnswers: [
+      { label: { en: 'Respect — people need air', fr: 'Du respect — les gens ont besoin d\'air', ar: 'احترام — الناس بحاجة إلى هواء', es: 'Respeto — la gente necesita aire' }, score: 2 },
+      { label: { en: 'A small sting, then okay', fr: 'Une petite piqûre, puis ça va', ar: 'وخز صغير، ثم أتقبّل', es: 'Una pequeña punzada, luego okay' }, score: 1 },
+      { label: { en: 'Quiet panic — what did I do?', fr: 'Une panique silencieuse — qu\'est-ce que j\'ai fait ?', ar: 'هلع صامت — ماذا فعلت؟', es: 'Pánico silencioso — ¿qué hice?' }, score: -1 },
+      { label: { en: 'Shut down before they go', fr: 'Je me ferme avant qu\'ils ne partent', ar: 'أنغلق قبل أن يذهبوا', es: 'Me cierro antes de que se vayan' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q18',
+    text: {
+      en: "How does your body feel during a long, honest conversation?",
+      fr: "Comment ton corps se sent-il pendant une longue conversation honnête ?",
+      ar: "كيف يشعر جسدك خلال محادثة طويلة وصادقة؟",
+      es: "¿Cómo se siente tu cuerpo durante una conversación larga y honesta?",
+    },
+    framework: 'intuition',
+    dimension: 'avoidant_response',
+    soloAnswers: [
+      { label: { en: 'Open and present', fr: 'Ouvert et présent', ar: 'منفتح وحاضر', es: 'Abierto y presente' }, score: 2 },
+      { label: { en: 'A little tight, but I stay', fr: 'Un peu tendu, mais je reste', ar: 'متوتر قليلاً، لكنني أبقى', es: 'Un poco tenso, pero me quedo' }, score: 1 },
+      { label: { en: 'I want it to end', fr: 'Je veux que ça finisse', ar: 'أريدها أن تنتهي', es: 'Quiero que termine' }, score: -1 },
+      { label: { en: 'I dissociate or check out', fr: 'Je dissocie ou je décroche', ar: 'أنفصل أو أهرب ذهنياً', es: 'Me disocio o me desconecto' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q19',
+    text: {
+      en: "When you imagine being deeply loved, what's the first feeling that arrives?",
+      fr: "Quand tu imagines être profondément aimé, quel est le premier sentiment qui arrive ?",
+      ar: "حين تتخيل أنك محبوب بعمق، ما أول شعور يأتيك؟",
+      es: "Cuando imaginas ser profundamente amado, ¿cuál es el primer sentimiento que llega?",
+    },
+    framework: 'intuition',
+    dimension: 'secure_base',
+    soloAnswers: [
+      { label: { en: 'Calm — yes, I deserve this', fr: 'Calme — oui, je mérite ça', ar: 'هدوء — نعم، أستحق هذا', es: 'Calma — sí, merezco esto' }, score: 2 },
+      { label: { en: 'Hopeful, with a hint of unsure', fr: 'Plein d\'espoir, avec un soupçon de doute', ar: 'أمل، مع لمحة شك', es: 'Esperanzado, con un toque de duda' }, score: 1 },
+      { label: { en: 'Wary — when does it end?', fr: 'Méfiant — quand est-ce que ça finit ?', ar: 'حذر — متى ينتهي ذلك؟', es: 'Cauto — ¿cuándo termina?' }, score: -1 },
+      { label: { en: 'Suffocated — too much closeness', fr: 'Étouffé — trop de proximité', ar: 'اختناق — قرب أكثر من اللازم', es: 'Asfixiado — demasiada cercanía' }, score: -2 },
+    ],
+  },
+  {
+    id: 'attachment_style_q20',
+    text: {
+      en: "If your closest people honestly described how it feels to love you, would you want to hear it?",
+      fr: "Si tes proches décrivaient honnêtement ce que c'est de t'aimer, voudrais-tu l'entendre ?",
+      ar: "لو وصف أقرب الناس إليك بصدق ما الذي يعنيه أن يحبوك، هل تود أن تسمع ذلك؟",
+      es: "Si tus seres más cercanos describieran honestamente cómo se siente amarte, ¿querrías escucharlo?",
+    },
+    framework: 'intuition',
+    dimension: 'repair_behavior',
+    soloAnswers: [
+      { label: { en: 'Yes — I want the truth, I can use it', fr: 'Oui — je veux la vérité, je peux l\'utiliser', ar: 'نعم — أريد الحقيقة، يمكنني الاستفادة منها', es: 'Sí — quiero la verdad, puedo usarla' }, score: 2 },
+      { label: { en: 'Yes, but in a kind frame', fr: 'Oui, mais formulé avec douceur', ar: 'نعم، لكن بإطار لطيف', es: 'Sí, pero enmarcado con cariño' }, score: 1 },
+      { label: { en: 'Only the good parts, please', fr: 'Seulement les bons côtés, s\'il te plaît', ar: 'الجزء الجيد فقط، رجاءً', es: 'Solo las partes buenas, por favor' }, score: -1 },
+      { label: { en: 'No — I don\'t want to know', fr: 'Non — je ne veux pas savoir', ar: 'لا — لا أريد أن أعرف', es: 'No — no quiero saber' }, score: -2 },
+    ],
+  },
 ];

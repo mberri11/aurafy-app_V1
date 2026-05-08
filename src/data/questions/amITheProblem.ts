@@ -1,4 +1,3 @@
-// STUB — expand to 20 questions before production
 import { Question } from '../../types';
 
 export const amITheProblemQuestions: Question[] = [
@@ -87,5 +86,259 @@ export const amITheProblemQuestions: Question[] = [
       { label: { en: 'I feel boundaries are often unreasonable', fr: 'Je sens que les limites sont souvent déraisonnables', ar: 'أشعر أن الحدود غالباً ما تكون غير معقولة', es: 'Siento que los límites suelen ser irrazonables' }, score: -2 },
     ],
   },
-  // TODO: add 15 more questions
+  {
+    id: 'am_i_problem_q06',
+    text: {
+      en: "When someone tells you something you did upset them, what do you do first?",
+      fr: "Quand quelqu'un te dit qu'une chose que tu as faite l'a blessé, que fais-tu en premier ?",
+      ar: "حين يخبرك أحدهم أن شيئاً فعلته أزعجه، ماذا تفعل أولاً؟",
+      es: "Cuando alguien te dice que algo que hiciste lo molestó, ¿qué haces primero?",
+    },
+    framework: 'mixed',
+    dimension: 'accountability',
+    soloAnswers: [
+      { label: { en: 'Listen fully before responding', fr: 'Écouter pleinement avant de répondre', ar: 'أصغي تماماً قبل أن أرد', es: 'Escuchar plenamente antes de responder' }, score: 2 },
+      { label: { en: 'Ask questions to understand', fr: 'Poser des questions pour comprendre', ar: 'أطرح أسئلة لأفهم', es: 'Hacer preguntas para entender' }, score: 1 },
+      { label: { en: 'Explain why I did it', fr: 'Expliquer pourquoi je l\'ai fait', ar: 'أشرح لماذا فعلت ذلك', es: 'Explicar por qué lo hice' }, score: -1 },
+      { label: { en: 'Defend myself before they finish', fr: 'Me défendre avant qu\'ils aient fini', ar: 'أدافع عن نفسي قبل أن ينتهوا', es: 'Defenderme antes de que terminen' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q07',
+    text: {
+      en: "How honest are you with yourself about your worst tendencies?",
+      fr: "À quel point es-tu honnête avec toi-même sur tes pires tendances ?",
+      ar: "ما مدى صدقك مع نفسك بشأن أسوأ ميولك؟",
+      es: "¿Qué tan honesto eres contigo mismo sobre tus peores tendencias?",
+    },
+    framework: 'mixed',
+    dimension: 'pattern_recognition',
+    soloAnswers: [
+      { label: { en: 'Very — I name them clearly', fr: 'Très — je les nomme clairement', ar: 'صادق جداً — أسميها بوضوح', es: 'Mucho — las nombro con claridad' }, score: 2 },
+      { label: { en: 'Mostly — when I\'m calm', fr: 'Surtout — quand je suis calme', ar: 'في الغالب — حين أكون هادئاً', es: 'Mayormente — cuando estoy calmado' }, score: 1 },
+      { label: { en: 'I see them but soften them', fr: 'Je les vois mais je les adoucis', ar: 'أراها لكنني أخفّفها', es: 'Las veo pero las suavizo' }, score: -1 },
+      { label: { en: 'I genuinely don\'t think I have many', fr: 'Je ne pense vraiment pas en avoir beaucoup', ar: 'صدقاً لا أعتقد أن لديّ الكثير منها', es: 'Sinceramente no creo tener muchas' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q08',
+    text: {
+      en: "When a story you tell makes you the hero, how often is that the full picture?",
+      fr: "Quand une histoire que tu racontes fait de toi le héros, à quelle fréquence est-ce le portrait complet ?",
+      ar: "حين تجعلك القصة التي ترويها بطلاً، كم مرة تكون هذه هي الصورة الكاملة؟",
+      es: "Cuando una historia que cuentas te convierte en el héroe, ¿con qué frecuencia es ese el cuadro completo?",
+    },
+    framework: 'mixed',
+    dimension: 'accountability',
+    soloAnswers: [
+      { label: { en: 'I share my role honestly, even when it\'s ugly', fr: 'Je partage mon rôle honnêtement, même s\'il est laid', ar: 'أشارك دوري بصدق، حتى لو كان قبيحاً', es: 'Comparto mi rol honestamente, aunque sea feo' }, score: 2 },
+      { label: { en: 'Mostly accurate, slightly polished', fr: 'Globalement exact, légèrement embelli', ar: 'دقيقة في الغالب، مع تلميع طفيف', es: 'Mayormente preciso, ligeramente pulido' }, score: 1 },
+      { label: { en: 'I leave out my worst lines', fr: 'Je laisse de côté mes pires répliques', ar: 'أحذف أسوأ ما قلته', es: 'Omito mis peores frases' }, score: -1 },
+      { label: { en: 'I tell it in a way that protects me', fr: 'Je la raconte d\'une façon qui me protège', ar: 'أرويها بطريقة تحميني', es: 'La cuento de modo que me proteja' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q09',
+    text: {
+      en: "When someone close cries, what's your honest internal reaction?",
+      fr: "Quand quelqu'un de proche pleure, quelle est ta réaction interne honnête ?",
+      ar: "حين يبكي شخص مقرب، ما رد فعلك الداخلي الصادق؟",
+      es: "Cuando alguien cercano llora, ¿cuál es tu reacción interna honesta?",
+    },
+    framework: 'mixed',
+    dimension: 'empathy_deficit',
+    soloAnswers: [
+      { label: { en: 'I move toward them — I want to help', fr: 'Je vais vers eux — je veux aider', ar: 'أتجه نحوهم — أريد المساعدة', es: 'Me acerco — quiero ayudar' }, score: 2 },
+      { label: { en: 'I\'m a bit awkward but stay', fr: 'Je suis un peu gêné mais je reste', ar: 'أرتبك قليلاً لكنني أبقى', es: 'Me siento incómodo pero me quedo' }, score: 1 },
+      { label: { en: 'I want them to stop quickly', fr: 'Je veux qu\'ils s\'arrêtent rapidement', ar: 'أريدهم أن يتوقفوا بسرعة', es: 'Quiero que paren rápido' }, score: -1 },
+      { label: { en: 'I find it manipulative or annoying', fr: 'Je trouve ça manipulateur ou agaçant', ar: 'أجد ذلك تلاعباً أو مزعجاً', es: 'Lo encuentro manipulador o molesto' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q10',
+    text: {
+      en: "How do you handle being told you were wrong about something important?",
+      fr: "Comment réagis-tu quand on te dit que tu avais tort sur quelque chose d'important ?",
+      ar: "كيف تتعامل حين يُقال لك إنك كنت مخطئاً في أمر مهم؟",
+      es: "¿Cómo manejas que te digan que estabas equivocado en algo importante?",
+    },
+    framework: 'mixed',
+    dimension: 'accountability',
+    soloAnswers: [
+      { label: { en: 'I update — being right was never the point', fr: 'Je me corrige — avoir raison n\'a jamais été le but', ar: 'أُحدِّث رأيي — لم يكن الصواب هدفاً قط', es: 'Cambio de opinión — tener razón nunca fue el punto' }, score: 2 },
+      { label: { en: 'I take it in privately, then adjust', fr: 'Je l\'absorbe en privé, puis j\'ajuste', ar: 'أتقبّلها في الخفاء ثم أُعدّل', es: 'Lo asimilo en privado, luego ajusto' }, score: 1 },
+      { label: { en: 'I argue first, then maybe reconsider', fr: 'Je débats d\'abord, puis peut-être je reconsidère', ar: 'أجادل أولاً ثم ربما أعيد التفكير', es: 'Discuto primero, luego tal vez reconsidero' }, score: -1 },
+      { label: { en: 'I dig in harder', fr: 'Je m\'enfonce davantage', ar: 'أتمسّك بموقفي أكثر', es: 'Me aferro aún más' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q11',
+    text: {
+      en: "When you see your own behavior on video or read your texts back, how do you feel?",
+      fr: "Quand tu te vois en vidéo ou relis tes messages, que ressens-tu ?",
+      ar: "حين ترى سلوكك في فيديو أو تعيد قراءة رسائلك، بماذا تشعر؟",
+      es: "Cuando ves tu comportamiento en video o relees tus mensajes, ¿cómo te sientes?",
+    },
+    framework: 'attachment',
+    dimension: 'pattern_recognition',
+    soloAnswers: [
+      { label: { en: 'Curious — I learn something', fr: 'Curieux — j\'apprends quelque chose', ar: 'فضولي — أتعلّم شيئاً', es: 'Curioso — aprendo algo' }, score: 2 },
+      { label: { en: 'Mildly cringey, but useful', fr: 'Un peu gênant, mais utile', ar: 'محرج قليلاً، لكنه مفيد', es: 'Un poco vergonzoso, pero útil' }, score: 1 },
+      { label: { en: 'Defensive — context is missing', fr: 'Sur la défensive — le contexte manque', ar: 'دفاعي — السياق مفقود', es: 'A la defensiva — falta contexto' }, score: -1 },
+      { label: { en: 'I refuse to look', fr: 'Je refuse de regarder', ar: 'أرفض أن أنظر', es: 'Me niego a mirar' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q12',
+    text: {
+      en: "How easily can you sit with the discomfort of being misunderstood without lashing out?",
+      fr: "Avec quelle facilité peux-tu rester avec l'inconfort d'être mal compris sans réagir agressivement ?",
+      ar: "كم يسهل عليك البقاء مع شعور سوء الفهم دون أن تنفجر؟",
+      es: "¿Con qué facilidad puedes sostener el malestar de ser malinterpretado sin reaccionar mal?",
+    },
+    framework: 'attachment',
+    dimension: 'empathy_deficit',
+    soloAnswers: [
+      { label: { en: 'Easily — I let it pass', fr: 'Facilement — je laisse passer', ar: 'بسهولة — أدع الأمر يمر', es: 'Fácilmente — lo dejo pasar' }, score: 2 },
+      { label: { en: 'It stings, but I stay grounded', fr: 'Ça pique, mais je reste ancré', ar: 'يؤلمني، لكنني أبقى ثابتاً', es: 'Duele, pero me mantengo firme' }, score: 1 },
+      { label: { en: 'I get sharp before I think', fr: 'Je deviens cassant avant de réfléchir', ar: 'أصبح حاداً قبل أن أفكر', es: 'Me pongo cortante antes de pensar' }, score: -1 },
+      { label: { en: 'I escalate quickly', fr: 'Je m\'emporte rapidement', ar: 'أتصاعد بسرعة', es: 'Escalo rápido' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q13',
+    text: {
+      en: "When close people set a clear limit with you, what's the truest first thought?",
+      fr: "Quand des proches posent une limite claire avec toi, quelle est la première pensée la plus vraie ?",
+      ar: "حين يضع المقربون منك حداً واضحاً، ما أصدق فكرة تخطر ببالك؟",
+      es: "Cuando seres cercanos te ponen un límite claro, ¿cuál es el pensamiento más verdadero?",
+    },
+    framework: 'attachment',
+    dimension: 'empathy_deficit',
+    soloAnswers: [
+      { label: { en: '"Good — they\'re taking care of themselves"', fr: '« Bien — ils prennent soin d\'eux »', ar: '\"جيد — إنهم يهتمون بأنفسهم\"', es: '"Bien — se están cuidando"' }, score: 2 },
+      { label: { en: '"Okay, I can adjust"', fr: '« D\'accord, je peux m\'adapter »', ar: '\"حسناً، يمكنني التكيّف\"', es: '"Bien, puedo ajustarme"' }, score: 1 },
+      { label: { en: '"Why are they making this a thing?"', fr: '« Pourquoi en font-ils une affaire ? »', ar: '\"لِمَ يجعلون من هذا قضية؟\"', es: '"¿Por qué están haciendo de esto un tema?"' }, score: -1 },
+      { label: { en: '"They\'re punishing me"', fr: '« Ils me punissent »', ar: '\"إنهم يعاقبونني\"', es: '"Me están castigando"' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q14',
+    text: {
+      en: "After a fight, who usually moves first to repair?",
+      fr: "Après une dispute, qui fait habituellement le premier pas pour réparer ?",
+      ar: "بعد شجار، من يبادر عادةً إلى الإصلاح؟",
+      es: "Después de una pelea, ¿quién suele dar el primer paso para reparar?",
+    },
+    framework: 'attachment',
+    dimension: 'accountability',
+    soloAnswers: [
+      { label: { en: 'Usually me — I value the bond', fr: 'Généralement moi — j\'accorde de la valeur au lien', ar: 'عادةً أنا — أُقدِّر الرابط', es: 'Usualmente yo — valoro el vínculo' }, score: 2 },
+      { label: { en: 'It\'s about fifty-fifty', fr: 'C\'est à peu près moitié-moitié', ar: 'تقريباً مناصفة', es: 'Es como cincuenta-cincuenta' }, score: 1 },
+      { label: { en: 'I almost always wait for them', fr: 'J\'attends presque toujours', ar: 'أنتظرهم في الغالب دائماً', es: 'Casi siempre espero a que ellos' }, score: -1 },
+      { label: { en: 'I refuse to repair until they grovel', fr: 'Je refuse de réparer tant qu\'ils n\'ont pas rampé', ar: 'أرفض الإصلاح حتى يتذلّلوا', es: 'Me niego a reparar hasta que se humillen' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q15',
+    text: {
+      en: "When you imagine the people you've cut off, what feeling rises first?",
+      fr: "Quand tu imagines les gens que tu as coupés de ta vie, quel sentiment monte en premier ?",
+      ar: "حين تتخيل من قطعتهم من حياتك، ما الشعور الذي يطفو أولاً؟",
+      es: "Cuando imaginas a las personas que has cortado de tu vida, ¿qué sentimiento aparece primero?",
+    },
+    framework: 'attachment',
+    dimension: 'pattern_recognition',
+    soloAnswers: [
+      { label: { en: 'Compassion — I see all sides now', fr: 'Compassion — je vois toutes les facettes maintenant', ar: 'تعاطف — أرى كل الجوانب الآن', es: 'Compasión — ahora veo todos los lados' }, score: 2 },
+      { label: { en: 'Mostly peace, some lingering questions', fr: 'Surtout de la paix, quelques questions persistantes', ar: 'سلام في الغالب، مع أسئلة باقية', es: 'Sobre todo paz, con algunas preguntas pendientes' }, score: 1 },
+      { label: { en: 'Mostly justified anger', fr: 'Surtout une colère justifiée', ar: 'في الغالب غضب مبرّر', es: 'Sobre todo enojo justificado' }, score: -1 },
+      { label: { en: 'Pride — I won', fr: 'Fierté — j\'ai gagné', ar: 'فخر — انتصرت', es: 'Orgullo — gané' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q16',
+    text: {
+      en: "How do people you don't know well react to you in groups?",
+      fr: "Comment les gens que tu connais peu réagissent-ils à toi en groupe ?",
+      ar: "كيف يتفاعل من لا يعرفونك جيداً معك في المجموعات؟",
+      es: "¿Cómo reaccionan en grupo las personas que no te conocen bien?",
+    },
+    framework: 'sociometry',
+    dimension: 'pattern_recognition',
+    soloAnswers: [
+      { label: { en: 'They warm up quickly — I feel safe', fr: 'Ils se détendent rapidement — je semble sûr', ar: 'يرتاحون لي بسرعة — أبدو آمناً', es: 'Se relajan rápido — parezco seguro' }, score: 2 },
+      { label: { en: 'They\'re friendly but reserved at first', fr: 'Ils sont amicaux mais réservés au début', ar: 'يكونون لطيفين لكن متحفظين في البداية', es: 'Son amables pero reservados al inicio' }, score: 1 },
+      { label: { en: 'They keep some distance', fr: 'Ils gardent une certaine distance', ar: 'يحافظون على بعض المسافة', es: 'Mantienen cierta distancia' }, score: -1 },
+      { label: { en: 'They seem to brace around me', fr: 'Ils semblent se tenir sur leurs gardes', ar: 'يبدون متأهبين حولي', es: 'Parecen ponerse en guardia conmigo' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q17',
+    text: {
+      en: "Have multiple, separate people described you using a similar criticism?",
+      fr: "Plusieurs personnes distinctes t'ont-elles décrit avec une critique similaire ?",
+      ar: "هل وصفك أشخاص متعددون منفصلون بنقد متشابه؟",
+      es: "¿Varias personas, por separado, te han descrito con una crítica similar?",
+    },
+    framework: 'sociometry',
+    dimension: 'pattern_recognition',
+    soloAnswers: [
+      { label: { en: 'No — feedback varies a lot', fr: 'Non — les retours varient beaucoup', ar: 'لا — الملاحظات تتنوع كثيراً', es: 'No — los comentarios varían mucho' }, score: 2 },
+      { label: { en: 'There\'s a soft theme I\'m aware of', fr: 'Il y a un thème léger dont je suis conscient', ar: 'هناك نمط خفيف أعرفه', es: 'Hay un patrón suave del que soy consciente' }, score: 1 },
+      { label: { en: 'Yes, and I usually disagree with it', fr: 'Oui, et je suis généralement en désaccord', ar: 'نعم، وعادةً لا أتفق معه', es: 'Sí, y normalmente no estoy de acuerdo' }, score: -1 },
+      { label: { en: 'Yes, and I dismiss everyone who says it', fr: 'Oui, et je rejette quiconque le dit', ar: 'نعم، وأرفض كل من يقولها', es: 'Sí, y descarto a todos los que lo dicen' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q18',
+    text: {
+      en: "Do friends seem comfortable disagreeing with you out loud?",
+      fr: "Tes amis semblent-ils à l'aise pour te contredire à voix haute ?",
+      ar: "هل يبدو أصدقاؤك مرتاحين لمعارضتك بصوت مسموع؟",
+      es: "¿Tus amigos parecen cómodos contradiciéndote en voz alta?",
+    },
+    framework: 'sociometry',
+    dimension: 'empathy_deficit',
+    soloAnswers: [
+      { label: { en: 'Yes — debate is normal between us', fr: 'Oui — le débat est normal entre nous', ar: 'نعم — النقاش طبيعي بيننا', es: 'Sí — el debate es normal entre nosotros' }, score: 2 },
+      { label: { en: 'Mostly — they pick the moment', fr: 'Surtout — ils choisissent le moment', ar: 'في الغالب — يختارون اللحظة', es: 'Mayormente — eligen el momento' }, score: 1 },
+      { label: { en: 'Not really — most agree to my face', fr: 'Pas vraiment — la plupart sont d\'accord en face', ar: 'ليس فعلاً — أغلبهم يوافق أمامي', es: 'No mucho — la mayoría me da la razón en la cara' }, score: -1 },
+      { label: { en: 'They go silent or change subject', fr: 'Ils se taisent ou changent de sujet', ar: 'يصمتون أو يغيرون الموضوع', es: 'Se callan o cambian de tema' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q19',
+    text: {
+      en: "If you read someone else's account of how you treat them, what would you most fear hearing?",
+      fr: "Si tu lisais le récit de quelqu'un sur la façon dont tu le traites, qu'aurais-tu le plus peur d'entendre ?",
+      ar: "لو قرأت ما يقوله شخص آخر عن طريقتك في التعامل معه، ما الذي تخشى سماعه أكثر؟",
+      es: "Si leyeras el relato de otra persona sobre cómo la tratas, ¿qué temerías más escuchar?",
+    },
+    framework: 'intuition',
+    dimension: 'empathy_deficit',
+    soloAnswers: [
+      { label: { en: 'A clear note for growth I can use', fr: 'Une note claire pour grandir que je peux utiliser', ar: 'ملاحظة واضحة للنمو يمكنني الاستفادة منها', es: 'Una nota clara para crecer que pueda usar' }, score: 2 },
+      { label: { en: 'A pattern I half-suspected', fr: 'Un schéma que je soupçonnais à moitié', ar: 'نمط كنت أشتبه به نصف الشك', es: 'Un patrón que sospechaba a medias' }, score: 1 },
+      { label: { en: 'That I made them feel unimportant', fr: 'Que je les ai fait se sentir sans importance', ar: 'أنني جعلتهم يشعرون بأنهم غير مهمين', es: 'Que los hice sentir poco importantes' }, score: -1 },
+      { label: { en: 'That I was, plainly, unkind', fr: 'Que j\'étais, simplement, méchant', ar: 'أنني كنت ببساطة قاسياً', es: 'Que fui, simplemente, cruel' }, score: -2 },
+    ],
+  },
+  {
+    id: 'am_i_problem_q20',
+    text: {
+      en: "When you ask yourself 'am I the problem?' honestly, what answer do you most often land on?",
+      fr: "Quand tu te demandes honnêtement « suis-je le problème ? », sur quelle réponse atterris-tu le plus souvent ?",
+      ar: "حين تسأل نفسك بصدق \"هل أنا المشكلة؟\"، على أي إجابة تستقر في الغالب؟",
+      es: "Cuando te preguntas honestamente '¿soy yo el problema?', ¿en qué respuesta aterrizas más a menudo?",
+    },
+    framework: 'intuition',
+    dimension: 'pattern_recognition',
+    soloAnswers: [
+      { label: { en: 'Sometimes I am — and that\'s information', fr: 'Parfois oui — et c\'est de l\'information', ar: 'أحياناً نعم — وهذه معلومة', es: 'A veces lo soy — y eso es información' }, score: 2 },
+      { label: { en: 'I share part of it, depending on the case', fr: 'J\'en porte une part, selon le cas', ar: 'أحمل جزءاً منها، حسب الحالة', es: 'Comparto parte, según el caso' }, score: 1 },
+      { label: { en: 'Rarely — most situations weren\'t my doing', fr: 'Rarement — la plupart n\'étaient pas de mon fait', ar: 'نادراً — معظم المواقف ليست من فعلي', es: 'Raramente — la mayoría no fue mi culpa' }, score: -1 },
+      { label: { en: 'No — I\'m not the problem, others are', fr: 'Non — je ne suis pas le problème, les autres le sont', ar: 'لا — لست المشكلة، الآخرون هم', es: 'No — no soy yo el problema, son los demás' }, score: -2 },
+    ],
+  },
 ];

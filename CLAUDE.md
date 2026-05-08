@@ -117,8 +117,8 @@ Match every screen to `design-reference/screenshots/` exactly.
 
 **Update this table as work completes. ✅ = done, 🔄 = in progress.**
 
-### PHASE 2 — Content (PENDING)
-Complete all 7 modules to 20 questions each + full results.ts. Modules: `who_loves_me`, `who_hates_me`, `who_jealous`, `who_cut_off`, `energy_reading`, `attachment_style`, `am_i_problem`.
+### PHASE 2 — Content (DONE, ahead of schedule)
+All 7 modules at 20 questions each (en/fr/ar/es). Insight pools at 6 variants per dimension across ≥3 dimensions per module. New dimensions added: `exclusion_signal` (who_hates_me), `possessive_orbit` (who_jealous), `emotional_exit` (who_cut_off). Module config in `src/data/modules.ts` verified correct — no edits needed. End-to-end flow (home → quiz → result) traced and confirmed wired in `quiz.tsx`, `loading.tsx`, `scoringEngine.ts`, `resultGenerator.ts`, `result.tsx`. Modules: `who_loves_me`, `who_hates_me`, `who_jealous`, `who_cut_off`, `energy_reading`, `attachment_style`, `am_i_problem`.
 
 ### PHASE 3 — Performance (PENDING)
 React.memo on list items, useMemo on expensive renders, useCallback on prop-passed handlers, UI-thread animation audit.

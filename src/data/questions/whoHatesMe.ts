@@ -1,4 +1,3 @@
-// STUB — expand to 20 questions before production
 import { Question } from '../../types';
 
 export const whoHatesMeQuestions: Question[] = [
@@ -62,5 +61,184 @@ export const whoHatesMeQuestions: Question[] = [
     dimension: 'negative_affect',
     personWeight: 2,
   },
-  // TODO: add 15 more questions
+  {
+    id: 'who_hates_me_q06',
+    text: {
+      en: "Whose 'jokes' about you always seem to land where it actually hurts?",
+      fr: "Dont les 'blagues' à ton sujet semblent toujours toucher là où ça fait mal ?",
+      ar: "من \"مزاحه\" عنك يصيب دائماً المكان الذي يؤلمك فعلاً؟",
+      es: "¿Cuyas 'bromas' sobre ti siempre parecen aterrizar donde realmente duele?",
+    },
+    framework: 'sociometry',
+    dimension: 'negative_affect',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q07',
+    text: {
+      en: "Who repeats your mistakes back to you, but never your wins?",
+      fr: "Qui te répète tes erreurs, mais jamais tes victoires ?",
+      ar: "من يكرر أمامك أخطاءك، لكنه لا يذكر انتصاراتك أبداً؟",
+      es: "¿Quién te repite tus errores, pero nunca tus victorias?",
+    },
+    framework: 'sociometry',
+    dimension: 'social_undermining',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q08',
+    text: {
+      en: "Who interrupts you the moment you start sharing something you care about?",
+      fr: "Qui t'interrompt dès que tu commences à partager quelque chose qui te tient à cœur ?",
+      ar: "من يقاطعك في اللحظة التي تبدأ فيها بمشاركة شيء يهمك؟",
+      es: "¿Quién te interrumpe en el momento en que empiezas a compartir algo que te importa?",
+    },
+    framework: 'sociometry',
+    dimension: 'social_undermining',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q09',
+    text: {
+      en: "Whose 'compliment' always carries a small sting underneath?",
+      fr: "Dont le 'compliment' porte toujours une petite piqûre en dessous ?",
+      ar: "من \"إطراؤه\" يحمل دائماً لسعة صغيرة تحته؟",
+      es: "¿Cuyo 'cumplido' siempre lleva un pequeño aguijón debajo?",
+    },
+    framework: 'sociometry',
+    dimension: 'negative_affect',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q10',
+    text: {
+      en: "Who do you find yourself rehearsing how to talk to, just to avoid being misunderstood?",
+      fr: "À qui te surprends-tu à répéter comment lui parler, juste pour éviter d'être mal compris ?",
+      ar: "مع من تجد نفسك تتدرب على كيفية الحديث، فقط لتجنب سوء الفهم؟",
+      es: "¿Con quién te encuentras ensayando cómo hablar, solo para evitar ser malinterpretado?",
+    },
+    framework: 'mixed',
+    dimension: 'negative_affect',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q11',
+    text: {
+      en: "Who treats your boundaries like personal insults?",
+      fr: "Qui traite tes limites comme des insultes personnelles ?",
+      ar: "من يعامل حدودك كأنها إهانات شخصية؟",
+      es: "¿Quién trata tus límites como insultos personales?",
+    },
+    framework: 'mixed',
+    dimension: 'social_undermining',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q12',
+    text: {
+      en: "Who has, at some point, made you feel small in front of others on purpose?",
+      fr: "Qui, à un moment donné, t'a fait te sentir petit devant les autres, intentionnellement ?",
+      ar: "من، في وقت ما، جعلك تشعر بأنك صغير أمام الآخرين عن قصد؟",
+      es: "¿Quién, en algún momento, te ha hecho sentir pequeño frente a otros a propósito?",
+    },
+    framework: 'mixed',
+    dimension: 'social_undermining',
+    personWeight: 2,
+  },
+  {
+    id: 'who_hates_me_q13',
+    text: {
+      en: "Who would not be sad if your luck suddenly turned bad?",
+      fr: "Qui ne serait pas triste si ta chance tournait soudainement mal ?",
+      ar: "من لن يحزن لو انقلب حظك فجأة إلى الأسوأ؟",
+      es: "¿Quién no estaría triste si tu suerte de pronto cambiara para mal?",
+    },
+    framework: 'mixed',
+    dimension: 'negative_affect',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q14',
+    text: {
+      en: "Who do you sense is keeping a quiet score against you?",
+      fr: "Qui sens-tu tenir un compte silencieux contre toi ?",
+      ar: "من تشعر أنه يحتفظ بسجل صامت ضدك؟",
+      es: "¿De quién intuyes que lleva una cuenta silenciosa contra ti?",
+    },
+    framework: 'attachment',
+    dimension: 'negative_affect',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q15',
+    text: {
+      en: "Who pretended to forgive you but kept the wound active?",
+      fr: "Qui a fait semblant de te pardonner mais a gardé la blessure ouverte ?",
+      ar: "من تظاهر بأنه سامحك لكنه أبقى الجرح مفتوحاً؟",
+      es: "¿Quién fingió perdonarte pero mantuvo la herida abierta?",
+    },
+    framework: 'attachment',
+    dimension: 'social_undermining',
+    personWeight: 2,
+  },
+  {
+    id: 'who_hates_me_q16',
+    text: {
+      en: "Who acts coldest in moments where someone who cared would soften?",
+      fr: "Qui agit le plus froidement dans les moments où quelqu'un qui tiendrait à toi s'adoucirait ?",
+      ar: "من يتصرف بأبرد طريقة في اللحظات التي يلين فيها من يكترث؟",
+      es: "¿Quién actúa más frío en los momentos en que alguien que se preocupara se ablandaría?",
+    },
+    framework: 'attachment',
+    dimension: 'negative_affect',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q17',
+    text: {
+      en: "Who treats your absence like a relief instead of a loss?",
+      fr: "Qui traite ton absence comme un soulagement plutôt qu'une perte ?",
+      ar: "من يعامل غيابك كأنه راحة لا كأنه خسارة؟",
+      es: "¿Quién trata tu ausencia como un alivio en lugar de una pérdida?",
+    },
+    framework: 'attachment',
+    dimension: 'exclusion_signal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q18',
+    text: {
+      en: "Who, when you walk into a room, you can feel pull away — even slightly?",
+      fr: "Qui, quand tu entres dans une pièce, tu peux sentir reculer — même légèrement ?",
+      ar: "من، عندما تدخل غرفة، تشعر به ينسحب — ولو قليلاً؟",
+      es: "¿Quién, cuando entras a una habitación, puedes sentir que se aparta — aunque sea un poco?",
+    },
+    framework: 'intuition',
+    dimension: 'exclusion_signal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q19',
+    text: {
+      en: "Whose plans seem to suddenly shift whenever you'd be included?",
+      fr: "Dont les plans semblent soudainement changer chaque fois que tu serais inclus ?",
+      ar: "من تتغير خططه فجأة كلما كان من الممكن أن تُشمل أنت؟",
+      es: "¿Cuyos planes parecen cambiar de repente cada vez que tú estarías incluido?",
+    },
+    framework: 'intuition',
+    dimension: 'exclusion_signal',
+    personWeight: 1,
+  },
+  {
+    id: 'who_hates_me_q20',
+    text: {
+      en: "If you went silent for a month, who would feel quietly relieved instead of worried?",
+      fr: "Si tu devenais silencieux pendant un mois, qui se sentirait discrètement soulagé plutôt qu'inquiet ?",
+      ar: "لو صمتّ شهراً كاملاً، من سيشعر بارتياح هادئ بدلاً من القلق؟",
+      es: "Si te quedaras en silencio por un mes, ¿quién se sentiría calladamente aliviado en lugar de preocupado?",
+    },
+    framework: 'intuition',
+    dimension: 'exclusion_signal',
+    personWeight: 2,
+  },
 ];

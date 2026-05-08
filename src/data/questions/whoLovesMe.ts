@@ -1,4 +1,3 @@
-// STUB — expand to 20 questions before production
 import { Question } from '../../types';
 
 export const whoLovesMeQuestions: Question[] = [
@@ -62,5 +61,184 @@ export const whoLovesMeQuestions: Question[] = [
     dimension: 'emotional_safety',
     personWeight: 2,
   },
-  // TODO: add 15 more questions
+  {
+    id: 'who_loves_me_q06',
+    text: {
+      en: "Who follows up on the things you said you were nervous about — even days later?",
+      fr: "Qui revient sur les choses dont tu as dit être nerveux — même des jours plus tard ?",
+      ar: "من يعود ليسأل عن الأشياء التي قلت إنك متوتر بشأنها — حتى بعد أيام؟",
+      es: "¿Quién retoma las cosas por las que dijiste estar nervioso — incluso días después?",
+    },
+    framework: 'attachment',
+    dimension: 'attunement',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q07',
+    text: {
+      en: "Whose loyalty you've never had to test, because it's already obvious?",
+      fr: "De qui tu n'as jamais eu à tester la loyauté, parce qu'elle est déjà évidente ?",
+      ar: "من لم تضطر يوماً لاختبار وفائه، لأنه واضح أصلاً؟",
+      es: "¿De quién nunca has tenido que probar la lealtad, porque ya es obvia?",
+    },
+    framework: 'attachment',
+    dimension: 'secure_base',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q08',
+    text: {
+      en: "Who consistently uses words that build you up rather than tear you down?",
+      fr: "Qui utilise systématiquement des mots qui te construisent plutôt que de te détruire ?",
+      ar: "من يستخدم باستمرار كلمات تبنيك بدلاً من أن تهدمك؟",
+      es: "¿Quién usa consistentemente palabras que te construyen en lugar de derribarte?",
+    },
+    framework: 'loveLanguages',
+    dimension: 'attunement',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q09',
+    text: {
+      en: "Who shows up with small, unprompted acts — fixing, feeding, helping — without making it a story?",
+      fr: "Qui se montre par de petits gestes spontanés — réparer, nourrir, aider — sans en faire une histoire ?",
+      ar: "من يحضر بأفعال صغيرة دون طلب — يصلح، يطعم، يساعد — دون أن يجعلها قصة؟",
+      es: "¿Quién aparece con pequeños actos sin pedírselo — arreglar, alimentar, ayudar — sin hacer un cuento?",
+    },
+    framework: 'loveLanguages',
+    dimension: 'emotional_safety',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q10',
+    text: {
+      en: "Who protects time for you on purpose — not what's left, but the best part of their day?",
+      fr: "Qui te réserve du temps exprès — pas ce qui reste, mais le meilleur moment de sa journée ?",
+      ar: "من يحفظ لك وقتاً عن قصد — لا ما يتبقى، بل أفضل جزء من يومه؟",
+      es: "¿Quién protege tiempo para ti a propósito — no lo que sobra, sino la mejor parte de su día?",
+    },
+    framework: 'loveLanguages',
+    dimension: 'attunement',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q11',
+    text: {
+      en: "Who has given you something — a note, an object, a song — that proved they were paying attention?",
+      fr: "Qui t'a offert quelque chose — un mot, un objet, une chanson — qui prouvait qu'il faisait attention ?",
+      ar: "من أعطاك شيئاً — رسالة، شيئاً ما، أغنية — أثبت أنه كان منتبهاً؟",
+      es: "¿Quién te ha dado algo — una nota, un objeto, una canción — que demostró que estaba prestando atención?",
+    },
+    framework: 'loveLanguages',
+    dimension: 'secure_base',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q12',
+    text: {
+      en: "Whose physical presence — a hug, a hand, simply being near — actually slows your heart rate?",
+      fr: "Dont la présence physique — un câlin, une main, simplement être près — ralentit vraiment ton rythme cardiaque ?",
+      ar: "من حضوره الجسدي — حضن، يد، أو مجرد القرب — يخفف فعلاً من سرعة نبض قلبك؟",
+      es: "¿Cuya presencia física — un abrazo, una mano, simplemente estar cerca — realmente baja tu ritmo cardíaco?",
+    },
+    framework: 'loveLanguages',
+    dimension: 'emotional_safety',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q13',
+    text: {
+      en: "When others speak about you behind your back, who is the one defending you?",
+      fr: "Quand les autres parlent de toi dans ton dos, qui est celui qui te défend ?",
+      ar: "عندما يتحدث الآخرون عنك في غيابك، من الذي يدافع عنك؟",
+      es: "Cuando otros hablan de ti a tus espaldas, ¿quién es el que te defiende?",
+    },
+    framework: 'sociometry',
+    dimension: 'attunement',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q14',
+    text: {
+      en: "Who makes other people feel they should treat you better, just by how they treat you?",
+      fr: "Qui donne aux autres le sentiment qu'ils devraient mieux te traiter, juste par la façon dont il te traite ?",
+      ar: "من يجعل الآخرين يشعرون أنه يجب أن يعاملوك بشكل أفضل، فقط بطريقة معاملته لك؟",
+      es: "¿Quién hace sentir a otros que deberían tratarte mejor, solo por cómo te trata?",
+    },
+    framework: 'sociometry',
+    dimension: 'secure_base',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q15',
+    text: {
+      en: "Who would still choose you, even if everyone around them said you weren't worth it?",
+      fr: "Qui te choisirait encore, même si tous autour de lui disaient que tu n'en valais pas la peine ?",
+      ar: "من سيظل يختارك، حتى لو قال كل من حوله إنك لا تستحق ذلك؟",
+      es: "¿Quién todavía te elegiría, incluso si todos a su alrededor dijeran que no vales la pena?",
+    },
+    framework: 'sociometry',
+    dimension: 'emotional_safety',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q16',
+    text: {
+      en: "When your name comes up in a group, whose face softens before they speak?",
+      fr: "Quand ton nom apparaît dans un groupe, dont le visage s'adoucit avant qu'il ne parle ?",
+      ar: "عندما يُذكر اسمك في مجموعة، من الذي يلين وجهه قبل أن يتكلم؟",
+      es: "Cuando tu nombre sale en un grupo, ¿de quién se suaviza el rostro antes de hablar?",
+    },
+    framework: 'sociometry',
+    dimension: 'attunement',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q17',
+    text: {
+      en: "Whose name comes to mind first when you read the word 'home'?",
+      fr: "Quel nom te vient à l'esprit en premier quand tu lis le mot 'maison' ?",
+      ar: "اسم من يخطر في بالك أولاً عند قراءتك كلمة \"البيت\"؟",
+      es: "¿El nombre de quién te viene a la mente primero cuando lees la palabra 'hogar'?",
+    },
+    framework: 'intuition',
+    dimension: 'secure_base',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q18',
+    text: {
+      en: "If your phone rang at 3 a.m. and it was them, you'd assume something matters — not that something is wrong.",
+      fr: "Si ton téléphone sonnait à 3h du matin et que c'était eux, tu supposerais que quelque chose compte — pas que quelque chose ne va pas.",
+      ar: "لو رنّ هاتفك في الثالثة صباحاً وكان هو، ستفترض أن أمراً مهم — لا أن شيئاً ما خطأ.",
+      es: "Si tu teléfono sonara a las 3 a.m. y fuera esa persona, asumirías que algo importa — no que algo está mal.",
+    },
+    framework: 'intuition',
+    dimension: 'emotional_safety',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q19',
+    text: {
+      en: "Whose silence still feels like care, not distance?",
+      fr: "Dont le silence semble encore de l'attention, pas de la distance ?",
+      ar: "من صمته لا يزال يشعر بالاهتمام، لا بالبعد؟",
+      es: "¿Cuyo silencio aún se siente como cuidado, no como distancia?",
+    },
+    framework: 'intuition',
+    dimension: 'attunement',
+    personWeight: 1,
+  },
+  {
+    id: 'who_loves_me_q20',
+    text: {
+      en: "If only one person could be told the truest thing about you, who would you trust to hold it?",
+      fr: "Si une seule personne pouvait connaître la chose la plus vraie sur toi, à qui ferais-tu confiance pour la garder ?",
+      ar: "لو لم يكن بالإمكان إخبار سوى شخص واحد بأصدق شيء عنك، لمن ستثق بحفظه؟",
+      es: "Si solo una persona pudiera saber lo más verdadero sobre ti, ¿en quién confiarías para guardarlo?",
+    },
+    framework: 'intuition',
+    dimension: 'emotional_safety',
+    personWeight: 2,
+  },
 ];
