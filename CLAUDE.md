@@ -19,6 +19,14 @@ Native builds via EAS (`eas.json`). Android package: `com.simobr.aurafy`.
 
 ## Behavior Rules (READ EVERY SESSION)
 
+## Design Reference Protocol
+
+1. Before touching ANY screen file, `view` the corresponding screenshot in `design-reference/screenshots/`
+2. Compare the screenshot to the current screen render ON DEVICE
+3. List every difference (spacing, font size, color, copy, layout, missing elements)
+4. Fix them one by one
+5. After changes, tell me to verify on device before proceeding
+
 **Context:** At the start of every session, read this entire file + check the PHASES table below to know what's done and what's next. Never assume — verify state from the file.
 
 **Scope:** Do not touch files outside the task unless directly required. If a related file needs changing, do it and mention it — no silent refactoring of unrelated things.

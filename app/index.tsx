@@ -25,7 +25,7 @@ export default function SplashScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Diagonal aurora: violet wash from top-left, deepening to navy. */}
+      {/* Base navy: bg2 hint in top-left fading to background. */}
       <LinearGradient
         colors={[theme.bg2, theme.background, theme.background]}
         locations={[0, 0.55, 1]}
@@ -33,17 +33,19 @@ export default function SplashScreen() {
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
+      {/* Upper purple aurora — strongest at top, fades to transparent mid-screen. */}
       <LinearGradient
-        colors={['rgba(139,92,246,0.08)', 'transparent', 'rgba(47,234,172,0.05)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        colors={[`${theme.primary}33`, `${theme.primary}0D`, 'transparent']}
+        locations={[0, 0.3, 0.55]}
+        start={{ x: 0.4, y: 0 }}
+        end={{ x: 0.55, y: 0.6 }}
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       />
-      {/* Bottom teal aurora glow — visible in design reference */}
+      {/* Bottom teal aurora glow — matches design reference. */}
       <LinearGradient
-        colors={['transparent', 'rgba(47,234,172,0.07)']}
-        start={{ x: 0.5, y: 0.4 }}
+        colors={['transparent', `${theme.gradient[2]}14`]}
+        start={{ x: 0.5, y: 0.5 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
