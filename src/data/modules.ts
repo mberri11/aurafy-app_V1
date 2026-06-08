@@ -1,7 +1,11 @@
 import { Module } from '../types';
 
+/** The one module whose first reading is free (Home "Try free ✦" pill + reading-mode
+ *  "Free" badges), until the user consumes it once via the persisted freeTrialUsed flag. */
+export const FREE_TRIAL_MODULE_ID = 'energy_reading';
+
 export const MODULES: Module[] = [
-  // RELATIONSHIP MODULES (multi-person)
+  // RELATIONSHIP MODULES (multi-person) — order matches the Home design (05-home-cosmic.png)
   {
     id: 'who_loves_me',
     type: 'multi',
@@ -9,6 +13,14 @@ export const MODULES: Module[] = [
     icon: '🔮',
     color: '#8B5CF6',
     framework: 'attachment',
+  },
+  {
+    id: 'energy_reading',
+    type: 'multi',
+    starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
+    icon: '✨',
+    color: '#10B981',
+    framework: 'colorWheel',
   },
   {
     id: 'who_hates_me',
@@ -22,25 +34,43 @@ export const MODULES: Module[] = [
     id: 'who_jealous',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '👁',
+    icon: '✂',
     color: '#F5C542',
     framework: 'sociometry',
+  },
+  {
+    id: 'who_soulmate',
+    type: 'multi',
+    starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
+    icon: '💕',
+    color: '#FB7185',
+    framework: 'loveLanguages',
+  },
+  {
+    id: 'who_admires',
+    type: 'multi',
+    starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
+    icon: '👁',
+    color: '#F5C542',
+    framework: 'intuition',
   },
   {
     id: 'who_cut_off',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '✂',
-    color: '#C73E1D',
-    framework: 'mixed',
+    icon: '😮',
+    color: '#FB923C',
+    framework: 'sociometry',
   },
   {
-    id: 'energy_reading',
+    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    id: 'birth_chart',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '✨',
-    color: '#2FEAAC',
-    framework: 'colorWheel',
+    icon: '🔒',
+    color: '#6E7290',
+    framework: 'mixed',
+    comingSoon: true,
   },
   // SELF-DISCOVERY MODULES (solo)
   {
@@ -48,7 +78,7 @@ export const MODULES: Module[] = [
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
     icon: '🧠',
-    color: '#2FEAAC',
+    color: '#22D3EE',
     framework: 'attachment',
   },
   {
@@ -58,5 +88,15 @@ export const MODULES: Module[] = [
     icon: '🪞',
     color: '#F5C542',
     framework: 'mixed',
+  },
+  {
+    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    id: 'am_i_healing',
+    type: 'solo',
+    starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
+    icon: '🔒',
+    color: '#6E7290',
+    framework: 'mixed',
+    comingSoon: true,
   },
 ];

@@ -125,7 +125,7 @@ export default function ResultScreen() {
                 styles.winnerName,
                 {
                   color: result.winner.color,
-                  fontFamily: 'Fraunces_400Regular',
+                  fontFamily: 'PlayfairDisplay_400Regular',
                   textShadowColor: result.winner.color,
                   textShadowOffset: { width: 0, height: 0 },
                   textShadowRadius: 20,
@@ -180,7 +180,7 @@ export default function ResultScreen() {
         // Solo result
         <>
           <Animated.View style={[styles.verdictContainer, winnerStyle]}>
-            <Text style={[styles.soloVerdict, { color: theme.text, fontFamily: 'Fraunces_400Regular' }]}>
+            <Text style={[styles.soloVerdict, { color: theme.text, fontFamily: 'PlayfairDisplay_400Regular' }]}>
               {result.insights[0]?.[language] ?? result.insights[0]?.en ?? ''}
             </Text>
           </Animated.View>

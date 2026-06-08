@@ -8,8 +8,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../themes/ThemeProvider';
 import { lightTap } from '../utils/haptics';
+import { rs } from '../utils/responsive';
 
 interface GradientButtonProps {
   label: string;
@@ -18,6 +20,14 @@ interface GradientButtonProps {
   variant?: 'primary' | 'outline';
   disabled?: boolean;
   loading?: boolean;
+  /** Override the primary label color (design uses dark text on the bright gradient). */
+  labelColor?: string;
+  /** Use a heavier 700 label (some CTAs read bold on the bright gradient). */
+  bold?: boolean;
+  /** Soft accent halo around the pill (the "light" under the CTA in the design). */
+  glow?: boolean;
+  /** MaterialCommunityIcons glyph rendered after the label, in the label colour. */
+  trailingIcon?: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 }
 
 const GradientButton = memo(function GradientButton({
@@ -27,6 +37,10 @@ const GradientButton = memo(function GradientButton({
   variant = 'primary',
   disabled = false,
   loading = false,
+  labelColor,
+  bold = false,
+  glow = false,
+  trailingIcon,
 }: GradientButtonProps) {
   const theme = useTheme();
 
@@ -52,7 +66,7 @@ const GradientButton = memo(function GradientButton({
           style={styles.outlineGradientBorder}
         >
           <View style={[styles.outlineInner, { backgroundColor: theme.background }]}>
-            <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
+            <Text style={[styles.label, bold && styles.labelBold, { color: theme.text }]}>{label}</Text>
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -72,12 +86,34 @@ const GradientButton = memo(function GradientButton({
         colors={theme.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        style={styles.gradient}
+        style={[
+          styles.gradient,
+          // Soft cyan halo (matches the design's teal glow). Lives on the opaque,
+          // rounded gradient — not the wrapper — so Android casts a clean coloured
+          // shadow instead of a clipped black drop.
+          glow && !disabled && {
+            shadowColor: '#22D3EE',
+            shadowOpacity: 0.55,
+            shadowRadius: rs(16),
+            shadowOffset: { width: 0, height: 0 },
+            elevation: 8,
+          },
+        ]}
       >
         {loading ? (
           <ActivityIndicator color="#fff" size="small" />
         ) : (
-          <Text style={styles.label}>{label}</Text>
+          <View style={styles.labelRow}>
+            <Text style={[styles.label, bold && styles.labelBold, labelColor ? { color: labelColor } : null]}>{label}</Text>
+            {trailingIcon ? (
+              <MaterialCommunityIcons
+                name={trailingIcon}
+                size={rs(16)}
+                color={labelColor ?? '#FFFFFF'}
+                style={styles.trailingIcon}
+              />
+            ) : null}
+          </View>
         )}
       </LinearGradient>
     </TouchableOpacity>
@@ -89,20 +125,30 @@ export default GradientButton;
 const styles = StyleSheet.create({
   wrapper: {
     borderRadius: 999,
-    overflow: 'hidden',
-    minHeight: 56,
+    minHeight: rs(56),
   },
   gradient: {
-    height: 56,
+    height: rs(56),
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: rs(24),
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trailingIcon: { marginLeft: rs(6) },
   label: {
-    fontSize: 16,
+    fontSize: rs(16),
     fontWeight: '600',
     color: '#FFFFFF',
     fontFamily: 'Inter_600SemiBold',
+  },
+  labelBold: {
+    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
   disabled: {
     opacity: 0.4,
@@ -110,17 +156,17 @@ const styles = StyleSheet.create({
   outlineWrapper: {
     borderRadius: 999,
     overflow: 'hidden',
-    minHeight: 56,
+    minHeight: rs(56),
   },
   outlineGradientBorder: {
     padding: 2,
     borderRadius: 999,
   },
   outlineInner: {
-    height: 52,
+    height: rs(52),
     borderRadius: 997,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: rs(24),
   },
 });

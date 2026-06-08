@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Reading } from '../types';
+import { ContentSlice, createContentSlice } from './contentSlice';
 
 const MAX_STARS = 50;
 const STARTING_STARS = 5;
@@ -15,7 +16,10 @@ interface StarTransaction {
   timestamp: number;
 }
 
-interface UserState {
+// Includes the Insights content slice (readArticleIds, savedArticleIds,
+// lastDailyBonusDate, markRead, toggleSaved, claimDailyInsightBonus) — composed
+// in below and persisted in the same `aurafy-user` blob.
+export interface UserState extends ContentSlice {
   stars: number;
   streak: number;
   lastDailyClaim: number | null;
@@ -24,12 +28,16 @@ interface UserState {
   history: Reading[];
   recentTransactions: StarTransaction[];
   readingCount: number;
+  /** True once the user has spent their one free-trial reading (FREE_TRIAL_MODULE_ID). */
+  freeTrialUsed: boolean;
   // Actions
   spendStars: (amount: number) => boolean;
+  markFreeTrialUsed: () => void;
   earnStars: (amount: number, reason: string) => void;
   claimDailyBonus: () => boolean;
   incrementStreak: () => void;
   addReading: (reading: Reading) => void;
+  clearHistory: () => void;
   setOnboarded: () => void;
   incrementReadingCount: () => void;
   resetAll: () => void;
@@ -37,15 +45,25 @@ interface UserState {
 
 export const useUserStore = create<UserState>()(
   persist(
-    (set, get) => ({
+    (set, get, store) => ({
+      // Insights content state + actions (readArticleIds, savedArticleIds,
+      // lastDailyBonusDate, markRead, toggleSaved, claimDailyInsightBonus).
+      ...createContentSlice(set, get, store),
+
       stars: STARTING_STARS,
       streak: 0,
       lastDailyClaim: null,
       lastDailyQuestion: null,
       hasOnboarded: false,
       history: [],
-      recentTransactions: [],
+      // Seeded so the wallet's Recent activity isn't empty on a fresh install —
+      // mirrors the "Welcome gift +5" row in the design. Reason is a stable key
+      // (see reasonLabel in app/(tabs)/stars.tsx) so it localizes per language.
+      recentTransactions: [
+        { type: 'earn', amount: STARTING_STARS, reason: 'welcome', timestamp: Date.now() },
+      ],
       readingCount: 0,
+      freeTrialUsed: false,
 
       spendStars: (amount: number): boolean => {
         const { stars } = get();
@@ -55,7 +73,7 @@ export const useUserStore = create<UserState>()(
           const tx: StarTransaction = {
             type: 'spend',
             amount,
-            reason: 'Reading',
+            reason: 'reading',
             timestamp: Date.now(),
           };
           return {
@@ -101,7 +119,7 @@ export const useUserStore = create<UserState>()(
           const tx: StarTransaction = {
             type: 'earn',
             amount: 2,
-            reason: 'Daily bonus',
+            reason: 'daily_bonus',
             timestamp: now,
           };
           return {
@@ -125,12 +143,20 @@ export const useUserStore = create<UserState>()(
         });
       },
 
+      clearHistory: (): void => {
+        set({ history: [] });
+      },
+
       setOnboarded: (): void => {
         set({ hasOnboarded: true });
       },
 
       incrementReadingCount: (): void => {
         set((s) => ({ readingCount: s.readingCount + 1 }));
+      },
+
+      markFreeTrialUsed: (): void => {
+        set({ freeTrialUsed: true });
       },
 
       resetAll: (): void => {
@@ -143,6 +169,11 @@ export const useUserStore = create<UserState>()(
           history: [],
           recentTransactions: [],
           readingCount: 0,
+          freeTrialUsed: false,
+          // Insights content slice
+          readArticleIds: [],
+          savedArticleIds: [],
+          lastDailyBonusDate: null,
         });
       },
     }),

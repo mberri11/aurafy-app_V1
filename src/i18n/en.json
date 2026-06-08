@@ -9,30 +9,62 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "close": "Close",
-    "skip": "Skip"
+    "skip": "Skip",
+    "tap": "Tap",
+    "ok": "OK"
   },
   "onboarding": {
     "slide1Title": "Decode the energy around you",
     "slide1Subtitle": "Choose a module. Enter the people in your life. Get a powerful reading in under 3 minutes.",
-    "slide2Title": "How Stars work",
-    "slide2Subtitle": "You start with 5 Stars. Spend them on readings. Earn more every day — or watch a short ad.",
+    "slide2Title": "Built on real psychology",
+    "slide2Subtitle": "Attachment theory, sociometry, love languages, color psychology — all decoded for you.",
+    "slide3Title": "How Stars work",
+    "slide3Subtitle": "You start with 5 Stars. Spend them on readings. Earn more every day — or watch a short ad.",
+    "cardAttachmentTag": "Attachment Theory",
+    "cardAttachmentQuestion": "Who shows up when you go quiet?",
+    "cardSociometryTag": "Sociometry",
+    "cardSociometryQuestion": "Who do you turn to for advice?",
+    "cardLoveTag": "Love Languages",
+    "cardLoveQuestion": "How do you give affection?",
+    "earnUseLabel": "Use",
+    "earnUseAmount": "Spend to read",
+    "earnDailyLabel": "Daily",
+    "earnDailyAmount": "+2 daily",
+    "earnWatchLabel": "Watch",
+    "earnWatchAmount": "+1 per ad",
     "beginButton": "Begin my journey",
     "earnStars": "Earn Stars",
     "spendStars": "Spend Stars",
     "dailyBonus": "Daily Bonus"
   },
+  "home": {
+    "heroEyebrow": "Tonight's question",
+    "heroTitle": "What do you want to discover?",
+    "dailyReady": "Today's free question is ready",
+    "tryFree": "Try free",
+    "comingSoon": "Coming soon",
+    "sectionRelationships": "Relationships",
+    "sectionSelf": "Self-Discovery"
+  },
+  "moduleDetail": {
+    "questions": "questions",
+    "minutes": "minutes",
+    "fromCost": "from {{cost}}",
+    "toRead": "to read",
+    "beginReading": "Begin Reading"
+  },
   "modules": {
     "who_loves_me": {
       "title": "Who Loves Me",
-      "subtitle": "Decode who genuinely cares",
-      "description": "Based on attachment theory, this reading maps who in your life shows up with consistent, unconditional care — even when you don't ask.",
+      "subtitle": "Who truly has your back",
+      "description": "Twenty questions rooted in attachment theory reveal who in your life loves you most — and how.",
       "poweredBy": "Attachment Theory",
       "time": "5–7 min",
       "cost": "From 1"
     },
     "who_hates_me": {
       "title": "Who Resents Me",
-      "subtitle": "Read the hidden tensions",
+      "subtitle": "Hidden friction, revealed",
       "description": "Sociometric analysis of who in your orbit is carrying negative energy or resentment toward you — even when they smile.",
       "poweredBy": "Sociometry",
       "time": "5–7 min",
@@ -40,15 +72,31 @@
     },
     "who_jealous": {
       "title": "Who's Jealous of Me",
-      "subtitle": "Spot envy before it costs you",
+      "subtitle": "Envy you can't see",
       "description": "Envy often wears the mask of friendship. This reading surfaces who is competing with you behind your back.",
       "poweredBy": "Sociometry",
       "time": "5–7 min",
       "cost": "From 1"
     },
+    "who_soulmate": {
+      "title": "Who's My Soulmate",
+      "subtitle": "Find your frequency match",
+      "description": "A love-languages reading that surfaces who you're most deeply aligned with — the person whose presence feels like resonance, not effort.",
+      "poweredBy": "Love Languages",
+      "time": "5–7 min",
+      "cost": "From 1"
+    },
+    "who_admires": {
+      "title": "Who Secretly Admires Me",
+      "subtitle": "The quiet admirers",
+      "description": "An intuition-based reading that reveals who carries quiet admiration for you — the attention, warmth, and longing they keep just below the surface.",
+      "poweredBy": "Intuition",
+      "time": "5–7 min",
+      "cost": "From 1"
+    },
     "who_cut_off": {
       "title": "Who's Pulling Away",
-      "subtitle": "Name the silence",
+      "subtitle": "Spot the drift early",
       "description": "When someone withdraws, it says something. This reading maps who is emotionally disconnecting — and why.",
       "poweredBy": "Relational Psychology",
       "time": "5–7 min",
@@ -56,7 +104,7 @@
     },
     "energy_reading": {
       "title": "Energy Reading",
-      "subtitle": "Feel who lights you up",
+      "subtitle": "Read the room's frequency",
       "description": "A color-wheel based reading that identifies whose energy is most aligned with yours — and who drains you.",
       "poweredBy": "Color Psychology",
       "time": "5–7 min",
@@ -64,19 +112,27 @@
     },
     "attachment_style": {
       "title": "Attachment Style",
-      "subtitle": "Understand how you love",
+      "subtitle": "How you bond, decoded",
       "description": "Based on decades of research, your attachment style shapes every relationship you have. Find out yours.",
       "poweredBy": "Attachment Theory",
       "time": "5–7 min",
       "cost": "1"
     },
     "am_i_problem": {
-      "title": "Am I the Problem?",
+      "title": "Am I The Problem?",
       "subtitle": "An honest mirror",
       "description": "Sometimes the pattern is us. This reading helps you see your relational blind spots with compassion and clarity.",
       "poweredBy": "Self-Psychology",
       "time": "5–7 min",
       "cost": "1"
+    },
+    "birth_chart": {
+      "title": "Birth Chart Reading",
+      "subtitle": "Coming soon"
+    },
+    "am_i_healing": {
+      "title": "Am I Healing?",
+      "subtitle": "Coming soon"
     }
   },
   "readingModes": {
@@ -87,19 +143,22 @@
     },
     "compare": {
       "title": "Compare",
-      "subtitle": "Head-to-head",
+      "subtitle": "Hold two side by side",
       "persons": "2 people"
     },
     "triangle": {
       "title": "Triangle",
-      "subtitle": "Three-way reading",
+      "subtitle": "Map a small circle",
       "persons": "3 people"
     },
     "circle": {
       "title": "Circle",
-      "subtitle": "Group reading",
-      "persons": "4+ people"
-    }
+      "subtitle": "Read your whole orbit",
+      "persons": "4–10 people"
+    },
+    "heading": "How many people are you reading?",
+    "earnStars": "Earn more",
+    "free": "Free"
   },
   "quiz": {
     "progressLabel": "Question {{current}} of {{total}}",
@@ -128,12 +187,12 @@
   "stars": {
     "walletTitle": "Your Stars",
     "balanceLabel": "{{balance}} Stars",
-    "earnTitle": "Earn more stars",
-    "watchVideo": "Watch a Video",
+    "earnTitle": "Earn More",
+    "watchVideo": "Watch a video",
     "watchVideoAmount": "+1",
-    "dailyBonus": "Daily Bonus",
+    "dailyBonus": "Daily bonus",
     "dailyBonusAmount": "+2",
-    "streakBonus": "7-Day Streak",
+    "streakBonus": "7-day streak",
     "streakBonusAmount": "+10",
     "shareApp": "Share Aurafy",
     "shareAppAmount": "+1",
@@ -144,7 +203,20 @@
     "dayProgress": "Day {{streak}} of 7",
     "activityTitle": "Recent activity",
     "earnReason": "Earned",
-    "spendReason": "Spent"
+    "spendReason": "Spent",
+    "watchVideoDesc": "A short ad, instant reward",
+    "dailyBonusDesc": "Once every day",
+    "streakDesc": "Keep your daily ritual alive",
+    "shareDesc": "Invite a friend to read",
+    "comeBack": "Come back in 24h",
+    "claimed": "Claimed",
+    "earnedSuffix": "earned",
+    "reasonWatch": "Watched a video",
+    "reasonShare": "Shared Aurafy",
+    "reasonDaily": "Daily bonus",
+    "reasonWelcome": "Welcome gift",
+    "reasonReading": "Reading",
+    "reasonStreak": "7-day streak"
   },
   "history": {
     "title": "Your Readings",
@@ -169,9 +241,41 @@
     "shareApp": "Share Aurafy",
     "data": "Data",
     "resetData": "Reset all data",
-    "resetConfirmTitle": "Reset everything?",
-    "resetConfirmMessage": "This will erase all readings, stars, and settings. This cannot be undone.",
-    "version": "Aurafy v1.0.0"
+    "resetConfirmTitle": "Reset all data?",
+    "resetConfirmMessage": "A full factory reset — Stars, history, settings and onboarding will all be erased.",
+    "resetConfirmAction": "Reset everything",
+    "version": "Aurafy v1.0.0",
+    "soundAudio": "Sound & Audio",
+    "soundEffectsDesc": "Chimes on tap, bell on reveal",
+    "ambientAudio": "Ambient audio",
+    "ambientAudioDesc": "A soft pad during readings",
+    "volume": "Volume",
+    "notifications": "Notifications",
+    "dailyReminder": "Daily reminder",
+    "dailyReminderDesc": "“Your daily question is ready 🌙”",
+    "reminderTime": "Reminder time",
+    "streakReminder": "Streak reminder",
+    "streakReminderDesc": "If your streak is about to break",
+    "readingPreferences": "Reading preferences",
+    "defaultMode": "Default mode",
+    "showFrameworkTags": "Show framework tags",
+    "showFrameworkTagsDesc": "During the quiz",
+    "autoCentering": "Auto-centering",
+    "autoCenteringDesc": "The 2-second breathing moment",
+    "howAurafyWorks": "How Aurafy works",
+    "howItWorksTitle": "How Aurafy works",
+    "howItWorksMessage": "Pick a module, answer a short set of intuitive questions, and Aurafy turns your taps into a reading. The questions map to real frameworks; the result is a reflection, not a diagnosis.",
+    "termsOfUse": "Terms of use",
+    "clearHistory": "Clear reading history",
+    "clearHistoryConfirmTitle": "Clear reading history?",
+    "clearHistoryConfirmMessage": "This removes all saved readings. Your Stars and settings are kept.",
+    "clearHistoryConfirmAction": "Clear history",
+    "exportReadings": "Export readings",
+    "exportEmpty": "No readings to export yet.",
+    "madeWith": "Made with",
+    "selectMode": "Default mode",
+    "selectTime": "Reminder time",
+    "setTime": "Set time"
   },
   "daily": {
     "title": "Daily Question",
@@ -187,13 +291,77 @@
     "notEnoughStars": "Not enough stars — visit Stars to earn more",
     "adFailed": "Ad failed to load",
     "adNotAvailable": "Ad not available right now",
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "notEnoughStarsTitle": "Not enough stars"
   },
   "personEntry": {
     "title": "Who are you reading?",
+    "subtitle": "Use first names or initials. Hold them clearly in mind.",
     "addPerson": "Add person",
     "startButton": "Start Reading — {{cost}}",
+    "startFree": "Start Reading — Free",
     "balanceAfter": "Balance after: {{balance}}",
-    "namePlaceholder": "Enter name..."
+    "namePlaceholder": "Enter name...",
+    "soloTitle": "This reading is for you",
+    "soloSubtitle": "Answer honestly — only you will see this.",
+    "locked": "locked"
+  },
+  "themeGallery": {
+    "title": "Themes",
+    "active": "Active",
+    "soon": "Soon",
+    "unlock": "Unlock",
+    "unlockTitle": "Unlock {{name}}?",
+    "unlockMessage": "Unlock {{name}} for {{cost}} stars?",
+    "cost": "Cost",
+    "balance": "Balance",
+    "unlockForCost": "Unlock for {{cost}}",
+    "needMore": "Need {{count}} more",
+    "cosmic": "Cosmic",
+    "desertOracle": "Desert Oracle",
+    "midnightVeil": "Midnight Veil",
+    "deepOcean": "Deep Ocean",
+    "roseQuartz": "Rose Quartz",
+    "ember": "Ember"
+  },
+  "about": {
+    "title": "The psychology behind Aurafy",
+    "subtitle": "The mystical language is a metaphor. The engine underneath is evidence-based.",
+    "footer": "Aurafy for self-reflection and entertainment. Not a clinical diagnostic tool.",
+    "attachmentTitle": "Attachment Theory",
+    "attachmentBody": "Bowlby and Ainsworth showed that the bonds we form as children become the blueprint for how we love as adults. Aurafy reads the behaviors — closeness, reassurance, distance — that reveal that blueprint.",
+    "sociometryTitle": "Sociometry",
+    "sociometryBody": "Jacob Moreno mapped the invisible currents of attraction and tension inside any group. Those same currents — who admires, who resents, who pulls away — shape your everyday relationships.",
+    "loveLanguagesTitle": "Love Languages",
+    "loveLanguagesBody": "Gary Chapman described five ways people give and receive affection. Knowing which language someone speaks explains why love can feel loud to one person and silent to another.",
+    "colorTitle": "Color Psychology",
+    "colorBody": "Colors carry consistent emotional associations across cultures — warmth, calm, intensity. Aurafy borrows that vocabulary to describe the energy each person brings into a room."
+  },
+  "insights": {
+    "editorial": "EDITORIAL",
+    "title": "Insights",
+    "tonightsRead": "TONIGHT'S READ",
+    "latest": "LATEST",
+    "sponsored": "SPONSORED",
+    "rewardToday": "+1 ✦ today",
+    "minRead": "{{n}} min read",
+    "min": "{{n}} min",
+    "takeReading": "Take the {{module}} reading",
+    "claimReward": "Claim +1 ✦",
+    "claimed": "Claimed",
+    "todaysReward": "Today's reading reward",
+    "open": "Open",
+    "empty": "No articles here yet.",
+    "sponsoredTitle": "Find your cosmic match tonight",
+    "sponsoredBrand": "Astra · Dating",
+    "categories": {
+      "all": "All",
+      "love": "Love",
+      "aura": "Aura",
+      "energy": "Energy",
+      "attachment": "Attachment",
+      "self": "Self",
+      "jealousy": "Jealousy"
+    }
   }
 }

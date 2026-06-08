@@ -103,7 +103,7 @@ export default function DailyReadingScreen() {
         🌙 {t('daily.title')} · {today.format('MMM D')}
       </Text>
 
-      <Text style={[styles.question, { color: theme.text, fontFamily: 'Fraunces_400Regular' }]}>
+      <Text style={[styles.question, { color: theme.text, fontFamily: 'PlayfairDisplay_400Regular' }]}>
         {question.text[language] ?? question.text.en}
       </Text>
 

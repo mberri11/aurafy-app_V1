@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../themes/ThemeProvider';
+import { rs } from '../utils/responsive';
 
 interface StarsBadgeProps {
   balance: number;
@@ -49,8 +50,9 @@ const StarsBadge = memo(function StarsBadge({ balance, onPress }: StarsBadgeProp
           },
         ]}
       >
-        <MaterialCommunityIcons name="star" size={16} color={theme.gold} />
+        <MaterialCommunityIcons name="star" size={rs(16)} color={theme.gold} />
         <Text style={[styles.text, { color: theme.gold }]}>{balance}</Text>
+        <MaterialCommunityIcons name="star-four-points" size={rs(13)} color={theme.gold} />
       </View>
     </Animated.View>
   );
@@ -77,14 +79,14 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: rs(6),
     borderRadius: 999,
     borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingHorizontal: rs(12),
+    paddingVertical: rs(7),
   },
   text: {
-    fontSize: 14,
+    fontSize: rs(14),
     fontFamily: 'Inter_700Bold',
   },
 });

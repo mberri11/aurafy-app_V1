@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { Platform, StyleSheet, View, ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme } from '../themes/ThemeProvider';
+import { rs } from '../utils/responsive';
 
 interface GlassCardProps {
   children: React.ReactNode;
@@ -63,11 +64,16 @@ const GlassCard = memo(function GlassCard({
         </>
       ) : null}
 
-      {/* Android: try the BlurView (Expo SDK 54+ supports it on native builds);
-          if it no-ops in Expo Go the bg2 fill above already provides the glassy look. */}
+      {/* Android: BlurView is a no-op in Expo Go (renders nothing over bg2) yet is an
+          expensive native view to mount/re-composite — the main reason Home repaints
+          late when a module is popped. So in **dev** (`__DEV__`, Expo Go) we SKIP it:
+          the opaque bg2 + this surface tint already produce the exact glass look there.
+          In a **release/native build** we mount the real BlurView for live blur. */}
       {isAndroid ? (
         <>
-          <BlurView intensity={blurIntensity} tint="dark" style={StyleSheet.absoluteFill} />
+          {!__DEV__ ? (
+            <BlurView intensity={blurIntensity} tint="dark" style={StyleSheet.absoluteFill} />
+          ) : null}
           <View
             style={[
               StyleSheet.absoluteFill,
@@ -89,7 +95,7 @@ export default GlassCard;
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 20,
+    borderRadius: rs(20),
     borderWidth: 1,
     overflow: 'hidden',
     shadowOffset: { width: 0, height: 8 },

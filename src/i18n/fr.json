@@ -9,32 +9,156 @@
     "cancel": "Annuler",
     "confirm": "Confirmer",
     "close": "Fermer",
-    "skip": "Passer"
+    "skip": "Passer",
+    "tap": "Appuyer",
+    "ok": "OK"
   },
   "onboarding": {
     "slide1Title": "Décrypte l'énergie autour de toi",
     "slide1Subtitle": "Choisis un module. Entre les personnes de ta vie. Obtiens une lecture puissante en moins de 3 minutes.",
-    "slide2Title": "Comment fonctionnent les étoiles",
-    "slide2Subtitle": "Tu commences avec 5 étoiles. Dépense-les sur des lectures. Gagnes-en plus chaque jour — ou regarde une courte publicité.",
+    "slide2Title": "Fondé sur la vraie psychologie",
+    "slide2Subtitle": "Théorie de l'attachement, sociométrie, langages de l'amour, psychologie des couleurs — tout décodé pour toi.",
+    "slide3Title": "Comment fonctionnent les étoiles",
+    "slide3Subtitle": "Tu commences avec 5 étoiles. Dépense-les sur des lectures. Gagnes-en plus chaque jour — ou regarde une courte publicité.",
+    "cardAttachmentTag": "Théorie de l'attachement",
+    "cardAttachmentQuestion": "Qui est là quand tu te tais ?",
+    "cardSociometryTag": "Sociométrie",
+    "cardSociometryQuestion": "Vers qui te tournes-tu pour un conseil ?",
+    "cardLoveTag": "Langages de l'amour",
+    "cardLoveQuestion": "Comment exprimes-tu l'affection ?",
+    "earnUseLabel": "Utiliser",
+    "earnUseAmount": "Dépense pour lire",
+    "earnDailyLabel": "Quotidien",
+    "earnDailyAmount": "+2 / jour",
+    "earnWatchLabel": "Regarder",
+    "earnWatchAmount": "+1 par pub",
     "beginButton": "Commencer mon voyage",
     "earnStars": "Gagner des étoiles",
     "spendStars": "Dépenser des étoiles",
     "dailyBonus": "Bonus quotidien"
   },
+  "home": {
+    "heroEyebrow": "La question de ce soir",
+    "heroTitle": "Que veux-tu découvrir ?",
+    "dailyReady": "Ta question gratuite du jour est prête",
+    "tryFree": "Essai gratuit",
+    "comingSoon": "Bientôt disponible",
+    "sectionRelationships": "Relations",
+    "sectionSelf": "Découverte de soi"
+  },
+  "moduleDetail": {
+    "questions": "questions",
+    "minutes": "minutes",
+    "fromCost": "dès {{cost}}",
+    "toRead": "à lire",
+    "beginReading": "Commencer la lecture"
+  },
   "modules": {
-    "who_loves_me": { "title": "Qui m'aime", "subtitle": "Décrypte qui se soucie vraiment", "description": "Basé sur la théorie de l'attachement, cette lecture cartographie qui dans ta vie est présent avec un soin constant et inconditionnel.", "poweredBy": "Théorie de l'attachement", "time": "5–7 min", "cost": "Dès 1" },
-    "who_hates_me": { "title": "Qui me ressent", "subtitle": "Lis les tensions cachées", "description": "Analyse sociométrique de qui dans ton orbite porte de l'énergie négative ou du ressentiment envers toi.", "poweredBy": "Sociométrie", "time": "5–7 min", "cost": "Dès 1" },
-    "who_jealous": { "title": "Qui est jaloux", "subtitle": "Repère l'envie avant qu'elle te coûte", "description": "L'envie porte souvent le masque de l'amitié. Cette lecture révèle qui rivalise avec toi dans ton dos.", "poweredBy": "Sociométrie", "time": "5–7 min", "cost": "Dès 1" },
-    "who_cut_off": { "title": "Qui s'éloigne", "subtitle": "Nomme le silence", "description": "Quand quelqu'un se retire, cela dit quelque chose. Cette lecture cartographie qui se déconnecte émotionnellement.", "poweredBy": "Psychologie relationnelle", "time": "5–7 min", "cost": "Dès 1" },
-    "energy_reading": { "title": "Lecture d'énergie", "subtitle": "Ressens qui t'illumine", "description": "Une lecture basée sur la roue des couleurs qui identifie dont l'énergie est la plus alignée avec la tienne.", "poweredBy": "Psychologie des couleurs", "time": "5–7 min", "cost": "Dès 1" },
-    "attachment_style": { "title": "Style d'attachement", "subtitle": "Comprends comment tu aimes", "description": "Basé sur des décennies de recherche, ton style d'attachement façonne chaque relation. Découvre le tien.", "poweredBy": "Théorie de l'attachement", "time": "5–7 min", "cost": "1" },
-    "am_i_problem": { "title": "Suis-je le problème ?", "subtitle": "Un miroir honnête", "description": "Parfois, le schéma c'est nous. Cette lecture t'aide à voir tes angles morts relationnels avec compassion.", "poweredBy": "Auto-psychologie", "time": "5–7 min", "cost": "1" }
+    "who_loves_me": {
+      "title": "Qui m'aime",
+      "subtitle": "Qui te soutient vraiment",
+      "description": "Vingt questions ancrées dans la théorie de l'attachement révèlent qui, dans ta vie, t'aime le plus — et comment.",
+      "poweredBy": "Théorie de l'attachement",
+      "time": "5–7 min",
+      "cost": "Dès 1"
+    },
+    "who_hates_me": {
+      "title": "Qui me ressent",
+      "subtitle": "Les frictions cachées, révélées",
+      "description": "Analyse sociométrique de qui dans ton orbite porte de l'énergie négative ou du ressentiment envers toi.",
+      "poweredBy": "Sociométrie",
+      "time": "5–7 min",
+      "cost": "Dès 1"
+    },
+    "who_jealous": {
+      "title": "Qui est jaloux",
+      "subtitle": "L'envie que tu ne vois pas",
+      "description": "L'envie porte souvent le masque de l'amitié. Cette lecture révèle qui rivalise avec toi dans ton dos.",
+      "poweredBy": "Sociométrie",
+      "time": "5–7 min",
+      "cost": "Dès 1"
+    },
+    "who_soulmate": {
+      "title": "Qui est mon âme sœur",
+      "subtitle": "Trouve ta vraie résonance",
+      "description": "Une lecture fondée sur les langages de l'amour qui révèle avec qui tu es le plus profondément aligné — celui dont la présence ressemble à une résonance, pas à un effort.",
+      "poweredBy": "Langages de l'amour",
+      "time": "5–7 min",
+      "cost": "Dès 1"
+    },
+    "who_admires": {
+      "title": "Qui m'admire en secret",
+      "subtitle": "Les admirateurs discrets",
+      "description": "Une lecture intuitive qui révèle qui nourrit une admiration discrète pour toi — l'attention, la chaleur et le désir qu'il garde juste sous la surface.",
+      "poweredBy": "Intuition",
+      "time": "5–7 min",
+      "cost": "Dès 1"
+    },
+    "who_cut_off": {
+      "title": "Qui s'éloigne",
+      "subtitle": "Repère l'éloignement tôt",
+      "description": "Quand quelqu'un se retire, cela dit quelque chose. Cette lecture cartographie qui se déconnecte émotionnellement.",
+      "poweredBy": "Psychologie relationnelle",
+      "time": "5–7 min",
+      "cost": "Dès 1"
+    },
+    "energy_reading": {
+      "title": "Lecture d'énergie",
+      "subtitle": "Lis la fréquence de la pièce",
+      "description": "Une lecture basée sur la roue des couleurs qui identifie dont l'énergie est la plus alignée avec la tienne.",
+      "poweredBy": "Psychologie des couleurs",
+      "time": "5–7 min",
+      "cost": "Dès 1"
+    },
+    "attachment_style": {
+      "title": "Style d'attachement",
+      "subtitle": "Ta façon de t'attacher, décodée",
+      "description": "Basé sur des décennies de recherche, ton style d'attachement façonne chaque relation. Découvre le tien.",
+      "poweredBy": "Théorie de l'attachement",
+      "time": "5–7 min",
+      "cost": "1"
+    },
+    "am_i_problem": {
+      "title": "Suis-je le problème ?",
+      "subtitle": "Un miroir honnête",
+      "description": "Parfois, le schéma c'est nous. Cette lecture t'aide à voir tes angles morts relationnels avec compassion.",
+      "poweredBy": "Auto-psychologie",
+      "time": "5–7 min",
+      "cost": "1"
+    },
+    "birth_chart": {
+      "title": "Lecture de thème astral",
+      "subtitle": "Bientôt disponible"
+    },
+    "am_i_healing": {
+      "title": "Est-ce que je guéris ?",
+      "subtitle": "Bientôt disponible"
+    }
   },
   "readingModes": {
-    "solo": { "title": "Solo", "subtitle": "Lire une personne", "persons": "1 personne" },
-    "compare": { "title": "Comparer", "subtitle": "Face à face", "persons": "2 personnes" },
-    "triangle": { "title": "Triangle", "subtitle": "Lecture à trois", "persons": "3 personnes" },
-    "circle": { "title": "Cercle", "subtitle": "Lecture de groupe", "persons": "4+ personnes" }
+    "solo": {
+      "title": "Solo",
+      "subtitle": "Lire une personne",
+      "persons": "1 personne"
+    },
+    "compare": {
+      "title": "Comparer",
+      "subtitle": "Comparez deux côte à côte",
+      "persons": "2 personnes"
+    },
+    "triangle": {
+      "title": "Triangle",
+      "subtitle": "Cartographiez un petit cercle",
+      "persons": "3 personnes"
+    },
+    "circle": {
+      "title": "Cercle",
+      "subtitle": "Lisez tout votre entourage",
+      "persons": "4–10 personnes"
+    },
+    "heading": "Combien de personnes lisez-vous ?",
+    "earnStars": "Gagner plus",
+    "free": "Gratuit"
   },
   "quiz": {
     "progressLabel": "Question {{current}} sur {{total}}",
@@ -63,7 +187,7 @@
   "stars": {
     "walletTitle": "Tes étoiles",
     "balanceLabel": "{{balance}} étoiles",
-    "earnTitle": "Gagner plus d'étoiles",
+    "earnTitle": "Gagner Plus",
     "watchVideo": "Regarder une vidéo",
     "watchVideoAmount": "+1",
     "dailyBonus": "Bonus quotidien",
@@ -79,7 +203,20 @@
     "dayProgress": "Jour {{streak}} sur 7",
     "activityTitle": "Activité récente",
     "earnReason": "Gagné",
-    "spendReason": "Dépensé"
+    "spendReason": "Dépensé",
+    "watchVideoDesc": "Une courte pub, récompense immédiate",
+    "dailyBonusDesc": "Une fois par jour",
+    "streakDesc": "Maintiens ton rituel quotidien",
+    "shareDesc": "Invite un ami à lire",
+    "comeBack": "Reviens dans 24h",
+    "claimed": "Réclamé",
+    "earnedSuffix": "gagné",
+    "reasonWatch": "Vidéo regardée",
+    "reasonShare": "Aurafy partagé",
+    "reasonDaily": "Bonus quotidien",
+    "reasonWelcome": "Cadeau de bienvenue",
+    "reasonReading": "Lecture",
+    "reasonStreak": "Série de 7 jours"
   },
   "history": {
     "title": "Tes lectures",
@@ -104,9 +241,41 @@
     "shareApp": "Partager Aurafy",
     "data": "Données",
     "resetData": "Réinitialiser toutes les données",
-    "resetConfirmTitle": "Tout réinitialiser ?",
-    "resetConfirmMessage": "Ceci effacera toutes les lectures, étoiles et paramètres. Cette action est irréversible.",
-    "version": "Aurafy v1.0.0"
+    "resetConfirmTitle": "Réinitialiser toutes les données ?",
+    "resetConfirmMessage": "Réinitialisation complète — étoiles, historique, réglages et intro seront tous effacés.",
+    "resetConfirmAction": "Tout réinitialiser",
+    "version": "Aurafy v1.0.0",
+    "soundAudio": "Son et audio",
+    "soundEffectsDesc": "Carillons au toucher, cloche à la révélation",
+    "ambientAudio": "Audio d'ambiance",
+    "ambientAudioDesc": "Une nappe douce pendant les lectures",
+    "volume": "Volume",
+    "notifications": "Notifications",
+    "dailyReminder": "Rappel quotidien",
+    "dailyReminderDesc": "« Ta question du jour est prête 🌙 »",
+    "reminderTime": "Heure du rappel",
+    "streakReminder": "Rappel de série",
+    "streakReminderDesc": "Si ta série est sur le point de se rompre",
+    "readingPreferences": "Préférences de lecture",
+    "defaultMode": "Mode par défaut",
+    "showFrameworkTags": "Afficher les cadres",
+    "showFrameworkTagsDesc": "Pendant le quiz",
+    "autoCentering": "Centrage automatique",
+    "autoCenteringDesc": "Le moment de respiration de 2 secondes",
+    "howAurafyWorks": "Comment fonctionne Aurafy",
+    "howItWorksTitle": "Comment fonctionne Aurafy",
+    "howItWorksMessage": "Choisis un module, réponds à une courte série de questions intuitives, et Aurafy transforme tes choix en lecture. Les questions s'appuient sur de vrais cadres ; le résultat est une réflexion, pas un diagnostic.",
+    "termsOfUse": "Conditions d'utilisation",
+    "clearHistory": "Effacer l'historique",
+    "clearHistoryConfirmTitle": "Effacer l'historique de lecture ?",
+    "clearHistoryConfirmMessage": "Cela supprime toutes les lectures enregistrées. Tes étoiles et tes réglages sont conservés.",
+    "clearHistoryConfirmAction": "Effacer l'historique",
+    "exportReadings": "Exporter les lectures",
+    "exportEmpty": "Aucune lecture à exporter pour l'instant.",
+    "madeWith": "Fait avec",
+    "selectMode": "Mode par défaut",
+    "selectTime": "Heure du rappel",
+    "setTime": "Définir l'heure"
   },
   "daily": {
     "title": "Question du jour",
@@ -122,13 +291,77 @@
     "notEnoughStars": "Pas assez d'étoiles — visite la section Étoiles pour en gagner plus",
     "adFailed": "Échec du chargement de la publicité",
     "adNotAvailable": "Publicité non disponible pour le moment",
-    "generic": "Quelque chose s'est mal passé. Veuillez réessayer."
+    "generic": "Quelque chose s'est mal passé. Veuillez réessayer.",
+    "notEnoughStarsTitle": "Pas assez d'étoiles"
   },
   "personEntry": {
     "title": "Qui lis-tu ?",
+    "subtitle": "Utilisez les prénoms ou les initiales. Gardez-les clairement en tête.",
     "addPerson": "Ajouter une personne",
     "startButton": "Commencer — {{cost}}",
+    "startFree": "Commencer — Gratuit",
     "balanceAfter": "Solde après : {{balance}}",
-    "namePlaceholder": "Entrer un prénom..."
+    "namePlaceholder": "Entrer un prénom...",
+    "soloTitle": "Cette lecture est pour toi",
+    "soloSubtitle": "Réponds honnêtement — toi seul la verras.",
+    "locked": "verrouillé"
+  },
+  "themeGallery": {
+    "title": "Thèmes",
+    "active": "Actif",
+    "soon": "Bientôt",
+    "unlock": "Débloquer",
+    "unlockTitle": "Débloquer {{name}} ?",
+    "unlockMessage": "Débloquer {{name}} pour {{cost}} étoiles ?",
+    "cost": "Coût",
+    "balance": "Solde",
+    "unlockForCost": "Débloquer pour {{cost}}",
+    "needMore": "Encore {{count}}",
+    "cosmic": "Cosmique",
+    "desertOracle": "Oracle du désert",
+    "midnightVeil": "Voile de minuit",
+    "deepOcean": "Océan profond",
+    "roseQuartz": "Quartz rose",
+    "ember": "Braise"
+  },
+  "about": {
+    "title": "La psychologie derrière Aurafy",
+    "subtitle": "Le langage mystique est une métaphore. Le moteur en dessous repose sur des preuves.",
+    "footer": "Aurafy est destiné à l'introspection et au divertissement. Ce n'est pas un outil de diagnostic clinique.",
+    "attachmentTitle": "Théorie de l'attachement",
+    "attachmentBody": "Bowlby et Ainsworth ont montré que les liens que nous formons enfants deviennent le modèle de notre façon d'aimer adultes. Aurafy lit les comportements — proximité, réassurance, distance — qui révèlent ce modèle.",
+    "sociometryTitle": "Sociométrie",
+    "sociometryBody": "Jacob Moreno a cartographié les courants invisibles d'attirance et de tension au sein de tout groupe. Ces mêmes courants — qui admire, qui en veut, qui s'éloigne — façonnent tes relations quotidiennes.",
+    "loveLanguagesTitle": "Langages de l'amour",
+    "loveLanguagesBody": "Gary Chapman a décrit cinq façons de donner et de recevoir l'affection. Savoir quelle langue parle quelqu'un explique pourquoi l'amour peut sembler bruyant pour l'un et silencieux pour l'autre.",
+    "colorTitle": "Psychologie des couleurs",
+    "colorBody": "Les couleurs portent des associations émotionnelles constantes à travers les cultures — chaleur, calme, intensité. Aurafy emprunte ce vocabulaire pour décrire l'énergie que chacun apporte dans une pièce."
+  },
+  "insights": {
+    "editorial": "ÉDITORIAL",
+    "title": "Insights",
+    "tonightsRead": "LECTURE DU SOIR",
+    "latest": "RÉCENTS",
+    "sponsored": "SPONSORISÉ",
+    "rewardToday": "+1 ✦ aujourd'hui",
+    "minRead": "{{n}} min de lecture",
+    "min": "{{n}} min",
+    "takeReading": "Faire la lecture {{module}}",
+    "claimReward": "Réclamer +1 ✦",
+    "claimed": "Réclamé",
+    "todaysReward": "Récompense de lecture du jour",
+    "open": "Ouvrir",
+    "empty": "Aucun article ici pour l'instant.",
+    "sponsoredTitle": "Trouve ton match cosmique ce soir",
+    "sponsoredBrand": "Astra · Rencontres",
+    "categories": {
+      "all": "Tout",
+      "love": "Amour",
+      "aura": "Aura",
+      "energy": "Énergie",
+      "attachment": "Attachement",
+      "self": "Soi",
+      "jealousy": "Jalousie"
+    }
   }
 }

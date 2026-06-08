@@ -5,6 +5,7 @@ import { Tabs } from 'expo-router';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useTheme } from '@/src/themes/ThemeProvider';
+import { rs } from '@/src/utils/responsive';
 
 /**
  * Tab bar — glass strip across the bottom. Active label is white,
@@ -19,10 +20,13 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.text,
+        // Transparent tab scene so the root CosmicField shows through Home's
+        // transparent container (other tabs paint their own opaque background).
+        sceneStyle: { backgroundColor: 'transparent' },
+        tabBarActiveTintColor: theme.gradient[0],
         tabBarInactiveTintColor: theme.textDim,
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: rs(11),
           fontFamily: 'Inter_600SemiBold',
           letterSpacing: 0.2,
         },
@@ -53,8 +57,23 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <Feather
               name="home"
-              size={22}
-              color={focused ? theme.primary : theme.textDim}
+              size={rs(22)}
+              color={focused ? theme.gradient[0] : theme.textDim}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="insights"
+        options={{
+          title: 'Insights',
+          // Provisional glyph — lock the exact icon against 10-Insight.png during
+          // the Golden Loop. Active tint inherits the cyan accent (gradient[0]).
+          tabBarIcon: ({ focused }) => (
+            <Feather
+              name="book-open"
+              size={rs(22)}
+              color={focused ? theme.gradient[0] : theme.textDim}
             />
           ),
         }}
@@ -63,10 +82,13 @@ export default function TabLayout() {
         name="stars"
         options={{
           title: 'Stars',
+          // Stars keeps its gold identity even when active (other tabs use the
+          // cyan accent) — the label must match the gold star, per the design.
+          tabBarActiveTintColor: theme.gold,
           tabBarIcon: ({ focused }) => (
             <MaterialCommunityIcons
               name={focused ? 'star' : 'star-outline'}
-              size={22}
+              size={rs(22)}
               color={theme.gold}
             />
           ),
@@ -79,8 +101,8 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <Feather
               name="clock"
-              size={22}
-              color={focused ? theme.primary : theme.textDim}
+              size={rs(22)}
+              color={focused ? theme.gradient[0] : theme.textDim}
             />
           ),
         }}
@@ -92,8 +114,8 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <Feather
               name="settings"
-              size={22}
-              color={focused ? theme.primary : theme.textDim}
+              size={rs(22)}
+              color={focused ? theme.gradient[0] : theme.textDim}
             />
           ),
         }}

@@ -6,18 +6,21 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import {
-  Fraunces_400Regular,
-  Fraunces_600SemiBold,
-  Fraunces_700Bold,
-} from "@expo-google-fonts/fraunces";
+  PlayfairDisplay_400Regular,
+  PlayfairDisplay_600SemiBold,
+  PlayfairDisplay_700Bold,
+} from "@expo-google-fonts/playfair-display";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { Component, useEffect } from "react";
+import React, { Component, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ThemeProvider } from "@/src/themes/ThemeProvider";
+import { useTransitionStore } from "@/src/store/transitionStore";
+import CosmicReveal from "@/src/components/CosmicReveal";
+import CosmicField from "@/src/components/CosmicField";
 import "@/src/i18n";
 
 SplashScreen.preventAutoHideAsync();
@@ -60,42 +63,80 @@ class AurafyErrorBoundary extends Component<
   }
 }
 
+/**
+ * Hosts the one-shot cosmic intro overlay at the very top of the app (above the
+ * navigator + tab bar) so it covers everything and the whole onboarding → home
+ * handoff. Triggered by the transient flag set on the onboarding "Begin" tap;
+ * dissolves to reveal Home beneath — no route swap, so no black-flash gap.
+ */
+function IntroOverlayHost() {
+  const playIntro = useTransitionStore((s) => s.playIntro);
+  const consumeIntro = useTransitionStore((s) => s.consumeIntro);
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    if (playIntro && !active) {
+      setActive(true);
+      consumeIntro();
+    }
+  }, [playIntro, active, consumeIntro]);
+
+  if (!active) return null;
+  return <CosmicReveal mode="reveal" onDone={() => setActive(false)} />;
+}
+
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    // Persistent cosmic field painted ONCE behind the whole navigator. Screens
+    // that keep a transparent container (Home) reveal it during transitions, so a
+    // stack pop can never expose the dark `#07091A` base while the destination's
+    // own gradient/bloom/content commit a frame late.
+    <View style={{ flex: 1 }}>
+      <CosmicField />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          // Dark surface under every transition so a screen swap never flashes
+          // white. Kept in sync with cosmicTheme.background / app.json splash bg.
+          contentStyle: { backgroundColor: "#07091A" },
+        }}
+      >
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false, animation: "fade" }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      {/* Fade so onboarding → home is a dark-to-dark crossfade (the cosmic intro
+          then plays as an overlay on Home itself). */}
+      <Stack.Screen
+        name="(tabs)"
+        options={{
+          headerShown: false,
+          animation: "fade",
+          // Transparent so Home (transparent container) reveals the persistent
+          // CosmicField behind the navigator instead of the dark base, killing the
+          // back-from-module flash. Other tabs paint their own opaque background.
+          contentStyle: { backgroundColor: "transparent" },
+        }}
+      />
+      {/* No native header — the screen draws its own glass back button. */}
       <Stack.Screen
         name="module/[id]"
         options={{
-          headerShown: true,
-          headerTransparent: true,
-          headerTitle: "",
-          headerTintColor: "#FFFFFF",
-          headerBackTitle: "Back",
+          headerShown: false,
           animation: "slide_from_right",
         }}
       />
+      {/* No native header — the screen draws its own glass back button. */}
       <Stack.Screen
         name="reading-mode"
         options={{
-          headerShown: true,
-          headerTransparent: true,
-          headerTitle: "",
-          headerTintColor: "#FFFFFF",
-          headerBackTitle: "Back",
+          headerShown: false,
           animation: "slide_from_right",
         }}
       />
+      {/* No native header — the screen draws its own glass back button. */}
       <Stack.Screen
         name="person-entry"
         options={{
-          headerShown: true,
-          headerTransparent: true,
-          headerTitle: "",
-          headerTintColor: "#FFFFFF",
-          headerBackTitle: "Back",
+          headerShown: false,
           animation: "slide_from_right",
         }}
       />
@@ -126,14 +167,27 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
         }}
       />
+      {/* Insights article reader — own glass back button + Share, no native header. */}
+      <Stack.Screen
+        name="article/[id]"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      {/* No native header — the screen draws its own glass back button. */}
       <Stack.Screen
         name="theme-gallery"
         options={{
-          headerShown: true,
-          headerTransparent: true,
-          headerTitle: "",
-          headerTintColor: "#FFFFFF",
-          headerBackTitle: "Settings",
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      {/* No native header — the screen draws its own glass back button. */}
+      <Stack.Screen
+        name="about-psychology"
+        options={{
+          headerShown: false,
           animation: "slide_from_right",
         }}
       />
@@ -148,7 +202,8 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
         }}
       />
-    </Stack>
+      </Stack>
+    </View>
   );
 }
 
@@ -158,9 +213,9 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
-    Fraunces_400Regular,
-    Fraunces_600SemiBold,
-    Fraunces_700Bold,
+    PlayfairDisplay_400Regular,
+    PlayfairDisplay_600SemiBold,
+    PlayfairDisplay_700Bold,
   });
 
   useEffect(() => {
@@ -177,6 +232,7 @@ export default function RootLayout() {
         <AurafyErrorBoundary>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <RootLayoutNav />
+            <IntroOverlayHost />
           </GestureHandlerRootView>
         </AurafyErrorBoundary>
       </ThemeProvider>

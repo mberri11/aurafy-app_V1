@@ -1,25 +1,51 @@
-import React, { useCallback } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { useSettingsStore } from '@/src/store/settingsStore';
 import { useUserStore } from '@/src/store/userStore';
 import { ThemeId } from '@/src/types';
 import { cosmicTheme } from '@/src/themes/cosmic';
 import { desertOracleTheme } from '@/src/themes/desertOracle';
-import GlassCard from '@/src/components/GlassCard';
-import { LinearGradient } from 'expo-linear-gradient';
+import StarsBadge from '@/src/components/StarsBadge';
+import ThemeUnlockDialog from '@/src/components/ThemeUnlockDialog';
+import { rs, screenWidth } from '@/src/utils/responsive';
 
-const THEMES = [
-  { id: 'cosmic' as ThemeId, theme: cosmicTheme, cost: 0, name: 'Cosmic' },
-  { id: 'desertOracle' as ThemeId, theme: desertOracleTheme, cost: 50, name: 'Desert Oracle' },
+const GUTTER = rs(20);
+const GAP = rs(14);
+const CARD_W = (screenWidth - GUTTER * 2 - GAP) / 2;
+
+interface ThemeEntry {
+  id: ThemeId;
+  gradient: [string, string, string];
+  cost: number;
+}
+
+const THEMES: ThemeEntry[] = [
+  { id: 'cosmic', gradient: cosmicTheme.gradient, cost: 0 },
+  { id: 'desertOracle', gradient: desertOracleTheme.gradient, cost: 50 },
 ];
 
-const COMING_SOON = [
-  { name: 'Lunar Tide', color: '#60A5FA' },
-  { name: 'Ember Veil', color: '#FB923C' },
+// Placeholder themes — locked, "Soon". Subtle 2-stops sampled around the design's
+// muted swatch centres (14-settings_themes.png); Ember is warm plum, NOT navy.
+const SOON: { key: string; gradient: [string, string] }[] = [
+  { key: 'midnightVeil', gradient: ['#151A30', '#232C49'] },
+  { key: 'deepOcean', gradient: ['#0C1E31', '#114254'] },
+  { key: 'roseQuartz', gradient: ['#201631', '#352440'] },
+  { key: 'ember', gradient: ['#1E151B', '#3A2A2B'] },
 ];
+
+type UnlockTarget = {
+  id: ThemeId;
+  gradient: [string, string, string];
+  cost: number;
+};
 
 export default function ThemeGalleryScreen() {
   const { t } = useTranslation();
@@ -27,111 +53,202 @@ export default function ThemeGalleryScreen() {
   const insets = useSafeAreaInsets();
   const { themeId, unlockedThemes, setTheme, unlockTheme } = useSettingsStore();
   const { stars, spendStars } = useUserStore();
+  const [unlock, setUnlock] = useState<UnlockTarget | null>(null);
 
-  const handleSelectTheme = useCallback(
-    (id: ThemeId, cost: number, name: string) => {
+  const handleSelect = useCallback(
+    (id: ThemeId, gradient: [string, string, string], cost: number) => {
       if (unlockedThemes.includes(id)) {
         setTheme(id);
         return;
       }
-      Alert.alert(`Unlock ${name}?`, `Unlock ${name} for ${cost} ✨?`, [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: 'Unlock',
-          onPress: () => {
-            const success = spendStars(cost);
-            if (success) {
-              unlockTheme(id);
-              setTheme(id);
-            } else {
-              Alert.alert('Not enough stars', t('errors.notEnoughStars'));
-            }
-          },
-        },
-      ]);
+      setUnlock({ id, gradient, cost });
     },
-    [unlockedThemes, setTheme, unlockTheme, spendStars, t],
+    [unlockedThemes, setTheme],
   );
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 }]}
-    >
-      <Text style={[styles.title, { color: theme.text, fontFamily: 'Fraunces_400Regular' }]}>
-        Themes
-      </Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* Cosmic depth base + violet bloom (stack-screen chrome) */}
+      <LinearGradient colors={['#181430', '#0E0B22', '#08061A']} locations={[0, 0.5, 1]} style={StyleSheet.absoluteFill} />
+      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+        <Defs>
+          <RadialGradient id="themes_glow" cx="50%" cy="16%" r="60%">
+            <Stop offset="0%" stopColor={theme.primary} stopOpacity={0.22} />
+            <Stop offset="55%" stopColor="#A855F7" stopOpacity={0.07} />
+            <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#themes_glow)" />
+      </Svg>
 
-      <View style={styles.grid}>
-        {THEMES.map(({ id, theme: t2, cost, name }) => {
-          const isActive = themeId === id;
-          const isUnlocked = unlockedThemes.includes(id);
+      {/* Header: back (left) + stars badge (right) */}
+      <View style={[styles.header, { paddingTop: insets.top + rs(12) }]}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          accessibilityLabel={t('common.back')}
+          accessibilityRole="button"
+          activeOpacity={0.8}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={[styles.backBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+        >
+          <Feather name="chevron-left" size={rs(20)} color={theme.text} />
+        </TouchableOpacity>
+        <StarsBadge balance={stars} onPress={() => router.push('/(tabs)/stars')} />
+      </View>
 
-          return (
-            <TouchableOpacity
-              key={id}
-              onPress={() => handleSelectTheme(id, cost, name)}
-              accessibilityLabel={`${name} theme${isActive ? ', active' : ''}`}
-              activeOpacity={0.85}
-            >
-              <GlassCard
-                style={[
-                  styles.themeCard,
-                  isActive && { borderColor: t2.primary, borderWidth: 2 },
-                ]}
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + rs(40) }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[styles.title, { color: theme.text }]}>{t('themeGallery.title')}</Text>
+
+        <View style={styles.grid}>
+          {THEMES.map(({ id, gradient, cost }) => {
+            const isActive = themeId === id;
+            const isUnlocked = unlockedThemes.includes(id);
+            return (
+              <TouchableOpacity
+                key={id}
+                style={styles.cell}
+                onPress={() => handleSelect(id, gradient, cost)}
+                activeOpacity={0.85}
+                accessibilityLabel={t(`themeGallery.${id}`)}
               >
-                {/* Preview gradient */}
                 <LinearGradient
-                  colors={t2.gradient}
+                  colors={gradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  style={styles.themePreview}
-                />
-                <Text style={[styles.themeName, { color: theme.text }]}>{name}</Text>
-                {isActive ? (
-                  <View style={[styles.activeBadge, { backgroundColor: `${t2.primary}20` }]}>
-                    <Text style={[styles.badgeText, { color: t2.primary }]}>Active ✦</Text>
-                  </View>
-                ) : isUnlocked ? (
-                  <Text style={[styles.unlockedText, { color: theme.textMuted }]}>Unlocked</Text>
-                ) : (
-                  <View style={[styles.costBadge, { backgroundColor: `${theme.gold}20` }]}>
-                    <Text style={[styles.badgeText, { color: theme.gold }]}>{cost} ✨</Text>
-                  </View>
-                )}
-              </GlassCard>
-            </TouchableOpacity>
-          );
-        })}
+                  style={[
+                    styles.tile,
+                    isActive && { borderColor: theme.gradient[0], borderWidth: 1.5 },
+                  ]}
+                >
+                  {!isUnlocked && cost > 0 && (
+                    <View style={styles.costPill}>
+                      <Text style={styles.costText}>{cost}</Text>
+                      <MaterialCommunityIcons name="star-four-points" size={rs(11)} color="#FFFFFF" />
+                    </View>
+                  )}
+                </LinearGradient>
+                <View style={styles.labelRow}>
+                  <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
+                    {t(`themeGallery.${id}`)}
+                  </Text>
+                  {isActive && (
+                    <Text style={[styles.active, { color: theme.gradient[0] }]}>
+                      {t('themeGallery.active').toUpperCase()}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
 
-        {COMING_SOON.map((t2) => (
-          <GlassCard key={t2.name} style={[styles.themeCard, { opacity: 0.4 }]}>
-            <LinearGradient
-              colors={[t2.color, theme.background]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.themePreview}
-            />
-            <Text style={[styles.themeName, { color: theme.textMuted }]}>{t2.name}</Text>
-            <Text style={[styles.comingSoon, { color: theme.textMuted }]}>🔒 Coming soon</Text>
-          </GlassCard>
-        ))}
-      </View>
-    </ScrollView>
+          {SOON.map(({ key, gradient }) => (
+            // Whole locked cell faded (tile + name + Soon) so it recedes like the
+            // design — not just the icon/title.
+            <View key={key} style={[styles.cell, styles.cellLocked]}>
+              {/* Locked tile: muted gradient + a frosted BlurView so it reads softer
+                  than the crisp available themes. */}
+              <View style={[styles.tile, styles.tileLocked, styles.tileFrostWrap, { borderColor: theme.surfaceBorder }]}>
+                <LinearGradient
+                  colors={gradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <BlurView
+                  intensity={18}
+                  tint="dark"
+                  experimentalBlurMethod="dimezisBlurView"
+                  style={StyleSheet.absoluteFill}
+                  pointerEvents="none"
+                />
+                <Feather name="lock" size={rs(22)} color={theme.textMuted} />
+              </View>
+              <View style={styles.labelRow}>
+                <Text style={[styles.name, { color: theme.textMuted }]} numberOfLines={1}>
+                  {t(`themeGallery.${key}`)}
+                </Text>
+                <Text style={[styles.soon, { color: theme.textDim }]}>{t('themeGallery.soon')}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+
+      <ThemeUnlockDialog
+        visible={unlock !== null}
+        themeName={unlock ? t(`themeGallery.${unlock.id}`) : ''}
+        gradient={unlock?.gradient ?? theme.gradient}
+        cost={unlock?.cost ?? 0}
+        balance={stars}
+        onConfirm={() => {
+          if (unlock && spendStars(unlock.cost)) {
+            unlockTheme(unlock.id);
+            setTheme(unlock.id);
+          }
+          setUnlock(null);
+        }}
+        onNeedMore={() => {
+          setUnlock(null);
+          router.push('/(tabs)/stars');
+        }}
+        onClose={() => setUnlock(null)}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { paddingHorizontal: 20, gap: 20 },
-  title: { fontSize: 30, marginBottom: 4 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
-  themeCard: { width: 155, padding: 14, gap: 10, alignItems: 'center' },
-  themePreview: { width: '100%', height: 90, borderRadius: 12 },
-  themeName: { fontSize: 15, fontWeight: '600', fontFamily: 'Inter_600SemiBold', textAlign: 'center' },
-  activeBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-  costBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-  badgeText: { fontSize: 12, fontWeight: '600', fontFamily: 'Inter_600SemiBold' },
-  unlockedText: { fontSize: 12, fontFamily: 'Inter_400Regular' },
-  comingSoon: { fontSize: 12, fontFamily: 'Inter_400Regular' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: GUTTER,
+    paddingBottom: rs(8),
+  },
+  backBtn: {
+    width: rs(44),
+    height: rs(44),
+    borderRadius: rs(22),
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: { paddingHorizontal: GUTTER, paddingTop: rs(8) },
+  title: { fontSize: rs(32), fontFamily: 'PlayfairDisplay_400Regular', marginBottom: rs(20) },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP },
+  cell: { width: CARD_W },
+  cellLocked: { opacity: 0.6 },
+  tile: {
+    width: '100%',
+    aspectRatio: 1.62,
+    borderRadius: rs(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tileLocked: { borderWidth: 1 },
+  tileFrostWrap: { overflow: 'hidden' },
+  costPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(4),
+    backgroundColor: 'rgba(20,12,30,0.6)',
+    borderRadius: 999,
+    paddingHorizontal: rs(12),
+    paddingVertical: rs(6),
+  },
+  costText: { color: '#FFFFFF', fontSize: rs(13), fontFamily: 'Inter_700Bold' },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: rs(8),
+    gap: rs(6),
+  },
+  name: { fontSize: rs(15), fontFamily: 'Inter_600SemiBold', flexShrink: 1 },
+  active: { fontSize: rs(11), fontFamily: 'Inter_700Bold', letterSpacing: 0.5 },
+  soon: { fontSize: rs(12), fontFamily: 'Inter_400Regular' },
 });

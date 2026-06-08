@@ -3,9 +3,11 @@ import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useUserStore } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import AurafyLogo from '@/src/components/AurafyLogo';
+import { rs } from '@/src/utils/responsive';
 import '../src/i18n'; // initialize i18n
 
 export default function SplashScreen() {
@@ -19,7 +21,7 @@ export default function SplashScreen() {
       if (navigated.current) return;
       navigated.current = true;
       router.replace(hasOnboarded ? '/(tabs)' : '/onboarding');
-    }, 10000);
+    }, 5000);
     return () => clearTimeout(timer);
   }, [hasOnboarded]);
 
@@ -33,12 +35,28 @@ export default function SplashScreen() {
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      {/* Upper purple aurora — strongest at top, fades to transparent mid-screen. */}
+      {/* Soft indigo radial glow centered on logo — diffuse, not a spotlight. */}
+      <Svg
+        width="100%"
+        height="100%"
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      >
+        <Defs>
+          <RadialGradient id="splash_glow" cx="50%" cy="47%" r="55%">
+            <Stop offset="0%"   stopColor="#4338CA" stopOpacity="0.26" />
+            <Stop offset="50%"  stopColor="#3730A3" stopOpacity="0.10" />
+            <Stop offset="100%" stopColor="#07091A" stopOpacity="0" />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#splash_glow)" />
+      </Svg>
+      {/* Upper purple aurora — top-left haze visible in design. */}
       <LinearGradient
-        colors={[`${theme.primary}33`, `${theme.primary}0D`, 'transparent']}
-        locations={[0, 0.3, 0.55]}
-        start={{ x: 0.4, y: 0 }}
-        end={{ x: 0.55, y: 0.6 }}
+        colors={[`${theme.primary}28`, `${theme.primary}08`, 'transparent']}
+        locations={[0, 0.35, 0.6]}
+        start={{ x: 0.3, y: 0 }}
+        end={{ x: 0.6, y: 0.55 }}
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       />
@@ -53,7 +71,7 @@ export default function SplashScreen() {
 
       <View style={styles.center}>
         <View style={styles.logoWrap}>
-          <AurafyLogo size={64} />
+          <AurafyLogo size={rs(116)} />
         </View>
         <Text style={[styles.wordmark, { color: theme.text }]}>Aurafy</Text>
         <Text style={[styles.tagline, { color: theme.textMuted }]}>
@@ -64,7 +82,7 @@ export default function SplashScreen() {
       <Text
         style={[
           styles.footer,
-          { color: theme.textDim, paddingBottom: insets.bottom + 32 },
+          { color: theme.textDim, paddingBottom: insets.bottom + rs(32) },
         ]}
       >
         LOADING THE STARS
@@ -79,26 +97,26 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 18,
-    paddingTop: 40,
+    gap: rs(12),
+    paddingTop: rs(40),
   },
   logoWrap: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   wordmark: {
-    fontSize: 48,
-    fontFamily: 'Fraunces_700Bold',
-    marginTop: -8,
-    letterSpacing: 0,
+    fontSize: rs(44),
+    fontFamily: 'PlayfairDisplay_700Bold',
+    marginTop: rs(-22),
+    letterSpacing: -0.4,
   },
   tagline: {
-    fontSize: 15,
+    fontSize: rs(13),
     fontFamily: 'Inter_400Regular',
     letterSpacing: 0.1,
   },
   footer: {
-    fontSize: 11,
+    fontSize: rs(11),
     fontFamily: 'Inter_600SemiBold',
     letterSpacing: 3,
     textAlign: 'center',

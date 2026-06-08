@@ -61,6 +61,8 @@ export interface Module {
   icon: string; // emoji
   color: string; // accent hex for glow
   framework: Framework;
+  /** Placeholder module shown on Home as a dimmed "Coming soon" card (not playable). */
+  comingSoon?: boolean;
 }
 
 export interface ThemeColors {
@@ -77,6 +79,7 @@ export interface ThemeColors {
   textDim: string;
   gold: string;
   rose: string;
+  emerald: string;
   glow: string;
 }
 

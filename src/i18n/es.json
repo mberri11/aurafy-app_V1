@@ -9,32 +9,156 @@
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "close": "Cerrar",
-    "skip": "Omitir"
+    "skip": "Omitir",
+    "tap": "Tocar",
+    "ok": "OK"
   },
   "onboarding": {
     "slide1Title": "Descifra la energía a tu alrededor",
     "slide1Subtitle": "Elige un módulo. Ingresa las personas en tu vida. Obtén una lectura poderosa en menos de 3 minutos.",
-    "slide2Title": "Cómo funcionan las estrellas",
-    "slide2Subtitle": "Empiezas con 5 estrellas. Gástalas en lecturas. Gana más cada día — o mira un anuncio corto.",
+    "slide2Title": "Basado en psicología real",
+    "slide2Subtitle": "Teoría del apego, sociometría, lenguajes del amor, psicología del color — todo descifrado para ti.",
+    "slide3Title": "Cómo funcionan las estrellas",
+    "slide3Subtitle": "Empiezas con 5 estrellas. Gástalas en lecturas. Gana más cada día — o mira un anuncio corto.",
+    "cardAttachmentTag": "Teoría del apego",
+    "cardAttachmentQuestion": "¿Quién aparece cuando te callas?",
+    "cardSociometryTag": "Sociometría",
+    "cardSociometryQuestion": "¿A quién acudes por consejo?",
+    "cardLoveTag": "Lenguajes del amor",
+    "cardLoveQuestion": "¿Cómo demuestras el afecto?",
+    "earnUseLabel": "Usar",
+    "earnUseAmount": "Gasta para leer",
+    "earnDailyLabel": "Diario",
+    "earnDailyAmount": "+2 al día",
+    "earnWatchLabel": "Ver",
+    "earnWatchAmount": "+1 por anuncio",
     "beginButton": "Comenzar mi viaje",
     "earnStars": "Ganar estrellas",
     "spendStars": "Gastar estrellas",
     "dailyBonus": "Bono diario"
   },
+  "home": {
+    "heroEyebrow": "La pregunta de esta noche",
+    "heroTitle": "¿Qué quieres descubrir?",
+    "dailyReady": "Tu pregunta gratis de hoy está lista",
+    "tryFree": "Prueba gratis",
+    "comingSoon": "Próximamente",
+    "sectionRelationships": "Relaciones",
+    "sectionSelf": "Autodescubrimiento"
+  },
+  "moduleDetail": {
+    "questions": "preguntas",
+    "minutes": "minutos",
+    "fromCost": "desde {{cost}}",
+    "toRead": "para leer",
+    "beginReading": "Comenzar lectura"
+  },
   "modules": {
-    "who_loves_me": { "title": "Quién me ama", "subtitle": "Descifra quién genuinamente se preocupa", "description": "Basado en la teoría del apego, esta lectura mapea quién en tu vida aparece con cuidado constante e incondicional.", "poweredBy": "Teoría del apego", "time": "5–7 min", "cost": "Desde 1" },
-    "who_hates_me": { "title": "Quién me resiente", "subtitle": "Lee las tensiones ocultas", "description": "Análisis sociométrico de quién en tu órbita lleva energía negativa o resentimiento hacia ti.", "poweredBy": "Sociometría", "time": "5–7 min", "cost": "Desde 1" },
-    "who_jealous": { "title": "Quién tiene envidia", "subtitle": "Detecta la envidia antes de que te cueste", "description": "La envidia suele llevar la máscara de la amistad. Esta lectura revela quién compite contigo a tus espaldas.", "poweredBy": "Sociometría", "time": "5–7 min", "cost": "Desde 1" },
-    "who_cut_off": { "title": "Quién se aleja", "subtitle": "Nombra el silencio", "description": "Cuando alguien se retira, dice algo. Esta lectura mapea quién se está desconectando emocionalmente.", "poweredBy": "Psicología relacional", "time": "5–7 min", "cost": "Desde 1" },
-    "energy_reading": { "title": "Lectura de energía", "subtitle": "Siente quién te ilumina", "description": "Una lectura basada en la rueda de colores que identifica cuya energía está más alineada con la tuya.", "poweredBy": "Psicología del color", "time": "5–7 min", "cost": "Desde 1" },
-    "attachment_style": { "title": "Estilo de apego", "subtitle": "Entiende cómo amas", "description": "Basado en décadas de investigación, tu estilo de apego da forma a cada relación. Descubre el tuyo.", "poweredBy": "Teoría del apego", "time": "5–7 min", "cost": "1" },
-    "am_i_problem": { "title": "¿Soy el problema?", "subtitle": "Un espejo honesto", "description": "A veces el patrón somos nosotros. Esta lectura te ayuda a ver tus puntos ciegos relacionales con compasión.", "poweredBy": "Auto-psicología", "time": "5–7 min", "cost": "1" }
+    "who_loves_me": {
+      "title": "Quién me ama",
+      "subtitle": "Quién te apoya de verdad",
+      "description": "Veinte preguntas basadas en la teoría del apego revelan quién en tu vida te ama más — y cómo.",
+      "poweredBy": "Teoría del apego",
+      "time": "5–7 min",
+      "cost": "Desde 1"
+    },
+    "who_hates_me": {
+      "title": "Quién me resiente",
+      "subtitle": "Fricciones ocultas, reveladas",
+      "description": "Análisis sociométrico de quién en tu órbita lleva energía negativa o resentimiento hacia ti.",
+      "poweredBy": "Sociometría",
+      "time": "5–7 min",
+      "cost": "Desde 1"
+    },
+    "who_jealous": {
+      "title": "Quién tiene envidia",
+      "subtitle": "La envidia que no ves",
+      "description": "La envidia suele llevar la máscara de la amistad. Esta lectura revela quién compite contigo a tus espaldas.",
+      "poweredBy": "Sociometría",
+      "time": "5–7 min",
+      "cost": "Desde 1"
+    },
+    "who_soulmate": {
+      "title": "¿Quién es mi alma gemela?",
+      "subtitle": "Encuentra tu sintonía",
+      "description": "Una lectura basada en los lenguajes del amor que revela con quién estás más profundamente alineado — la persona cuya presencia se siente como resonancia, no como esfuerzo.",
+      "poweredBy": "Lenguajes del amor",
+      "time": "5–7 min",
+      "cost": "Desde 1"
+    },
+    "who_admires": {
+      "title": "Quién me admira en secreto",
+      "subtitle": "Los admiradores callados",
+      "description": "Una lectura basada en la intuición que revela quién siente una admiración callada por ti — la atención, la calidez y el anhelo que guarda bajo la superficie.",
+      "poweredBy": "Intuición",
+      "time": "5–7 min",
+      "cost": "Desde 1"
+    },
+    "who_cut_off": {
+      "title": "Quién se aleja",
+      "subtitle": "Detecta el distanciamiento pronto",
+      "description": "Cuando alguien se retira, dice algo. Esta lectura mapea quién se está desconectando emocionalmente.",
+      "poweredBy": "Psicología relacional",
+      "time": "5–7 min",
+      "cost": "Desde 1"
+    },
+    "energy_reading": {
+      "title": "Lectura de energía",
+      "subtitle": "Lee la frecuencia del lugar",
+      "description": "Una lectura basada en la rueda de colores que identifica cuya energía está más alineada con la tuya.",
+      "poweredBy": "Psicología del color",
+      "time": "5–7 min",
+      "cost": "Desde 1"
+    },
+    "attachment_style": {
+      "title": "Estilo de apego",
+      "subtitle": "Cómo te vinculas, descifrado",
+      "description": "Basado en décadas de investigación, tu estilo de apego da forma a cada relación. Descubre el tuyo.",
+      "poweredBy": "Teoría del apego",
+      "time": "5–7 min",
+      "cost": "1"
+    },
+    "am_i_problem": {
+      "title": "¿Soy el problema?",
+      "subtitle": "Un espejo honesto",
+      "description": "A veces el patrón somos nosotros. Esta lectura te ayuda a ver tus puntos ciegos relacionales con compasión.",
+      "poweredBy": "Auto-psicología",
+      "time": "5–7 min",
+      "cost": "1"
+    },
+    "birth_chart": {
+      "title": "Lectura de carta astral",
+      "subtitle": "Próximamente"
+    },
+    "am_i_healing": {
+      "title": "¿Estoy sanando?",
+      "subtitle": "Próximamente"
+    }
   },
   "readingModes": {
-    "solo": { "title": "Solo", "subtitle": "Leer una persona", "persons": "1 persona" },
-    "compare": { "title": "Comparar", "subtitle": "Cara a cara", "persons": "2 personas" },
-    "triangle": { "title": "Triángulo", "subtitle": "Lectura de tres", "persons": "3 personas" },
-    "circle": { "title": "Círculo", "subtitle": "Lectura grupal", "persons": "4+ personas" }
+    "solo": {
+      "title": "Solo",
+      "subtitle": "Leer una persona",
+      "persons": "1 persona"
+    },
+    "compare": {
+      "title": "Comparar",
+      "subtitle": "Compara dos lado a lado",
+      "persons": "2 personas"
+    },
+    "triangle": {
+      "title": "Triángulo",
+      "subtitle": "Traza un pequeño círculo",
+      "persons": "3 personas"
+    },
+    "circle": {
+      "title": "Círculo",
+      "subtitle": "Lee todo tu entorno",
+      "persons": "4–10 personas"
+    },
+    "heading": "¿A cuántas personas vas a leer?",
+    "earnStars": "Gana más",
+    "free": "Gratis"
   },
   "quiz": {
     "progressLabel": "Pregunta {{current}} de {{total}}",
@@ -63,7 +187,7 @@
   "stars": {
     "walletTitle": "Tus estrellas",
     "balanceLabel": "{{balance}} estrellas",
-    "earnTitle": "Ganar más estrellas",
+    "earnTitle": "Ganar Más",
     "watchVideo": "Ver un video",
     "watchVideoAmount": "+1",
     "dailyBonus": "Bono diario",
@@ -79,7 +203,20 @@
     "dayProgress": "Día {{streak}} de 7",
     "activityTitle": "Actividad reciente",
     "earnReason": "Ganado",
-    "spendReason": "Gastado"
+    "spendReason": "Gastado",
+    "watchVideoDesc": "Un anuncio corto, recompensa al instante",
+    "dailyBonusDesc": "Una vez al día",
+    "streakDesc": "Mantén tu ritual diario",
+    "shareDesc": "Invita a un amigo a leer",
+    "comeBack": "Vuelve en 24h",
+    "claimed": "Reclamado",
+    "earnedSuffix": "ganado",
+    "reasonWatch": "Video visto",
+    "reasonShare": "Aurafy compartido",
+    "reasonDaily": "Bono diario",
+    "reasonWelcome": "Regalo de bienvenida",
+    "reasonReading": "Lectura",
+    "reasonStreak": "Racha de 7 días"
   },
   "history": {
     "title": "Tus lecturas",
@@ -104,9 +241,41 @@
     "shareApp": "Compartir Aurafy",
     "data": "Datos",
     "resetData": "Restablecer todos los datos",
-    "resetConfirmTitle": "¿Restablecer todo?",
-    "resetConfirmMessage": "Esto borrará todas las lecturas, estrellas y ajustes. No se puede deshacer.",
-    "version": "Aurafy v1.0.0"
+    "resetConfirmTitle": "¿Restablecer todos los datos?",
+    "resetConfirmMessage": "Un restablecimiento total: estrellas, historial, ajustes e introducción se borrarán.",
+    "resetConfirmAction": "Restablecer todo",
+    "version": "Aurafy v1.0.0",
+    "soundAudio": "Sonido y audio",
+    "soundEffectsDesc": "Tintineos al tocar, campana al revelar",
+    "ambientAudio": "Audio ambiental",
+    "ambientAudioDesc": "Un fondo suave durante las lecturas",
+    "volume": "Volumen",
+    "notifications": "Notificaciones",
+    "dailyReminder": "Recordatorio diario",
+    "dailyReminderDesc": "«Tu pregunta diaria está lista 🌙»",
+    "reminderTime": "Hora del recordatorio",
+    "streakReminder": "Recordatorio de racha",
+    "streakReminderDesc": "Si tu racha está a punto de romperse",
+    "readingPreferences": "Preferencias de lectura",
+    "defaultMode": "Modo predeterminado",
+    "showFrameworkTags": "Mostrar marcos",
+    "showFrameworkTagsDesc": "Durante el cuestionario",
+    "autoCentering": "Autocentrado",
+    "autoCenteringDesc": "El momento de respiración de 2 segundos",
+    "howAurafyWorks": "Cómo funciona Aurafy",
+    "howItWorksTitle": "Cómo funciona Aurafy",
+    "howItWorksMessage": "Elige un módulo, responde una breve serie de preguntas intuitivas y Aurafy convierte tus toques en una lectura. Las preguntas se basan en marcos reales; el resultado es una reflexión, no un diagnóstico.",
+    "termsOfUse": "Términos de uso",
+    "clearHistory": "Borrar historial de lecturas",
+    "clearHistoryConfirmTitle": "¿Borrar el historial de lecturas?",
+    "clearHistoryConfirmMessage": "Esto elimina todas las lecturas guardadas. Tus estrellas y ajustes se conservan.",
+    "clearHistoryConfirmAction": "Borrar historial",
+    "exportReadings": "Exportar lecturas",
+    "exportEmpty": "Aún no hay lecturas para exportar.",
+    "madeWith": "Hecho con",
+    "selectMode": "Modo predeterminado",
+    "selectTime": "Hora del recordatorio",
+    "setTime": "Establecer hora"
   },
   "daily": {
     "title": "Pregunta diaria",
@@ -122,13 +291,77 @@
     "notEnoughStars": "Estrellas insuficientes — visita Estrellas para ganar más",
     "adFailed": "Error al cargar el anuncio",
     "adNotAvailable": "Anuncio no disponible ahora mismo",
-    "generic": "Algo salió mal. Por favor intenta de nuevo."
+    "generic": "Algo salió mal. Por favor intenta de nuevo.",
+    "notEnoughStarsTitle": "No hay suficientes estrellas"
   },
   "personEntry": {
     "title": "¿A quién estás leyendo?",
+    "subtitle": "Usa nombres o iniciales. Tenlos claramente en mente.",
     "addPerson": "Agregar persona",
     "startButton": "Comenzar lectura — {{cost}}",
+    "startFree": "Comenzar lectura — Gratis",
     "balanceAfter": "Saldo después: {{balance}}",
-    "namePlaceholder": "Ingresa un nombre..."
+    "namePlaceholder": "Ingresa un nombre...",
+    "soloTitle": "Esta lectura es para ti",
+    "soloSubtitle": "Responde con sinceridad — solo tú la verás.",
+    "locked": "bloqueado"
+  },
+  "themeGallery": {
+    "title": "Temas",
+    "active": "Activo",
+    "soon": "Pronto",
+    "unlock": "Desbloquear",
+    "unlockTitle": "¿Desbloquear {{name}}?",
+    "unlockMessage": "¿Desbloquear {{name}} por {{cost}} estrellas?",
+    "cost": "Coste",
+    "balance": "Saldo",
+    "unlockForCost": "Desbloquear por {{cost}}",
+    "needMore": "Faltan {{count}}",
+    "cosmic": "Cósmico",
+    "desertOracle": "Oráculo del desierto",
+    "midnightVeil": "Velo de medianoche",
+    "deepOcean": "Océano profundo",
+    "roseQuartz": "Cuarzo rosa",
+    "ember": "Brasa"
+  },
+  "about": {
+    "title": "La psicología detrás de Aurafy",
+    "subtitle": "El lenguaje místico es una metáfora. El motor que hay debajo se basa en evidencia.",
+    "footer": "Aurafy es para la autorreflexión y el entretenimiento. No es una herramienta de diagnóstico clínico.",
+    "attachmentTitle": "Teoría del apego",
+    "attachmentBody": "Bowlby y Ainsworth demostraron que los vínculos que formamos de niños se convierten en el modelo de cómo amamos de adultos. Aurafy lee los comportamientos — cercanía, tranquilidad, distancia — que revelan ese modelo.",
+    "sociometryTitle": "Sociometría",
+    "sociometryBody": "Jacob Moreno cartografió las corrientes invisibles de atracción y tensión dentro de cualquier grupo. Esas mismas corrientes — quién admira, quién resiente, quién se aleja — moldean tus relaciones cotidianas.",
+    "loveLanguagesTitle": "Lenguajes del amor",
+    "loveLanguagesBody": "Gary Chapman describió cinco formas de dar y recibir afecto. Saber qué lenguaje habla alguien explica por qué el amor puede sentirse fuerte para una persona y silencioso para otra.",
+    "colorTitle": "Psicología del color",
+    "colorBody": "Los colores tienen asociaciones emocionales constantes entre culturas — calidez, calma, intensidad. Aurafy toma ese vocabulario para describir la energía que cada persona trae a una habitación."
+  },
+  "insights": {
+    "editorial": "EDITORIAL",
+    "title": "Insights",
+    "tonightsRead": "LECTURA DE HOY",
+    "latest": "RECIENTES",
+    "sponsored": "PATROCINADO",
+    "rewardToday": "+1 ✦ hoy",
+    "minRead": "{{n}} min de lectura",
+    "min": "{{n}} min",
+    "takeReading": "Hacer la lectura {{module}}",
+    "claimReward": "Reclamar +1 ✦",
+    "claimed": "Reclamado",
+    "todaysReward": "Recompensa de lectura de hoy",
+    "open": "Abrir",
+    "empty": "Aún no hay artículos aquí.",
+    "sponsoredTitle": "Encuentra tu pareja cósmica esta noche",
+    "sponsoredBrand": "Astra · Citas",
+    "categories": {
+      "all": "Todo",
+      "love": "Amor",
+      "aura": "Aura",
+      "energy": "Energía",
+      "attachment": "Apego",
+      "self": "Yo",
+      "jealousy": "Celos"
+    }
   }
 }

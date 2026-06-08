@@ -21,7 +21,8 @@ import { lightTap } from '@/src/utils/haptics';
 import { whoLovesMeQuestions } from '@/src/data/questions/whoLovesMe';
 import { whoHatesMeQuestions } from '@/src/data/questions/whoHatesMe';
 import { whoJealousQuestions } from '@/src/data/questions/whoJealous';
-import { whoCutOffQuestions } from '@/src/data/questions/whoCutOff';
+import { whoSoulmateQuestions } from '@/src/data/questions/whoSoulmate';
+import { whoAdmiresQuestions } from '@/src/data/questions/whoAdmires';
 import { energyReadingQuestions } from '@/src/data/questions/energyReading';
 import { attachmentStyleQuestions } from '@/src/data/questions/attachmentStyle';
 import { amITheProblemQuestions } from '@/src/data/questions/amITheProblem';
@@ -30,7 +31,8 @@ const QUESTIONS_MAP: Record<string, Question[]> = {
   who_loves_me: whoLovesMeQuestions,
   who_hates_me: whoHatesMeQuestions,
   who_jealous: whoJealousQuestions,
-  who_cut_off: whoCutOffQuestions,
+  who_soulmate: whoSoulmateQuestions,
+  who_admires: whoAdmiresQuestions,
   energy_reading: energyReadingQuestions,
   attachment_style: attachmentStyleQuestions,
   am_i_problem: amITheProblemQuestions,
@@ -138,7 +140,7 @@ export default function QuizScreen() {
         </View>
 
         {/* Question text */}
-        <Text style={[styles.questionText, { color: theme.text, fontFamily: 'Fraunces_400Regular' }]}>
+        <Text style={[styles.questionText, { color: theme.text, fontFamily: 'PlayfairDisplay_400Regular' }]}>
           {currentQuestion.text[language] ?? currentQuestion.text.en}
         </Text>
       </Animated.View>

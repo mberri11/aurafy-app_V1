@@ -5,12 +5,14 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../themes/ThemeProvider';
 import GlassCard from './GlassCard';
 import { Module } from '../types';
+import { rs } from '../utils/responsive';
 
 interface ModuleCardProps {
   module: Module;
@@ -18,6 +20,10 @@ interface ModuleCardProps {
   subtitle: string;
   onPress: () => void;
   locked?: boolean;
+  /** Dimmed, non-interactive "Coming soon" placeholder card (per the Home design). */
+  comingSoon?: boolean;
+  /** Shows the gold "Try free ✦" pill in the top-right (the free module). */
+  freeTrial?: boolean;
 }
 
 const ModuleCard = memo(function ModuleCard({
@@ -26,8 +32,11 @@ const ModuleCard = memo(function ModuleCard({
   subtitle,
   onPress,
   locked = false,
+  comingSoon = false,
+  freeTrial = false,
 }: ModuleCardProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const scale = useSharedValue(1);
 
   const handlePressIn = useCallback(() => {
@@ -40,6 +49,42 @@ const ModuleCard = memo(function ModuleCard({
 
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
+  // Locked "Coming soon" placeholder: faint dashed panel, dim lock tile, no bloom,
+  // not interactive. Matches the Birth Chart / Am I Healing cards in the design.
+  if (comingSoon) {
+    return (
+      <View
+        style={[
+          styles.card,
+          styles.comingSoonCard,
+          { borderColor: theme.surfaceBorder },
+        ]}
+        accessibilityLabel={`${title}, coming soon`}
+        accessibilityRole="text"
+      >
+        <View style={styles.topRow}>
+          <View
+            style={[
+              styles.iconTile,
+              { backgroundColor: `${theme.textDim}14`, borderColor: `${theme.textDim}40` },
+            ]}
+          >
+            <MaterialCommunityIcons name="lock-outline" size={rs(20)} color={theme.textDim} />
+          </View>
+        </View>
+
+        <View style={styles.spacer} />
+
+        <Text style={[styles.title, { color: theme.textDim }]} numberOfLines={2}>
+          {title}
+        </Text>
+        <Text style={[styles.subtitle, { color: theme.textDim }]} numberOfLines={1}>
+          {subtitle}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <Animated.View style={animatedStyle}>
       <TouchableOpacity
@@ -51,21 +96,35 @@ const ModuleCard = memo(function ModuleCard({
         activeOpacity={1}
       >
         <GlassCard glowColor={`${module.color}66`} style={styles.card}>
-          <LinearGradient
-            pointerEvents="none"
-            colors={[`${module.color}55`, `${module.color}1A`, 'transparent']}
-            start={{ x: 0.5, y: 0.2 }}
-            end={{ x: 0.5, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
+          {/* soft color bloom emanating from the top-right corner; the card's
+              overflow:hidden clips the oversized radial to the card edges */}
+          <Svg width={300} height={300} style={styles.bloom} pointerEvents="none">
+            <Defs>
+              <RadialGradient id={`mc-${module.id}`} cx="50%" cy="50%" r="50%">
+                <Stop offset="0%" stopColor={module.color} stopOpacity={0.32} />
+                <Stop offset="50%" stopColor={module.color} stopOpacity={0.09} />
+                <Stop offset="100%" stopColor={module.color} stopOpacity={0} />
+              </RadialGradient>
+            </Defs>
+            <Rect x={0} y={0} width={300} height={300} fill={`url(#mc-${module.id})`} />
+          </Svg>
 
-          <View
-            style={[
-              styles.iconTile,
-              { backgroundColor: `${module.color}33`, borderColor: `${module.color}66` },
-            ]}
-          >
-            <Text style={styles.iconChar}>{module.icon}</Text>
+          <View style={styles.topRow}>
+            <View
+              style={[
+                styles.iconTile,
+                { backgroundColor: `${module.color}33`, borderColor: `${module.color}66` },
+              ]}
+            >
+              <Text style={styles.iconChar}>{module.icon}</Text>
+            </View>
+
+            {freeTrial ? (
+              <View style={[styles.tryFreePill, { borderColor: `${theme.gold}66`, backgroundColor: `${theme.gold}14` }]}>
+                <Text style={[styles.tryFreeText, { color: theme.gold }]}>{t('home.tryFree')}</Text>
+                <MaterialCommunityIcons name="star-four-points" size={rs(10)} color={theme.gold} />
+              </View>
+            ) : null}
           </View>
 
           <View style={styles.spacer} />
@@ -82,7 +141,7 @@ const ModuleCard = memo(function ModuleCard({
               pointerEvents="none"
               style={[styles.lockedOverlay, { backgroundColor: `${theme.background}CC` }]}
             >
-              <MaterialCommunityIcons name="lock" size={22} color={theme.textMuted} />
+              <MaterialCommunityIcons name="lock" size={rs(22)} color={theme.textMuted} />
             </View>
           ) : null}
         </GlassCard>
@@ -95,32 +154,59 @@ export default ModuleCard;
 
 const styles = StyleSheet.create({
   card: {
-    padding: 16,
-    minHeight: 180,
+    padding: rs(14),
+    minHeight: rs(148),
+  },
+  comingSoonCard: {
+    borderRadius: rs(20),
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    overflow: 'hidden',
+  },
+  bloom: {
+    position: 'absolute',
+    top: -95,
+    right: -95,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
   },
   iconTile: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: rs(40),
+    height: rs(40),
+    borderRadius: rs(11),
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconChar: { fontSize: 22 },
-  spacer: { flex: 1, minHeight: 24 },
+  iconChar: { fontSize: rs(20) },
+  tryFreePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(3),
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: rs(8),
+    paddingVertical: rs(3),
+  },
+  tryFreeText: { fontSize: rs(11), fontFamily: 'Inter_600SemiBold' },
+  spacer: { flex: 1, minHeight: rs(14) },
   title: {
-    fontSize: 16,
-    fontFamily: 'Fraunces_700Bold',
-    marginBottom: 4,
+    fontSize: rs(16),
+    lineHeight: rs(20),
+    fontFamily: 'PlayfairDisplay_700Bold',
+    marginBottom: rs(3),
   },
   subtitle: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: rs(11),
+    lineHeight: rs(15),
     fontFamily: 'Inter_400Regular',
   },
   lockedOverlay: {
     ...StyleSheet.absoluteFillObject,
-    borderRadius: 20,
+    borderRadius: rs(20),
     alignItems: 'center',
     justifyContent: 'center',
   },

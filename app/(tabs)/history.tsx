@@ -103,7 +103,7 @@ export default function HistoryScreen() {
           { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 100 },
         ]}
         ListHeaderComponent={
-          <Text style={[styles.screenTitle, { color: theme.text, fontFamily: 'Fraunces_400Regular' }]}>
+          <Text style={[styles.screenTitle, { color: theme.text, fontFamily: 'PlayfairDisplay_400Regular' }]}>
             {t('history.title')}
           </Text>
         }

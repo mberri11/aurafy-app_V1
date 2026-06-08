@@ -9,7 +9,7 @@ import { MODULES } from '@/src/data/modules';
 import { scoreReading } from '@/src/engine/scoringEngine';
 import { generateMultiResult, generateSoloResult } from '@/src/engine/resultGenerator';
 import { AdMobManager } from '@/src/ads/AdMobManager';
-import ConstellationLoader from '@/src/components/ConstellationLoader';
+import CosmicReveal from '@/src/components/CosmicReveal';
 import GlassCard from '@/src/components/GlassCard';
 import GradientButton from '@/src/components/GradientButton';
 import { ResultData, ReadingMode } from '@/src/types';
@@ -19,7 +19,8 @@ import { ReadingMode as RM } from '@/src/types';
 import { whoLovesMeResults } from '@/src/data/results/whoLovesMeResults';
 import { whoHatesMeResults } from '@/src/data/results/whoHatesMeResults';
 import { whoJealousResults } from '@/src/data/results/whoJealousResults';
-import { whoCutOffResults } from '@/src/data/results/whoCutOffResults';
+import { whoSoulmateResults } from '@/src/data/results/whoSoulmateResults';
+import { whoAdmiresResults } from '@/src/data/results/whoAdmiresResults';
 import { energyReadingResults } from '@/src/data/results/energyReadingResults';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
@@ -28,7 +29,8 @@ import { MultiResults, SoloResults } from '@/src/types';
 import { whoLovesMeQuestions } from '@/src/data/questions/whoLovesMe';
 import { whoHatesMeQuestions } from '@/src/data/questions/whoHatesMe';
 import { whoJealousQuestions } from '@/src/data/questions/whoJealous';
-import { whoCutOffQuestions } from '@/src/data/questions/whoCutOff';
+import { whoSoulmateQuestions } from '@/src/data/questions/whoSoulmate';
+import { whoAdmiresQuestions } from '@/src/data/questions/whoAdmires';
 import { energyReadingQuestions } from '@/src/data/questions/energyReading';
 import { attachmentStyleQuestions } from '@/src/data/questions/attachmentStyle';
 import { amITheProblemQuestions } from '@/src/data/questions/amITheProblem';
@@ -38,7 +40,8 @@ const QUESTIONS_MAP: Record<string, Question[]> = {
   who_loves_me: whoLovesMeQuestions,
   who_hates_me: whoHatesMeQuestions,
   who_jealous: whoJealousQuestions,
-  who_cut_off: whoCutOffQuestions,
+  who_soulmate: whoSoulmateQuestions,
+  who_admires: whoAdmiresQuestions,
   energy_reading: energyReadingQuestions,
   attachment_style: attachmentStyleQuestions,
   am_i_problem: amITheProblemQuestions,
@@ -48,7 +51,8 @@ const MULTI_RESULTS_MAP: Record<string, MultiResults> = {
   who_loves_me: whoLovesMeResults,
   who_hates_me: whoHatesMeResults,
   who_jealous: whoJealousResults,
-  who_cut_off: whoCutOffResults,
+  who_soulmate: whoSoulmateResults,
+  who_admires: whoAdmiresResults,
   energy_reading: energyReadingResults,
 };
 
@@ -152,7 +156,7 @@ export default function LoadingScreen() {
     >
       {/* Main loading UI */}
       <View style={styles.centerContent}>
-        <ConstellationLoader />
+        <CosmicReveal mode="loading" showWordmark={false} />
         <Text style={[styles.loadingText, { color: theme.textMuted }]}>
           {LOADING_TEXTS[loadingTextIdx]}
         </Text>
@@ -162,7 +166,7 @@ export default function LoadingScreen() {
       {showAdGate && (
         <View style={styles.adGateBackdrop}>
           <GlassCard intensity="high" style={styles.adGateCard}>
-            <Text style={[styles.adGateTitle, { color: theme.text, fontFamily: 'Fraunces_400Regular' }]}>
+            <Text style={[styles.adGateTitle, { color: theme.text, fontFamily: 'PlayfairDisplay_400Regular' }]}>
               🔮 Your reading is ready
             </Text>
             <Text style={[styles.adGateSubtitle, { color: theme.textMuted }]}>
