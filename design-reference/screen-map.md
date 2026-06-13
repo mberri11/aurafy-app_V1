@@ -19,9 +19,9 @@
 | 07-person-entry_2.png | app/person-entry.tsx (name input, triangle — 3 people) | ✅ |
 | 07-person-entry_3.png | app/person-entry.tsx (name input, circle — 4 + "Add another") | ✅ |
 | 07-person-entry_4.png | app/person-entry.tsx (name input, Energy free-trial solo) | ✅ |
-| quiz-multi.png | app/quiz.tsx | 🔲 |
-| quiz-solo.png | app/quiz.tsx | 🔲 |
-| loading.png | app/loading.tsx | 🔲 |
+| quiz-multi.png | app/quiz.tsx | ✅ Simo-verified 2026-06-13 |
+| quiz-solo.png | app/quiz.tsx | ✅ Simo-verified 2026-06-13 |
+| loading.png | app/loading.tsx | ✅ Simo-verified 2026-06-13 |
 | result-multi.png | app/result.tsx | 🔲 |
 | result-solo.png | app/result.tsx | 🔲 |
 | stars.png (+ _1 / _earned / _claimed states) | app/(tabs)/stars.tsx | ✅ |

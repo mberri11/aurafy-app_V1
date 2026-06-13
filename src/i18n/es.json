@@ -161,7 +161,7 @@
     "free": "Gratis"
   },
   "quiz": {
-    "progressLabel": "Pregunta {{current}} de {{total}}",
+    "progressLabel": "{{current}} / {{total}}",
     "tapToAnswer": "Toca para seleccionar",
     "frameworks": {
       "attachment": "Teoría del apego",
@@ -169,19 +169,48 @@
       "sociometry": "Sociometría",
       "colorWheel": "Psicología del color",
       "intuition": "Intuición",
-      "mixed": "Psicología"
+      "mixed": "Psicología",
+      "selfPsychology": "Psicología del yo"
+    },
+    "breath": {
+      "multi": "Respira. Tenlos claramente en mente.",
+      "solo": "Respira. Esta es para ti.",
+      "soloPerson": "Respira. Mantén a {{name}} claramente en mente.",
+      "tap": "Toca en cualquier lugar para continuar"
+    },
+    "soloFrequency": {
+      "always": "Siempre — sin falta",
+      "often": "A menudo",
+      "sometimes": "A veces",
+      "rarely": "Rara vez o nunca"
     }
+  },
+  "loading": {
+    "phrases": {
+      "energy": "Leyendo la energía...",
+      "patterns": "Descifrando patrones...",
+      "connections": "Trazando las conexiones...",
+      "almost": "Tu lectura está casi lista..."
+    },
+    "ready": "Tu lectura está lista",
+    "unlock": "Mira un video corto para desbloquear tu resultado completo.",
+    "watchNow": "Ver ahora",
+    "skip": "Saltar",
+    "adUnavailable": "Anuncio no disponible — salta abajo"
   },
   "result": {
     "confidenceLabel": "{{confidence}}% de confianza",
+    "confidenceHeadline": "Tenemos un {{confidence}}% de confianza en esta lectura.",
+    "confidenceSub": "Más alto que el {{pct}}% de las lecturas de esta noche.",
     "attachmentStyle": "Dinámica de apego",
     "loveLanguage": "Señal de lenguaje amoroso",
-    "shareButton": "Compartir resultado",
+    "shareButton": "Compartir esta lectura",
     "saveButton": "Guardar y salir",
     "retryButton": "Intentar otra",
-    "disclaimer": "Solo para reflexión personal y entretenimiento.",
+    "disclaimer": "Aurafy es para la autorreflexión y el entretenimiento — no una herramienta de diagnóstico clínico.",
     "insightPrefix": "✦",
-    "comparison": "Cómo se compara cada uno",
+    "comparison": "El panorama completo",
+    "theRead": "La lectura",
     "whatThisMeans": "Qué significa esto"
   },
   "stars": {

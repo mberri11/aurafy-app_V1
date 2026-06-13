@@ -341,8 +341,8 @@ The screens kept missing because the *primitives* were off. Fix these first:
 | Module detail | `app/module/[id].tsx` | ✅ matches — Simo-verified 2026-06-04 |
 | Reading mode | `app/reading-mode.tsx` | ✅ matches — Simo-verified 2026-06-05 |
 | Person entry | `app/person-entry.tsx` | ✅ matches — Simo-verified 2026-06-05 (solo per `_3`) |
-| Quiz (multi + solo) | `app/quiz.tsx` | 🔲 |
-| Loading / ad-gate | `app/loading.tsx` | 🔲 |
+| Quiz (multi + solo) | `app/quiz.tsx` | ✅ matches — Simo-verified 2026-06-13 |
+| Loading / ad-gate | `app/loading.tsx` | ✅ matches — Simo-verified 2026-06-13 |
 | Result (multi + solo) | `app/result.tsx` | 🔲 |
 | Stars / wallet | `app/(tabs)/stars.tsx` | ✅ matches — Simo-verified 2026-06-06 |
 | History | `app/(tabs)/history.tsx` | 🔲 |

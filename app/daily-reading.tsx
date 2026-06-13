@@ -19,7 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { useUserStore } from '@/src/store/userStore';
-import { useSettingsStore } from '@/src/store/settingsStore';
+import { Language } from '@/src/types';
 import { dailyQuestions } from '@/src/data/dailyQuestions';
 import GlassCard from '@/src/components/GlassCard';
 import GradientButton from '@/src/components/GradientButton';
@@ -29,10 +29,10 @@ dayjs.extend(dayOfYear);
 dayjs.extend(isSameOrBefore);
 
 export default function DailyReadingScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const language = useSettingsStore((s) => s.language);
+  const language = i18n.language as Language;
   const { lastDailyQuestion, claimDailyBonus } = useUserStore();
   const setLastDailyQuestion = useUserStore.getState;
 

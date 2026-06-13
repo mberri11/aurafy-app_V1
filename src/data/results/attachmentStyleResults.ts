@@ -1,6 +1,11 @@
 import { SoloResults } from '../../types';
 
 export const attachmentStyleResults: SoloResults = {
+  verdictLabel: {
+    positive: { en: 'Secure', fr: 'Sécurisé', ar: 'آمن', es: 'Seguro' },
+    neutral: { en: 'Mixed', fr: 'Mixte', ar: 'مختلط', es: 'Mixto' },
+    negative: { en: 'Guarded', fr: 'Sur la défensive', ar: 'متحفّظ', es: 'Reservado' },
+  },
   verdicts: {
     positive: {
       en: 'Your attachment style is Secure.',

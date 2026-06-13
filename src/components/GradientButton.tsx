@@ -28,6 +28,8 @@ interface GradientButtonProps {
   glow?: boolean;
   /** MaterialCommunityIcons glyph rendered after the label, in the label colour. */
   trailingIcon?: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  /** MaterialCommunityIcons glyph rendered before the label, in the label colour. */
+  leadingIcon?: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 }
 
 const GradientButton = memo(function GradientButton({
@@ -41,6 +43,7 @@ const GradientButton = memo(function GradientButton({
   bold = false,
   glow = false,
   trailingIcon,
+  leadingIcon,
 }: GradientButtonProps) {
   const theme = useTheme();
 
@@ -104,6 +107,14 @@ const GradientButton = memo(function GradientButton({
           <ActivityIndicator color="#fff" size="small" />
         ) : (
           <View style={styles.labelRow}>
+            {leadingIcon ? (
+              <MaterialCommunityIcons
+                name={leadingIcon}
+                size={rs(16)}
+                color={labelColor ?? '#FFFFFF'}
+                style={styles.leadingIcon}
+              />
+            ) : null}
             <Text style={[styles.label, bold && styles.labelBold, labelColor ? { color: labelColor } : null]}>{label}</Text>
             {trailingIcon ? (
               <MaterialCommunityIcons
@@ -140,6 +151,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   trailingIcon: { marginLeft: rs(6) },
+  leadingIcon: { marginRight: rs(8) },
   label: {
     fontSize: rs(16),
     fontWeight: '600',

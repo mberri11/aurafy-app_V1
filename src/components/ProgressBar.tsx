@@ -5,19 +5,24 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../themes/ThemeProvider';
 import { useTranslation } from 'react-i18next';
+import { rs } from '../utils/responsive';
 
 interface ProgressBarProps {
   current: number;
   total: number;
+  /** Solid fill colour — the module accent. Defaults to theme.primary. */
+  accentColor?: string;
 }
 
-const ProgressBar = memo(function ProgressBar({ current, total }: ProgressBarProps) {
+// Single-row layout per the quiz design (08-*_quiz.png): rounded track on the
+// left, "1 / 20" counter right-aligned on the same baseline, solid accent fill.
+const ProgressBar = memo(function ProgressBar({ current, total, accentColor }: ProgressBarProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const progress = useSharedValue(0);
+  const fill = accentColor ?? theme.primary;
 
   useEffect(() => {
     const ratio = total > 0 ? current / total : 0;
@@ -29,20 +34,25 @@ const ProgressBar = memo(function ProgressBar({ current, total }: ProgressBarPro
   }));
 
   return (
-    <View style={styles.wrapper}>
+    <View style={styles.row}>
+      <View style={[styles.track, { backgroundColor: theme.surfaceBorder }]}>
+        <Animated.View
+          style={[
+            styles.fill,
+            animatedStyle,
+            {
+              backgroundColor: fill,
+              shadowColor: fill,
+              shadowOpacity: 0.6,
+              shadowRadius: rs(6),
+              shadowOffset: { width: 0, height: 0 },
+            },
+          ]}
+        />
+      </View>
       <Text style={[styles.label, { color: theme.textMuted }]}>
         {t('quiz.progressLabel', { current, total })}
       </Text>
-      <View style={[styles.track, { backgroundColor: theme.surface }]}>
-        <Animated.View style={[styles.fillWrapper, animatedStyle]}>
-          <LinearGradient
-            colors={[theme.gradient[0], theme.gradient[2]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[StyleSheet.absoluteFill, { shadowColor: theme.glow, shadowOpacity: 0.6, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } }]}
-          />
-        </Animated.View>
-      </View>
     </View>
   );
 });
@@ -50,8 +60,12 @@ const ProgressBar = memo(function ProgressBar({ current, total }: ProgressBarPro
 export default ProgressBar;
 
 const styles = StyleSheet.create({
-  wrapper: { width: '100%', gap: 6 },
-  label: { fontSize: 13, textAlign: 'right', fontFamily: 'Inter_400Regular' },
-  track: { height: 4, borderRadius: 4, width: '100%', overflow: 'hidden' },
-  fillWrapper: { height: 4, borderRadius: 4, overflow: 'hidden' },
+  row: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: rs(12) },
+  track: { flex: 1, height: rs(5), borderRadius: rs(5), overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: rs(5) },
+  label: {
+    fontSize: rs(12),
+    fontFamily: 'Inter_500Medium',
+    fontVariant: ['lining-nums'],
+  },
 });

@@ -1,6 +1,11 @@
 import { SoloResults } from '../../types';
 
 export const amITheProblemResults: SoloResults = {
+  verdictLabel: {
+    positive: { en: 'Self-Aware', fr: 'Conscient', ar: 'واعٍ لذاتك', es: 'Consciente' },
+    neutral: { en: 'Mostly Aware', fr: 'Plutôt conscient', ar: 'واعٍ غالبًا', es: 'Bastante consciente' },
+    negative: { en: 'Blind Spots', fr: 'Angles morts', ar: 'نقاط عمياء', es: 'Puntos ciegos' },
+  },
   verdicts: {
     positive: {
       en: 'You show strong self-awareness and accountability.',

@@ -19,6 +19,12 @@ export interface SoloAnswer {
 export interface Question {
   id: string;
   text: LocalizedString;
+  /**
+   * Statement form of a multi question for solo mode ("{name} cools a tense
+   * moment just by being there."), answered with the generic frequency scale.
+   * `{name}` is replaced with the person's name. Falls back to `text` when absent.
+   */
+  soloText?: LocalizedString;
   framework: Framework;
   dimension: string;
   personWeight?: number; // for multi-person questions, default 1
@@ -90,6 +96,12 @@ export interface MultiResults {
 
 export interface SoloResults {
   verdicts: {
+    positive: LocalizedString;
+    neutral: LocalizedString;
+    negative: LocalizedString;
+  };
+  /** Short headline word shown as the big result title (e.g. "Secure"). */
+  verdictLabel: {
     positive: LocalizedString;
     neutral: LocalizedString;
     negative: LocalizedString;

@@ -161,7 +161,7 @@
     "free": "Free"
   },
   "quiz": {
-    "progressLabel": "Question {{current}} of {{total}}",
+    "progressLabel": "{{current}} / {{total}}",
     "tapToAnswer": "Tap to select",
     "frameworks": {
       "attachment": "Attachment Theory",
@@ -169,19 +169,48 @@
       "sociometry": "Sociometry",
       "colorWheel": "Color Psychology",
       "intuition": "Intuition",
-      "mixed": "Psychology"
+      "mixed": "Psychology",
+      "selfPsychology": "Self-Psychology"
+    },
+    "breath": {
+      "multi": "Take a breath. Hold them clearly in mind.",
+      "solo": "Take a breath. This one is for you.",
+      "soloPerson": "Take a breath. Hold {{name}} clearly in mind.",
+      "tap": "Tap anywhere to continue"
+    },
+    "soloFrequency": {
+      "always": "Always — without fail",
+      "often": "Often",
+      "sometimes": "Sometimes",
+      "rarely": "Rarely or never"
     }
+  },
+  "loading": {
+    "phrases": {
+      "energy": "Reading the energy...",
+      "patterns": "Decoding patterns...",
+      "connections": "Mapping the connections...",
+      "almost": "Your reading is almost ready..."
+    },
+    "ready": "Your reading is ready",
+    "unlock": "Watch a short video to unlock your full result.",
+    "watchNow": "Watch Now",
+    "skip": "Skip",
+    "adUnavailable": "Ad unavailable — skip below"
   },
   "result": {
     "confidenceLabel": "{{confidence}}% confidence",
+    "confidenceHeadline": "We're {{confidence}}% confident in this reading.",
+    "confidenceSub": "Higher than {{pct}}% of readings tonight.",
     "attachmentStyle": "Attachment dynamic",
     "loveLanguage": "Love language signal",
-    "shareButton": "Share result",
+    "shareButton": "Share this reading",
     "saveButton": "Save & exit",
     "retryButton": "Try another",
-    "disclaimer": "For self-reflection and entertainment purposes only.",
+    "disclaimer": "Aurafy is for self-reflection and entertainment — not a clinical diagnostic tool.",
     "insightPrefix": "✦",
-    "comparison": "How everyone compares",
+    "comparison": "The full picture",
+    "theRead": "The read",
     "whatThisMeans": "What this means"
   },
   "stars": {

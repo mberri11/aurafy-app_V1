@@ -161,7 +161,7 @@
     "free": "Gratuit"
   },
   "quiz": {
-    "progressLabel": "Question {{current}} sur {{total}}",
+    "progressLabel": "{{current}} / {{total}}",
     "tapToAnswer": "Appuie pour sélectionner",
     "frameworks": {
       "attachment": "Théorie de l'attachement",
@@ -169,19 +169,48 @@
       "sociometry": "Sociométrie",
       "colorWheel": "Psychologie des couleurs",
       "intuition": "Intuition",
-      "mixed": "Psychologie"
+      "mixed": "Psychologie",
+      "selfPsychology": "Psychologie de soi"
+    },
+    "breath": {
+      "multi": "Respire. Garde-les clairement en tête.",
+      "solo": "Respire. Celle-ci est pour toi.",
+      "soloPerson": "Respire. Garde {{name}} clairement en tête.",
+      "tap": "Touche n'importe où pour continuer"
+    },
+    "soloFrequency": {
+      "always": "Toujours — sans exception",
+      "often": "Souvent",
+      "sometimes": "Parfois",
+      "rarely": "Rarement ou jamais"
     }
+  },
+  "loading": {
+    "phrases": {
+      "energy": "Lecture de l'énergie...",
+      "patterns": "Décodage des schémas...",
+      "connections": "Cartographie des liens...",
+      "almost": "Ta lecture est presque prête..."
+    },
+    "ready": "Ta lecture est prête",
+    "unlock": "Regarde une courte vidéo pour débloquer ton résultat complet.",
+    "watchNow": "Regarder",
+    "skip": "Passer",
+    "adUnavailable": "Pub indisponible — passe ci-dessous"
   },
   "result": {
     "confidenceLabel": "{{confidence}}% de confiance",
+    "confidenceHeadline": "Nous sommes sûrs de cette lecture à {{confidence}}%.",
+    "confidenceSub": "Plus élevé que {{pct}}% des lectures de ce soir.",
     "attachmentStyle": "Dynamique d'attachement",
     "loveLanguage": "Signal de langage d'amour",
-    "shareButton": "Partager le résultat",
+    "shareButton": "Partager cette lecture",
     "saveButton": "Sauvegarder et quitter",
     "retryButton": "Essayer autre chose",
-    "disclaimer": "À des fins de réflexion personnelle et de divertissement uniquement.",
+    "disclaimer": "Aurafy est destiné à l'introspection et au divertissement — pas un outil de diagnostic clinique.",
     "insightPrefix": "✦",
-    "comparison": "Comment tout le monde se compare",
+    "comparison": "Le tableau complet",
+    "theRead": "La lecture",
     "whatThisMeans": "Ce que cela signifie"
   },
   "stars": {

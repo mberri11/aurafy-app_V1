@@ -159,11 +159,7 @@ function RootLayoutNav() {
       <Stack.Screen
         name="result"
         options={{
-          headerShown: true,
-          headerTransparent: true,
-          headerTitle: "",
-          headerTintColor: "#FFFFFF",
-          headerBackTitle: "Home",
+          headerShown: false,
           animation: "slide_from_bottom",
         }}
       />

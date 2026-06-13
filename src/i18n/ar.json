@@ -161,7 +161,7 @@
     "free": "مجاني"
   },
   "quiz": {
-    "progressLabel": "السؤال {{current}} من {{total}}",
+    "progressLabel": "{{current}} / {{total}}",
     "tapToAnswer": "اضغط للاختيار",
     "frameworks": {
       "attachment": "نظرية التعلق",
@@ -169,19 +169,48 @@
       "sociometry": "السوسيومتري",
       "colorWheel": "سيكولوجية الألوان",
       "intuition": "الحدس",
-      "mixed": "علم النفس"
+      "mixed": "علم النفس",
+      "selfPsychology": "سيكولوجيا الذات"
+    },
+    "breath": {
+      "multi": "خذ نفسًا. استحضرهم بوضوح في ذهنك.",
+      "solo": "خذ نفسًا. هذه القراءة لك أنت.",
+      "soloPerson": "خذ نفسًا. استحضر {{name}} بوضوح في ذهنك.",
+      "tap": "المس أي مكان للمتابعة"
+    },
+    "soloFrequency": {
+      "always": "دائمًا — بلا استثناء",
+      "often": "غالبًا",
+      "sometimes": "أحيانًا",
+      "rarely": "نادرًا أو أبدًا"
     }
+  },
+  "loading": {
+    "phrases": {
+      "energy": "نقرأ الطاقة...",
+      "patterns": "نفكّ الأنماط...",
+      "connections": "نرسم الروابط...",
+      "almost": "قراءتك شارفت على الاكتمال..."
+    },
+    "ready": "قراءتك جاهزة",
+    "unlock": "شاهد مقطعًا قصيرًا لفتح نتيجتك الكاملة.",
+    "watchNow": "شاهد الآن",
+    "skip": "تخطٍّ",
+    "adUnavailable": "الإعلان غير متاح — تخطَّ أدناه"
   },
   "result": {
     "confidenceLabel": "{{confidence}}% ثقة",
+    "confidenceHeadline": "نحن واثقون من هذه القراءة بنسبة {{confidence}}%.",
+    "confidenceSub": "أعلى من {{pct}}% من قراءات هذه الليلة.",
     "attachmentStyle": "ديناميكية التعلق",
     "loveLanguage": "إشارة لغة الحب",
-    "shareButton": "مشاركة النتيجة",
+    "shareButton": "شارك هذه القراءة",
     "saveButton": "حفظ والخروج",
     "retryButton": "جرب قراءة أخرى",
-    "disclaimer": "لأغراض التأمل الذاتي والترفيه فقط.",
+    "disclaimer": "أورافاي للتأمل الذاتي والترفيه — وليس أداة تشخيص سريري.",
     "insightPrefix": "✦",
-    "comparison": "كيف يقارن الجميع",
+    "comparison": "الصورة الكاملة",
+    "theRead": "الخلاصة",
     "whatThisMeans": "ماذا يعني هذا"
   },
   "stars": {

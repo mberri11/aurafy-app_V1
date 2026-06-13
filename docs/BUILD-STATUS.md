@@ -90,13 +90,29 @@
   (incl. the Energy free trial) get a normal name-input card in solo. (c) Subtitle now shows on
   both variants; added `personEntry.subtitle` (en/fr/ar/es).
 
-### Quiz — `app/quiz.tsx` — 🔲 (matches `quiz-multi.png` + `quiz-solo.png`)
-- **Implemented:** progress bar, framework tag, question text, solo = 4 answer cards, multi = one card per person; slide animation.
-- **Watch for:** dead/confusing `isSolo` expression (`!currentQuestion?.soloAnswers === false`) — clean it. Framework tag shows raw `currentQuestion.framework` (e.g. "attachment") instead of the localized `quiz.frameworks.*` label used elsewhere — confirm which the design wants.
+### Quiz — `app/quiz.tsx` — ✅ matches — Simo-verified 2026-06-13
+- Full rewrite (breath interstitial + question phase). Per-module theming: background bloom,
+  breath halo, framework tag, progress bar all driven by `module.color` so each module's quiz
+  is visually distinct. Breath float faster (±6dp/800ms) + 4.5s hold; breath copy is 3-way
+  (`quiz.breath.solo` self / `soloPerson` named relationship-solo / `multi`).
+- Solo-relationship: question's `{name}` rendered in the module accent; answers = generic
+  frequency scale. Self-discovery: 4 `soloAnswers` cards. Multi: one card per person.
+- Cards are glass (diagonal sheen gradient, `borderStrong`, taller/roomier); person cards
+  have a straight accent strip and NO chevron (Simo override of the design PNG, which showed
+  one). New i18n: `quiz.breath.soloPerson` (en/fr/ar/es — FR/AR/ES pending native review).
 
-### Loading / ad-gate — `app/loading.tsx` — 🔲
-- **Implemented:** ConstellationLoader, cycling text, ad-gate modal after 5s (Watch / Skip-for-1★).
-- **Watch for:** ad-gate title uses 🔮 emoji + hardcoded English ("Your reading is ready", "Watch a short video…"). ConstellationLoader vs the design's loader animation.
+### Loading / ad-gate — `app/loading.tsx` — ✅ matches — Simo-verified 2026-06-13
+- Full rewrite (the old `CosmicReveal` scattered-dot field is gone for this screen).
+  Loader = a hexagon of 6 **module-coloured** dots around a small centered atom, joined by a
+  faint outline; a single shared `phase` (3.6s loop) sweeps a brighten+swell "chase" around
+  the ring. Background bloom is module-tinted too — each module's loading screen is unique.
+- Cycling phrases via i18n (`loading.phrases.*`), 4 phrases, 1.6s interval.
+- Ad-gate is a **bottom sheet** (slides up, drag handle, rounded-top border, translucent glass
+  `rgba(11,14,37,.90)`). Title = per-module **emoji** (`module.icon`) + Playfair "ready";
+  full-width "▶ Watch Now" (`GradientButton` `leadingIcon="play"`, dark label) + gold-star
+  "Skip (1 ✦)". When the sheet is up the loader ghosts back (`loaderDim` 0.4) yet keeps chasing.
+- All strings localized (new `loading` i18n block, en/fr/ar/es — FR/AR/ES pending native review).
+  Added `GradientButton.leadingIcon` prop.
 
 ### Result — `app/result.tsx` — 🔲 (matches `result-multi.png` + `result-solo.png`)
 - **Implemented:** multi = winner name (glow) + confidence + comparison bars; solo = verdict + confidence + "what this means"; insights card; share/retry/save.
@@ -211,6 +227,8 @@
 - `quiz.tsx`: dead/confusing `isSolo` expression.
 - `daily-reading.tsx`: `const setLastDailyQuestion = useUserStore.getState;` — unused/confused line.
 - ~~`(tabs)/index.tsx`: hardcoded `RELATIONSHIPS`, `SELF-DISCOVERY`, `Tap`, `Today's free question is ready`.~~ ✅ resolved 2026-06-04 (all via `t()`: `home.sectionRelationships/sectionSelf`, `common.tap`, `home.dailyReady`).
-- `(tabs)/stars.tsx`, `loading.tsx`, `daily-reading.tsx`: emoji used as icons → vector icons + i18n.
+- `(tabs)/stars.tsx`, `daily-reading.tsx`: emoji used as icons → vector icons + i18n.
+  (`loading.tsx` ✅ resolved 2026-06-13 — i18n'd; ad-gate emoji is now the per-module
+  `module.icon`, an intentional Simo-confirmed design choice, not a cleanup target.)
 - `app/index.tsx`: dual splash (native `app.json` splash + custom screen) + 20s debug timer → reduce to ~2s.
 - `dailyQuestions.ts`: 10 → 365.
