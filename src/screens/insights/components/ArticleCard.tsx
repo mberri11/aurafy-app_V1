@@ -6,7 +6,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { Feather } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +19,7 @@ import { useTheme } from '@/src/themes/ThemeProvider';
 import GlassCard from '@/src/components/GlassCard';
 import { type Article, type ArticleContent, CATEGORY_COLORS } from '@/src/content/articles';
 import { rs } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
 import OrbitArt from './OrbitArt';
 
 export interface ArticleCardProps {
@@ -30,6 +36,7 @@ const THUMB_BG = '#1B1330';
 export default function ArticleCard({ article, content, unread, onPress }: ArticleCardProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const isRTL = useIsRTL();
   const accent = CATEGORY_COLORS[article.category];
 
   // ── Sponsored native-ad variant ──────────────────────────────────────────
@@ -55,7 +62,7 @@ export default function ArticleCard({ article, content, unread, onPress }: Artic
               </View>
               <View style={styles.openRow}>
                 <Text style={[styles.openText, { color: theme.text }]}>{t('insights.open')}</Text>
-                <Feather name="chevron-right" size={rs(13)} color={theme.text} />
+                <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={rs(13)} color={theme.text} />
               </View>
             </View>
           </View>
@@ -71,6 +78,8 @@ export default function ArticleCard({ article, content, unread, onPress }: Artic
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85} accessibilityRole="button">
       <GlassCard glowColor={`${accent}33`} style={styles.card}>
+        {/* per-category accent line on the leading edge */}
+        <View style={[styles.accent, { backgroundColor: accent }]} />
         <View style={[styles.thumb, { backgroundColor: THUMB_BG }]}>
           <OrbitArt size={rs(48)} accent={accent} />
         </View>
@@ -98,6 +107,16 @@ const styles = StyleSheet.create({
     gap: rs(12),
     padding: rs(12),
     marginBottom: rs(12),
+    overflow: 'hidden',
+  },
+  accent: {
+    position: 'absolute',
+    start: 0,
+    top: 0,
+    bottom: 0,
+    width: rs(3),
+    borderTopEndRadius: rs(3),
+    borderBottomEndRadius: rs(3),
   },
   thumb: {
     width: rs(64),
@@ -116,12 +135,12 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: rs(5) },
   dot: { width: rs(6), height: rs(6), borderRadius: 999 },
   tagText: { fontSize: rs(10), fontFamily: 'Inter_700Bold', letterSpacing: 0.6 },
-  clock: { marginLeft: rs(6) },
+  clock: { marginStart: rs(6) },
   readText: { fontSize: rs(11), fontFamily: 'Inter_500Medium' },
   unreadDot: {
     position: 'absolute',
     top: rs(12),
-    right: rs(12),
+    end: rs(12),
     width: rs(8),
     height: rs(8),
     borderRadius: 999,

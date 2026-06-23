@@ -7,6 +7,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { useTheme } from '../themes/ThemeProvider';
+import { useIsRTL } from '../utils/rtl';
 import { rs } from '../utils/responsive';
 
 interface SliderProps {
@@ -28,6 +29,7 @@ const TRACK_H = rs(4);
  */
 const Slider = memo(function Slider({ value, onChange, disabled = false }: SliderProps) {
   const theme = useTheme();
+  const rtl = useIsRTL();
   const [width, setWidth] = useState(0);
   const usable = Math.max(0, width - THUMB);
   const pos = useSharedValue(value * usable);
@@ -52,7 +54,10 @@ const Slider = memo(function Slider({ value, onChange, disabled = false }: Slide
 
   const setFromX = (x: number) => {
     'worklet';
-    const next = Math.max(0, Math.min(usable, x - THUMB / 2));
+    // Gesture x is always physical (from the left). In RTL the low end is the RIGHT edge,
+    // so measure the logical distance from there instead.
+    const lx = rtl ? width - x : x;
+    const next = Math.max(0, Math.min(usable, lx - THUMB / 2));
     pos.value = next;
     runOnJS(commit)(next);
   };
@@ -73,8 +78,13 @@ const Slider = memo(function Slider({ value, onChange, disabled = false }: Slide
 
   const gesture = Gesture.Race(pan, tap);
 
+  // Fill + thumb anchor at the LOGICAL `start` (auto-mirrors to the right edge under native
+  // RTL — see styles). The thumb slide is a transform (not auto-mirrored), so flip its sign
+  // for RTL so it travels from the start edge toward the end.
   const fillStyle = useAnimatedStyle(() => ({ width: pos.value + THUMB / 2 }));
-  const thumbStyle = useAnimatedStyle(() => ({ transform: [{ translateX: pos.value }] }));
+  const thumbStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: rtl ? -pos.value : pos.value }],
+  }));
 
   return (
     <GestureDetector gesture={gesture}>
@@ -84,9 +94,7 @@ const Slider = memo(function Slider({ value, onChange, disabled = false }: Slide
       >
         <View style={[styles.track, { backgroundColor: theme.borderStrong }]} />
         <Animated.View style={[styles.fill, { backgroundColor: theme.gradient[0] }, fillStyle]} />
-        <Animated.View
-          style={[styles.thumb, { backgroundColor: '#FFFFFF' }, thumbStyle]}
-        />
+        <Animated.View style={[styles.thumb, { backgroundColor: '#FFFFFF' }, thumbStyle]} />
       </View>
     </GestureDetector>
   );
@@ -106,14 +114,14 @@ const styles = StyleSheet.create({
     height: TRACK_H,
     borderRadius: TRACK_H / 2,
     position: 'absolute',
-    left: 0,
+    start: 0,
   },
   thumb: {
     width: THUMB,
     height: THUMB,
     borderRadius: THUMB / 2,
     position: 'absolute',
-    left: 0,
+    start: 0,
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 3,

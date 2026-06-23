@@ -1,5 +1,11 @@
 import React, { memo, useEffect, useRef } from 'react';
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,

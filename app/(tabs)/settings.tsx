@@ -5,10 +5,10 @@ import {
   ScrollView,
   Share,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +26,8 @@ import ConfirmSheet from '@/src/components/ConfirmSheet';
 import i18n from '@/src/i18n';
 import { clear as storageClear } from '@/src/utils/storage';
 import { shareAppLink } from '@/src/utils/share';
+import { reloadApp } from '@/src/utils/reloadApp';
+import { useIsRTL } from '@/src/utils/rtl';
 import { rs } from '@/src/utils/responsive';
 
 const LANGUAGES: { code: Language; name: string }[] = [
@@ -75,6 +77,7 @@ function Row({
   onPress?: () => void;
 }) {
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const inner = (
     <View style={[styles.row, disabled && styles.rowDisabled]}>
       <View style={styles.rowText}>
@@ -84,7 +87,7 @@ function Row({
       <View style={styles.rowRight}>
         {value ? <Text style={[styles.rowValue, { color: theme.textMuted }]}>{value}</Text> : null}
         {right}
-        {chevron ? <Feather name="chevron-right" size={rs(20)} color={theme.textMuted} /> : null}
+        {chevron ? <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={rs(20)} color={theme.textMuted} /> : null}
       </View>
     </View>
   );
@@ -107,6 +110,7 @@ function Divider() {
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const {
     language,
@@ -140,11 +144,29 @@ export default function SettingsScreen() {
 
   const handleLanguageChange = useCallback(
     (lang: Language) => {
+      if (lang === language) return;
+      // Persist + switch strings immediately.
+      const willBeRTL = lang === 'ar';
       setLanguage(lang);
       i18n.changeLanguage(lang);
-      I18nManager.forceRTL(lang === 'ar');
+      // Set the native layout direction UNCONDITIONALLY for the target language — don't
+      // gate on `I18nManager.isRTL`, which can read stale under Expo Go + New Arch and
+      // would then skip clearing RTL on ar→non-ar (English staying mirrored). Applied on
+      // the forced restart below (RTL is a native flag, not a JS one).
+      I18nManager.allowRTL(willBeRTL);
+      I18nManager.forceRTL(willBeRTL);
+      // Always restart on a language change (Simo's call) so the new language — and, for
+      // Arabic, the mirrored layout — applies cleanly everywhere rather than half-live.
+      setSheet({
+        title: t('settings.restartTitle'),
+        message: t('settings.restartMessage'),
+        confirmLabel: t('settings.restartNow'),
+        tone: 'rose',
+        cancelLabel: t('common.cancel'),
+        onConfirm: () => reloadApp(),
+      });
     },
-    [setLanguage],
+    [language, setLanguage, t],
   );
 
   // Default mode cycles through the options on tap — no popup.
@@ -312,7 +334,7 @@ export default function SettingsScreen() {
                 <Text style={[styles.rowValue, { color: theme.textMuted }]}>
                   {t(`readingModes.${defaultMode}.title`)}
                 </Text>
-                <Feather name="chevron-right" size={rs(20)} color={theme.textMuted} />
+                <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={rs(20)} color={theme.textMuted} />
               </TouchableOpacity>
             }
           />
@@ -403,7 +425,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     marginTop: rs(22),
     marginBottom: rs(8),
-    marginLeft: rs(4),
+    marginStart: rs(4),
   },
   // Translucent glass — lets the cosmic field show through so cards read as
   // lifted glass panels, not the near-black opaque fill GlassCard falls back to
@@ -433,7 +455,7 @@ const styles = StyleSheet.create({
   rowSub: { fontSize: rs(12), fontFamily: 'Inter_400Regular' },
   rowRight: { flexDirection: 'row', alignItems: 'center', gap: rs(8) },
   rowValue: { fontSize: rs(14), fontFamily: 'Inter_400Regular' },
-  modePick: { flexDirection: 'row', alignItems: 'center', gap: rs(4), paddingVertical: rs(6), paddingLeft: rs(10) },
+  modePick: { flexDirection: 'row', alignItems: 'center', gap: rs(4), paddingVertical: rs(6), paddingStart: rs(10) },
   sliderWrap: { width: rs(140) },
   divider: { height: 1, marginHorizontal: rs(16) },
   footer: {

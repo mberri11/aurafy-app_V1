@@ -1,5 +1,11 @@
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { useTheme } from '../themes/ThemeProvider';
 import { rs } from '../utils/responsive';
 import GlassCard from './GlassCard';

@@ -1,5 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +27,7 @@ import { useTransitionStore } from '@/src/store/transitionStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import GradientButton from '@/src/components/GradientButton';
 import { rs } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
 
 /** Design cyan used for the sample-card eyebrow labels — no exact theme token. */
 const CARD_CYAN = '#22D3EE';
@@ -165,18 +172,28 @@ function SampleCard({
 function HeroCards() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const isRTL = useIsRTL();
+  // Mirror the fanned card stack in RTL by negating both the tilt and the X offset
+  // (transforms aren't auto-mirrored), so the fan opens the other way.
+  const fan = (deg: number, x: number, y: number) => ({
+    transform: [
+      { rotate: `${isRTL ? -deg : deg}deg` },
+      { translateX: rs(isRTL ? -x : x) },
+      { translateY: rs(y) },
+    ],
+  });
   return (
     <View style={cardStyles.stack}>
-      {/* third card — peeks out to the right, furthest back */}
-      <View style={[cardStyles.cardSlot, cardStyles.thirdCard]}>
+      {/* third card — peeks out to the leading side, furthest back */}
+      <View style={[cardStyles.cardSlot, cardStyles.thirdCard, fan(9, 60, -6)]}>
         <SampleCard
           tag={t('onboarding.cardLoveTag')}
           question={t('onboarding.cardLoveQuestion')}
           textColor={theme.textDim}
         />
       </View>
-      {/* back card — peeks out to the left, tilted */}
-      <View style={[cardStyles.cardSlot, cardStyles.backCard]}>
+      {/* back card — peeks out to the other side, tilted */}
+      <View style={[cardStyles.cardSlot, cardStyles.backCard, fan(-10, -48, -4)]}>
         <SampleCard
           tag={t('onboarding.cardSociometryTag')}
           question={t('onboarding.cardSociometryQuestion')}
@@ -184,7 +201,7 @@ function HeroCards() {
         />
       </View>
       {/* front card — tilted the other way, on top; opaque so backs don't bleed through */}
-      <View style={[cardStyles.cardSlot, cardStyles.frontCard]}>
+      <View style={[cardStyles.cardSlot, cardStyles.frontCard, fan(3, 6, -14)]}>
         <SampleCard
           tag={t('onboarding.cardAttachmentTag')}
           question={t('onboarding.cardAttachmentQuestion')}
@@ -278,9 +295,10 @@ export default function OnboardingScreen() {
   const setOnboarded = useUserStore((s) => s.setOnboarded);
   const [slide, setSlide] = useState(0);
 
-  // Skip — go straight into the app, no transition.
+  // Skip — same as Begin: flag Home to play the cosmic intro overlay, then enter the app.
   const finish = useCallback(() => {
     setOnboarded();
+    useTransitionStore.getState().requestIntro();
     router.replace('/(tabs)');
   }, [setOnboarded]);
 
@@ -478,16 +496,14 @@ const cardStyles = StyleSheet.create({
     width: rs(228),
   },
   // furthest back — only its right edge peeks out from behind the front card
+  // transforms applied inline (RTL-mirrored) in HeroCards via fan()
   thirdCard: {
-    transform: [{ rotate: '9deg' }, { translateX: rs(60) }, { translateY: rs(-6) }],
     opacity: 0.22,
   },
   backCard: {
-    transform: [{ rotate: '-10deg' }, { translateX: rs(-48) }, { translateY: rs(-4) }],
     opacity: 0.36,
   },
   frontCard: {
-    transform: [{ rotate: '3deg' }, { translateX: rs(6) }, { translateY: rs(-14) }],
     zIndex: 3,
   },
   card: {
@@ -550,7 +566,7 @@ const earnStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  skipBar: { position: 'absolute', right: rs(24), zIndex: 10 },
+  skipBar: { position: 'absolute', end: rs(24), zIndex: 10 },
   skipText: { fontSize: rs(15), fontFamily: 'Inter_500Medium' },
 
   column: { flex: 1, paddingHorizontal: rs(24) },
@@ -561,7 +577,7 @@ const styles = StyleSheet.create({
 
   textBlock: { alignItems: 'center', gap: rs(12) },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  titleIcon: { marginLeft: rs(10) },
+  titleIcon: { marginStart: rs(10) },
   h1: {
     fontSize: rs(32),
     lineHeight: rs(40),

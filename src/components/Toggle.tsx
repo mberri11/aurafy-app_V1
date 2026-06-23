@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../themes/ThemeProvider';
+import { useIsRTL } from '../utils/rtl';
 import { rs } from '../utils/responsive';
 
 interface ToggleProps {
@@ -29,11 +30,16 @@ const TRAVEL = TRACK_W - THUMB - PAD * 2;
  */
 const Toggle = memo(function Toggle({ value, onValueChange, accessibilityLabel }: ToggleProps) {
   const theme = useTheme();
+  const isRTL = useIsRTL();
+  // The thumb rests at the leading edge via the LOGICAL `start` inset (auto-mirrors to the
+  // right under native RTL — see styles.thumb). The slide is a transform, which is NOT
+  // auto-mirrored, so flip its sign for RTL (travel left instead of right).
+  const travel = isRTL ? -TRAVEL : TRAVEL;
   const progress = useDerivedValue(() => withTiming(value ? 1 : 0, { duration: 180 }), [value]);
 
   const gradientStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
   const thumbStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(progress.value, [0, 1], [0, TRAVEL]) }],
+    transform: [{ translateX: interpolate(progress.value, [0, 1], [0, travel]) }],
   }));
 
   return (
@@ -79,6 +85,9 @@ const styles = StyleSheet.create({
   },
   fill: { borderRadius: TRACK_H / 2, overflow: 'hidden' },
   thumb: {
+    position: 'absolute',
+    top: PAD,
+    start: PAD,
     width: THUMB,
     height: THUMB,
     borderRadius: THUMB / 2,

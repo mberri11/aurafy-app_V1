@@ -7,11 +7,20 @@
     "save": "حفظ",
     "retry": "حاول مجدداً",
     "cancel": "إلغاء",
+    "later": "لاحقًا",
     "confirm": "تأكيد",
     "close": "إغلاق",
     "skip": "تخطي",
     "tap": "اضغط",
-    "ok": "حسناً"
+    "ok": "حسناً",
+    "done": "تم"
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "insights": "رؤى",
+    "stars": "النجوم",
+    "history": "السجل",
+    "settings": "الإعدادات"
   },
   "onboarding": {
     "slide1Title": "افك شفرة الطاقة من حولك",
@@ -235,7 +244,10 @@
     "spendReason": "منفق",
     "watchVideoDesc": "إعلان قصير، مكافأة فورية",
     "dailyBonusDesc": "مرة كل يوم",
+    "dailyQuestion": "السؤال اليومي",
+    "dailyQuestionDesc": "أجب عن سؤال اليوم المجاني",
     "streakDesc": "حافظ على طقسك اليومي",
+    "streakLabel": "سلسلة {{streak}} يوم",
     "shareDesc": "ادعُ صديقاً للقراءة",
     "comeBack": "عُد بعد ٢٤ ساعة",
     "claimed": "تم الحصول",
@@ -261,6 +273,9 @@
     "haptics": "التغذية الراجعة اللمسية",
     "animations": "رسوم الخلفية",
     "language": "اللغة",
+    "restartTitle": "إعادة التشغيل لتطبيق اللغة؟",
+    "restartMessage": "يجب أن يُعيد Aurafy التشغيل لتطبيق اللغة الجديدة.",
+    "restartNow": "أعد التشغيل",
     "sound": "الصوت",
     "soundEffects": "المؤثرات الصوتية",
     "about": "حول",
@@ -314,7 +329,13 @@
     "alreadyAnsweredMessage": "عد غداً لسؤال جديد.",
     "returnLabel": "عد غداً",
     "streakBadge": "{{streak}} يوم متتالي",
-    "bonusClaimed": "+٢ تم الحصول عليهم!"
+    "bonusClaimed": "+٢ تم الحصول عليهم!",
+    "starEarned": "تم كسب نجمة",
+    "balanceNow": "رصيدك الآن {{balance}} ✦",
+    "weekProgress": "اليوم {{day}} من 7 — كل إجابة تضيف إلى الصورة. أكمل الأسبوع لفتح قراءتك.",
+    "comeBackTomorrow": "عُد غداً للمقال التالي.",
+    "dayOf": "اليوم {{day}} من 7",
+    "weekCaption": "كل إجابة تضيف إلى الصورة. أكمل الأسبوع لفتح قراءتك."
   },
   "errors": {
     "notEnoughStars": "نجوم غير كافية — زر قسم النجوم لكسب المزيد",
@@ -391,6 +412,12 @@
       "attachment": "تعلّق",
       "self": "الذات",
       "jealousy": "غيرة"
-    }
+    },
+    "ritualLead": "اقرأ مقال هذا المساء، أجب عن السؤال بداخله، واكسب ✦ خاصتك.",
+    "beginRead": "ابدأ قراءة الليلة",
+    "stepRead": "اقرأ",
+    "stepAnswer": "أجب",
+    "stepEarn": "اكسب",
+    "ritualDone": "عُد غداً"
   }
 }

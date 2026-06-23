@@ -7,11 +7,20 @@
     "save": "Guardar",
     "retry": "Intentar de nuevo",
     "cancel": "Cancelar",
+    "later": "Más tarde",
     "confirm": "Confirmar",
     "close": "Cerrar",
     "skip": "Omitir",
     "tap": "Tocar",
-    "ok": "OK"
+    "ok": "OK",
+    "done": "Hecho"
+  },
+  "tabs": {
+    "home": "Inicio",
+    "insights": "Insights",
+    "stars": "Estrellas",
+    "history": "Historial",
+    "settings": "Ajustes"
   },
   "onboarding": {
     "slide1Title": "Descifra la energía a tu alrededor",
@@ -235,7 +244,10 @@
     "spendReason": "Gastado",
     "watchVideoDesc": "Un anuncio corto, recompensa al instante",
     "dailyBonusDesc": "Una vez al día",
+    "dailyQuestion": "Pregunta diaria",
+    "dailyQuestionDesc": "Responde la pregunta de hoy",
     "streakDesc": "Mantén tu ritual diario",
+    "streakLabel": "Racha de {{streak}} días",
     "shareDesc": "Invita a un amigo a leer",
     "comeBack": "Vuelve en 24h",
     "claimed": "Reclamado",
@@ -261,6 +273,9 @@
     "haptics": "Retroalimentación háptica",
     "animations": "Animaciones de fondo",
     "language": "Idioma",
+    "restartTitle": "¿Reiniciar para aplicar el idioma?",
+    "restartMessage": "Aurafy debe reiniciarse para aplicar el nuevo idioma.",
+    "restartNow": "Reiniciar",
     "sound": "Sonido",
     "soundEffects": "Efectos de sonido",
     "about": "Acerca de",
@@ -314,7 +329,13 @@
     "alreadyAnsweredMessage": "Vuelve mañana para una nueva pregunta.",
     "returnLabel": "Volver mañana",
     "streakBadge": "{{streak}} días seguidos",
-    "bonusClaimed": "+2 reclamados!"
+    "bonusClaimed": "+2 reclamados!",
+    "starEarned": "Estrella ganada",
+    "balanceNow": "Tu saldo ahora es {{balance}} ✦",
+    "weekProgress": "Día {{day}} de 7 — cada respuesta completa el cuadro. Completa la semana para desbloquear tu lectura.",
+    "comeBackTomorrow": "Vuelve mañana para la próxima pieza.",
+    "dayOf": "Día {{day}} de 7",
+    "weekCaption": "Cada respuesta completa el cuadro. Completa la semana para desbloquear tu lectura."
   },
   "errors": {
     "notEnoughStars": "Estrellas insuficientes — visita Estrellas para ganar más",
@@ -391,6 +412,12 @@
       "attachment": "Apego",
       "self": "Yo",
       "jealousy": "Celos"
-    }
+    },
+    "ritualLead": "Lee la pieza de esta noche, responde la pregunta dentro y gana tu ✦.",
+    "beginRead": "Comenzar la lectura de esta noche",
+    "stepRead": "Leer",
+    "stepAnswer": "Responde",
+    "stepEarn": "Gana",
+    "ritualDone": "Vuelve mañana"
   }
 }

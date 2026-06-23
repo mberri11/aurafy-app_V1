@@ -1,5 +1,6 @@
 // TODO: expand to 365 questions before production
 import { LocalizedString } from '../types';
+import { localDateKey } from '../content/articles/dailyInsight';
 
 export interface DailyQuestion {
   id: string;
@@ -283,3 +284,54 @@ export const dailyQuestions: DailyQuestion[] = [
   },
   // TODO: add 355 more daily questions before production
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DAILY RITUAL — weekly-lean taxonomy + lockstep daily pick
+// ─────────────────────────────────────────────────────────────────────────────
+// Each daily answer maps to one "lean" axis. The weekly report (item 16) tallies
+// the 7 chosen answers' axes → "This week you leaned toward [X]". Kept as an
+// id→[a0,a1,a2,a3] map (not inline on every answer) so the localized copy above
+// stays untouched.
+export type DailyDimension = 'grounded' | 'seeking' | 'guarded' | 'weary' | 'avoidant';
+
+export const DAILY_ANSWER_DIMENSIONS: Record<string, DailyDimension[]> = {
+  daily_q01: ['seeking', 'guarded', 'weary', 'avoidant'],
+  daily_q02: ['grounded', 'seeking', 'weary', 'avoidant'],
+  daily_q03: ['weary', 'guarded', 'weary', 'avoidant'],
+  daily_q04: ['grounded', 'seeking', 'guarded', 'avoidant'],
+  daily_q05: ['weary', 'seeking', 'avoidant', 'guarded'],
+  daily_q06: ['grounded', 'weary', 'guarded', 'avoidant'],
+  daily_q07: ['guarded', 'seeking', 'guarded', 'weary'],
+  daily_q08: ['grounded', 'guarded', 'avoidant', 'weary'],
+  daily_q09: ['grounded', 'seeking', 'weary', 'weary'],
+  daily_q10: ['seeking', 'grounded', 'guarded', 'seeking'],
+};
+
+/** The weekly-lean axis for a given daily answer; defaults to 'grounded' if untagged. */
+export function getDailyAnswerDimension(questionId: string, answerIndex: number): DailyDimension {
+  return DAILY_ANSWER_DIMENSIONS[questionId]?.[answerIndex] ?? 'grounded';
+}
+
+/** djb2 hash → unsigned 32-bit, matching dailyInsight's picker so both stay deterministic. */
+function hashKey(input: string): number {
+  let hash = 5381;
+  for (let i = 0; i < input.length; i++) hash = (hash * 33) ^ input.charCodeAt(i);
+  return hash >>> 0;
+}
+
+/**
+ * Today's daily question — picked by the SAME local-date key the daily article uses
+ * (src/content/articles/dailyInsight). This puts the article + question in lockstep
+ * (one ritual, one day), reversing the old day-of-year independence. Stable all day,
+ * identical on every device.
+ */
+export function getDailyQuestionId(date: Date = new Date()): string {
+  if (dailyQuestions.length === 0) return '';
+  return dailyQuestions[hashKey(localDateKey(date)) % dailyQuestions.length].id;
+}
+
+/** The full daily question record for today's pick (convenience). */
+export function getDailyQuestion(date: Date = new Date()): DailyQuestion | undefined {
+  const id = getDailyQuestionId(date);
+  return dailyQuestions.find((q) => q.id === id);
+}

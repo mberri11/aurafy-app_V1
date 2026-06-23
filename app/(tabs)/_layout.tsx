@@ -2,6 +2,7 @@ import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useTheme } from '@/src/themes/ThemeProvider';
@@ -14,6 +15,7 @@ import { rs } from '@/src/utils/responsive';
  */
 export default function TabLayout() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const isIOS = Platform.OS === 'ios';
 
   return (
@@ -53,7 +55,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('tabs.home'),
           tabBarIcon: ({ focused }) => (
             <Feather
               name="home"
@@ -66,7 +68,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="insights"
         options={{
-          title: 'Insights',
+          title: t('tabs.insights'),
           // Provisional glyph — lock the exact icon against 10-Insight.png during
           // the Golden Loop. Active tint inherits the cyan accent (gradient[0]).
           tabBarIcon: ({ focused }) => (
@@ -81,7 +83,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="stars"
         options={{
-          title: 'Stars',
+          title: t('tabs.stars'),
           // Stars keeps its gold identity even when active (other tabs use the
           // cyan accent) — the label must match the gold star, per the design.
           tabBarActiveTintColor: theme.gold,
@@ -97,7 +99,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'History',
+          title: t('tabs.history'),
           tabBarIcon: ({ focused }) => (
             <Feather
               name="clock"
@@ -110,7 +112,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: t('tabs.settings'),
           tabBarIcon: ({ focused }) => (
             <Feather
               name="settings"

@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -17,7 +23,6 @@ import { useUserStore } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import GlassCard from '@/src/components/GlassCard';
 import CosmicBloom from '@/src/components/CosmicBloom';
-import { shareAppLink } from '@/src/utils/share';
 import { rs } from '@/src/utils/responsive';
 
 dayjs.extend(relativeTime);
@@ -144,7 +149,7 @@ export default function StarsWalletScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const reasonLabel = useReasonLabel();
-  const { stars, streak, lastDailyClaim, recentTransactions, earnStars, claimDailyBonus, incrementStreak } =
+  const { stars, streak, lastDailyClaim, recentTransactions, claimDailyBonus, earnRewardedVideo } =
     useUserStore();
 
   const canClaimDaily = useMemo(() => {
@@ -183,29 +188,18 @@ export default function StarsWalletScreen() {
     transform: [{ translateY: toastY.value }],
   }));
 
-  // NOTE: real gating (rewarded ad, 7-day completion, share completion) is Phase 4.
-  // For now every card earns directly so the flow is testable on device.
+  // Rewarded video: +2 flat, capped at 25/day in the store. Phase D replaces this direct
+  // call with a real AdMobManager.showRewarded() gate before crediting.
   const handleWatchVideo = useCallback(() => {
-    earnStars(1, 'rewarded_ad');
-    showEarnedToast(1);
-  }, [earnStars, showEarnedToast]);
+    if (earnRewardedVideo()) showEarnedToast(2);
+  }, [earnRewardedVideo, showEarnedToast]);
 
+  // Daily ritual claim: +1, plus +10 on the 7th consecutive day. claimDailyBonus returns
+  // the total earned (0 if already claimed today). Phase C routes this through the article.
   const handleClaimDaily = useCallback(() => {
-    const claimed = claimDailyBonus();
-    if (claimed) showEarnedToast(2);
+    const earned = claimDailyBonus();
+    if (earned > 0) showEarnedToast(earned);
   }, [claimDailyBonus, showEarnedToast]);
-
-  const handleStreak = useCallback(() => {
-    incrementStreak();
-    earnStars(10, 'streak');
-    showEarnedToast(10);
-  }, [incrementStreak, earnStars, showEarnedToast]);
-
-  const handleShareApp = useCallback(() => {
-    void shareAppLink();
-    earnStars(1, 'share_app');
-    showEarnedToast(1);
-  }, [earnStars, showEarnedToast]);
 
   return (
     // Transparent so the root CosmicField (indigo→navy) shows through, matching the
@@ -231,6 +225,19 @@ export default function StarsWalletScreen() {
             <Text style={[styles.heroLabel, { color: theme.textMuted }]}>{t('stars.walletTitle')}</Text>
             <MaterialCommunityIcons name="star-four-points" size={rs(10)} color={theme.textMuted} />
           </View>
+          {streak > 0 && (
+            <View
+              style={[
+                styles.heroStreakChip,
+                { backgroundColor: `${theme.rose}26`, borderColor: `${theme.rose}40` },
+              ]}
+            >
+              <MaterialCommunityIcons name="fire" size={rs(12)} color={theme.rose} />
+              <Text style={[styles.heroStreakText, { color: theme.rose }]}>
+                {t('stars.streakLabel', { streak })}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Earn section */}
@@ -242,40 +249,34 @@ export default function StarsWalletScreen() {
           accent={theme.emerald}
           title={t('stars.watchVideo')}
           subtitle={t('stars.watchVideoDesc')}
-          amount="+1"
+          amount="+2"
           onPress={handleWatchVideo}
         />
 
+        {/* The daily +1 is the reward for today's daily question (the ritual). Labeled as
+            such; tapping still claims directly for now — Phase C routes it through the
+            article + question flow. */}
         <EarnCard
           lib="feather"
           iconName="calendar"
           accent={theme.gradient[0]}
-          title={t('stars.dailyBonus')}
-          subtitle={canClaimDaily ? t('stars.dailyBonusDesc') : t('stars.comeBack')}
-          amount="+2"
+          title={t('stars.dailyQuestion')}
+          subtitle={canClaimDaily ? t('stars.dailyQuestionDesc') : t('stars.comeBack')}
+          amount="+1"
           onPress={handleClaimDaily}
           claimed={!canClaimDaily}
         />
 
+        {/* 7-day streak — informational only. The +10 is paid automatically on the 7th day
+            by claimDailyBonus, not by tapping, so this card has no onPress. */}
         <EarnCard
           lib="mci"
           iconName="fire"
           accent={theme.rose}
           title={t('stars.streakBonus')}
-          subtitle={t('stars.streakDesc')}
-          amount="+10"
-          onPress={handleStreak}
+          subtitle={streak > 0 ? t('stars.dayProgress', { streak }) : t('stars.streakDesc')}
+          amount={t('stars.streakBonusAmount')}
           streak={streak}
-        />
-
-        <EarnCard
-          lib="feather"
-          iconName="share-2"
-          accent={theme.primary}
-          title={t('stars.shareApp')}
-          subtitle={t('stars.shareDesc')}
-          amount="+1"
-          onPress={handleShareApp}
         />
 
         {/* Recent activity */}
@@ -352,6 +353,17 @@ const styles = StyleSheet.create({
   },
   heroLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: rs(5), marginTop: rs(2) },
   heroLabel: { fontSize: rs(10), fontFamily: 'Inter_600SemiBold' },
+  heroStreakChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(4),
+    paddingHorizontal: rs(10),
+    paddingVertical: rs(4),
+    borderRadius: 999,
+    borderWidth: 1,
+    marginTop: rs(8),
+  },
+  heroStreakText: { fontSize: rs(11), fontFamily: 'Inter_700Bold' },
 
   // Section labels
   sectionLabel: {

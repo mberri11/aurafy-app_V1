@@ -4,16 +4,43 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Reading } from '../types';
 import { ContentSlice, createContentSlice } from './contentSlice';
 
-const MAX_STARS = 50;
+const MAX_STARS = 100;
 const STARTING_STARS = 5;
 const MAX_HISTORY = 20;
 const MAX_TRANSACTIONS = 5;
+
+// Stars economy (FINAL — see CLAUDE.md → Stars Economy).
+const DAILY_RITUAL_REWARD = 1; // +1 per local day for the daily ritual
+const STREAK_LENGTH = 7; // a full streak cycle is 7 consecutive days
+const STREAK_BONUS_REWARD = 10; // +10 paid when the 7th day completes
+const REWARDED_VIDEO_REWARD = 2; // +2 flat per rewarded video
+const REWARDED_VIDEO_DAILY_CAP = 25; // max 25 videos/day → +50★/day ceiling
+
+/** Local calendar-day key (YYYY-MM-DD, zero-padded). MUST stay byte-identical to
+ *  `localDateKey` in src/content/articles/dailyInsight.ts — the reader and Home compare
+ *  the ritual answer's stored date against THAT one, so a mismatched format silently
+ *  breaks the daily-ritual lock (the answer never resolves as "done today"). */
+function localDateKey(d: Date = new Date()): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
 interface StarTransaction {
   type: 'earn' | 'spend';
   amount: number;
   reason: string;
   timestamp: number;
+}
+
+/** One completed daily ritual: the chosen daily-question answer + its weekly-lean axis.
+ *  The weekly report (item 16) tallies the last STREAK_LENGTH of these. */
+export interface DailyRitualAnswer {
+  date: string; // local day the ritual was completed (localDateKey)
+  questionId: string;
+  answerIndex: number;
+  dimension: string; // DailyDimension from src/data/dailyQuestions
 }
 
 // Includes the Insights content slice (readArticleIds, savedArticleIds,
@@ -30,11 +57,23 @@ export interface UserState extends ContentSlice {
   readingCount: number;
   /** True once the user has spent their one free-trial reading (FREE_TRIAL_MODULE_ID). */
   freeTrialUsed: boolean;
+  /** Rewarded videos already watched today + the local day they count for (daily cap). */
+  rewardedToday: number;
+  rewardedDate: string | null;
+  /** The chosen answers from the last ≤7 completed daily rituals (feeds the weekly report). */
+  dailyAnswers: DailyRitualAnswer[];
   // Actions
   spendStars: (amount: number) => boolean;
   markFreeTrialUsed: () => void;
   earnStars: (amount: number, reason: string) => void;
-  claimDailyBonus: () => boolean;
+  /** Credits +2 for a rewarded video, enforcing the 25/day cap. Returns false when capped. */
+  earnRewardedVideo: () => boolean;
+  /** Claims the daily ritual (+1) plus the +10 bonus on the 7th consecutive day. Returns
+   *  the total stars earned (0 if already claimed within the last 24h). */
+  claimDailyBonus: () => number;
+  /** Completes the merged daily ritual: records the chosen answer (when the day's claim
+   *  fires) and runs claimDailyBonus. Returns the stars earned (0 if already done today). */
+  completeDailyRitual: (answer: Omit<DailyRitualAnswer, 'date'>) => number;
   incrementStreak: () => void;
   addReading: (reading: Reading) => void;
   clearHistory: () => void;
@@ -64,6 +103,9 @@ export const useUserStore = create<UserState>()(
       ],
       readingCount: 0,
       freeTrialUsed: false,
+      rewardedToday: 0,
+      rewardedDate: null,
+      dailyAnswers: [],
 
       spendStars: (amount: number): boolean => {
         const { stars } = get();
@@ -100,36 +142,76 @@ export const useUserStore = create<UserState>()(
         });
       },
 
-      /** Returns false if already claimed today (within 24h). */
-      claimDailyBonus: (): boolean => {
-        const { lastDailyClaim } = get();
-        const now = Date.now();
-        const oneDay = 24 * 60 * 60 * 1000;
-
-        if (lastDailyClaim !== null && now - lastDailyClaim < oneDay) {
-          return false;
-        }
-
-        // Check if streak should be reset (gap > 48h since last claim)
-        const twoDays = 48 * 60 * 60 * 1000;
-        const shouldResetStreak = lastDailyClaim !== null && now - lastDailyClaim > twoDays;
-
+      earnRewardedVideo: (): boolean => {
+        const todayKey = localDateKey();
+        const { rewardedDate, rewardedToday } = get();
+        const usedToday = rewardedDate === todayKey ? rewardedToday : 0;
+        if (usedToday >= REWARDED_VIDEO_DAILY_CAP) return false;
         set((s) => {
-          const newStreak = shouldResetStreak ? 1 : s.streak + 1;
           const tx: StarTransaction = {
             type: 'earn',
-            amount: 2,
-            reason: 'daily_bonus',
-            timestamp: now,
+            amount: REWARDED_VIDEO_REWARD,
+            reason: 'rewarded_ad',
+            timestamp: Date.now(),
           };
           return {
-            stars: Math.min(MAX_STARS, s.stars + 2),
-            streak: newStreak,
-            lastDailyClaim: now,
+            stars: Math.min(MAX_STARS, s.stars + REWARDED_VIDEO_REWARD),
+            rewardedToday: usedToday + 1,
+            rewardedDate: todayKey,
             recentTransactions: [tx, ...s.recentTransactions].slice(0, MAX_TRANSACTIONS),
           };
         });
         return true;
+      },
+
+      /** Claims the daily ritual (+1) plus the +10 bonus on the 7th consecutive day.
+       *  Returns the total earned (0 if already claimed within the last 24h). The weekly
+       *  report card + answer persistence land in Phase C (items 14/16). */
+      claimDailyBonus: (): number => {
+        const { lastDailyClaim, streak } = get();
+        const now = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+        if (lastDailyClaim !== null && now - lastDailyClaim < oneDay) return 0;
+
+        // Reset the streak if it's been more than 48h since the last claim (a missed day).
+        const twoDays = 48 * 60 * 60 * 1000;
+        const shouldResetStreak = lastDailyClaim !== null && now - lastDailyClaim > twoDays;
+
+        let newStreak = shouldResetStreak ? 1 : streak + 1;
+        let earned = DAILY_RITUAL_REWARD;
+        const txs: StarTransaction[] = [
+          { type: 'earn', amount: DAILY_RITUAL_REWARD, reason: 'daily_bonus', timestamp: now },
+        ];
+
+        // 7th consecutive day → pay the +10 streak bonus and start a fresh cycle.
+        if (newStreak >= STREAK_LENGTH) {
+          earned += STREAK_BONUS_REWARD;
+          txs.unshift({ type: 'earn', amount: STREAK_BONUS_REWARD, reason: 'streak', timestamp: now });
+          newStreak = 0;
+        }
+
+        set((s) => ({
+          stars: Math.min(MAX_STARS, s.stars + earned),
+          streak: newStreak,
+          lastDailyClaim: now,
+          recentTransactions: [...txs, ...s.recentTransactions].slice(0, MAX_TRANSACTIONS),
+        }));
+        return earned;
+      },
+
+      completeDailyRitual: (answer: Omit<DailyRitualAnswer, 'date'>): number => {
+        // Run the once-per-day claim first; only record the answer if the claim actually
+        // fired, so one completed ritual == one recorded answer per local day. The last
+        // STREAK_LENGTH answers feed the weekly report (item 16); it handles their reset.
+        const earned = get().claimDailyBonus();
+        if (earned > 0) {
+          const record: DailyRitualAnswer = { ...answer, date: localDateKey() };
+          set((s) => ({
+            dailyAnswers: [...s.dailyAnswers, record].slice(-STREAK_LENGTH),
+            lastDailyQuestion: Date.now(),
+          }));
+        }
+        return earned;
       },
 
       incrementStreak: (): void => {
@@ -170,6 +252,9 @@ export const useUserStore = create<UserState>()(
           recentTransactions: [],
           readingCount: 0,
           freeTrialUsed: false,
+          rewardedToday: 0,
+          rewardedDate: null,
+          dailyAnswers: [],
           // Insights content slice
           readArticleIds: [],
           savedArticleIds: [],

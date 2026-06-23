@@ -22,6 +22,36 @@
 
 ---
 
+## Cross-cutting · RTL (Arabic) — ✅ matches 95% (Simo 2026-06-22; residual: careful per-screen device retest pending)
+
+Full app-wide RTL correctness pass. **Root cause:** widgets/icons branched on the JS
+`I18nManager.isRTL` flag, which reads stale under Expo Go + New Arch (mirrored layout but
+flag `false`); and physical `left`/`right` styles get auto-swapped by native RTL.
+
+**Fix pattern (now the standard):** positions use **logical props** (`start`/`end`,
+`marginStart`/`paddingStart`/`borderStart*`, `*StartRadius`) which auto-mirror with the
+native layout; transforms (`translateX`) keep physical and flip **sign** via `useIsRTL()`
+(`src/utils/rtl.ts`, language-based — the one sanctioned JS RTL signal); directional icons
+branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for rendering.**
+
+- **Widgets:** `Toggle` + `Slider` re-anchored to logical `start`, language-signed travel.
+- **Icons:** 9 back/forward chevrons + CTA arrow now flip (module, reading-mode, person-entry,
+  theme-gallery, about-psychology, article reader, home, article card).
+- **Positions:** Insights cards/accents/quote-border, Home daily accent, onboarding skip +
+  fanned card stack, settings header/picker, GradientButton icons, ModuleCard bloom.
+- **Transforms:** quiz slide + onboarding card fan mirror by `useIsRTL()`.
+- **Naskh font:** loaded `@expo-google-fonts/noto-naskh-arabic` (4 weights); new `AppText`
+  wrapper (`{ AppText as Text }` per file) auto-swaps Inter/Playfair → Noto Naskh in Arabic;
+  wordmark opts out via `latin`.
+- **Restart behaviour:** language ⇄ Arabic needs a native restart. **Dev (Expo Go):** the
+  in-app "Restart" button can't apply `forceRTL` — use a **terminal reload (`r`) / full
+  relaunch**. **Production (Phase D):** `expo-updates` `Updates.reloadAsync()` does it
+  automatically + seamlessly. See `src/utils/reloadApp.ts`.
+- **Verify:** Simo screenshots Arabic (after terminal reload) — Home, Settings, Insights feed
+  + reader, Onboarding, Quiz, Result — then this flips to ✅.
+
+---
+
 ## 1 · SCREENS (Phase 1 — UI match)
 
 ### Splash — `app/index.tsx` — ✅ DONE (Simo-verified 2026-06-03)
@@ -210,12 +240,29 @@
 - ✅ Results files `src/data/results/*` with insight pools (≥6 variants, ≥3 dimensions).
 - ✅ Engine wiring traced: quiz → loading → scoringEngine → resultGenerator → result.
 - ⚠️ `src/data/dailyQuestions.ts` — **10 / 365**. Expand before release.
+- 🆕 **(2026-06-20 — see `docs/V1-REVIEW-BACKLOG.md` items 14, 16, 22):** the daily article and
+  daily question are being **merged into one "daily ritual"** — `dailyInsight.ts` and
+  `dailyQuestions.ts` move to a **single paired source** (one `dailyContent[]` table, or questions
+  carry an `articleId`) sharing theme/dimension. This **reverses** the old "deliberately not in
+  lockstep" rule — they are now deliberately **in lockstep**. Daily questions expand + pair under
+  this source; the standalone `daily-reading.tsx` is absorbed into the article reader. The
+  **weekly report** is generated deterministically from the 7 persisted ritual answers
+  (dimension tally) and shown as a shareable card. Economy numbers: `CLAUDE.md → Stars Economy (FINAL)`.
 
 ## 3 · ENGINE — ✅
 - `scoringEngine.ts`, `insightSelector.ts` (seeded), `resultGenerator.ts` — pure, working.
 
 ## 4 · INFRA / RELEASE — 🔲
 - 🔲 AdMob: replace stub with `react-native-google-mobile-ads` + real IDs (`src/ads/adIds.ts` still has `REPLACE_WITH_REAL_*`).
+- 🆕 **Ad strategy (FINAL 2026-06-20 — see `docs/V1-REVIEW-BACKLOG.md` items 12, 13, 25):**
+  **Option C on result** — remove the pre-result ad gate from `loading.tsx`; on `result.tsx` the
+  headline is free and the insight bullets + share card unlock behind **1★ or a rewarded ad**.
+  **Rewarded video = +2★ flat, capped 25/day.** **Banners only on linger/scroll screens**
+  (Insights / History / Stars) — never on quiz/loading/result/module/person-entry. **Interstitial**
+  only at natural transitions, frequency-capped, and **never stacked with a rewarded ad in the same
+  flow** (current bug: `result.tsx:68` fires an interstitial every 3rd reading that can stack with
+  the `loading.tsx` rewarded ad). Native = the SPONSORED Insights card. Add **Google UMP** consent
+  before personalized ads (EU).
 - 🔲 EAS production AAB.
 - 🔲 Privacy policy + Play Store listing copy (AdMob requires a privacy policy URL).
 - 🔲 Icon + splash assets at all required densities.

@@ -4,10 +4,10 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +31,7 @@ import { localizeTemplate } from '@/src/engine/scoringEngine';
 import AurafyLogo from '@/src/components/AurafyLogo';
 import ProgressBar from '@/src/components/ProgressBar';
 import { rs } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
 import { lightTap } from '@/src/utils/haptics';
 
 // Map moduleId → questions
@@ -72,9 +73,14 @@ const SOLO_FREQUENCY = [
 export default function QuizScreen() {
   const { moduleId, mode } = useLocalSearchParams<{ moduleId: string; mode: ReadingMode }>();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const { t, i18n } = useTranslation();
   const language = i18n.language as Language;
+  // In RTL the slide flow mirrors: new question enters from the leading (left) side,
+  // the answered one exits toward the trailing (right) side.
+  const enterX = isRTL ? -SCREEN_WIDTH : SCREEN_WIDTH;
+  const exitX = isRTL ? SCREEN_WIDTH : -SCREEN_WIDTH;
   const { currentPersons, recordAnswer } = useReadingStore();
   const showFrameworkTags = useSettingsStore((s) => s.showFrameworkTags);
 
@@ -113,15 +119,15 @@ export default function QuizScreen() {
 
   const advanceQuestion = useCallback(
     (newIndex: number) => {
-      // Slide in from right
-      translateX.value = SCREEN_WIDTH;
+      // Slide in from the leading edge (right in LTR, left in RTL)
+      translateX.value = enterX;
       opacity.value = 0;
       translateX.value = withTiming(0, { duration: 250 });
       opacity.value = withTiming(1, { duration: 250 });
       setIsAnimating(false);
       setCurrentIndex(newIndex);
     },
-    [translateX, opacity],
+    [translateX, opacity, enterX],
   );
 
   const enterQuiz = useCallback(() => {
@@ -167,8 +173,8 @@ export default function QuizScreen() {
       recordAnswer(currentQuestion.id, answerValue);
       setIsAnimating(true);
 
-      // Slide out to left
-      translateX.value = withTiming(-SCREEN_WIDTH, { duration: 250 });
+      // Slide out toward the trailing edge (left in LTR, right in RTL)
+      translateX.value = withTiming(exitX, { duration: 250 });
       opacity.value = withTiming(0, { duration: 250 }, (finished) => {
         if (finished) {
           if (isLastQuestion) {
@@ -187,6 +193,7 @@ export default function QuizScreen() {
       currentQuestion,
       translateX,
       opacity,
+      exitX,
       isLastQuestion,
       moduleId,
       mode,

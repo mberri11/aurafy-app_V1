@@ -8,7 +8,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Feather } from '@expo/vector-icons';
 
@@ -66,7 +71,7 @@ function ArticleBlockView({ block, accent }: { block: ArticleBlock; accent: stri
 
     case 'quote':
       return (
-        <View style={[styles.quote, { borderLeftColor: accent }]}>
+        <View style={[styles.quote, { borderStartColor: accent }]}>
           <Text style={[styles.quoteText, { color: theme.text }]}>{block.text}</Text>
           {block.attribution ? (
             <Text style={[styles.quoteAttr, { color: theme.textMuted }]}>— {block.attribution}</Text>
@@ -149,8 +154,8 @@ const styles = StyleSheet.create({
   listText: { fontSize: rs(14), lineHeight: rs(21), fontFamily: 'Inter_400Regular' },
 
   quote: {
-    borderLeftWidth: rs(3),
-    paddingLeft: rs(16),
+    borderStartWidth: rs(3),
+    paddingStart: rs(16),
     paddingVertical: rs(4),
     marginVertical: rs(22),
   },

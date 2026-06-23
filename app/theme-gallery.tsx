@@ -1,5 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,6 +22,7 @@ import { desertOracleTheme } from '@/src/themes/desertOracle';
 import StarsBadge from '@/src/components/StarsBadge';
 import ThemeUnlockDialog from '@/src/components/ThemeUnlockDialog';
 import { rs, screenWidth } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
 
 const GUTTER = rs(20);
 const GAP = rs(14);
@@ -50,6 +57,7 @@ type UnlockTarget = {
 export default function ThemeGalleryScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const { themeId, unlockedThemes, setTheme, unlockTheme } = useSettingsStore();
   const { stars, spendStars } = useUserStore();
@@ -91,7 +99,7 @@ export default function ThemeGalleryScreen() {
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={[styles.backBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
         >
-          <Feather name="chevron-left" size={rs(20)} color={theme.text} />
+          <Feather name={isRTL ? 'chevron-right' : 'chevron-left'} size={rs(20)} color={theme.text} />
         </TouchableOpacity>
         <StarsBadge balance={stars} onPress={() => router.push('/(tabs)/stars')} />
       </View>

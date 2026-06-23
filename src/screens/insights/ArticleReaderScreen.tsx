@@ -9,13 +9,22 @@
 // reward. markRead() fires on open so the reward gate + History pick it up.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useCallback, useEffect } from 'react';
-import { Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  Share,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import Animated, {
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useSharedValue,
+  withSpring,
 } from 'react-native-reanimated';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,16 +40,21 @@ import {
   type Language,
 } from '@/src/content/articles';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
+import { getDailyQuestion, getDailyAnswerDimension } from '@/src/data/dailyQuestions';
 import { rs } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
+import { lightTap } from '@/src/utils/haptics';
 import ReadingProgressBar from './components/ReadingProgressBar';
 import ArticleBlocks from './components/ArticleBlocks';
 import OrbitArt from './components/OrbitArt';
 
 const HERO_BG = '#241733';
+const STREAK_DAYS = 7; // one full streak cycle (mirrors STREAK_LENGTH in userStore)
 
 export default function ArticleReaderScreen() {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const lang = i18n.language as Language;
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -49,10 +63,34 @@ export default function ArticleReaderScreen() {
   const content = id ? getArticleContent(id, lang) : undefined;
 
   const markRead = useUserStore((s) => s.markRead);
-  const claimDailyInsightBonus = useUserStore((s) => s.claimDailyInsightBonus);
-  const lastDailyBonusDate = useUserStore((s) => s.lastDailyBonusDate);
+  const completeDailyRitual = useUserStore((s) => s.completeDailyRitual);
+  const dailyAnswers = useUserStore((s) => s.dailyAnswers);
+  const stars = useUserStore((s) => s.stars);
+  const streak = useUserStore((s) => s.streak);
 
-  // Mark read on open (drives the reward gate + History).
+  // Daily ritual question — answered at the foot of the daily article. Picking an answer
+  // claims the +1★ ritual reward + advances the streak via completeDailyRitual. The answer
+  // feeds the WEEKLY report only — there is deliberately NO per-day reading/interpretation.
+  const todayAnswer = dailyAnswers.find((a) => a.date === localDateKey());
+  const [picked, setPicked] = useState<number | null>(null);
+  // Resolve the selected answer from this session OR a ritual already done earlier today
+  // (so re-opening the article lands in the "answered" state, not a fresh question).
+  const answeredIdx = picked ?? todayAnswer?.answerIndex ?? null;
+  const answered = answeredIdx !== null;
+  // "Prior-locked" = the ritual was completed on an earlier visit today (not this session).
+  // Re-entering should read as already-done: the whole question block is muted + frozen on
+  // the submitted answer. A fresh in-session answer (picked != null) stays vivid instead.
+  const priorLocked = answered && picked === null;
+  // The star-earned reveal starts already-visible when the ritual was done earlier today
+  // (no slide-in), and slides up on a fresh answer.
+  const revealY = useSharedValue(todayAnswer ? 0 : rs(24));
+  const revealOpacity = useSharedValue(todayAnswer ? 1 : 0);
+  const revealStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: revealY.value }],
+    opacity: revealOpacity.value,
+  }));
+
+  // Mark read on open (drives the streak surface + History).
   useEffect(() => {
     if (article) markRead(article.id);
   }, [article, markRead]);
@@ -68,9 +106,20 @@ export default function ArticleReaderScreen() {
     Share.share({ message: `${content.title} — Aurafy` }).catch(() => {});
   }, [content]);
 
-  const onClaim = useCallback(() => {
-    if (article) claimDailyInsightBonus(article.id);
-  }, [article, claimDailyInsightBonus]);
+  const onAnswer = useCallback(
+    (idx: number, questionId: string) => {
+      if (answered) return;
+      lightTap();
+      setPicked(idx);
+      revealY.value = rs(24);
+      revealOpacity.value = 0;
+      revealY.value = withSpring(0, { stiffness: 200, damping: 20 });
+      revealOpacity.value = withSpring(1, { stiffness: 200, damping: 20 });
+      const dimension = getDailyAnswerDimension(questionId, idx);
+      completeDailyRitual({ questionId, answerIndex: idx, dimension });
+    },
+    [answered, revealY, revealOpacity, completeDailyRitual],
+  );
 
   const openModule = useCallback(() => {
     if (article) router.push({ pathname: '/module/[id]', params: { id: article.relatedModuleId } });
@@ -91,7 +140,10 @@ export default function ArticleReaderScreen() {
   const catLabel = t(`insights.categories.${article.category}`).toUpperCase();
   const readLabel = t('insights.minRead', { n: article.readMinutes });
   const isDaily = article.id === getDailyInsightId();
-  const claimedToday = lastDailyBonusDate === localDateKey();
+  const dailyQuestion = isDaily ? getDailyQuestion() : undefined;
+  // Day-in-cycle for the streak-progress message. claimDailyBonus resets streak to 0 the
+  // moment day 7 completes, so a 0 here means "just finished the week" → show 7.
+  const day = streak === 0 ? 7 : streak;
   const moduleTitle = t(`modules.${article.relatedModuleId}.title`);
 
   return (
@@ -119,7 +171,7 @@ export default function ArticleReaderScreen() {
             accessibilityLabel={t('common.back')}
             accessibilityRole="button"
           >
-            <Feather name="chevron-left" size={rs(20)} color={theme.text} />
+            <Feather name={isRTL ? 'chevron-right' : 'chevron-left'} size={rs(20)} color={theme.text} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onShare}
@@ -158,63 +210,174 @@ export default function ArticleReaderScreen() {
         {/* Body */}
         <ArticleBlocks blocks={content.blocks} accent={accent} />
 
-        {/* End-of-article cross-sell + reward */}
-        <View style={[styles.endDivider, { backgroundColor: theme.surfaceBorder }]} />
+        {/* Daily ritual — today's question on a celestial "moon" panel so it reads as a
+            distinct moment (the gradient fade in from the article body is the texture shift). */}
+        {isDaily && dailyQuestion ? (
+          <View style={styles.ritualWrap}>
+            {/* celestial backdrop: violet fade + soft top glow + faint stars */}
+            <LinearGradient
+              colors={['rgba(36,23,51,0)', 'rgba(46,28,66,0.55)', 'rgba(26,17,42,0.92)']}
+              locations={[0, 0.42, 1]}
+              style={StyleSheet.absoluteFill}
+            />
+            <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+              <Defs>
+                <RadialGradient id="ritual_glow" cx="50%" cy="12%" r="58%">
+                  <Stop offset="0%" stopColor={theme.primary} stopOpacity={0.3} />
+                  <Stop offset="55%" stopColor={theme.primary} stopOpacity={0.06} />
+                  <Stop offset="100%" stopColor={theme.primary} stopOpacity={0} />
+                </RadialGradient>
+              </Defs>
+              <Rect x="0" y="0" width="100%" height="100%" fill="url(#ritual_glow)" />
+            </Svg>
+            <View style={[styles.star, { top: rs(22), start: rs(56) }]} />
+            <View style={[styles.star, styles.starSm, { top: rs(58), end: rs(70) }]} />
+            <View style={[styles.star, styles.starSm, { top: rs(104), start: '76%' }]} />
 
-        <View style={styles.ctaRow}>
-          <GradientButton
-            label={t('insights.takeReading', { module: moduleTitle })}
-            onPress={openModule}
-            labelColor="#0B0E25"
-            bold
-            glow
-            trailingIcon="arrow-right"
-            style={styles.ctaButton}
-          />
-          <TouchableOpacity
-            onPress={onShare}
-            style={[styles.circleBtn, styles.ctaShare, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
-            accessibilityLabel={t('common.share')}
-            accessibilityRole="button"
-          >
-            <Feather name="share-2" size={rs(17)} color={theme.text} />
-          </TouchableOpacity>
-        </View>
-
-        {isDaily ? (
-          <View style={styles.rewardWrap}>
-            <TouchableOpacity
-              onPress={onClaim}
-              disabled={claimedToday}
-              activeOpacity={0.85}
-              style={[
-                styles.claimBtn,
-                {
-                  borderColor: claimedToday ? theme.surfaceBorder : `${theme.gold}88`,
-                  backgroundColor: claimedToday ? theme.surface : `${theme.gold}14`,
-                },
-              ]}
-              accessibilityRole="button"
-            >
-              <MaterialCommunityIcons
-                name="star"
-                size={rs(18)}
-                color={claimedToday ? theme.textDim : theme.gold}
-              />
-              <Text
-                style={[
-                  styles.claimText,
-                  { color: claimedToday ? theme.textDim : theme.gold },
-                ]}
-              >
-                {claimedToday ? t('insights.claimed') : t('insights.claimReward')}
+            <View style={styles.ritualContent}>
+              <View style={styles.ritualHeader}>
+                <MaterialCommunityIcons name="star-four-points" size={rs(14)} color={`${theme.gold}AA`} />
+                <View style={styles.ritualEyebrowRow}>
+                  <MaterialCommunityIcons name="moon-waning-crescent" size={rs(14)} color={theme.gold} />
+                  <Text style={[styles.ritualEyebrow, { color: theme.gold }]}>{t('daily.title').toUpperCase()}</Text>
+                </View>
+              </View>
+              <Text style={[styles.ritualQuestion, { color: theme.text }, priorLocked && styles.lockedText]}>
+                {dailyQuestion.text[lang] ?? dailyQuestion.text.en}
               </Text>
-            </TouchableOpacity>
-            <Text style={[styles.rewardCaption, { color: theme.textDim }]}>
-              {t('insights.todaysReward')}
-            </Text>
+
+              <View
+                style={[styles.ritualAnswers, priorLocked && styles.lockedBlock]}
+                pointerEvents={priorLocked ? 'none' : 'auto'}
+              >
+                {dailyQuestion.answers.map((a, idx) => {
+                  const active = answeredIdx === idx;
+                  const dim = answered && !active;
+                  const letter = String.fromCharCode(65 + idx);
+                  return (
+                    <TouchableOpacity
+                      key={idx}
+                      onPress={() => onAnswer(idx, dailyQuestion.id)}
+                      disabled={answered}
+                      activeOpacity={0.85}
+                      accessibilityRole="button"
+                      accessibilityLabel={a.label[lang] ?? a.label.en}
+                    >
+                      <View
+                        style={[
+                          styles.ritualAnswer,
+                          {
+                            backgroundColor: active ? `${theme.gold}14` : theme.surface,
+                            borderColor: active ? theme.gold : theme.borderStrong,
+                            borderWidth: active ? 1.5 : 1,
+                          },
+                          dim && styles.ritualAnswerDim,
+                        ]}
+                      >
+                        <View
+                          style={[
+                            styles.letterBadge,
+                            {
+                              borderColor: active ? theme.gold : theme.borderStrong,
+                              backgroundColor: active ? `${theme.gold}26` : 'transparent',
+                            },
+                          ]}
+                        >
+                          <Text style={[styles.letterText, { color: active ? theme.gold : theme.textMuted }]}>
+                            {letter}
+                          </Text>
+                        </View>
+                        <Text style={[styles.ritualAnswerText, { color: theme.text }]}>
+                          {a.label[lang] ?? a.label.en}
+                        </Text>
+                        {active ? (
+                          <MaterialCommunityIcons name="star" size={rs(16)} color={theme.gold} style={styles.answerStar} />
+                        ) : null}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Post-answer payoff: star-earned confirmation + streak progress. NO per-day
+                  reading — the answer only feeds the weekly report. Stays locked all day. */}
+              {answered ? (
+                <Animated.View style={[styles.revealCol, revealStyle]}>
+                  <View style={[styles.starCard, { borderColor: `${theme.gold}45` }]}>
+                    <LinearGradient
+                      colors={[`${theme.gold}24`, `${theme.gold}08`]}
+                      style={StyleSheet.absoluteFill}
+                    />
+                    <View style={styles.starBadgeWrap}>
+                      <View style={[styles.starHalo, { backgroundColor: `${theme.gold}1F` }]} pointerEvents="none" />
+                      <View style={[styles.starGlow, { backgroundColor: `${theme.gold}2E`, borderColor: `${theme.gold}80` }]}>
+                        <MaterialCommunityIcons name="star" size={rs(24)} color={theme.gold} />
+                      </View>
+                    </View>
+                    <View style={styles.starTextCol}>
+                      <Text style={[styles.starTitle, { color: theme.gold }]}>{t('daily.starEarned')}</Text>
+                      <Text style={[styles.starBalance, { color: theme.text }]}>
+                        {t('daily.balanceNow', { balance: stars })}
+                      </Text>
+                      <Text style={[styles.starHint, { color: theme.textDim }]}>{t('daily.comeBackTomorrow')}</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.progressField, { borderColor: theme.surfaceBorder, backgroundColor: theme.surface }]}>
+                    <View style={styles.dotsRow}>
+                      {Array.from({ length: STREAK_DAYS }).map((_, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            styles.progressDot,
+                            { backgroundColor: i < day ? theme.gold : theme.borderStrong },
+                            i < day && {
+                              shadowColor: theme.gold,
+                              shadowOpacity: 0.6,
+                              shadowRadius: rs(3),
+                              shadowOffset: { width: 0, height: 0 },
+                              elevation: 2,
+                            },
+                          ]}
+                        />
+                      ))}
+                    </View>
+                    <Text style={[styles.progressLabel, { color: theme.text }]}>{t('daily.dayOf', { day })}</Text>
+                    <Text style={[styles.progressCaption, { color: theme.textDim }]}>{t('daily.weekCaption')}</Text>
+                  </View>
+                </Animated.View>
+              ) : null}
+            </View>
           </View>
         ) : null}
+
+        {/* End-of-article cross-sell — full-width, module contextual via relatedModuleId */}
+        <View style={[styles.endDivider, { backgroundColor: theme.surfaceBorder }]} />
+        <GradientButton
+          label={t('insights.takeReading', { module: moduleTitle })}
+          onPress={openModule}
+          labelColor="#0B0E25"
+          bold
+          trailingIcon={isRTL ? 'arrow-left' : 'arrow-right'}
+        />
+
+        {/* Done — return Home after completing the ritual. Faint-gold "completed" pill with a
+            circular check, echoing the star-earned reward so it reads as a satisfying close. */}
+        {isDaily && answered ? (
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={[styles.doneBtn, { borderColor: `${theme.gold}3D`, backgroundColor: `${theme.gold}0F` }]}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.done')}
+          >
+            <View style={[styles.doneCheck, { borderColor: `${theme.gold}66`, backgroundColor: `${theme.gold}1F` }]}>
+              <Feather name="check" size={rs(12)} color={theme.gold} />
+            </View>
+            <Text style={[styles.doneText, { color: theme.text }]}>{t('common.done')}</Text>
+          </TouchableOpacity>
+        ) : null}
+
       </Animated.ScrollView>
     </View>
   );
@@ -260,7 +423,7 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: rs(5), marginBottom: rs(10) },
   dot: { width: rs(6), height: rs(6), borderRadius: 999 },
   tagText: { fontSize: rs(11), fontFamily: 'Inter_700Bold', letterSpacing: 0.6 },
-  clock: { marginLeft: rs(6) },
+  clock: { marginStart: rs(6) },
   readText: { fontSize: rs(12), fontFamily: 'Inter_500Medium' },
   title: {
     fontSize: rs(27),
@@ -272,22 +435,122 @@ const styles = StyleSheet.create({
 
   endDivider: { height: StyleSheet.hairlineWidth, marginTop: rs(24), marginBottom: rs(22) },
 
-  ctaRow: { flexDirection: 'row', alignItems: 'center', gap: rs(12) },
-  ctaButton: { flex: 1 },
-  ctaShare: { width: rs(56), height: rs(56) },
+  /* daily ritual — full-bleed celestial panel */
+  ritualWrap: {
+    marginHorizontal: -rs(20),
+    marginTop: rs(20),
+    paddingVertical: rs(28),
+    overflow: 'hidden',
+  },
+  ritualContent: { paddingHorizontal: rs(20), gap: rs(14) },
+  star: {
+    position: 'absolute',
+    width: rs(4),
+    height: rs(4),
+    borderRadius: rs(2),
+    backgroundColor: 'rgba(255,255,255,0.7)',
+  },
+  starSm: { width: rs(2.5), height: rs(2.5), borderRadius: rs(1.5), backgroundColor: 'rgba(255,255,255,0.45)' },
+  ritualHeader: { alignItems: 'center', gap: rs(6) },
+  ritualEyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: rs(6) },
+  ritualEyebrow: { fontSize: rs(11), fontFamily: 'Inter_700Bold', letterSpacing: 1 },
+  ritualQuestion: {
+    fontSize: rs(22),
+    lineHeight: rs(29),
+    fontFamily: 'PlayfairDisplay_600SemiBold',
+    letterSpacing: -0.3,
+    textAlign: 'center',
+  },
+  ritualAnswers: { gap: rs(10), marginTop: rs(2) },
+  /* re-entry (prior-locked) — the question reads as already-done: muted + frozen */
+  lockedText: { opacity: 0.7 },
+  lockedBlock: { opacity: 0.6 },
+  ritualAnswer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(12),
+    borderRadius: rs(14),
+    paddingVertical: rs(14),
+    paddingHorizontal: rs(14),
+  },
+  ritualAnswerDim: { opacity: 0.45 },
+  letterBadge: {
+    width: rs(26),
+    height: rs(26),
+    borderRadius: rs(13),
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  letterText: { fontSize: rs(12), fontFamily: 'Inter_700Bold' },
+  ritualAnswerText: { flex: 1, fontSize: rs(14.5), lineHeight: rs(20), fontFamily: 'Inter_500Medium' },
+  answerStar: { marginStart: rs(4) },
 
-  rewardWrap: { alignItems: 'center', marginTop: rs(16), gap: rs(8) },
-  claimBtn: {
+  /* post-answer star-earned + streak progress */
+  revealCol: { gap: rs(12), marginTop: rs(4) },
+  starCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(14),
+    borderRadius: rs(16),
+    borderWidth: 1,
+    padding: rs(16),
+    overflow: 'hidden',
+  },
+  // Centered wrapper so the soft halo can sit behind the badge without an Android
+  // elevation shadow (which rendered as a dark box behind the star).
+  starBadgeWrap: { width: rs(46), height: rs(46), alignItems: 'center', justifyContent: 'center' },
+  starHalo: {
+    position: 'absolute',
+    width: rs(58),
+    height: rs(58),
+    borderRadius: rs(29),
+  },
+  starGlow: {
+    width: rs(46),
+    height: rs(46),
+    borderRadius: rs(23),
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  starTextCol: { flex: 1, gap: rs(2) },
+  starTitle: { fontSize: rs(16), fontFamily: 'Inter_700Bold' },
+  starBalance: { fontSize: rs(13.5), lineHeight: rs(18), fontFamily: 'Inter_600SemiBold' },
+  starHint: { fontSize: rs(12), lineHeight: rs(16), fontFamily: 'Inter_400Regular', marginTop: rs(2) },
+  progressField: {
+    borderRadius: rs(14),
+    borderWidth: 1,
+    paddingVertical: rs(14),
+    paddingHorizontal: rs(16),
+    alignItems: 'center',
+    gap: rs(8),
+  },
+  dotsRow: { flexDirection: 'row', gap: rs(7), alignItems: 'center' },
+  progressDot: { width: rs(8), height: rs(8), borderRadius: rs(4) },
+  progressLabel: { fontSize: rs(13.5), fontFamily: 'Inter_700Bold' },
+  progressCaption: { fontSize: rs(12.5), lineHeight: rs(18), fontFamily: 'Inter_400Regular', textAlign: 'center' },
+
+  doneBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: rs(8),
+    gap: rs(9),
+    alignSelf: 'center',
     borderWidth: 1,
     borderRadius: 999,
-    paddingVertical: rs(15),
-    paddingHorizontal: rs(24),
-    alignSelf: 'stretch',
+    paddingVertical: rs(11),
+    paddingStart: rs(14),
+    paddingEnd: rs(24),
+    marginTop: rs(16),
   },
-  claimText: { fontSize: rs(16), fontFamily: 'Inter_700Bold' },
-  rewardCaption: { fontSize: rs(12), fontFamily: 'Inter_400Regular' },
+  doneCheck: {
+    width: rs(22),
+    height: rs(22),
+    borderRadius: rs(11),
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  doneText: { fontSize: rs(14.5), fontFamily: 'Inter_600SemiBold', letterSpacing: 0.3 },
 });

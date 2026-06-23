@@ -7,11 +7,20 @@
     "save": "Sauvegarder",
     "retry": "Réessayer",
     "cancel": "Annuler",
+    "later": "Plus tard",
     "confirm": "Confirmer",
     "close": "Fermer",
     "skip": "Passer",
     "tap": "Appuyer",
-    "ok": "OK"
+    "ok": "OK",
+    "done": "Terminé"
+  },
+  "tabs": {
+    "home": "Accueil",
+    "insights": "Insights",
+    "stars": "Étoiles",
+    "history": "Historique",
+    "settings": "Paramètres"
   },
   "onboarding": {
     "slide1Title": "Décrypte l'énergie autour de toi",
@@ -235,7 +244,10 @@
     "spendReason": "Dépensé",
     "watchVideoDesc": "Une courte pub, récompense immédiate",
     "dailyBonusDesc": "Une fois par jour",
+    "dailyQuestion": "Question du jour",
+    "dailyQuestionDesc": "Réponds à la question du jour",
     "streakDesc": "Maintiens ton rituel quotidien",
+    "streakLabel": "Série de {{streak}} jours",
     "shareDesc": "Invite un ami à lire",
     "comeBack": "Reviens dans 24h",
     "claimed": "Réclamé",
@@ -261,6 +273,9 @@
     "haptics": "Retour haptique",
     "animations": "Animations de fond",
     "language": "Langue",
+    "restartTitle": "Redémarrer pour appliquer la langue ?",
+    "restartMessage": "Aurafy doit redémarrer pour appliquer la nouvelle langue.",
+    "restartNow": "Redémarrer",
     "sound": "Son",
     "soundEffects": "Effets sonores",
     "about": "À propos",
@@ -314,7 +329,13 @@
     "alreadyAnsweredMessage": "Reviens demain pour une nouvelle question.",
     "returnLabel": "Revenir demain",
     "streakBadge": "{{streak}} jours de suite",
-    "bonusClaimed": "+2 réclamés !"
+    "bonusClaimed": "+2 réclamés !",
+    "starEarned": "Étoile gagnée",
+    "balanceNow": "Ton solde est maintenant de {{balance}} ✦",
+    "weekProgress": "Jour {{day}} sur 7 — chaque réponse complète le tableau. Termine la semaine pour débloquer ta lecture.",
+    "comeBackTomorrow": "Reviens demain pour le prochain texte.",
+    "dayOf": "Jour {{day}} sur 7",
+    "weekCaption": "Chaque réponse complète le tableau. Termine la semaine pour débloquer ta lecture."
   },
   "errors": {
     "notEnoughStars": "Pas assez d'étoiles — visite la section Étoiles pour en gagner plus",
@@ -391,6 +412,12 @@
       "attachment": "Attachement",
       "self": "Soi",
       "jealousy": "Jalousie"
-    }
+    },
+    "ritualLead": "Lis le texte de ce soir, réponds à la question à l'intérieur, gagne ton ✦.",
+    "beginRead": "Commencer la lecture de ce soir",
+    "stepRead": "Lire",
+    "stepAnswer": "Répondre",
+    "stepEarn": "Gagner",
+    "ritualDone": "Reviens demain"
   }
 }

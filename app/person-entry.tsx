@@ -1,5 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +23,7 @@ import GlassCard from '@/src/components/GlassCard';
 import StarsBadge from '@/src/components/StarsBadge';
 import AppDialog from '@/src/components/AppDialog';
 import { rs } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
 
 const COLOR_OPTIONS = ['#A78BFA', '#2FEAAC', '#E84393', '#F5C542', '#60A5FA', '#FB923C'];
 
@@ -35,6 +42,7 @@ export default function PersonEntryScreen() {
   const { moduleId, mode } = useLocalSearchParams<{ moduleId: string; mode: ReadingMode }>();
   const { t } = useTranslation();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const { stars, spendStars } = useUserStore();
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
@@ -139,7 +147,7 @@ export default function PersonEntryScreen() {
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={[styles.backBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
         >
-          <Feather name="chevron-left" size={rs(20)} color={theme.text} />
+          <Feather name={isRTL ? 'chevron-right' : 'chevron-left'} size={rs(20)} color={theme.text} />
         </TouchableOpacity>
         <StarsBadge balance={stars} onPress={handleStarsPress} />
       </View>

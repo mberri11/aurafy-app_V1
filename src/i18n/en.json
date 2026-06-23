@@ -7,11 +7,20 @@
     "save": "Save",
     "retry": "Try Again",
     "cancel": "Cancel",
+    "later": "Later",
     "confirm": "Confirm",
     "close": "Close",
     "skip": "Skip",
     "tap": "Tap",
-    "ok": "OK"
+    "ok": "OK",
+    "done": "Done"
+  },
+  "tabs": {
+    "home": "Home",
+    "insights": "Insights",
+    "stars": "Stars",
+    "history": "History",
+    "settings": "Settings"
   },
   "onboarding": {
     "slide1Title": "Decode the energy around you",
@@ -235,7 +244,10 @@
     "spendReason": "Spent",
     "watchVideoDesc": "A short ad, instant reward",
     "dailyBonusDesc": "Once every day",
+    "dailyQuestion": "Daily question",
+    "dailyQuestionDesc": "Answer today's free question",
     "streakDesc": "Keep your daily ritual alive",
+    "streakLabel": "{{streak}}-day streak",
     "shareDesc": "Invite a friend to read",
     "comeBack": "Come back in 24h",
     "claimed": "Claimed",
@@ -261,6 +273,9 @@
     "haptics": "Haptic feedback",
     "animations": "Background animations",
     "language": "Language",
+    "restartTitle": "Restart to apply language?",
+    "restartMessage": "Aurafy needs to restart to apply your new language.",
+    "restartNow": "Restart now",
     "sound": "Sound",
     "soundEffects": "Sound effects",
     "about": "About",
@@ -314,7 +329,13 @@
     "alreadyAnsweredMessage": "Come back tomorrow for a new question.",
     "returnLabel": "Return tomorrow",
     "streakBadge": "{{streak}} day streak",
-    "bonusClaimed": "+2 claimed!"
+    "bonusClaimed": "+2 claimed!",
+    "starEarned": "Star earned",
+    "balanceNow": "Your balance is now {{balance}} ✦",
+    "weekProgress": "Day {{day}} of 7 — each answer adds to the picture. Complete the week to unlock your reading.",
+    "comeBackTomorrow": "Come back tomorrow for the next piece.",
+    "dayOf": "Day {{day}} of 7",
+    "weekCaption": "Each answer adds to the picture. Complete the week to unlock your reading."
   },
   "errors": {
     "notEnoughStars": "Not enough stars — visit Stars to earn more",
@@ -391,6 +412,12 @@
       "attachment": "Attachment",
       "self": "Self",
       "jealousy": "Jealousy"
-    }
+    },
+    "ritualLead": "Read tonight's piece, answer the question inside, earn your ✦.",
+    "beginRead": "Begin tonight's read",
+    "stepRead": "Read",
+    "stepAnswer": "Answer",
+    "stepEarn": "Earn",
+    "ritualDone": "Come back tomorrow"
   }
 }

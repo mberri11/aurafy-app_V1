@@ -300,6 +300,66 @@ All go through the existing `src/ads/` manager (stub until Phase 4). No IAP anyw
 
 ---
 
+## Stars Economy (FINAL)
+
+> Canonical numbers — finalized 2026-06-20. The detailed, tickable work items live in
+> `docs/V1-REVIEW-BACKLOG.md`; this table is the source of truth so a session never has to
+> re-read the backlog to know the economy. **If they ever disagree, this section wins.**
+> `MAX_STARS` lives in `src/store/userStore.ts`.
+
+**Economy = free + read-to-earn, AdMob-only (no IAP — Moroccan account constraint).**
+**MAX BALANCE = 100** (raised from the old 50).
+
+### Sources (exhaustive — no other earn paths exist)
+| Source | Amount | Rule |
+|---|---|---|
+| Welcome gift | **+5** | Once, on first launch. |
+| Daily ritual | **+1** | Once per local day. Earned by **entering the daily article AND answering the daily question** at its bottom. One completed ritual = one streak day. |
+| 7-day streak complete | **+10** | After the 7th consecutive day. Grants the **weekly report card**, then **resets the streak to 0** for a new cycle. |
+| Rewarded video | **+2 flat** | Daily cap **25 videos/day** (max **+50★/day**). No escalating ladder. |
+
+**Removed sources:** share-app reward (unverifiable — `Share.share` resolves on sheet open, not on
+send; keep the share **button** for organic growth, just no stars); the daily article as a separate
++1 (absorbed into the daily ritual).
+
+### Sinks (exhaustive)
+| Sink | Cost | Note |
+|---|---|---|
+| Reading | **solo −1 · compare −2 · triangle −3 · circle −5** | Circle = 4–10 people. |
+| Unlock full result + share card | **−1** *(or watch a rewarded ad)* | Option C gate on `result.tsx` — headline is free, insight bullets + saveable/shareable card unlock here. |
+| Theme unlock | **−30** | Was 50. |
+| Module unlock | **−20 to −30** | Aura + future locked modules. |
+| OST unlock | **−20 to −30** | Ambient soundtracks. |
+| Streak insurance (revive) | **−5** | Reactive revive within a 48h grace window. |
+| Extra daily reading | **−3** | 2nd daily question same day. Does **not** count toward the streak or weekly report. |
+
+**Removed sinks:** deep reading −2 (folded into the −1 result unlock); re-roll −3 (cut — felt
+exploitative).
+
+### Key rules
+- **Daily ritual = the merged article + question flow.** The daily article and daily question are
+  paired in a single canonical source (one `dailyContent[]` table, or questions carry an `articleId`)
+  so they always share theme/dimension. This **reverses** the old "deliberately not in lockstep" rule
+  for `dailyInsight.ts` vs `dailyQuestions.ts` — they are now deliberately **in lockstep**. The
+  question sits at the bottom of the article reader; the user must enter the article first, but there
+  is **no** scroll/read-time hard-gate. The standalone `app/daily-reading.tsx` is **removed** (absorbed).
+- **Streak:** advances 1 per completed ritual (one/local day). Day 7 → +10★ + weekly report + reset.
+  Miss a day → on next foreground, if >24h since last ritual and streak>0, offer **Restore for 5★**
+  (keeps the count; user must still do today's ritual to advance) or **Start fresh** (reset streak +
+  clear the weekly-report answers). Revive only within **48h** of the last ritual; after that the
+  streak auto-resets with no buy-back.
+- **Weekly report:** deterministic, offline, generated from the **7 persisted ritual answers**
+  (dimension tally → "This week you leaned toward [X]"). Rendered as a **shareable card** via the
+  shared `react-native-view-shot` generator (same one the result share card uses — build once,
+  reuse). +10★ is paid **with** the report; then `dailyAnswers` + streak reset to 0.
+- **Ad strategy (Phase 4):** Option C result gate (no ad before result; gate insights + card).
+  Banners only on linger/scroll screens (Insights / History / Stars) — **never** on
+  quiz/loading/result/module/person-entry. Interstitial only at natural transitions, frequency-capped,
+  and **never stacked with a rewarded ad in the same flow**. Rewarded only at the result unlock + the
+  +2★ video. Native = the SPONSORED Insights card. Google **UMP** consent before personalized ads.
+
+---
+
 ## UI Standards (design-system rules — enforce on every screen)
 
 - Icons: `@expo/vector-icons` Feather or MaterialCommunityIcons — **no emoji as icons.**

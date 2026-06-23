@@ -1,5 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +20,7 @@ import GlassCard from '@/src/components/GlassCard';
 import GradientButton from '@/src/components/GradientButton';
 import StarsBadge from '@/src/components/StarsBadge';
 import { rs } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
 
 // Solo/Compare use filled person glyphs tinted blue; Triangle/Circle are light
 // outline shapes — matches the icon tiles in 06-mode-select.png.
@@ -30,6 +37,7 @@ export default function ReadingModeScreen() {
   const { moduleId } = useLocalSearchParams<{ moduleId: string }>();
   const { t } = useTranslation();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const stars = useUserStore((s) => s.stars);
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
@@ -83,7 +91,7 @@ export default function ReadingModeScreen() {
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={[styles.backBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
         >
-          <Feather name="chevron-left" size={rs(20)} color={theme.text} />
+          <Feather name={isRTL ? 'chevron-right' : 'chevron-left'} size={rs(20)} color={theme.text} />
         </TouchableOpacity>
         <StarsBadge balance={stars} onPress={handleStarsPress} />
       </View>

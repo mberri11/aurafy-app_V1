@@ -10,6 +10,12 @@ import {
   PlayfairDisplay_600SemiBold,
   PlayfairDisplay_700Bold,
 } from "@expo-google-fonts/playfair-display";
+import {
+  NotoNaskhArabic_400Regular,
+  NotoNaskhArabic_500Medium,
+  NotoNaskhArabic_600SemiBold,
+  NotoNaskhArabic_700Bold,
+} from "@expo-google-fonts/noto-naskh-arabic";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { Component, useEffect, useState } from "react";
@@ -187,17 +193,6 @@ function RootLayoutNav() {
           animation: "slide_from_right",
         }}
       />
-      <Stack.Screen
-        name="daily-reading"
-        options={{
-          headerShown: true,
-          headerTransparent: true,
-          headerTitle: "",
-          headerTintColor: "#FFFFFF",
-          headerBackTitle: "Home",
-          animation: "slide_from_bottom",
-        }}
-      />
       </Stack>
     </View>
   );
@@ -212,6 +207,10 @@ export default function RootLayout() {
     PlayfairDisplay_400Regular,
     PlayfairDisplay_600SemiBold,
     PlayfairDisplay_700Bold,
+    NotoNaskhArabic_400Regular,
+    NotoNaskhArabic_500Medium,
+    NotoNaskhArabic_600SemiBold,
+    NotoNaskhArabic_700Bold,
   });
 
   useEffect(() => {

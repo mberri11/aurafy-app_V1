@@ -1,12 +1,12 @@
 import React, { memo, useCallback } from 'react';
 import {
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   ViewStyle,
   ActivityIndicator,
 } from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../themes/ThemeProvider';
@@ -150,8 +150,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  trailingIcon: { marginLeft: rs(6) },
-  leadingIcon: { marginRight: rs(8) },
+  trailingIcon: { marginStart: rs(6) },
+  leadingIcon: { marginEnd: rs(8) },
   label: {
     fontSize: rs(16),
     fontWeight: '600',

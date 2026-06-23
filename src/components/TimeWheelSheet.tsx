@@ -5,9 +5,9 @@ import {
   NativeSyntheticEvent,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import {
   GestureHandlerRootView,
   ScrollView,

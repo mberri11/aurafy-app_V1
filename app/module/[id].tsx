@@ -1,5 +1,10 @@
 import React, { useCallback, useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,11 +20,13 @@ import GlassCard from '@/src/components/GlassCard';
 import StarsBadge from '@/src/components/StarsBadge';
 import ModuleIcon from '@/src/components/ModuleIcon';
 import { rs } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
 
 export default function ModuleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const stars = useUserStore((s) => s.stars);
 
@@ -92,7 +99,7 @@ export default function ModuleDetailScreen() {
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={[styles.backBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
         >
-          <Feather name="chevron-left" size={20} color={theme.text} />
+          <Feather name={isRTL ? 'chevron-right' : 'chevron-left'} size={20} color={theme.text} />
         </TouchableOpacity>
         <StarsBadge balance={stars} onPress={handleStarsPress} />
       </View>

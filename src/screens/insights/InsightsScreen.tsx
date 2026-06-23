@@ -14,10 +14,10 @@ import {
   ListRenderItem,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -51,14 +51,15 @@ export default function InsightsScreen() {
 
   const stars = useUserStore((s) => s.stars);
   const readArticleIds = useUserStore((s) => s.readArticleIds);
-  const lastDailyBonusDate = useUserStore((s) => s.lastDailyBonusDate);
+  const dailyAnswers = useUserStore((s) => s.dailyAnswers);
 
   const [activeChip, setActiveChip] = useState<ChipKey>('all');
 
   const dailyId = getDailyInsightId();
   const dailyArticle = ARTICLES.find((a) => a.id === dailyId);
   const dailyContent = getArticleContent(dailyId, lang);
-  const rewardAvailable = lastDailyBonusDate !== localDateKey();
+  // Reward pill shows until today's daily ritual (article + question) is completed.
+  const rewardAvailable = !dailyAnswers.some((a) => a.date === localDateKey());
 
   const openArticle = useCallback((id: string) => {
     router.push({ pathname: '/article/[id]', params: { id } });
@@ -200,7 +201,7 @@ const styles = StyleSheet.create({
   latestLabel: { marginTop: rs(4) },
 
   chipsScroll: { marginTop: rs(16), marginBottom: rs(18) },
-  chipsRow: { gap: rs(8), paddingHorizontal: rs(2), paddingRight: rs(16) },
+  chipsRow: { gap: rs(8), paddingHorizontal: rs(2), paddingEnd: rs(16) },
   chip: {
     borderWidth: 1,
     borderRadius: 999,

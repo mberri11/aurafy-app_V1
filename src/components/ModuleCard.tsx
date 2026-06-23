@@ -1,5 +1,10 @@
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -166,7 +171,7 @@ const styles = StyleSheet.create({
   bloom: {
     position: 'absolute',
     top: -95,
-    right: -95,
+    end: -95,
   },
   topRow: {
     flexDirection: 'row',

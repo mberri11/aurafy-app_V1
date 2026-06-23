@@ -22,14 +22,14 @@ function detectLanguage(): string {
   }
 }
 
-/** Apply RTL/LTR layout direction for a language (Arabic = RTL). Only touches
- *  I18nManager when the direction actually changes. */
+/** Apply RTL/LTR layout direction for a language (Arabic = RTL). Set the native flag
+ *  UNCONDITIONALLY — don't gate on `I18nManager.isRTL`, which can read stale under Expo
+ *  Go + the New Architecture and would then skip a needed flip. Takes effect on the next
+ *  launch (RTL is a native flag). */
 function applyDirection(lang: string): void {
   const shouldRTL = lang === 'ar';
-  if (I18nManager.isRTL !== shouldRTL) {
-    I18nManager.allowRTL(shouldRTL);
-    I18nManager.forceRTL(shouldRTL);
-  }
+  I18nManager.allowRTL(shouldRTL);
+  I18nManager.forceRTL(shouldRTL);
 }
 
 /** Boot language: the persisted store value if it has already hydrated,

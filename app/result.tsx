@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AppText as Text } from '@/src/components/AppText';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +31,7 @@ import { Reading, Language, SoloResults } from '@/src/types';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
 import { rs } from '@/src/utils/responsive';
+import { useIsRTL } from '@/src/utils/rtl';
 
 const SOLO_RESULTS: Record<string, SoloResults> = {
   attachment_style: attachmentStyleResults,
@@ -39,6 +46,7 @@ export default function ResultScreen() {
   const { viewOnly } = useLocalSearchParams<{ viewOnly?: string }>();
   const { t, i18n } = useTranslation();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const language = i18n.language as Language;
   const { currentResult, currentPersons, currentAnswers, currentModuleId, currentMode, viewOnlyResult } =
@@ -233,7 +241,7 @@ export default function ResultScreen() {
                   <View style={[styles.compTrack, { backgroundColor: theme.surface }]}>
                     <View style={[styles.compFill, { width: `${pct}%`, backgroundColor: p.color }]} />
                   </View>
-                  <Text style={[styles.compPct, { color: theme.textMuted }]}>{pct}%</Text>
+                  <Text style={[styles.compPct, { color: theme.textMuted, textAlign: isRTL ? 'left' : 'right' }]}>{pct}%</Text>
                 </View>
               );
             })}
@@ -367,7 +375,7 @@ const styles = StyleSheet.create({
   compName: { width: rs(64), fontSize: rs(14), fontFamily: 'Inter_500Medium' },
   compTrack: { flex: 1, height: rs(8), borderRadius: rs(4), overflow: 'hidden' },
   compFill: { height: rs(8), borderRadius: rs(4) },
-  compPct: { width: rs(40), fontSize: rs(13), textAlign: 'right', fontFamily: 'Inter_500Medium' },
+  compPct: { width: rs(40), fontSize: rs(13), fontFamily: 'Inter_500Medium' },
 
   // The read
   theReadText: { fontSize: rs(18), lineHeight: rs(26) },
