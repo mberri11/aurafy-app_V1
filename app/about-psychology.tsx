@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_600SemiBold',
     letterSpacing: -0.3,
   },
-  subtitle: { fontSize: rs(13), lineHeight: rs(18), fontFamily: 'Inter_400Regular', marginTop: rs(8) },
+  subtitle: { fontSize: rs(13), lineHeight: rs(18), fontFamily: 'HankenGrotesk_400Regular', marginTop: rs(8) },
   cards: { gap: rs(14), marginTop: rs(20) },
   card: { padding: rs(16) },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: rs(11) },
@@ -122,6 +122,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cardTitle: { fontSize: rs(16.5), fontFamily: 'PlayfairDisplay_600SemiBold', flexShrink: 1 },
-  cardBody: { fontSize: rs(13), lineHeight: rs(19), fontFamily: 'Inter_400Regular', marginTop: rs(11) },
-  footer: { fontSize: rs(12), lineHeight: rs(17), fontFamily: 'Inter_400Regular', textAlign: 'center', marginTop: rs(22) },
+  cardBody: { fontSize: rs(13), lineHeight: rs(19), fontFamily: 'HankenGrotesk_400Regular', marginTop: rs(11) },
+  footer: { fontSize: rs(12), lineHeight: rs(17), fontFamily: 'HankenGrotesk_400Regular', textAlign: 'center', marginTop: rs(22) },
 });

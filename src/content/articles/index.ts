@@ -20,6 +20,8 @@
 import type { Language } from '../../types';
 // Re-exported so Insights screens can pull the locale type from one place.
 export type { Language } from '../../types';
+// C-10 PILOT — Week 1 days 2–7 article metadata (day 1 reuses ten_signs_secret_love).
+import { w01Articles } from '../../data/weeks/w01_secret_signs_of_love';
 
 /** Editorial categories. Drive the feed filter chips + each card's accent tag. */
 export type ArticleCategory =
@@ -28,9 +30,11 @@ export type ArticleCategory =
   | 'energy'
   | 'attachment'
   | 'self'
-  | 'jealousy';
+  | 'jealousy'
+  | 'zodiac';
 
-/** Chip / filter order in the feed (matches 10-Insight-1.png). */
+/** Chip / filter order in the feed (matches 10-Insight-1.png). 7 categories — do NOT
+ *  add Communication/Healing/Social chips; those articles carry existing categories. */
 export const CATEGORY_ORDER: ArticleCategory[] = [
   'love',
   'aura',
@@ -38,6 +42,7 @@ export const CATEGORY_ORDER: ArticleCategory[] = [
   'attachment',
   'self',
   'jealousy',
+  'zodiac',
 ];
 
 /**
@@ -52,6 +57,7 @@ export const CATEGORY_COLORS: Record<ArticleCategory, string> = {
   attachment: '#22D3EE', // cyan
   self: '#F5C542', // gold
   jealousy: '#C084FC', // lilac
+  zodiac: '#818CF8', // cosmic indigo (C-10 — zodiac/cosmic weeks)
 };
 
 /** A single row inside an ordered-list block (e.g. one of the "10 signs"). */
@@ -231,6 +237,8 @@ export const ARTICLES: Article[] = [
     sponsored: true,
     publishedAt: '2026-06-06',
   },
+  // C-10 PILOT — Week 1 "Secret Signs of Love" days 2–7 (day 1 = ten_signs_secret_love above).
+  ...w01Articles,
 ];
 
 // ── Content resolution ─────────────────────────────────────────────────────────

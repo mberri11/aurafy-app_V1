@@ -41,6 +41,7 @@ import {
 } from '@/src/content/articles';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
 import { getDailyQuestion, getDailyAnswerDimension } from '@/src/data/dailyQuestions';
+import { getTodayOutcomeKey } from '@/src/data/weeks/walker';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
 import { lightTap } from '@/src/utils/haptics';
@@ -66,6 +67,7 @@ export default function ArticleReaderScreen() {
   const completeDailyRitual = useUserStore((s) => s.completeDailyRitual);
   const dailyAnswers = useUserStore((s) => s.dailyAnswers);
   const stars = useUserStore((s) => s.stars);
+  const weekAnchorDate = useUserStore((s) => s.weekAnchorDate);
   const streak = useUserStore((s) => s.streak);
 
   // Daily ritual question — answered at the foot of the daily article. Picking an answer
@@ -115,10 +117,19 @@ export default function ArticleReaderScreen() {
       revealOpacity.value = 0;
       revealY.value = withSpring(0, { stiffness: 200, damping: 20 });
       revealOpacity.value = withSpring(1, { stiffness: 200, damping: 20 });
-      const dimension = getDailyAnswerDimension(questionId, idx);
+      // C-10: record the WEEK-LOCAL outcome key (the day-7 tally reads these). Falls
+      // back to the legacy lean axis when the curriculum is off/empty.
+      const dimension = getTodayOutcomeKey(questionId, idx, weekAnchorDate) ?? getDailyAnswerDimension(questionId, idx);
       completeDailyRitual({ questionId, answerIndex: idx, dimension });
+      // C-10: completing the 7th ritual (forgiving streak) stages a PENDING weekly result —
+      // reveal it (after a beat so the star-earned confirmation registers first). The reveal
+      // pays the +5 on mount, enforcing reveal-before-bonus.
+      const wr = useUserStore.getState().weeklyResult;
+      if (wr && wr.claimedAt === 0) {
+        setTimeout(() => router.push('/weekly-result'), 700);
+      }
     },
-    [answered, revealY, revealOpacity, completeDailyRitual],
+    [answered, revealY, revealOpacity, completeDailyRitual, weekAnchorDate],
   );
 
   const openModule = useCallback(() => {
@@ -139,11 +150,13 @@ export default function ArticleReaderScreen() {
   const accent = CATEGORY_COLORS[article.category];
   const catLabel = t(`insights.categories.${article.category}`).toUpperCase();
   const readLabel = t('insights.minRead', { n: article.readMinutes });
-  const isDaily = article.id === getDailyInsightId();
-  const dailyQuestion = isDaily ? getDailyQuestion() : undefined;
-  // Day-in-cycle for the streak-progress message. claimDailyBonus resets streak to 0 the
-  // moment day 7 completes, so a 0 here means "just finished the week" → show 7.
-  const day = streak === 0 ? 7 : streak;
+  const isDaily = article.id === getDailyInsightId(weekAnchorDate);
+  const dailyQuestion = isDaily ? getDailyQuestion(weekAnchorDate) : undefined;
+  // "Day X of 7" tracks the FORGIVING streak (rituals completed this cycle) — the SAME counter
+  // the day-7 reveal fires on — so the dots and the reveal stay in lockstep even when a day is
+  // skipped (skips hold the streak, they don't advance it). The anchor's calendar dayIndex still
+  // picks WHICH article shows each day; it no longer drives this progress meter.
+  const day = Math.min(streak, STREAK_DAYS);
   const moduleTitle = t(`modules.${article.relatedModuleId}.title`);
 
   return (
@@ -386,8 +399,8 @@ export default function ArticleReaderScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { alignItems: 'center', justifyContent: 'center', gap: rs(12) },
-  notFound: { fontSize: rs(15), fontFamily: 'Inter_400Regular' },
-  backLink: { fontSize: rs(15), fontFamily: 'Inter_600SemiBold' },
+  notFound: { fontSize: rs(15), fontFamily: 'HankenGrotesk_400Regular' },
+  backLink: { fontSize: rs(15), fontFamily: 'HankenGrotesk_600SemiBold' },
 
   progressWrap: {
     position: 'absolute',
@@ -422,9 +435,9 @@ const styles = StyleSheet.create({
 
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: rs(5), marginBottom: rs(10) },
   dot: { width: rs(6), height: rs(6), borderRadius: 999 },
-  tagText: { fontSize: rs(11), fontFamily: 'Inter_700Bold', letterSpacing: 0.6 },
+  tagText: { fontSize: rs(11), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 0.6 },
   clock: { marginStart: rs(6) },
-  readText: { fontSize: rs(12), fontFamily: 'Inter_500Medium' },
+  readText: { fontSize: rs(12), fontFamily: 'HankenGrotesk_500Medium' },
   title: {
     fontSize: rs(27),
     lineHeight: rs(33),
@@ -453,7 +466,7 @@ const styles = StyleSheet.create({
   starSm: { width: rs(2.5), height: rs(2.5), borderRadius: rs(1.5), backgroundColor: 'rgba(255,255,255,0.45)' },
   ritualHeader: { alignItems: 'center', gap: rs(6) },
   ritualEyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: rs(6) },
-  ritualEyebrow: { fontSize: rs(11), fontFamily: 'Inter_700Bold', letterSpacing: 1 },
+  ritualEyebrow: { fontSize: rs(11), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 1 },
   ritualQuestion: {
     fontSize: rs(22),
     lineHeight: rs(29),
@@ -482,8 +495,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  letterText: { fontSize: rs(12), fontFamily: 'Inter_700Bold' },
-  ritualAnswerText: { flex: 1, fontSize: rs(14.5), lineHeight: rs(20), fontFamily: 'Inter_500Medium' },
+  letterText: { fontSize: rs(12), fontFamily: 'HankenGrotesk_700Bold' },
+  ritualAnswerText: { flex: 1, fontSize: rs(14.5), lineHeight: rs(20), fontFamily: 'HankenGrotesk_500Medium' },
   answerStar: { marginStart: rs(4) },
 
   /* post-answer star-earned + streak progress */
@@ -515,9 +528,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   starTextCol: { flex: 1, gap: rs(2) },
-  starTitle: { fontSize: rs(16), fontFamily: 'Inter_700Bold' },
-  starBalance: { fontSize: rs(13.5), lineHeight: rs(18), fontFamily: 'Inter_600SemiBold' },
-  starHint: { fontSize: rs(12), lineHeight: rs(16), fontFamily: 'Inter_400Regular', marginTop: rs(2) },
+  starTitle: { fontSize: rs(16), fontFamily: 'HankenGrotesk_700Bold' },
+  starBalance: { fontSize: rs(13.5), lineHeight: rs(18), fontFamily: 'HankenGrotesk_600SemiBold' },
+  starHint: { fontSize: rs(12), lineHeight: rs(16), fontFamily: 'HankenGrotesk_400Regular', marginTop: rs(2) },
   progressField: {
     borderRadius: rs(14),
     borderWidth: 1,
@@ -528,8 +541,8 @@ const styles = StyleSheet.create({
   },
   dotsRow: { flexDirection: 'row', gap: rs(7), alignItems: 'center' },
   progressDot: { width: rs(8), height: rs(8), borderRadius: rs(4) },
-  progressLabel: { fontSize: rs(13.5), fontFamily: 'Inter_700Bold' },
-  progressCaption: { fontSize: rs(12.5), lineHeight: rs(18), fontFamily: 'Inter_400Regular', textAlign: 'center' },
+  progressLabel: { fontSize: rs(13.5), fontFamily: 'HankenGrotesk_700Bold' },
+  progressCaption: { fontSize: rs(12.5), lineHeight: rs(18), fontFamily: 'HankenGrotesk_400Regular', textAlign: 'center' },
 
   doneBtn: {
     flexDirection: 'row',
@@ -552,5 +565,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  doneText: { fontSize: rs(14.5), fontFamily: 'Inter_600SemiBold', letterSpacing: 0.3 },
+  doneText: { fontSize: rs(14.5), fontFamily: 'HankenGrotesk_600SemiBold', letterSpacing: 0.3 },
 });

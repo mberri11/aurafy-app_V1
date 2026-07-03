@@ -20,6 +20,7 @@ export function generateMultiResult(
     ...result,
     // Store the localized winner statement as the first insight
     insights: [populatedTemplate, ...insights],
+    shareLine: moduleResults.shareLines[result.dominantDimension],
   };
 }
 
@@ -35,5 +36,6 @@ export function generateSoloResult(
   return {
     ...result,
     insights: [verdictStatement, ...insights],
+    shareLine: moduleResults.shareLines[verdict],
   };
 }

@@ -291,6 +291,7 @@ function EarnCardsRow() {
 export default function OnboardingScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const setOnboarded = useUserStore((s) => s.setOnboarded);
   const [slide, setSlide] = useState(0);
@@ -336,8 +337,10 @@ export default function OnboardingScreen() {
       />
       <BackgroundGlow />
 
-      {/* Skip — absolute top-right */}
-      <View style={[styles.skipBar, { top: insets.top + rs(8) }]}>
+      {/* Skip — absolute top corner; trailing edge per direction (top-left in Arabic).
+          Explicit physical side keyed on language so it mirrors even when the native RTL
+          flag hasn't applied yet (Expo Go live language switch). */}
+      <View style={[styles.skipBar, { top: insets.top + rs(8) }, isRTL ? styles.skipBarRTL : styles.skipBarLTR]}>
         <Pressable
           onPress={finish}
           accessibilityLabel={t('common.skip')}
@@ -449,19 +452,23 @@ function SlideText({
   titleIcon?: React.ReactNode;
 }) {
   const theme = useTheme();
+  const isRTL = useIsRTL();
+  // Base writing direction so mixed Arabic + Latin/number copy (e.g. "3 دقائق", "+2 يومياً")
+  // orders right-to-left. Stays centered (the design alignment) — only the bidi base flips.
+  const dir = { writingDirection: isRTL ? 'rtl' : 'ltr' } as const;
   return (
     <View style={styles.textBlock}>
       {titleIcon ? (
         // Single-line title with a trailing accent glyph (e.g. the gold sparkle on
         // the Stars slide), kept on the text baseline row.
         <View style={styles.titleRow}>
-          <Text style={[styles.h1, { color: theme.text }]}>{title}</Text>
+          <Text style={[styles.h1, { color: theme.text }, dir]}>{title}</Text>
           <View style={styles.titleIcon}>{titleIcon}</View>
         </View>
       ) : (
-        <Text style={[styles.h1, { color: theme.text }]}>{title}</Text>
+        <Text style={[styles.h1, { color: theme.text }, dir]}>{title}</Text>
       )}
-      <Text style={[styles.body, { color: theme.textMuted }]}>{subtitle}</Text>
+      <Text style={[styles.body, { color: theme.textMuted }, dir]}>{subtitle}</Text>
     </View>
   );
 }
@@ -526,7 +533,7 @@ const cardStyles = StyleSheet.create({
   },
   tag: {
     fontSize: rs(12),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 1.4,
     color: CARD_CYAN,
   },
@@ -560,14 +567,16 @@ const earnStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  label: { fontSize: rs(13), fontFamily: 'Inter_600SemiBold' },
-  amount: { fontSize: rs(11), fontFamily: 'Inter_400Regular', textAlign: 'center' },
+  label: { fontSize: rs(13), fontFamily: 'HankenGrotesk_600SemiBold' },
+  amount: { fontSize: rs(11), fontFamily: 'HankenGrotesk_400Regular', textAlign: 'center' },
 });
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  skipBar: { position: 'absolute', end: rs(24), zIndex: 10 },
-  skipText: { fontSize: rs(15), fontFamily: 'Inter_500Medium' },
+  skipBar: { position: 'absolute', zIndex: 10 },
+  skipBarLTR: { right: rs(24) },
+  skipBarRTL: { left: rs(24) },
+  skipText: { fontSize: rs(15), fontFamily: 'HankenGrotesk_500Medium' },
 
   column: { flex: 1, paddingHorizontal: rs(24) },
   content: { flex: 1, alignItems: 'center' },
@@ -588,7 +597,7 @@ const styles = StyleSheet.create({
   body: {
     fontSize: rs(14),
     lineHeight: rs(20),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     textAlign: 'center',
   },
 

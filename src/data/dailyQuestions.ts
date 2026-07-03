@@ -1,6 +1,9 @@
 // TODO: expand to 365 questions before production
 import { LocalizedString } from '../types';
 import { localDateKey } from '../content/articles/dailyInsight';
+// C-10 PILOT — curriculum walker + Week 1's 7 paired questions.
+import { getTodayPairing } from './weeks/walker';
+import { w01Questions } from './weeks/w01_secret_signs_of_love';
 
 export interface DailyQuestion {
   id: string;
@@ -282,6 +285,8 @@ export const dailyQuestions: DailyQuestion[] = [
       },
     ],
   },
+  // C-10 PILOT — Week 1's 7 daily-ritual questions (paired to its 7 articles via the walker).
+  ...w01Questions,
   // TODO: add 355 more daily questions before production
 ];
 
@@ -320,18 +325,21 @@ function hashKey(input: string): number {
 }
 
 /**
- * Today's daily question — picked by the SAME local-date key the daily article uses
- * (src/content/articles/dailyInsight). This puts the article + question in lockstep
- * (one ritual, one day), reversing the old day-of-year independence. Stable all day,
- * identical on every device.
+ * Today's daily question. C-10: when the weekly curriculum is active, this is a thin
+ * wrapper over the walker's `getTodayPairing()` so the article + question are the SAME
+ * day's authored pair (article ↔ question related by design). When the curriculum is
+ * off or empty, it falls back to the legacy date-hash over the local pool (which stays
+ * in lockstep with the daily article via the shared local-date key).
  */
-export function getDailyQuestionId(date: Date = new Date()): string {
+export function getDailyQuestionId(anchor: number | null, date: Date = new Date()): string {
+  const pairing = getTodayPairing(anchor, date);
+  if (pairing) return pairing.questionId;
   if (dailyQuestions.length === 0) return '';
   return dailyQuestions[hashKey(localDateKey(date)) % dailyQuestions.length].id;
 }
 
 /** The full daily question record for today's pick (convenience). */
-export function getDailyQuestion(date: Date = new Date()): DailyQuestion | undefined {
-  const id = getDailyQuestionId(date);
+export function getDailyQuestion(anchor: number | null, date: Date = new Date()): DailyQuestion | undefined {
+  const id = getDailyQuestionId(anchor, date);
   return dailyQuestions.find((q) => q.id === id);
 }

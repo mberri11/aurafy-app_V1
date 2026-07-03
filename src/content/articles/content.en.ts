@@ -7,8 +7,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { ArticleContentMap } from './index';
+// C-10 PILOT — Week 1 days 2–7 EN bodies (day 1 'ten_signs_secret_love' lives below).
+import { w01ArticlesEn } from '../../data/weeks/w01_secret_signs_of_love';
 
 export const articlesEn: ArticleContentMap = {
+  ...w01ArticlesEn,
   // ───────────────────────────────────────────────────────────────────────────
   // FULL ARTICLE — relatedModuleId: 'who_loves_me'
   // ───────────────────────────────────────────────────────────────────────────

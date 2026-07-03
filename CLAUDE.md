@@ -131,8 +131,13 @@ until fonts resolve.
 - **Playfair Display** — all headings, titles, the wordmark, result verdicts, big numbers.
   Weights in use: `PlayfairDisplay_400Regular`, `PlayfairDisplay_600SemiBold`,
   `PlayfairDisplay_700Bold`.
-- **Inter** — all body text, labels, captions. (`Inter_400Regular`, `_500Medium`,
-  `_600SemiBold`, `_700Bold`.)
+- **Hanken Grotesk** — all body text, labels, captions, buttons (adopted in the C-10
+  result-experience pilot, 2026-06-25, replacing **Inter**). Weights:
+  `HankenGrotesk_400Regular`, `_500Medium`, `_600SemiBold`, `_700Bold`, plus `_800ExtraBold`
+  / `_900Black` for share-card + big-CTA emphasis. The old `Inter_*` family refs were renamed
+  app-wide to `HankenGrotesk_*`; the `@expo-google-fonts/inter` dep is left installed-but-unused
+  (no longer loaded in `app/_layout.tsx`). Do NOT reintroduce Inter for body — the body face is
+  Hanken Grotesk. (Pending Simo's device DIFF confirmation of the look.)
 
 > If Simo ever decides to keep Fraunces as an intentional substitute, that's allowed — but
 > then every `PlayfairDisplay_*` reference reverts to `Fraunces_*` AND this section is
@@ -175,8 +180,9 @@ Adding a module: `src/data/modules.ts` + `src/data/questions/name.ts` +
 `src/data/results/nameResults.ts`. Keep filenames parallel.
 
 ### State (`src/store/`, Zustand)
-- `userStore.ts` — **persisted** (AsyncStorage `aurafy-user`). Stars [0–50], history cap
-  20, transactions cap 5. Daily bonus 24h cooldown, streak resets after 48h gap.
+- `userStore.ts` — **persisted** (AsyncStorage `aurafy-user`). Stars [0–100], history cap
+  20, transactions cap 5. Daily ritual once per local day; streak is **forgiving** (a missed
+  day holds it, never resets — see Stars Economy).
 - `contentSlice.ts` — **Insights** state (`readArticleIds`, `savedArticleIds`,
   `lastDailyBonusDate`, `markRead`, `toggleSaved`, `claimDailyInsightBonus`). Composed
   INTO `userStore` via the zustand slices pattern (not a separate store) — persisted in
@@ -314,8 +320,8 @@ All go through the existing `src/ads/` manager (stub until Phase 4). No IAP anyw
 | Source | Amount | Rule |
 |---|---|---|
 | Welcome gift | **+5** | Once, on first launch. |
-| Daily ritual | **+1** | Once per local day. Earned by **entering the daily article AND answering the daily question** at its bottom. One completed ritual = one streak day. |
-| 7-day streak complete | **+10** | After the 7th consecutive day. Grants the **weekly report card**, then **resets the streak to 0** for a new cycle. |
+| Daily ritual | **+1** | Once per local day. Earned by **entering the daily article AND answering the daily question** at its bottom. One completed ritual = **streak +1** (a missed day holds the streak, never resets it). |
+| 7-day streak complete | **+5** | After the 7th completed ritual (forgiving streak — see Key rules). Fires the **weekly result reveal**, then **resets the streak to 0** for a new cycle. Paid AFTER the reveal. |
 | Rewarded video | **+2 flat** | Daily cap **25 videos/day** (max **+50★/day**). No escalating ladder. |
 
 **Removed sources:** share-app reward (unverifiable — `Share.share` resolves on sheet open, not on
@@ -330,11 +336,11 @@ send; keep the share **button** for organic growth, just no stars); the daily ar
 | Theme unlock | **−30** | Was 50. |
 | Module unlock | **−20 to −30** | Aura + future locked modules. |
 | OST unlock | **−20 to −30** | Ambient soundtracks. |
-| Streak insurance (revive) | **−5** | Reactive revive within a 48h grace window. |
 | Extra daily reading | **−3** | 2nd daily question same day. Does **not** count toward the streak or weekly report. |
 
 **Removed sinks:** deep reading −2 (folded into the −1 result unlock); re-roll −3 (cut — felt
-exploitative).
+exploitative); **streak insurance −5** (removed 2026-06-28 — the streak is now forgiving, so there
+is nothing to insure; no `insuredDays`, no 5★ auto-spend, no 48h grace).
 
 ### Key rules
 - **Daily ritual = the merged article + question flow.** The daily article and daily question are
@@ -343,15 +349,18 @@ exploitative).
   for `dailyInsight.ts` vs `dailyQuestions.ts` — they are now deliberately **in lockstep**. The
   question sits at the bottom of the article reader; the user must enter the article first, but there
   is **no** scroll/read-time hard-gate. The standalone `app/daily-reading.tsx` is **removed** (absorbed).
-- **Streak:** advances 1 per completed ritual (one/local day). Day 7 → +10★ + weekly report + reset.
-  Miss a day → on next foreground, if >24h since last ritual and streak>0, offer **Restore for 5★**
-  (keeps the count; user must still do today's ritual to advance) or **Start fresh** (reset streak +
-  clear the weekly-report answers). Revive only within **48h** of the last ritual; after that the
-  streak auto-resets with no buy-back.
-- **Weekly report:** deterministic, offline, generated from the **7 persisted ritual answers**
+- **Streak (FORGIVING — 2026-06-28):** advances **+1 per completed ritual** (once per local day). A
+  **missed day does NOT reset it** — the streak simply HOLDS at its current number and resumes
+  climbing on the next answer. No insurance, no Stars cost, no buy-back, no punishment, no 48h grace.
+  The 7th completed ritual fires the **weekly reveal** (+5★, paid AFTER the reveal) and resets the
+  streak to 0 for the next cycle. A **daily local notification** (`expo-notifications`, offline, no
+  backend) is the honest nudge that keeps users answering — wired as a follow-up (a dev-panel test
+  button exists now; see `docs/BUILD-STATUS.md`).
+- **Weekly report:** deterministic, offline, generated from the **last 7 ritual answers**
   (dimension tally → "This week you leaned toward [X]"). Rendered as a **shareable card** via the
   shared `react-native-view-shot` generator (same one the result share card uses — build once,
-  reuse). +10★ is paid **with** the report; then `dailyAnswers` + streak reset to 0.
+  reuse). +5★ is paid **with** the reveal (after it's on screen); then `streak` resets to 0 (recent
+  `dailyAnswers` are kept, capped at 14, feeding the next cycle's tally window).
 - **Ad strategy (Phase 4):** Option C result gate (no ad before result; gate insights + card).
   Banners only on linger/scroll screens (Insights / History / Stars) — **never** on
   quiz/loading/result/module/person-entry. Interstitial only at natural transitions, frequency-capped,
@@ -373,6 +382,124 @@ exploitative).
 - Module accent colors, radii, shadows: verify against `design-reference/tokens.md`.
 - No hardcoded user-facing strings. Section labels, "Tap", banner copy etc. must come from
   `src/i18n/*.json` so AR/FR/ES work.
+
+---
+
+## C-10 — Weekly Curriculum & Result System (ARCHITECTURE BRIEF)
+
+> Documents the FULL incoming target for the daily ritual → weekly result loop so nothing
+> built before C-10 has to be ripped out. The data is the master content map
+> (`docs/aurafy-article-content-map.md`). **Do not build the result screen or swap the daily
+> pickers until C-10 is greenlit with Week 1 content in hand.**
+>
+> **STATUS — foundation pass done (2026-06-24): rails only, flag OFF.** Types + empty `WEEKS[]`
+> + walker (flag-gated, no-ops on empty) + store fields (`forcedNextWeekId`, `weeklyResult`) +
+> pure `tallyWeeklyOutcome` + anti-exploit hardening + `zodiac` chip are in. No screen is routed
+> through the walker yet; current app behavior is unchanged.
+
+### What changes and why
+Today the daily **article** and daily **question** are picked by two *independent* date-hashes over
+two *separate* pools (`getDailyInsightId`, `getDailyQuestionId`). They are not related, the featured
+pool is size-1 (so the article never rotates), and the 7-day streak pays a flat bonus but reveals **no
+reading** — breaking the "complete the week to unlock your reading" promise.
+
+**Model B** replaces this with a themed weekly curriculum: content is grouped into **54 themed
+weeks**. Each week = 7 paired (article ↔ question) days that resolve into ONE weekly result built
+from the user's 7 answers. This pairs article+question by design, makes the article rotate, and
+finally delivers the day-7 payoff.
+
+### New data shapes (single source of truth — `src/data/weeks/types.ts`)
+```ts
+export interface WeekOutcome { key:string; title:LocalizedString; body:LocalizedString; shareLine:LocalizedString; }
+export interface WeekDay    { articleId:string; questionId:string; }            // exactly 7 per week
+export interface WeeklyTheme {
+  id:string; title:LocalizedString; category:ArticleCategory; resultPrompt:LocalizedString;
+  days: WeekDay[];                          // EXACTLY 7, index 0..6
+  outcomes: WeekOutcome[];                  // EXACTLY 4
+  answerOutcomes: Record<string,string[]>;  // questionId → [outcomeKey per answer index]
+}
+export const WEEKS: WeeklyTheme[] = [ /* 54 rows, authored via the week-generator skill */ ];
+```
+Per-week **4-outcome model**: every question = a 4-way vote (4 answers ↔ 4 outcomes). Day-7 tally of
+the 7 outcome keys → highest wins (tiebreak = order in `outcomes[]`, via `tallyWeeklyOutcome`).
+
+### The curriculum walker (`src/data/weeks/walker.ts` — replaces BOTH pickers)
+- **ANCHOR-RELATIVE (pilot fix, 2026-06-25), NOT calendar-weekday.** Paced off a per-user
+  `weekAnchorDate` (epoch ms at local midnight of the user's first-ever completed ritual; set
+  once in `userStore.completeDailyRitual`, persisted, never overwritten). This stops a user who
+  starts on, say, Friday from landing mid-week and getting a 2-answer weekly result.
+  - `getDaysSinceAnchor(anchor, d)` = `floor((d - anchor)/86_400_000)` (0 when anchor null or
+    clock < anchor — backwards-clock clamp). THE single app-wide day-count definition.
+  - `getDayIndex(anchor, d)` = `daysSinceAnchor % 7`; `getActiveWeekIndex(anchor, d)` =
+    `floor(daysSinceAnchor / 7) % WEEKS.length`; `getActiveWeek` / `getTodayPairing(anchor, d)`.
+  - **The anchor is THREADED AS A PARAMETER** — the walker never imports the store (the chain
+    `userStore → contentSlice → dailyInsight → walker` would otherwise cycle). React screens read
+    `weekAnchorDate` from the store and pass it down through `getDailyInsightId`/`getDailyQuestionId`.
+  - Anchor null (brand-new user, no ritual yet) → Day 0 / Week 0 default. `isoWeekNumber` is kept
+    only as a generic date util; it no longer drives indexing.
+- Behind `WEEKLY_CURRICULUM_ENABLED` (`src/config/flags.ts`, **flipped ON 2026-06-25** for the
+  pilot); the date-based resolvers no-op (return null) while the flag is off or `WEEKS` is empty →
+  callers fall back to the legacy pickers.
+- `getDailyInsightId(anchor, …)`/`getDailyQuestionId(anchor, …)` are now thin wrappers over
+  `getTodayPairing(anchor, …)` (legacy hash retained as the flag-off fallback).
+
+#### Forced-week override (promo hook — slot built now, unused)
+Store field `forcedNextWeekId: string | null` (default `null`). When set, the user's **next fresh
+weekly cycle** resolves to `getWeekById(forcedNextWeekId)` instead of the calendar week, then the
+field auto-clears. Use case (~V1.4): zodiac modules ship → set `forcedNextWeekId = 'w28_four_elements'`
+to funnel everyone's next week into zodiac content that promotes the new module. Zero retrofit later.
+
+### Weekly result sequencing (day-7 payoff — STRICT ORDER)
+On the **7th** completed ritual (streak reaches 7; forgiving, so the 7 need not be calendar-consecutive):
+1) **Tally** last 7 answers → winning `WeekOutcome`; 2) **Reveal** the weekly result card (headline =
+`outcome.title`, body, shareable image w/ `@aurafy.app` watermark) — THIS is the hero moment + share
+asset; 3) **THEN** award `+5`; 4) **THEN** reset streak to 0 and advance to the next week (apply
+`forcedNextWeekId` if set, then clear it). **Never** award +5 or reset before the reveal. C-10 gates
+the day-7 +5 behind the reveal (mounting `app/weekly-result.tsx` runs `claimWeeklyResult()`), not
+before it.
+
+### Store deltas (`src/store/userStore.ts`)
+- `dailyAnswers[].dimension` holds the **week-local outcome key** under C-10 (already typed `string`
+  — no type change), set from `activeWeek.answerOutcomes[questionId][answerIndex]` at completion.
+- `forcedNextWeekId` + `weeklyResult: { weekId; outcomeKey; claimedAt } | null` (both persisted).
+- **Atomic rollover (fixes the desync bug):** the streak reset (Stars screen) and the "Day X of 7"
+  in the article reader must read from ONE store value and flip in the SAME update on day-7
+  completion. Eliminate any independent/cached day calc in `ArticleReaderScreen`.
+
+### Anti-exploit (offline-realistic; full fix = V3 server time)
+Store gates on epoch `lastDailyClaim`. Added: **backwards-clock detection** (`now < lastDailyClaim`
+→ award nothing, no advance); **cap +1 streak per genuine ~20–24h window** (the existing oneDay gate);
+streak advances **only** via `completeDailyRitual()`/`claimDailyBonus()` (the stray `incrementStreak`
+path was removed so a mount/reload can't bump it). Tagged a known V1 limitation.
+
+### Schema additions
+- `ArticleCategory`: **`'zodiac'`** added + a 7th feed chip (accent `#818CF8`, i18n
+  `insights.categories.zodiac`). Do NOT add Communication/Healing/Social chips — those map to
+  existing chips at the article level. Total chips = 7.
+- Articles with `relatedModuleId:''` hide the end-of-article CTA.
+
+### Corrected module mapping (real `modules.ts` ids)
+`who_loves_me, energy_reading, who_hates_me, who_jealous, who_soulmate, who_admires, who_cut_off,
+birth_chart, attachment_style, am_i_problem, am_i_healing`.
+- `who_drains_me` **does not exist** → energy weeks 18 & 45 map to **`energy_reading`**.
+- Healing weeks → **`am_i_healing`** (weeks 21, 52, 54).
+- `who_admires` available for love/social weeks (e.g. week 7).
+- **`birth_chart` already exists.** Zodiac weeks 28–33: if live, wire CTA now; else keep
+  `relatedModuleId:''` (no CTA) until the V1.4 zodiac modules, then wire + use the forced-week hook.
+
+### Content scale & locales
+54 weeks × 7 = **378 articles + 378 questions + 54 weekly results** + a 3-theme seasonal reserve.
+**EN-first**; FR/AR/ES use the existing `getArticleContent` fallback. Author as **one cluster file
+per locale** (9 clusters) so startup never parses a single 2MB module.
+
+### Build order (result still built last, per the Golden Loop)
+1. **Now (safe rails) ✅** — `zodiac` chip; `WeeklyTheme`/`WeekOutcome`/`WeekDay` + empty `WEEKS[]`;
+   flag-gated walker; `forcedNextWeekId` + `weeklyResult`; `tallyWeeklyOutcome`; anti-exploit.
+   Typecheck clean, no screen changes.
+2. **Pilot** — drop in **Week 1**, flip the flag (dev build), wire the day-7 reveal + strict
+   sequencing, route the reader through the walker, device-test the full loop.
+3. **Scale** — bulk-import weeks 2–54.
+4. **Result screen polish** — built last, reusing the same outcome data.
 
 ---
 
@@ -402,8 +529,9 @@ The screens kept missing because the *primitives* were off. Fix these first:
 | Reading mode | `app/reading-mode.tsx` | ✅ matches — Simo-verified 2026-06-05 |
 | Person entry | `app/person-entry.tsx` | ✅ matches — Simo-verified 2026-06-05 (solo per `_3`) |
 | Quiz (multi + solo) | `app/quiz.tsx` | ✅ matches — Simo-verified 2026-06-13 |
-| Loading / ad-gate | `app/loading.tsx` | ✅ matches — Simo-verified 2026-06-13 |
-| Result (multi + solo) | `app/result.tsx` | 🔲 |
+| Loading / ad-gate | `app/loading.tsx` | ✅ matches — Simo-verified 2026-06-13; C-10 pass re-approved 2026-07-03 |
+| Result (multi + solo) | `app/result.tsx` | ✅ matches (98%) — Simo-approved 2026-07-03 (residuals in BUILD-STATUS) |
+| Share card (reading + weekly) | `src/components/ShareCard.tsx` | ✅ matches (98%) — Simo-approved 2026-07-03 (view-shot capture; residuals in BUILD-STATUS) |
 | Stars / wallet | `app/(tabs)/stars.tsx` | ✅ matches — Simo-verified 2026-06-06 |
 | History | `app/(tabs)/history.tsx` | 🔲 |
 | Settings | `app/(tabs)/settings.tsx` | ✅ matches — Simo-verified 2026-06-07 |
@@ -431,6 +559,8 @@ placeholder + the reward gate); translate `content.fr/ar/es`; saved/bookmark sur
 "continue reading" + read-history surface; broaden the `featured` daily pool as articles
 land. (No premium articles / IAP — Moroccan AdMob-only constraint.)
 
+
+
 ### PHASE 2 — CONTENT (mostly done)
 7 modules × 20 questions (en/fr/ar/es), insight pools ≥6 variants × ≥3 dimensions, results
 files, engine wiring traced end-to-end. **Gaps:** `dailyQuestions.ts` has 10/365; some
@@ -446,3 +576,5 @@ safety, persisted interstitial counter.
 
 ### PHASE 5 — EAS BUILD + PLAY STORE
 Production AAB, store listing copy, privacy policy, icon/splash assets at required sizes.
+
+

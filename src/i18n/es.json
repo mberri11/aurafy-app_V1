@@ -7,6 +7,7 @@
     "save": "Guardar",
     "retry": "Intentar de nuevo",
     "cancel": "Cancelar",
+    "cannotBeUndone": "No se puede deshacer",
     "later": "Más tarde",
     "confirm": "Confirmar",
     "close": "Cerrar",
@@ -195,22 +196,45 @@
     }
   },
   "loading": {
-    "phrases": {
-      "energy": "Leyendo la energía...",
-      "patterns": "Descifrando patrones...",
-      "connections": "Trazando las conexiones...",
-      "almost": "Tu lectura está casi lista..."
+    "pool": {
+      "love1": "Leyendo la calidez...",
+      "love2": "Trazando quién se queda...",
+      "love3": "Nombrando el amor callado...",
+      "energy1": "Leyendo la energía...",
+      "energy2": "Descifrando patrones...",
+      "energy3": "Sintiendo la frecuencia...",
+      "attachment1": "Escuchando tus patrones...",
+      "attachment2": "Trazando cómo te vinculas...",
+      "attachment3": "Buscando tu ancla...",
+      "aura1": "Leyendo tus colores...",
+      "aura2": "Captando la luz que dejas...",
+      "aura3": "Mezclando tu tono...",
+      "self1": "Sosteniendo el espejo...",
+      "self2": "Pesando la respuesta honesta...",
+      "self3": "Suavizando el veredicto...",
+      "jealousy1": "Leyendo las corrientes ocultas...",
+      "jealousy2": "Trazando los bordes afilados...",
+      "jealousy3": "Nombrando la rivalidad callada...",
+      "zodiac1": "Trazando tu cielo...",
+      "zodiac2": "Alineando las casas...",
+      "zodiac3": "Leyendo las constelaciones..."
     },
     "ready": "Tu lectura está lista",
-    "unlock": "Mira un video corto para desbloquear tu resultado completo.",
+    "veil": "Un último velo por levantar",
+    "unlock": "Mira un video corto para desbloquear tu resultado completo — o gasta una estrella y lo levantamos por ti.",
     "watchNow": "Ver ahora",
+    "fullReading": "Ver la lectura completa",
     "skip": "Saltar",
-    "adUnavailable": "Anuncio no disponible — salta abajo"
+    "adUnavailable": "Anuncio no disponible — usa una estrella o salta"
   },
   "result": {
     "confidenceLabel": "{{confidence}}% de confianza",
     "confidenceHeadline": "Tenemos un {{confidence}}% de confianza en esta lectura.",
-    "confidenceSub": "Más alto que el {{pct}}% de las lecturas de esta noche.",
+    "confidenceSub": "Más alto que el {{pct}}% de tus lecturas.",
+    "lockedEyebrow": "Aún velado",
+    "lockedBody": "Lo que esto significa, el panorama completo y tu tarjeta para compartir están a un velo de distancia.",
+    "unlockWatch": "Mira para desbloquear",
+    "unlockStar": "Levántalo ahora",
     "attachmentStyle": "Dinámica de apego",
     "loveLanguage": "Señal de lenguaje amoroso",
     "shareButton": "Compartir esta lectura",
@@ -231,7 +255,7 @@
     "dailyBonus": "Bono diario",
     "dailyBonusAmount": "+2",
     "streakBonus": "Racha de 7 días",
-    "streakBonusAmount": "+10",
+    "streakBonusAmount": "+5",
     "shareApp": "Compartir Aurafy",
     "shareAppAmount": "+1",
     "watchNow": "Ver ahora",
@@ -262,9 +286,14 @@
   "history": {
     "title": "Tus lecturas",
     "emptyTitle": "Tus lecturas vivirán aquí",
-    "emptyMessage": "Completa una lectura para ver tu historial.",
+    "emptyMessage": "Cada nombre, color y patrón que descubres se guarda aquí: un mapa privado de lo que has aprendido sobre ti.",
     "ctaButton": "Comenzar una lectura",
-    "modeLabel": "Lectura {{mode}}"
+    "modeLabel": "Lectura {{mode}}",
+    "confidenceLine": "{{pct}} % de confianza",
+    "weeklyEyebrow": "Lectura semanal",
+    "sevenDayBadge": "7 días",
+    "nights": "{{count}} noches · completado el {{date}}",
+    "sponsored": "Patrocinado: aparece cuando estás en línea"
   },
   "settings": {
     "title": "Ajustes",
@@ -347,6 +376,7 @@
   "personEntry": {
     "title": "¿A quién estás leyendo?",
     "subtitle": "Usa nombres o iniciales. Tenlos claramente en mente.",
+    "duplicateNames": "Dale a cada persona un nombre diferente.",
     "addPerson": "Agregar persona",
     "startButton": "Comenzar lectura — {{cost}}",
     "startFree": "Comenzar lectura — Gratis",
@@ -411,7 +441,8 @@
       "energy": "Energía",
       "attachment": "Apego",
       "self": "Yo",
-      "jealousy": "Celos"
+      "jealousy": "Celos",
+      "zodiac": "Zodíaco"
     },
     "ritualLead": "Lee la pieza de esta noche, responde la pregunta dentro y gana tu ✦.",
     "beginRead": "Comenzar la lectura de esta noche",
@@ -419,5 +450,23 @@
     "stepAnswer": "Responde",
     "stepEarn": "Gana",
     "ritualDone": "Vuelve mañana"
+  },
+  "weekly": {
+    "eyebrow": "Tu semana revelada",
+    "bonusTitle": "+{{amount}} ✦ bono de racha",
+    "bonusSubtitle": "Siete noches, sin interrupción. Tu saldo ahora es {{balance}} ✦.",
+    "share": "Compartir mi semana",
+    "save": "Guardar en el historial",
+    "empty": "Aún no hay resultado semanal."
+  },
+  "shareCard": {
+    "ctaReading": "Descubre la tuya →",
+    "ctaWeekly": "Empieza tu semana →",
+    "weekEyebrow": "Mi semana revelada",
+    "watermark": "@aurafy.app",
+    "dialogTitle": "Comparte tu lectura de Aurafy",
+    "save": "Guardar imagen",
+    "saved": "Guardada en tu galería ✓",
+    "saveDenied": "No se pudo guardar — permite el acceso a fotos e inténtalo de nuevo."
   }
 }

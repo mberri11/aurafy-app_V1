@@ -22,11 +22,11 @@ import CosmicBloom from '@/src/components/CosmicBloom';
 import Toggle from '@/src/components/Toggle';
 import Slider from '@/src/components/Slider';
 import TimeWheelSheet from '@/src/components/TimeWheelSheet';
-import ConfirmSheet from '@/src/components/ConfirmSheet';
+import ConfirmSheet, { type ConfirmSheetIcon } from '@/src/components/ConfirmSheet';
 import i18n from '@/src/i18n';
 import { clear as storageClear } from '@/src/utils/storage';
-import { shareAppLink } from '@/src/utils/share';
 import { reloadApp } from '@/src/utils/reloadApp';
+import { shareAppLink } from '@/src/utils/share';
 import { useIsRTL } from '@/src/utils/rtl';
 import { rs } from '@/src/utils/responsive';
 
@@ -49,6 +49,8 @@ type SheetConfig = {
   confirmLabel: string;
   tone?: 'cyan' | 'rose';
   cancelLabel?: string;
+  icon?: ConfirmSheetIcon;
+  eyebrow?: string;
   onConfirm: () => void;
 };
 
@@ -145,25 +147,34 @@ export default function SettingsScreen() {
   const handleLanguageChange = useCallback(
     (lang: Language) => {
       if (lang === language) return;
-      // Persist + switch strings immediately.
-      const willBeRTL = lang === 'ar';
-      setLanguage(lang);
-      i18n.changeLanguage(lang);
-      // Set the native layout direction UNCONDITIONALLY for the target language — don't
-      // gate on `I18nManager.isRTL`, which can read stale under Expo Go + New Arch and
-      // would then skip clearing RTL on ar→non-ar (English staying mirrored). Applied on
-      // the forced restart below (RTL is a native flag, not a JS one).
-      I18nManager.allowRTL(willBeRTL);
-      I18nManager.forceRTL(willBeRTL);
-      // Always restart on a language change (Simo's call) so the new language — and, for
-      // Arabic, the mirrored layout — applies cleanly everywhere rather than half-live.
+      // Do NOT apply the language yet. Staging it and applying only when the user confirms
+      // "Restart" makes Cancel/dismiss a true no-op. Previously the language (and, for
+      // Arabic, the RTL flag) switched immediately, so cancelling left the app half-changed
+      // — strings/RTL flipped but no restart — which was chaotic for Arabic.
       setSheet({
         title: t('settings.restartTitle'),
         message: t('settings.restartMessage'),
         confirmLabel: t('settings.restartNow'),
         tone: 'rose',
+        icon: 'refresh-cw',
         cancelLabel: t('common.cancel'),
-        onConfirm: () => reloadApp(),
+        onConfirm: () => {
+          const willBeRTL = lang === 'ar';
+          setLanguage(lang);
+          i18n.changeLanguage(lang);
+          // RTL is a native flag — set unconditionally for the target language (stale
+          // `I18nManager.isRTL` under Expo Go + New Arch); it applies on the relaunch.
+          I18nManager.allowRTL(willBeRTL);
+          I18nManager.forceRTL(willBeRTL);
+
+          // ─── TEST-ONLY — remove before production ──────────────────────────────
+          // Begin from onboarding so the chosen language can be reviewed from the first
+          // screen. PRODUCTION: delete the two lines below and call `reloadApp()` here
+          // (re-add its import) so the new language + RTL apply via a clean relaunch.
+          useUserStore.setState({ hasOnboarded: false });
+          router.replace('/onboarding');
+          // ───────────────────────────────────────────────────────────────────────
+        },
       });
     },
     [language, setLanguage, t],
@@ -182,6 +193,7 @@ export default function SettingsScreen() {
       message: t('settings.clearHistoryConfirmMessage'),
       confirmLabel: t('settings.clearHistoryConfirmAction'),
       tone: 'cyan',
+      icon: 'trash-2',
       cancelLabel: t('common.cancel'),
       onConfirm: () => clearHistory(),
     });
@@ -194,6 +206,7 @@ export default function SettingsScreen() {
         message: t('settings.exportEmpty'),
         confirmLabel: t('common.ok'),
         tone: 'cyan',
+        icon: 'inbox',
         onConfirm: () => {},
       });
       return;
@@ -207,11 +220,22 @@ export default function SettingsScreen() {
       message: t('settings.resetConfirmMessage'),
       confirmLabel: t('settings.resetConfirmAction'),
       tone: 'rose',
+      icon: 'alert-triangle',
+      eyebrow: t('common.cannotBeUndone'),
       cancelLabel: t('common.cancel'),
       onConfirm: async () => {
         resetUser();
         resetSettings();
         await storageClear();
+        // Back to factory: default language (English) + LTR, then a hard reload so ALL in-memory
+        // state — i18n strings, the article/content language, RTL direction, and the re-seeded
+        // +5 welcome wallet — re-initialises from defaults instead of lingering in whatever the
+        // previous language/state was. (In Expo Go the RTL flag only fully re-applies on a manual
+        // relaunch; production wires expo-updates for a seamless one.)
+        i18n.changeLanguage('en');
+        I18nManager.allowRTL(false);
+        I18nManager.forceRTL(false);
+        reloadApp();
       },
     });
   }, [resetUser, resetSettings, t]);
@@ -382,6 +406,22 @@ export default function SettingsScreen() {
           <Row label={t('settings.resetData')} chevron destructive onPress={handleReset} />
         </GlassCard>
 
+        {/* DEVELOPER — dev builds only. TEST-ONLY (C-10 loop simulator); remove before
+            production. Hardcoded strings are fine here since this never ships. */}
+        {__DEV__ ? (
+          <>
+            <SectionHeader title="Developer" />
+            <GlassCard style={styles.card}>
+              <Row
+                label="C-10 Dev panel"
+                sublabel="Anchor / forgiving streak / reveal simulator"
+                chevron
+                onPress={() => router.push('/dev-panel')}
+              />
+            </GlassCard>
+          </>
+        ) : null}
+
         <View style={styles.footer}>
           <Text style={[styles.version, { color: theme.textMuted }]}>
             {t('settings.version')} · {t('settings.madeWith')}{' '}
@@ -403,7 +443,13 @@ export default function SettingsScreen() {
         message={sheet?.message}
         confirmLabel={sheet?.confirmLabel ?? t('common.ok')}
         tone={sheet?.tone}
+        icon={sheet?.icon}
+        eyebrow={sheet?.eyebrow}
         cancelLabel={sheet?.cancelLabel}
+        // Restart / reset / clear / export are consequential — require an explicit choice
+        // instead of letting a tap-outside silently dismiss (and, for restart, leave the
+        // language change half-applied).
+        dismissOnBackdrop={false}
         onConfirm={() => {
           sheet?.onConfirm();
           setSheet(null);
@@ -422,7 +468,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: rs(10.5),
     letterSpacing: 1.4,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     marginTop: rs(22),
     marginBottom: rs(8),
     marginStart: rs(4),
@@ -451,10 +497,10 @@ const styles = StyleSheet.create({
   },
   rowDisabled: { opacity: 0.4 },
   rowText: { flex: 1, gap: rs(3) },
-  rowLabel: { fontSize: rs(14), fontFamily: 'Inter_500Medium' },
-  rowSub: { fontSize: rs(12), fontFamily: 'Inter_400Regular' },
+  rowLabel: { fontSize: rs(14), fontFamily: 'HankenGrotesk_500Medium' },
+  rowSub: { fontSize: rs(12), fontFamily: 'HankenGrotesk_400Regular' },
   rowRight: { flexDirection: 'row', alignItems: 'center', gap: rs(8) },
-  rowValue: { fontSize: rs(14), fontFamily: 'Inter_400Regular' },
+  rowValue: { fontSize: rs(14), fontFamily: 'HankenGrotesk_400Regular' },
   modePick: { flexDirection: 'row', alignItems: 'center', gap: rs(4), paddingVertical: rs(6), paddingStart: rs(10) },
   sliderWrap: { width: rs(140) },
   divider: { height: 1, marginHorizontal: rs(16) },
@@ -464,5 +510,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: rs(26),
   },
-  version: { fontSize: rs(13), fontFamily: 'Inter_400Regular' },
+  version: { fontSize: rs(13), fontFamily: 'HankenGrotesk_400Regular' },
 });

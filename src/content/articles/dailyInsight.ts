@@ -11,6 +11,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ARTICLES, type Article } from './index';
+// C-10 PILOT — when the weekly curriculum is active, the daily article comes from
+// the walker's pairing so it's the SAME day's pair as the daily question.
+import { getTodayPairing } from '../../data/weeks/walker';
 
 /** Local-calendar date key, e.g. "2026-06-06" (NOT UTC — matches the user's day). */
 export function localDateKey(date: Date = new Date()): string {
@@ -36,10 +39,20 @@ export function getFeaturedPool(articles: Article[] = ARTICLES): Article[] {
 }
 
 /**
- * The id of today's featured article. Deterministic per local day.
- * Falls back to the first article if no featured pool exists yet.
+ * The id of today's featured article. C-10: when the weekly curriculum is active this
+ * is a thin wrapper over the walker's `getTodayPairing()` (so the daily article is the
+ * authored partner of the daily question), paced off the user's `weekAnchorDate` (pass
+ * `useUserStore.getState().weekAnchorDate` / a store selector). When the curriculum is
+ * off/empty it falls back to the legacy deterministic hash over the `featured` pool.
+ * Stable per local day.
  */
-export function getDailyInsightId(date: Date = new Date(), articles: Article[] = ARTICLES): string {
+export function getDailyInsightId(
+  anchor: number | null,
+  date: Date = new Date(),
+  articles: Article[] = ARTICLES,
+): string {
+  const pairing = getTodayPairing(anchor, date);
+  if (pairing) return pairing.articleId;
   const pool = getFeaturedPool(articles);
   if (pool.length === 0) return articles[0]?.id ?? '';
   const idx = hashString(localDateKey(date)) % pool.length;
@@ -47,7 +60,11 @@ export function getDailyInsightId(date: Date = new Date(), articles: Article[] =
 }
 
 /** The full Article record for today's featured pick (convenience). */
-export function getDailyInsight(date: Date = new Date(), articles: Article[] = ARTICLES): Article | undefined {
-  const id = getDailyInsightId(date, articles);
+export function getDailyInsight(
+  anchor: number | null,
+  date: Date = new Date(),
+  articles: Article[] = ARTICLES,
+): Article | undefined {
+  const id = getDailyInsightId(anchor, date, articles);
   return articles.find((a) => a.id === id);
 }

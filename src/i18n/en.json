@@ -7,6 +7,7 @@
     "save": "Save",
     "retry": "Try Again",
     "cancel": "Cancel",
+    "cannotBeUndone": "Cannot be undone",
     "later": "Later",
     "confirm": "Confirm",
     "close": "Close",
@@ -195,22 +196,45 @@
     }
   },
   "loading": {
-    "phrases": {
-      "energy": "Reading the energy...",
-      "patterns": "Decoding patterns...",
-      "connections": "Mapping the connections...",
-      "almost": "Your reading is almost ready..."
+    "pool": {
+      "love1": "Reading the warmth...",
+      "love2": "Tracing who stays...",
+      "love3": "Naming the quiet love...",
+      "energy1": "Reading the energy...",
+      "energy2": "Decoding patterns...",
+      "energy3": "Sensing the frequency...",
+      "attachment1": "Listening to your patterns...",
+      "attachment2": "Tracing how you bond...",
+      "attachment3": "Finding your anchor...",
+      "aura1": "Reading your colors...",
+      "aura2": "Catching the light you leave...",
+      "aura3": "Mixing your hue...",
+      "self1": "Holding up the mirror...",
+      "self2": "Weighing the honest answer...",
+      "self3": "Softening the verdict...",
+      "jealousy1": "Reading the undercurrents...",
+      "jealousy2": "Tracing the sharp edges...",
+      "jealousy3": "Naming the quiet rivalry...",
+      "zodiac1": "Charting your sky...",
+      "zodiac2": "Aligning the houses...",
+      "zodiac3": "Reading the constellations..."
     },
     "ready": "Your reading is ready",
-    "unlock": "Watch a short video to unlock your full result.",
+    "veil": "One veil left to lift",
+    "unlock": "Watch a short video to unlock your full result — or spend a star and we'll lift it for you.",
     "watchNow": "Watch Now",
+    "fullReading": "See the full reading",
     "skip": "Skip",
-    "adUnavailable": "Ad unavailable — skip below"
+    "adUnavailable": "Ad unavailable — use a star or skip"
   },
   "result": {
     "confidenceLabel": "{{confidence}}% confidence",
     "confidenceHeadline": "We're {{confidence}}% confident in this reading.",
-    "confidenceSub": "Higher than {{pct}}% of readings tonight.",
+    "confidenceSub": "Higher than {{pct}}% of your readings.",
+    "lockedEyebrow": "Still veiled",
+    "lockedBody": "What this means, the full picture and your share card are one veil away.",
+    "unlockWatch": "Watch to unlock",
+    "unlockStar": "Lift it now",
     "attachmentStyle": "Attachment dynamic",
     "loveLanguage": "Love language signal",
     "shareButton": "Share this reading",
@@ -231,7 +255,7 @@
     "dailyBonus": "Daily bonus",
     "dailyBonusAmount": "+2",
     "streakBonus": "7-day streak",
-    "streakBonusAmount": "+10",
+    "streakBonusAmount": "+5",
     "shareApp": "Share Aurafy",
     "shareAppAmount": "+1",
     "watchNow": "Watch Now",
@@ -262,9 +286,14 @@
   "history": {
     "title": "Your Readings",
     "emptyTitle": "Your readings will live here",
-    "emptyMessage": "Complete a reading to see your history.",
+    "emptyMessage": "Every name, color and pattern you uncover is kept here — a private map of what you've learned about yourself.",
     "ctaButton": "Start a reading",
-    "modeLabel": "{{mode}} reading"
+    "modeLabel": "{{mode}} reading",
+    "confidenceLine": "{{pct}}% confidence",
+    "weeklyEyebrow": "Weekly reading",
+    "sevenDayBadge": "7-Day",
+    "nights": "{{count}} nights · completed {{date}}",
+    "sponsored": "Sponsored — appears when online"
   },
   "settings": {
     "title": "Settings",
@@ -286,7 +315,7 @@
     "data": "Data",
     "resetData": "Reset all data",
     "resetConfirmTitle": "Reset all data?",
-    "resetConfirmMessage": "A full factory reset — Stars, history, settings and onboarding will all be erased.",
+    "resetConfirmMessage": "A full factory reset. Your Stars, history, settings and onboarding will all be erased.",
     "resetConfirmAction": "Reset everything",
     "version": "Aurafy v1.0.0",
     "soundAudio": "Sound & Audio",
@@ -312,7 +341,7 @@
     "termsOfUse": "Terms of use",
     "clearHistory": "Clear reading history",
     "clearHistoryConfirmTitle": "Clear reading history?",
-    "clearHistoryConfirmMessage": "This removes all saved readings. Your Stars and settings are kept.",
+    "clearHistoryConfirmMessage": "This removes all saved readings from this device. Your Stars and settings are kept.",
     "clearHistoryConfirmAction": "Clear history",
     "exportReadings": "Export readings",
     "exportEmpty": "No readings to export yet.",
@@ -347,6 +376,7 @@
   "personEntry": {
     "title": "Who are you reading?",
     "subtitle": "Use first names or initials. Hold them clearly in mind.",
+    "duplicateNames": "Give each person a different name.",
     "addPerson": "Add person",
     "startButton": "Start Reading — {{cost}}",
     "startFree": "Start Reading — Free",
@@ -411,7 +441,8 @@
       "energy": "Energy",
       "attachment": "Attachment",
       "self": "Self",
-      "jealousy": "Jealousy"
+      "jealousy": "Jealousy",
+      "zodiac": "Zodiac"
     },
     "ritualLead": "Read tonight's piece, answer the question inside, earn your ✦.",
     "beginRead": "Begin tonight's read",
@@ -419,5 +450,23 @@
     "stepAnswer": "Answer",
     "stepEarn": "Earn",
     "ritualDone": "Come back tomorrow"
+  },
+  "weekly": {
+    "eyebrow": "Your week revealed",
+    "bonusTitle": "+{{amount}} ✦ streak bonus",
+    "bonusSubtitle": "Seven nights, unbroken. Your balance is now {{balance}} ✦.",
+    "share": "Share my week",
+    "save": "Save to history",
+    "empty": "No weekly result yet."
+  },
+  "shareCard": {
+    "ctaReading": "Discover yours →",
+    "ctaWeekly": "Start your week →",
+    "weekEyebrow": "My week revealed",
+    "watermark": "@aurafy.app",
+    "dialogTitle": "Share your Aurafy reading",
+    "save": "Save image",
+    "saved": "Saved to your gallery ✓",
+    "saveDenied": "Couldn't save — allow photo access and try again."
   }
 }

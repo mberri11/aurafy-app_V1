@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: rs(8),
     paddingVertical: rs(3),
   },
-  tryFreeText: { fontSize: rs(11), fontFamily: 'Inter_600SemiBold' },
+  tryFreeText: { fontSize: rs(11), fontFamily: 'HankenGrotesk_600SemiBold' },
   spacer: { flex: 1, minHeight: rs(14) },
   title: {
     fontSize: rs(16),
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: rs(11),
     lineHeight: rs(15),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
   },
   lockedOverlay: {
     ...StyleSheet.absoluteFillObject,

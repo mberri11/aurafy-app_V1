@@ -7,6 +7,26 @@ export const whoHatesMeResults: MultiResults = {
     ar: '{name} يحمل أكبر قدر من الضغينة تجاهك.',
     es: '{name} alberga más resentimiento hacia ti.',
   },
+  shareLines: {
+    negative_affect: {
+      en: 'Not everyone clapping was cheering.',
+      fr: "Tous ceux qui applaudissaient n'encourageaient pas.",
+      ar: 'ليس كل من صفّق كان يهتف لك.',
+      es: 'No todos los que aplaudían te animaban.',
+    },
+    social_undermining: {
+      en: 'The knife was never in front of you.',
+      fr: "Le couteau n'a jamais été devant toi.",
+      ar: 'السكين لم تكن يوماً أمامك.',
+      es: 'El cuchillo nunca estuvo frente a ti.',
+    },
+    exclusion_signal: {
+      en: "Some doors don't slam — they close quietly.",
+      fr: 'Certaines portes ne claquent pas — elles se ferment sans bruit.',
+      ar: 'بعض الأبواب لا تُصفَق — بل تُغلَق بهدوء.',
+      es: 'Algunas puertas no se azotan — se cierran en silencio.',
+    },
+  },
   insights: {
     negative_affect: [
       {

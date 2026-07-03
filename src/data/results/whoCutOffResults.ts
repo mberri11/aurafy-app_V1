@@ -7,6 +7,26 @@ export const whoCutOffResults: MultiResults = {
     ar: '{name} انسحب عاطفياً أكثر من غيره.',
     es: '{name} se ha retirado emocionalmente más que los demás.',
   },
+  shareLines: {
+    withdrawal: {
+      en: 'Some goodbyes happen long before the words.',
+      fr: 'Certains adieux arrivent bien avant les mots.',
+      ar: 'بعض الوداعات تحدث قبل الكلمات بكثير.',
+      es: 'Algunas despedidas ocurren mucho antes que las palabras.',
+    },
+    passive_withdrawal: {
+      en: "They didn't leave loudly. That's the point.",
+      fr: "Ils ne sont pas partis bruyamment. C'est justement ça.",
+      ar: 'لم يرحلوا بضجيج — وهذا هو بيت القصيد.',
+      es: 'No se fueron haciendo ruido. Ese es el punto.',
+    },
+    emotional_exit: {
+      en: 'The door was closing while you were still talking.',
+      fr: 'La porte se fermait pendant que tu parlais encore.',
+      ar: 'كان الباب يُغلَق وأنت ما زلت تتكلم.',
+      es: 'La puerta se cerraba mientras aún hablabas.',
+    },
+  },
   insights: {
     withdrawal: [
       {

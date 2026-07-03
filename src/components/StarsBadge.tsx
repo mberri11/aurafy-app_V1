@@ -93,6 +93,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: rs(14),
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'HankenGrotesk_700Bold',
   },
 });

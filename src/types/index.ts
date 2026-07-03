@@ -67,6 +67,10 @@ export interface ResultData {
   signalTotal?: number;
   confidence: number; // clamped per scoring path (see scoringEngine)
   insights: LocalizedString[];
+  /** Punchy social-card quote picked at generation time (the dimension/verdict
+   *  shareLine — see MultiResults/SoloResults.shareLines). Optional: readings
+   *  persisted before the share card shipped don't carry one. */
+  shareLine?: LocalizedString;
   attachmentLabel?: LocalizedString;
   loveLanguageLabel?: LocalizedString;
 }
@@ -116,6 +120,9 @@ export interface ThemeColors {
 export interface MultiResults {
   winnerTemplate: LocalizedString;
   insights: Record<string, LocalizedString[]>;
+  /** One designed share-card quote per dimension (same keys as `insights`) —
+   *  the social-growth line on the exported card, NOT a truncated insight. */
+  shareLines: Record<string, LocalizedString>;
 }
 
 export interface SoloResults {
@@ -131,6 +138,13 @@ export interface SoloResults {
     negative: LocalizedString;
   };
   whatThisMeans: {
+    positive: LocalizedString;
+    neutral: LocalizedString;
+    negative: LocalizedString;
+  };
+  /** One designed share-card quote per verdict — first-person confession voice
+   *  (the self-module card is the user talking about themselves). */
+  shareLines: {
     positive: LocalizedString;
     neutral: LocalizedString;
     negative: LocalizedString;

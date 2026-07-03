@@ -7,6 +7,26 @@ export const energyReadingResults: MultiResults = {
     ar: '{name} يشع أكثر طاقة إيجابية تجاهك.',
     es: '{name} irradia la energía más positiva hacia ti.',
   },
+  shareLines: {
+    vitality: {
+      en: 'Some people are caffeine. Keep them close.',
+      fr: 'Certaines personnes sont de la caféine. Garde-les près de toi.',
+      ar: 'بعض الناس كالقهوة — أبقِهم قريبين.',
+      es: 'Algunas personas son cafeína. Mantenlas cerca.',
+    },
+    calm_energy: {
+      en: 'The calmest person in the room is holding it up.',
+      fr: 'La personne la plus calme de la pièce est celle qui la porte.',
+      ar: 'أهدأ شخص في الغرفة هو من يحملها.',
+      es: 'La persona más tranquila de la sala es quien la sostiene.',
+    },
+    inspirational_energy: {
+      en: "Some energy doesn't recharge you — it rewrites you.",
+      fr: 'Certaines énergies ne te rechargent pas — elles te réécrivent.',
+      ar: 'بعض الطاقات لا تشحنك — بل تعيد كتابتك.',
+      es: 'Hay energías que no te recargan — te reescriben.',
+    },
+  },
   insights: {
     vitality: [
       {

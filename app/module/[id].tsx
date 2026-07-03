@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   tagDot: { width: rs(6), height: rs(6), borderRadius: rs(3) },
   tagText: {
     fontSize: rs(10.5),
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'HankenGrotesk_700Bold',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     fontSize: rs(13.5),
     lineHeight: rs(21),
     textAlign: 'center',
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     marginTop: rs(24),
   },
 
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold',
     fontVariant: ['lining-nums'],
   },
-  infoLabel: { fontSize: rs(11.5), fontFamily: 'Inter_400Regular' },
+  infoLabel: { fontSize: rs(11.5), fontFamily: 'HankenGrotesk_400Regular' },
   infoDivider: { width: 1, height: rs(32) },
 
   /* Footer */

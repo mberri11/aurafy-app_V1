@@ -46,6 +46,26 @@ export const amITheProblemResults: SoloResults = {
       es: 'Esta lectura no es un veredicto — es una invitación. El hecho de que hayas tomado este cuestionario sugiere que una parte de ti ya sabe que algo necesita examinarse.',
     },
   },
+  shareLines: {
+    positive: {
+      en: 'Checked myself before anyone had to. Verdict: clear.',
+      fr: "Je me suis remis en question avant qu'on le fasse. Verdict : innocent.",
+      ar: 'حاسبت نفسي قبل أن يفعلها أحد. الحكم: بريء.',
+      es: 'Me examiné antes de que alguien tuviera que hacerlo. Veredicto: libre.',
+    },
+    neutral: {
+      en: 'Not the villain. Not fully innocent either.',
+      fr: 'Pas le méchant. Pas totalement innocent non plus.',
+      ar: 'لستُ الشرير — ولستُ بريئاً تماماً أيضاً.',
+      es: 'No soy el villano. Tampoco del todo inocente.',
+    },
+    negative: {
+      en: 'Plot twist: the pattern was me.',
+      fr: 'Rebondissement : le schéma, c\'était moi.',
+      ar: 'المفاجأة: النمط المتكرر كان أنا.',
+      es: 'Giro de la trama: el patrón era yo.',
+    },
+  },
   insights: {
     accountability: [
       {

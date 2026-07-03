@@ -134,9 +134,9 @@ const styles = StyleSheet.create({
   },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: rs(5) },
   dot: { width: rs(6), height: rs(6), borderRadius: 999 },
-  tagText: { fontSize: rs(10), fontFamily: 'Inter_700Bold', letterSpacing: 0.6 },
+  tagText: { fontSize: rs(10), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 0.6 },
   clock: { marginStart: rs(6) },
-  readText: { fontSize: rs(11), fontFamily: 'Inter_500Medium' },
+  readText: { fontSize: rs(11), fontFamily: 'HankenGrotesk_500Medium' },
   unreadDot: {
     position: 'absolute',
     top: rs(12),
@@ -147,14 +147,14 @@ const styles = StyleSheet.create({
   },
 
   /* sponsored */
-  sponsoredLabel: { fontSize: rs(9), fontFamily: 'Inter_700Bold', letterSpacing: 1 },
+  sponsoredLabel: { fontSize: rs(9), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 1 },
   brandPill: {
     borderWidth: 1,
     borderRadius: 999,
     paddingHorizontal: rs(8),
     paddingVertical: rs(2),
   },
-  brandText: { fontSize: rs(10.5), fontFamily: 'Inter_500Medium' },
+  brandText: { fontSize: rs(10.5), fontFamily: 'HankenGrotesk_500Medium' },
   openRow: { flexDirection: 'row', alignItems: 'center', gap: rs(1) },
-  openText: { fontSize: rs(12), fontFamily: 'Inter_600SemiBold' },
+  openText: { fontSize: rs(12), fontFamily: 'HankenGrotesk_600SemiBold' },
 });

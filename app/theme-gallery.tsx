@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: rs(12),
     paddingVertical: rs(6),
   },
-  costText: { color: '#FFFFFF', fontSize: rs(13), fontFamily: 'Inter_700Bold' },
+  costText: { color: '#FFFFFF', fontSize: rs(13), fontFamily: 'HankenGrotesk_700Bold' },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     marginTop: rs(8),
     gap: rs(6),
   },
-  name: { fontSize: rs(15), fontFamily: 'Inter_600SemiBold', flexShrink: 1 },
-  active: { fontSize: rs(11), fontFamily: 'Inter_700Bold', letterSpacing: 0.5 },
-  soon: { fontSize: rs(12), fontFamily: 'Inter_400Regular' },
+  name: { fontSize: rs(15), fontFamily: 'HankenGrotesk_600SemiBold', flexShrink: 1 },
+  active: { fontSize: rs(11), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 0.5 },
+  soon: { fontSize: rs(12), fontFamily: 'HankenGrotesk_400Regular' },
 });

@@ -43,12 +43,12 @@ const styles = StyleSheet.create({
   },
   adLabel: {
     fontSize: 10,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     opacity: 0.5,
   },
   adPlaceholder: {
     fontSize: 11,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     opacity: 0.4,
   },
 });

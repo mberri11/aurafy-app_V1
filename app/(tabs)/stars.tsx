@@ -8,6 +8,7 @@ import {
 import { AppText as Text } from '@/src/components/AppText';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { router } from 'expo-router';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, {
   useAnimatedStyle,
@@ -23,6 +24,7 @@ import { useUserStore } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import GlassCard from '@/src/components/GlassCard';
 import CosmicBloom from '@/src/components/CosmicBloom';
+import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
 import { rs } from '@/src/utils/responsive';
 
 dayjs.extend(relativeTime);
@@ -71,10 +73,13 @@ interface EarnCardProps {
   amount: string;
   onPress?: () => void;
   claimed?: boolean;
+  /** Keep the card tappable in the claimed/done state (e.g. the daily card still opens
+   *  the article to review). Default: claimed cards are inert. */
+  tappableWhenClaimed?: boolean;
   streak?: number; // when defined → render the 7-segment progress bar
 }
 
-function EarnCard({ lib, iconName, accent, title, subtitle, amount, onPress, claimed, streak }: EarnCardProps) {
+function EarnCard({ lib, iconName, accent, title, subtitle, amount, onPress, claimed, tappableWhenClaimed, streak }: EarnCardProps) {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -134,7 +139,7 @@ function EarnCard({ lib, iconName, accent, title, subtitle, amount, onPress, cla
     </GlassCard>
   );
 
-  if (onPress && !claimed) {
+  if (onPress && (!claimed || tappableWhenClaimed)) {
     return (
       <TouchableOpacity onPress={onPress} activeOpacity={0.85} accessibilityRole="button" accessibilityLabel={title}>
         {body}
@@ -149,13 +154,16 @@ export default function StarsWalletScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const reasonLabel = useReasonLabel();
-  const { stars, streak, lastDailyClaim, recentTransactions, claimDailyBonus, earnRewardedVideo } =
+  const { stars, streak, recentTransactions, earnRewardedVideo, dailyAnswers, weekAnchorDate } =
     useUserStore();
 
-  const canClaimDaily = useMemo(() => {
-    if (lastDailyClaim === null) return true;
-    return Date.now() - lastDailyClaim >= 24 * 60 * 60 * 1000;
-  }, [lastDailyClaim]);
+  // Today's ritual is "done" once an answer is recorded for the local day — the SAME
+  // calendar-day signal Home uses to dim the "Tonight's Read" card. (Deliberately not the
+  // 24h lastDailyClaim window, which can disagree with the calendar day across midnight.)
+  const ritualDoneToday = useMemo(
+    () => dailyAnswers.some((a) => a.date === localDateKey()),
+    [dailyAnswers],
+  );
 
   // ── Balance pulse on change ──────────────────────────────────────────────
   const numScale = useSharedValue(1);
@@ -194,12 +202,12 @@ export default function StarsWalletScreen() {
     if (earnRewardedVideo()) showEarnedToast(2);
   }, [earnRewardedVideo, showEarnedToast]);
 
-  // Daily ritual claim: +1, plus +10 on the 7th consecutive day. claimDailyBonus returns
-  // the total earned (0 if already claimed today). Phase C routes this through the article.
-  const handleClaimDaily = useCallback(() => {
-    const earned = claimDailyBonus();
-    if (earned > 0) showEarnedToast(earned);
-  }, [claimDailyBonus, showEarnedToast]);
+  // Daily ritual: the +1 is NOT granted here anymore — the ritual is the article + question
+  // flow. Tapping this card (done or not) opens today's daily article, where answering the
+  // question claims the +1 (and +10 on the 7th day) via completeDailyRitual.
+  const handleOpenDaily = useCallback(() => {
+    router.push({ pathname: '/article/[id]', params: { id: getDailyInsightId(weekAnchorDate) } });
+  }, [weekAnchorDate]);
 
   return (
     // Transparent so the root CosmicField (indigo→navy) shows through, matching the
@@ -253,22 +261,23 @@ export default function StarsWalletScreen() {
           onPress={handleWatchVideo}
         />
 
-        {/* The daily +1 is the reward for today's daily question (the ritual). Labeled as
-            such; tapping still claims directly for now — Phase C routes it through the
-            article + question flow. */}
+        {/* The daily +1 is the reward for today's ritual (article + question). Tapping opens
+            the daily article — it does NOT claim here. Stays tappable when done so the user
+            can re-open the article to review their answer. */}
         <EarnCard
           lib="feather"
           iconName="calendar"
           accent={theme.gradient[0]}
           title={t('stars.dailyQuestion')}
-          subtitle={canClaimDaily ? t('stars.dailyQuestionDesc') : t('stars.comeBack')}
+          subtitle={ritualDoneToday ? t('stars.comeBack') : t('stars.dailyQuestionDesc')}
           amount="+1"
-          onPress={handleClaimDaily}
-          claimed={!canClaimDaily}
+          onPress={handleOpenDaily}
+          claimed={ritualDoneToday}
+          tappableWhenClaimed
         />
 
-        {/* 7-day streak — informational only. The +10 is paid automatically on the 7th day
-            by claimDailyBonus, not by tapping, so this card has no onPress. */}
+        {/* 7-day streak — informational only. The +5 is paid by claimWeeklyResult after the
+            day-7 weekly reveal (not by tapping), so this card has no onPress. */}
         <EarnCard
           lib="mci"
           iconName="fire"
@@ -352,7 +361,7 @@ const styles = StyleSheet.create({
     textShadowRadius: rs(16),
   },
   heroLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: rs(5), marginTop: rs(2) },
-  heroLabel: { fontSize: rs(10), fontFamily: 'Inter_600SemiBold' },
+  heroLabel: { fontSize: rs(10), fontFamily: 'HankenGrotesk_600SemiBold' },
   heroStreakChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -363,14 +372,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: rs(8),
   },
-  heroStreakText: { fontSize: rs(11), fontFamily: 'Inter_700Bold' },
+  heroStreakText: { fontSize: rs(11), fontFamily: 'HankenGrotesk_700Bold' },
 
   // Section labels
   sectionLabel: {
     fontSize: rs(9.5),
     letterSpacing: 1.3,
     textTransform: 'uppercase',
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
   },
 
   // Earn card
@@ -386,8 +395,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   earnText: { flex: 1, gap: rs(2) },
-  earnTitle: { fontSize: rs(13), fontFamily: 'Inter_700Bold' },
-  earnSubtitle: { fontSize: rs(11), fontFamily: 'Inter_400Regular' },
+  earnTitle: { fontSize: rs(13), fontFamily: 'HankenGrotesk_700Bold' },
+  earnSubtitle: { fontSize: rs(11), fontFamily: 'HankenGrotesk_400Regular' },
   streakBar: { flexDirection: 'row', gap: rs(5), marginTop: rs(7) },
   streakSeg: { flex: 1, height: rs(5), borderRadius: rs(2.5) },
 
@@ -401,18 +410,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: rs(12),
     paddingVertical: rs(6),
   },
-  pillText: { fontSize: rs(10.5), fontFamily: 'Inter_700Bold' },
-  claimedText: { fontSize: rs(11.5), fontFamily: 'Inter_600SemiBold' },
+  pillText: { fontSize: rs(10.5), fontFamily: 'HankenGrotesk_700Bold' },
+  claimedText: { fontSize: rs(11.5), fontFamily: 'HankenGrotesk_600SemiBold' },
 
   // Recent activity
   activityCard: { paddingVertical: rs(2), paddingHorizontal: rs(2) },
   divider: { height: 1, marginHorizontal: rs(15) },
   activityRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: rs(11), paddingHorizontal: rs(15) },
   activityText: { flex: 1, gap: rs(2) },
-  activityReason: { fontSize: rs(13.5), fontFamily: 'Inter_700Bold' },
-  activityTime: { fontSize: rs(10.5), fontFamily: 'Inter_400Regular' },
+  activityReason: { fontSize: rs(13.5), fontFamily: 'HankenGrotesk_700Bold' },
+  activityTime: { fontSize: rs(10.5), fontFamily: 'HankenGrotesk_400Regular' },
   activityAmount: { flexDirection: 'row', alignItems: 'center', gap: rs(4) },
-  activityAmountText: { fontSize: rs(12.5), fontFamily: 'Inter_700Bold' },
+  activityAmountText: { fontSize: rs(12.5), fontFamily: 'HankenGrotesk_700Bold' },
 
   // Toast
   toastWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
@@ -425,6 +434,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: rs(16),
     paddingVertical: rs(9),
   },
-  toastAmount: { fontSize: rs(13.5), fontFamily: 'Inter_700Bold' },
-  toastSuffix: { fontSize: rs(12.5), fontFamily: 'Inter_500Medium' },
+  toastAmount: { fontSize: rs(13.5), fontFamily: 'HankenGrotesk_700Bold' },
+  toastSuffix: { fontSize: rs(12.5), fontFamily: 'HankenGrotesk_500Medium' },
 });

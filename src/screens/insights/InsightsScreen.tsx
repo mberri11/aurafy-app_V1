@@ -52,10 +52,11 @@ export default function InsightsScreen() {
   const stars = useUserStore((s) => s.stars);
   const readArticleIds = useUserStore((s) => s.readArticleIds);
   const dailyAnswers = useUserStore((s) => s.dailyAnswers);
+  const weekAnchorDate = useUserStore((s) => s.weekAnchorDate);
 
   const [activeChip, setActiveChip] = useState<ChipKey>('all');
 
-  const dailyId = getDailyInsightId();
+  const dailyId = getDailyInsightId(weekAnchorDate);
   const dailyArticle = ARTICLES.find((a) => a.id === dailyId);
   const dailyContent = getArticleContent(dailyId, lang);
   // Reward pill shows until today's daily ritual (article + question) is completed.
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
   },
   editorial: {
     fontSize: rs(11),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 1.8,
     marginBottom: rs(2),
   },
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
 
   eyebrow: {
     fontSize: rs(11),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 1.8,
     marginBottom: rs(10),
     paddingHorizontal: rs(4),
@@ -208,11 +209,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: rs(16),
     paddingVertical: rs(8),
   },
-  chipText: { fontSize: rs(13), fontFamily: 'Inter_600SemiBold' },
+  chipText: { fontSize: rs(13), fontFamily: 'HankenGrotesk_600SemiBold' },
 
   empty: {
     fontSize: rs(13),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     textAlign: 'center',
     marginTop: rs(40),
   },

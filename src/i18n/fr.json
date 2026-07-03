@@ -7,6 +7,7 @@
     "save": "Sauvegarder",
     "retry": "Réessayer",
     "cancel": "Annuler",
+    "cannotBeUndone": "Irréversible",
     "later": "Plus tard",
     "confirm": "Confirmer",
     "close": "Fermer",
@@ -195,22 +196,45 @@
     }
   },
   "loading": {
-    "phrases": {
-      "energy": "Lecture de l'énergie...",
-      "patterns": "Décodage des schémas...",
-      "connections": "Cartographie des liens...",
-      "almost": "Ta lecture est presque prête..."
+    "pool": {
+      "love1": "Lecture de la chaleur...",
+      "love2": "On trace qui reste...",
+      "love3": "On nomme l'amour discret...",
+      "energy1": "Lecture de l'énergie...",
+      "energy2": "Décodage des schémas...",
+      "energy3": "On capte la fréquence...",
+      "attachment1": "Écoute de tes schémas...",
+      "attachment2": "On trace tes liens...",
+      "attachment3": "On cherche ton ancre...",
+      "aura1": "Lecture de tes couleurs...",
+      "aura2": "On capte la lumière que tu laisses...",
+      "aura3": "On mélange ta teinte...",
+      "self1": "On tend le miroir...",
+      "self2": "On pèse la réponse honnête...",
+      "self3": "On adoucit le verdict...",
+      "jealousy1": "Lecture des courants cachés...",
+      "jealousy2": "On trace les angles vifs...",
+      "jealousy3": "On nomme la rivalité muette...",
+      "zodiac1": "On dresse ta carte du ciel...",
+      "zodiac2": "Alignement des maisons...",
+      "zodiac3": "Lecture des constellations..."
     },
     "ready": "Ta lecture est prête",
-    "unlock": "Regarde une courte vidéo pour débloquer ton résultat complet.",
+    "veil": "Un dernier voile à lever",
+    "unlock": "Regarde une courte vidéo pour débloquer ton résultat complet — ou dépense une étoile et on le lève pour toi.",
     "watchNow": "Regarder",
+    "fullReading": "Voir la lecture complète",
     "skip": "Passer",
-    "adUnavailable": "Pub indisponible — passe ci-dessous"
+    "adUnavailable": "Pub indisponible — utilise une étoile ou passe"
   },
   "result": {
     "confidenceLabel": "{{confidence}}% de confiance",
     "confidenceHeadline": "Nous sommes sûrs de cette lecture à {{confidence}}%.",
-    "confidenceSub": "Plus élevé que {{pct}}% des lectures de ce soir.",
+    "confidenceSub": "Plus élevé que {{pct}}% de tes lectures.",
+    "lockedEyebrow": "Encore voilé",
+    "lockedBody": "Ce que ça signifie, le tableau complet et ta carte à partager sont à un voile près.",
+    "unlockWatch": "Regarder pour débloquer",
+    "unlockStar": "Lève-le maintenant",
     "attachmentStyle": "Dynamique d'attachement",
     "loveLanguage": "Signal de langage d'amour",
     "shareButton": "Partager cette lecture",
@@ -231,7 +255,7 @@
     "dailyBonus": "Bonus quotidien",
     "dailyBonusAmount": "+2",
     "streakBonus": "Série de 7 jours",
-    "streakBonusAmount": "+10",
+    "streakBonusAmount": "+5",
     "shareApp": "Partager Aurafy",
     "shareAppAmount": "+1",
     "watchNow": "Regarder maintenant",
@@ -262,9 +286,14 @@
   "history": {
     "title": "Tes lectures",
     "emptyTitle": "Tes lectures vivront ici",
-    "emptyMessage": "Complète une lecture pour voir ton historique.",
+    "emptyMessage": "Chaque nom, couleur et schéma que tu découvres est conservé ici — une carte intime de ce que tu apprends sur toi.",
     "ctaButton": "Commencer une lecture",
-    "modeLabel": "Lecture {{mode}}"
+    "modeLabel": "Lecture {{mode}}",
+    "confidenceLine": "{{pct}} % de confiance",
+    "weeklyEyebrow": "Lecture hebdomadaire",
+    "sevenDayBadge": "7 jours",
+    "nights": "{{count}} nuits · terminé le {{date}}",
+    "sponsored": "Sponsorisé — visible en ligne"
   },
   "settings": {
     "title": "Paramètres",
@@ -347,6 +376,7 @@
   "personEntry": {
     "title": "Qui lis-tu ?",
     "subtitle": "Utilisez les prénoms ou les initiales. Gardez-les clairement en tête.",
+    "duplicateNames": "Donne un nom différent à chaque personne.",
     "addPerson": "Ajouter une personne",
     "startButton": "Commencer — {{cost}}",
     "startFree": "Commencer — Gratuit",
@@ -411,7 +441,8 @@
       "energy": "Énergie",
       "attachment": "Attachement",
       "self": "Soi",
-      "jealousy": "Jalousie"
+      "jealousy": "Jalousie",
+      "zodiac": "Zodiaque"
     },
     "ritualLead": "Lis le texte de ce soir, réponds à la question à l'intérieur, gagne ton ✦.",
     "beginRead": "Commencer la lecture de ce soir",
@@ -419,5 +450,23 @@
     "stepAnswer": "Répondre",
     "stepEarn": "Gagner",
     "ritualDone": "Reviens demain"
+  },
+  "weekly": {
+    "eyebrow": "Votre semaine révélée",
+    "bonusTitle": "+{{amount}} ✦ bonus de série",
+    "bonusSubtitle": "Sept nuits, sans interruption. Votre solde est maintenant de {{balance}} ✦.",
+    "share": "Partager ma semaine",
+    "save": "Enregistrer dans l'historique",
+    "empty": "Pas encore de résultat hebdomadaire."
+  },
+  "shareCard": {
+    "ctaReading": "Découvre la tienne →",
+    "ctaWeekly": "Commence ta semaine →",
+    "weekEyebrow": "Ma semaine révélée",
+    "watermark": "@aurafy.app",
+    "dialogTitle": "Partage ta lecture Aurafy",
+    "save": "Enregistrer l'image",
+    "saved": "Enregistrée dans ta galerie ✓",
+    "saveDenied": "Impossible d'enregistrer — autorise l'accès aux photos et réessaie."
   }
 }

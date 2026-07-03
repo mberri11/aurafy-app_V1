@@ -30,6 +30,11 @@ interface GradientButtonProps {
   trailingIcon?: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
   /** MaterialCommunityIcons glyph rendered before the label, in the label colour. */
   leadingIcon?: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  /** Override the fill gradient (defaults to the 3-color brand `theme.gradient`).
+   *  Used by category-themed CTAs (e.g. the result Share pill in the category accent). */
+  colors?: readonly [string, string, ...string[]];
+  /** Override the glow halo colour (defaults to the brand cyan `#22D3EE`). */
+  glowColor?: string;
 }
 
 const GradientButton = memo(function GradientButton({
@@ -44,8 +49,11 @@ const GradientButton = memo(function GradientButton({
   glow = false,
   trailingIcon,
   leadingIcon,
+  colors,
+  glowColor,
 }: GradientButtonProps) {
   const theme = useTheme();
+  const fill = colors ?? theme.gradient;
 
   const handlePress = useCallback(() => {
     lightTap();
@@ -63,7 +71,7 @@ const GradientButton = memo(function GradientButton({
         activeOpacity={0.75}
       >
         <LinearGradient
-          colors={theme.gradient}
+          colors={fill}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.outlineGradientBorder}
@@ -86,16 +94,16 @@ const GradientButton = memo(function GradientButton({
       activeOpacity={0.85}
     >
       <LinearGradient
-        colors={theme.gradient}
+        colors={fill}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={[
           styles.gradient,
-          // Soft cyan halo (matches the design's teal glow). Lives on the opaque,
+          // Soft accent halo (default: the design's teal glow). Lives on the opaque,
           // rounded gradient — not the wrapper — so Android casts a clean coloured
           // shadow instead of a clipped black drop.
           glow && !disabled && {
-            shadowColor: '#22D3EE',
+            shadowColor: glowColor ?? '#22D3EE',
             shadowOpacity: 0.55,
             shadowRadius: rs(16),
             shadowOffset: { width: 0, height: 0 },
@@ -156,11 +164,11 @@ const styles = StyleSheet.create({
     fontSize: rs(16),
     fontWeight: '600',
     color: '#FFFFFF',
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
   },
   labelBold: {
     fontWeight: '700',
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'HankenGrotesk_700Bold',
   },
   disabled: {
     opacity: 0.4,

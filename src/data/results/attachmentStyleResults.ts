@@ -46,6 +46,26 @@ export const attachmentStyleResults: SoloResults = {
       es: 'Tu apego muestra patrones de ansiedad o evitación — resultados comunes de heridas pasadas. La conciencia de tu patrón es el primer paso para cambiarlo.',
     },
   },
+  shareLines: {
+    positive: {
+      en: "Secure isn't boring. It's the plot twist.",
+      fr: "Être sécurisé, ce n'est pas ennuyeux. C'est le rebondissement.",
+      ar: 'الأمان ليس مملاً — إنه مفاجأة الحبكة.',
+      es: 'Lo seguro no es aburrido. Es el giro de la trama.',
+    },
+    neutral: {
+      en: 'I love deeply, worry quickly — learning the difference.',
+      fr: "J'aime profondément, je m'inquiète vite — j'apprends la différence.",
+      ar: 'أحب بعمق وأقلق بسرعة — وأتعلّم الفرق.',
+      es: 'Amo profundo, me preocupo rápido — aprendiendo la diferencia.',
+    },
+    negative: {
+      en: "My walls have walls. At least they're honest now.",
+      fr: 'Mes murs ont des murs. Au moins, ils sont honnêtes maintenant.',
+      ar: 'جدراني لها جدران — لكنها صادقة الآن على الأقل.',
+      es: 'Mis muros tienen muros. Al menos ahora son honestos.',
+    },
+  },
   insights: {
     anxious_response: [
       {

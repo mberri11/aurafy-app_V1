@@ -7,6 +7,26 @@ export const whoJealousResults: MultiResults = {
     ar: '{name} هو الأكثر حسداً لما تملكه.',
     es: '{name} es quien más envidia lo que tienes.',
   },
+  shareLines: {
+    envy_mirroring: {
+      en: 'Imitation is envy wearing a compliment.',
+      fr: "L'imitation, c'est l'envie déguisée en compliment.",
+      ar: 'التقليد حسدٌ يرتدي ثوب المجاملة.',
+      es: 'La imitación es envidia disfrazada de cumplido.',
+    },
+    competitive_resentment: {
+      en: 'Your wins are keeping someone up at night.',
+      fr: "Tes victoires empêchent quelqu'un de dormir.",
+      ar: 'انتصاراتك تُبقي أحدهم مستيقظاً في الليل.',
+      es: 'Tus victorias le quitan el sueño a alguien.',
+    },
+    possessive_orbit: {
+      en: "Some people don't want you — they want your orbit.",
+      fr: 'Certains ne te veulent pas toi — ils veulent ton orbite.',
+      ar: 'بعض الناس لا يريدونك أنت — بل يريدون مدارك.',
+      es: 'Algunas personas no te quieren a ti — quieren tu órbita.',
+    },
+  },
   insights: {
     envy_mirroring: [
       {

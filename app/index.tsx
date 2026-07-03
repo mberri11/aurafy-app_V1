@@ -112,12 +112,12 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: rs(13),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     letterSpacing: 0.1,
   },
   footer: {
     fontSize: rs(11),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 3,
     textAlign: 'center',
   },

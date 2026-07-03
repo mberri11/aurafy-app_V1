@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   paragraph: {
     fontSize: rs(15),
     lineHeight: rs(24),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     marginBottom: rs(14),
   },
 
@@ -148,10 +148,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: rs(2),
   },
-  listNumText: { fontSize: rs(12), fontFamily: 'Inter_700Bold' },
+  listNumText: { fontSize: rs(12), fontFamily: 'HankenGrotesk_700Bold' },
   listBody: { flex: 1, gap: rs(3) },
-  listTitle: { fontSize: rs(15), lineHeight: rs(21), fontFamily: 'Inter_700Bold' },
-  listText: { fontSize: rs(14), lineHeight: rs(21), fontFamily: 'Inter_400Regular' },
+  listTitle: { fontSize: rs(15), lineHeight: rs(21), fontFamily: 'HankenGrotesk_700Bold' },
+  listText: { fontSize: rs(14), lineHeight: rs(21), fontFamily: 'HankenGrotesk_400Regular' },
 
   quote: {
     borderStartWidth: rs(3),
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_600SemiBold',
     fontStyle: 'italic',
   },
-  quoteAttr: { fontSize: rs(13), fontFamily: 'Inter_500Medium', marginTop: rs(8) },
+  quoteAttr: { fontSize: rs(13), fontFamily: 'HankenGrotesk_500Medium', marginTop: rs(8) },
 
   imageWrap: { marginVertical: rs(18) },
   imageBanner: {
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: '100%' },
   caption: {
     fontSize: rs(12),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     fontStyle: 'italic',
     textAlign: 'center',
     marginTop: rs(8),
@@ -194,8 +194,8 @@ const styles = StyleSheet.create({
   },
   calloutIcon: { marginTop: rs(2) },
   calloutBody: { flex: 1, gap: rs(5) },
-  calloutTitle: { fontSize: rs(14), fontFamily: 'Inter_700Bold' },
-  calloutText: { fontSize: rs(13.5), lineHeight: rs(20), fontFamily: 'Inter_400Regular' },
+  calloutTitle: { fontSize: rs(14), fontFamily: 'HankenGrotesk_700Bold' },
+  calloutText: { fontSize: rs(13.5), lineHeight: rs(20), fontFamily: 'HankenGrotesk_400Regular' },
 
   divider: { height: StyleSheet.hairlineWidth, marginVertical: rs(24) },
 });

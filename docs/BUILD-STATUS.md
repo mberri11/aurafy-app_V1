@@ -119,6 +119,8 @@ branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for renderi
   mode === 'solo'`, so only **self-discovery** modules lock to "You"; relationship modules
   (incl. the Energy free trial) get a normal name-input card in solo. (c) Subtitle now shows on
   both variants; added `personEntry.subtitle` (en/fr/ar/es).
+- **2026-07-03:** the locked "You" card now carries the selected-state treatment (2px
+  module-accent border + glow), mirroring reading-mode's selected card — Simo-verified 2026-07-03.
 
 ### Quiz — `app/quiz.tsx` — ✅ matches — Simo-verified 2026-06-13
 - Full rewrite (breath interstitial + question phase). Per-module theming: background bloom,
@@ -131,7 +133,7 @@ branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for renderi
   have a straight accent strip and NO chevron (Simo override of the design PNG, which showed
   one). New i18n: `quiz.breath.soloPerson` (en/fr/ar/es — FR/AR/ES pending native review).
 
-### Loading / ad-gate — `app/loading.tsx` — ✅ matches — Simo-verified 2026-06-13
+### Loading / ad-gate — `app/loading.tsx` — ✅ matches — Simo-verified 2026-06-13; C-10 pass re-approved 2026-07-03 (98%)
 - Full rewrite (the old `CosmicReveal` scattered-dot field is gone for this screen).
   Loader = a hexagon of 6 **module-coloured** dots around a small centered atom, joined by a
   faint outline; a single shared `phase` (3.6s loop) sweeps a brighten+swell "chase" around
@@ -143,10 +145,65 @@ branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for renderi
   "Skip (1 ✦)". When the sheet is up the loader ghosts back (`loaderDim` 0.4) yet keeps chasing.
 - All strings localized (new `loading` i18n block, en/fr/ar/es — FR/AR/ES pending native review).
   Added `GradientButton.leadingIcon` prop.
+- **2026-07-03 (C-10 result-experience pass, Simo-approved):** the centered atom now rotates (7s,
+  rs64) with a breathing accentSoft glow behind it; phrases → per-CATEGORY copy pools ×3 with
+  crossfade (`loading.pool.<cat>1..3`, 4 locales). Gate sheet rebuilt per `ad_gate*.png`: glowing
+  module orb (Svg sphere) + expanding pulse ring + "YOUR READING IS READY" accent eyebrow +
+  Playfair "One veil left to lift" + ▶ Watch Now (ad→FULL) / "See the full reading" 1✦ glass pill
+  (spend→FULL) / "Skip" text (free→MINIMAL). All colors from the per-module spine. Flagged
+  divergence (accepted): design shows a blurred result behind the gate; we ship dimmed loader +
+  scrim (Expo Go blur cost).
 
-### Result — `app/result.tsx` — 🔲 (matches `result-multi.png` + `result-solo.png`)
-- **Implemented:** multi = winner name (glow) + confidence + comparison bars; solo = verdict + confidence + "what this means"; insights card; share/retry/save.
-- **Watch for:** winner name font; insight prefix `✦`; share text format. Heaviest screen — most likely to need several DIFF passes.
+### Result — `app/result.tsx` — ✅ matches (98%) — Simo-approved 2026-07-03
+- **Final state (C-10 result experience; spec `aurafy-result-experience-DESIGN-SPEC.md` +
+  `Screenshots_new/Result_*.png` — these supersede the old `result-multi/solo.png`):** per-module
+  themed via the category spine — accent eyebrow (module subtitle) → crisp white reveal name
+  (single accent textShadow r16) + ghosted oversized motif + 3 accent ✦ sparkles → verdict line →
+  confidence card (§3 honest: percentile sub-line only after ≥5 prior readings) → THE FULL PICTURE
+  (accent bars, winner emphasized) → WHAT THIS MEANS (✦ bullets) → disclaimer → accent Share pill
+  (`[accent, darkenHex(accent,.22)]`) → Try another | Save & exit.
+- **Two-tier (Option C):** gate on loading → ad or 1✦ unlocks FULL; free Skip → MINIMAL (eyebrow +
+  name + verdict + confidence + "STILL VEILED" unlock card + accentSoft floor bloom). Reading is
+  saved on mount regardless of tier; History reopen is always full (accepted).
+- **Module-color pass (2026-07-03, device-verified):** spine accents realigned to `Module.color`
+  (COLOR RULE comment in `src/themes/categoryTheme.ts`) — loves **violet #8B5CF6** (was wrongly
+  pink; pink stays with soulmate), jealous **emerald #34D399** (took energy's original green;
+  venom #046B50 dropped), energy **radiant white #FFFFFF** (soft = silver #E2E8F0, deliberately
+  darker than the accent so blooms stay visible), am_i_problem **gold #F5C542** (matches its Home
+  card; mirror motif keeps it apart from admires' eye).
+- **Residual retouch (~2%, logged per matches-protocol):** Simo's minor polish TBD; energy
+  Home/module tile is still the gold ✨ emoji on the now-white tile (emoji→vector standing item);
+  History love `crystal-ball` glyph swap still optional.
+
+### Share card (result + weekly) — `src/components/ShareCard.tsx` — ✅ matches (98%) — Simo-approved 2026-07-03
+- **One generator, two variants** (design `Screenshots_new/share_card.png`, 1080×1920 story):
+  fixed 360×640 logical canvas in RAW px (deliberately no `rs()` — the export must be identical
+  on every device), captured at 3× via react-native-view-shot (4.0.3, SDK-pinned → capture works
+  in Expo Go) and shared as PNG through expo-sharing. Off-screen host parked past the left edge
+  on `result.tsx` + `weekly-result.tsx`; the old text share remains the automatic fallback.
+- **Anatomy:** accent-tinted night sky + deterministic star field + ✦ sparkles → atom logo +
+  Playfair wordmark → center block (reading: spine-colored eyebrow / white glowing name /
+  verdict line + faint planet rim · weekly: constant weekly-cyan venn motif + "MY WEEK REVEALED"
+  + outcome title) → Playfair-Italic pull-quote → glass CTA pill ("Discover yours →" /
+  "Start your week →") → `@aurafy.app` watermark. New font loaded:
+  `PlayfairDisplay_400Regular_Italic` (+ Naskh mapping so the AR quote never falls to Latin).
+- **Quote = designed shareLines (Simo's option b):** `shareLines` added to `MultiResults`
+  (per dimension) + `SoloResults` (per verdict) and filled in all 9 results files — 27 lines ×
+  4 locales (multi modules second-person, self modules first-person confession);
+  `resultGenerator` stamps the pick into `ResultData.shareLine`. Weekly reuses
+  `WeekOutcome.shareLine` (already existed for exactly this).
+- **Save-to-gallery:** expo-media-library (18.2.1 + app.json plugin) — circular download button
+  beside Share on the result (ALSO on History view-only reopens; nav pills stay fresh-reading
+  only) and on weekly, with a transient "Saved ✓ / allow photos" hint. i18n `shareCard.*` ×4.
+- **Same-day retouches:** loves `accentSoft` #C4B5FD→#A78BFA (loading glow read white on
+  device); solo-quiz `{name}` highlight now `accentInk(accent)` — ice-blue #9CC2FF ONLY for the
+  white energy accent, which vanished inside white question copy (every colored module keeps its
+  accent); reveal names on result/card stay white-ink + accent-glow (re-approved after a blue-ink
+  detour — do NOT re-tint them); planet rim softened .06→.04; download button made circular.
+- **Residual (~2%):** confirm gallery save lands on the dev/EAS build (Expo Go warns it can't
+  grant full media-library access); pre-2026-07-03 History readings carry no stored shareLine →
+  their cards render without the pull-quote (accepted); `share_card.png` shows pre-swap pink
+  loves — re-export pending; FR/AR/ES shareLines pending native review.
 
 ### Stars / wallet — `app/(tabs)/stars.tsx` — ✅ matches — Simo-verified 2026-06-06
 - **Final state:** transparent container over the root CosmicField (indigo→navy) + top-center violet
@@ -163,9 +220,23 @@ branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for renderi
 - **Testing shim:** every card earns directly (watch/streak/share bypass real gating) — real
   rewarded-ad / 7-day / share-completion gating is Phase 4.
 
-### History — `app/(tabs)/history.tsx` — 🔲
-- **Implemented:** list of past readings (module icon, title, result preview, mode badge, date), empty state, banner-ad footer.
-- **Watch for:** module emoji icon fallback `🔮`; "Reading from …" a11y; date format.
+### History — `app/(tabs)/history.tsx` — ✅ matches (90%) — Simo-approved 2026-06-30 (advance now; residual logged)
+- **Final state:** transparent over root CosmicField + top `CosmicBloom` (was flat-black; the fix). Playfair "Your
+  Readings" title. Merged, date-sorted timeline of `history` (readings) + `weeklyHistory` (weekly entries).
+- **Reading cards** are category-themed via the new **category spine** (`src/themes/categoryTheme.ts`,
+  `src/components/CategoryMotif.tsx`): accent left-bar + soft category bloom + motif tile (vector, no emoji) + dot-eyebrow
+  (module) + Playfair result name + inline "— X% confidence" + Solo/Compare/… pill + date; tap → view-only result.
+  Result name via `src/utils/readingDisplay.ts` (winner name → solo verdict LABEL → dominantDimension).
+- **Weekly card:** distinct constant-cyan treatment — orbit tile + "WEEKLY READING" eyebrow + "7-DAY" badge + outcome
+  title (Playfair) + "7 nights · completed {date}" (single completion date — NOT a continuous range, since the streak is
+  forgiving). Saved idempotently in `userStore.claimWeeklyResult` → persisted `weeklyHistory[]` (cap 20; cleared by
+  `clearHistory` + `resetAll`).
+- **Empty state:** canonical `AurafyLogo` (rs116) over a violet bloom + "Your readings will live here" + spec copy +
+  gradient "Start a reading" CTA. **Sponsored ad slot renders in BOTH states** (online-only; empty pushes it to the bottom).
+- **i18n:** 4 locales — `emptyMessage` (new copy), `confidenceLine`, `weeklyEyebrow`, `sevenDayBadge`, `nights`, `sponsored`.
+- **RESIDUAL (final-revision retouch, non-blocking):** love card motif is the spec's `crystal-ball` glyph — reads slightly
+  webcam-like at small size; offered Simo a one-line swap to a glow-orb/heart. No `aura`-category card appears from real data
+  until the Aura module ships (spine already supports `aura_color`).
 
 ### Settings — `app/(tabs)/settings.tsx` — ✅ matches — Simo-verified 2026-06-07
 - **Final state:** transparent over root CosmicField + top `CosmicBloom`; Playfair title; sectioned
@@ -232,6 +303,86 @@ branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for renderi
 - **V1 remaining:** device DIFF passes (Golden Loop) → AR RTL → real images → broaden daily `featured` pool. Economy = free + read-to-earn (+1 ✦/day behind an ad; ad gate stubbed).
 - **V1.1:** real AdMob native/rewarded wiring, FR/AR/ES translations, saved + read-history surfaces. No IAP (AdMob-only).
 - **Note (non-blocking):** new earn reason key `insight_read` needs a localized label in `stars.tsx` `reasonLabel` + i18n when the reward UI is built.
+
+---
+
+## 1.6 · C-10 — WEEKLY CURRICULUM & RESULT — 🔄 PILOT IN PROGRESS (flag ON)
+
+**2026-06-24 (foundation pass):** safe, non-breaking rails for the daily ritual → weekly result
+system. Full spec in **CLAUDE.md → "C-10 — Weekly Curriculum & Result System"**; data plan in
+**`docs/aurafy-article-content-map.md`** (54-week canonical map). Current app behavior unchanged
+(`WEEKLY_CURRICULUM_ENABLED = false`, `WEEKS` empty → walker no-ops, legacy daily pickers still run).
+Typecheck clean (minus the 2 known `reading-mode.tsx` errors).
+
+| Piece | File | Status |
+|---|---|---|
+| Feature flag | `src/config/flags.ts` | ✅ `WEEKLY_CURRICULUM_ENABLED = false` |
+| Week types | `src/data/weeks/types.ts` | ✅ `WeekOutcome` / `WeekDay` / `WeeklyTheme` |
+| Empty registry + validators | `src/data/weeks/index.ts` | ✅ `WEEKS: [] ` + `getWeekById` + dev-only `validateWeek` |
+| Curriculum walker | `src/data/weeks/walker.ts` | ✅ `isoWeekNumber` / `getDayIndex` (Mon=0) / `getActiveWeek` / `getTodayPairing` (flag-gated, null no-op) |
+| Store fields | `src/store/userStore.ts` | ✅ persisted `forcedNextWeekId` + `weeklyResult`; pure `tallyWeeklyOutcome` exported |
+| Anti-exploit | `src/store/userStore.ts` | ✅ backwards-clock guard; +1/24h cap; removed stray `incrementStreak` |
+| `zodiac` chip | `src/content/articles/index.ts` + `i18n/*.json` | ✅ 7th category (accent `#818CF8`, 4 locales) |
+
+**Content map placed:** `docs/aurafy-article-content-map.md`. **Skill placed:**
+`.claude/skills/aurafy-week-generator/SKILL.md`.
+
+**2026-06-28 (pilot — economy lock + reveal · reveal loop ~90% DONE):** Simo locked the streak model and built the reveal.
+- **Insurance system REMOVED** — `insuredDays`, the 5★ auto-spend, the gap/cap logic, the 48h grace:
+  all deleted from `userStore` + `dev-panel`. Nothing references it anywhere.
+- **Streak is now FORGIVING** — `completeDailyRitual` = +1 per ritual (once/local day); a missed day
+  HOLDS the streak (never resets). Reaching 7 stages the pending `weeklyResult`; `claimWeeklyResult`
+  pays the bonus and rolls the streak → 0. Backwards-clock + once-per-local-day anti-exploit kept.
+- **Weekly reveal bonus +10 → +5** (`STREAK_BONUS_REWARD`; `app/weekly-result.tsx` `STREAK_BONUS`;
+  i18n `weekly.bonusTitle` is `{{amount}}`-parameterized so it follows automatically).
+- **Reveal screen** `app/weekly-result.tsx` — **🔄 ~90% (logic solid; visuals nearly there)**.
+  Category-tinted bloom + **breathing atom-mark glow** (matches `Screenshots_new/7-DayPayoff_animationStar*`
+  pulse) + **luminous outcome title** (stacked accent HALO + GLOW copies behind a crisp white CORE that
+  breathe with the same twinkle — RN has no multi-pass text-shadow on one `Text`, so the glow is faked
+  with layered copies; closest achievable to the screenshot's neon without Skia), +5 bonus card, share, save.
+  **Remaining ~10% = small retouches to circle back to:** `Screenshots_new/7-DayPayoff.png` still shows
+  **+10** in the bonus card → needs a re-export to +5 (Golden-Loop source-of-truth); plus any glow-intensity
+  tuning after the device DIFF. 🔄 awaiting device DIFF.
+- **Reset-to-factory** — `userStore.resetAll` re-seeds the welcome **+5 wallet row**; Settings reset
+  now hard-reloads (default language + LTR) so strings/content/RTL return to defaults, not the prior
+  language. (Expo Go: RTL flag fully re-applies only on a manual relaunch; prod = expo-updates.)
+- **Keep-awake** — the benign dev-only Expo wake-lock rejection ("Unable to activate keep awake") is
+  silenced via `LogBox.ignoreLogs` in `app/_layout.tsx` (dev-only; cannot occur in a prod build).
+
+**FOLLOW-UP (deferred — NOT built):** **Daily reminder notification.** `expo-notifications` installed
+(`~0.32.17`); a guarded, lazy-loaded **dev-panel test button** ("Send test notification",
+`src/utils/notifications.ts`) exists so on-device delivery can be verified — **requires an EAS
+dev-client REBUILD** (native module; not in the current binary, so the button reports "Not available"
+until rebuilt). Still TODO: schedule a daily local notification at the user's `reminderTime` (the
+Settings `dailyReminder` / `streakReminder` toggles already exist), permission UX, reschedule on
+time/locale change, cancel on toggle-off. Offline, no backend.
+
+**Build order:** (1) rails ✅ now · (2) PILOT — Week 1 content + flip flag + day-7 reveal + route
+reader through walker (device DIFF) · (3) scale weeks 2–54 · (4) result-screen polish (built last).
+**Not done in this pass:** no result screen, no picker swap, no content, no screen routed through the
+walker. `getDailyInsightId`/`getDailyQuestionId` untouched.
+
+---
+
+## 1.7 · DESIGN SYSTEM · DIALOGS — 🔄 restyled to "System Sheet", awaiting device DIFF
+
+**2026-06-28:** brought every confirmation popup onto the new **System Sheet** language from
+`Screenshots_new/Reset_all_Data.png` + `Clear_history.png` (tone icon badge over a top bloom,
+optional eyebrow, serif title, **tone-gradient** primary pill, glass cancel pill).
+- **`ConfirmSheet`** (bottom sheet — Settings: Reset / Clear / Restart / Export) — full restyle +
+  new `icon` / `eyebrow` props. Reset = rose + `alert-triangle` + "Cannot be undone"; Clear = cyan +
+  `trash-2`; Restart = rose + `refresh-cw`; Export-empty = cyan + `inbox`. Matches the 2 PNGs.
+- **`AppDialog`** (centered quick-dialog — person-entry "not enough stars") — same grammar in a
+  centered card (kept centered for fast info/errors). New `tone`/`icon`/`eyebrow` props; `destructive`
+  back-compat → rose. The not-enough-stars use = cyan + `star`. ⚠️ **Note for Simo:** person-entry has
+  **no** leave/discard dialog — its only `AppDialog` is the not-enough-stars info. If a discard dialog
+  is wanted, point me to it.
+- **`ThemeUnlockDialog`** (theme-gallery) — kept the gradient theme-preview hero (better than a generic
+  icon here); added a **lock badge** over the hero + upgraded the cancel text-link → glass pill. Tone
+  stays gold (★ cost).
+- **Pickers** (`PickerSheet` / `TimeWheelSheet`) — out of scope (not confirmations), untouched.
+- i18n: added `common.cannotBeUndone` (4 locales); aligned EN reset/clear messages to the PNGs.
+- No PNG exists for AppDialog / ThemeUnlockDialog — extended the same language by judgment (Simo-approved).
 
 ---
 

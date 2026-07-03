@@ -5,6 +5,7 @@ import {
   NativeSyntheticEvent,
   Pressable,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
@@ -14,9 +15,10 @@ import {
 } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Feather } from '@expo/vector-icons';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../themes/ThemeProvider';
-import GradientButton from './GradientButton';
 import { rs } from '../utils/responsive';
 
 interface TimeWheelSheetProps {
@@ -27,7 +29,11 @@ interface TimeWheelSheetProps {
   onClose: () => void;
 }
 
-const ITEM_H = rs(40);
+// "System Sheet" cyan accent — matches ConfirmSheet's safe/info tone.
+const ACCENT = '#22D3EE';
+const ACCENT_GRADIENT: readonly [string, string] = ['#22D3EE', '#06B6D4'];
+
+const ITEM_H = rs(36);
 const VISIBLE = 5; // odd → one centred row
 const WHEEL_H = ITEM_H * VISIBLE;
 const PAD = ITEM_H * Math.floor(VISIBLE / 2); // top/bottom spacer so ends can centre
@@ -93,9 +99,12 @@ function Wheel({
 }
 
 /**
- * Any-time reminder picker — three snap-scroll wheels (hour / minute / AM-PM)
- * inside the cosmic-glass bottom sheet. A fixed centre band + top/bottom fade
- * frame the selection; the "Set time" CTA emits an "h:mm AM/PM" string.
+ * Any-time reminder picker, dressed in the shared **"System Sheet"** grammar
+ * (see `ConfirmSheet`): a glass sheen over `bg2`, a cyan top bloom, a clock
+ * icon badge with a glow halo, an uppercase eyebrow + serif title, and the
+ * cyan gradient primary pill. The body is three snap-scroll wheels (hour /
+ * minute / AM-PM); a fixed centre band + top/bottom fade frame the selection,
+ * and the "Set time" CTA emits an "h:mm AM/PM" string.
  *
  * The sheet content lives under a `GestureHandlerRootView` (RN `Modal` renders
  * in its own window, outside the app's root one) and the wheels use the
@@ -119,17 +128,36 @@ export default function TimeWheelSheet({ visible, value, onSelect, onClose }: Ti
               {
                 backgroundColor: theme.bg2,
                 borderColor: theme.borderStrong,
-                paddingBottom: insets.bottom + rs(16),
+                paddingBottom: insets.bottom + rs(20),
               },
             ]}
           >
-            <LinearGradient
-              colors={theme.gradient}
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              style={styles.accentLine}
-            />
+            {/* White-5% sheen over bg2 → lifted app-glass (matches GlassCard / ConfirmSheet). */}
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: theme.surface }]} />
+
+            {/* Cyan bloom rising from behind the icon. */}
+            <Svg pointerEvents="none" style={styles.bloom} width="100%" height="100%">
+              <Defs>
+                <RadialGradient id="tw_bloom" cx="50%" cy="0%" r="62%">
+                  <Stop offset="0%" stopColor={ACCENT} stopOpacity={0.3} />
+                  <Stop offset="55%" stopColor={ACCENT} stopOpacity={0.07} />
+                  <Stop offset="100%" stopColor={ACCENT} stopOpacity={0} />
+                </RadialGradient>
+              </Defs>
+              <Rect x="0" y="0" width="100%" height="100%" fill="url(#tw_bloom)" />
+            </Svg>
+
             <View style={[styles.grabber, { backgroundColor: theme.surfaceBorder }]} />
+
+            {/* Icon badge — glass tile + cyan glow halo. */}
+            <View style={styles.iconWrap}>
+              <View style={[styles.iconHalo, { backgroundColor: `${ACCENT}26` }]} pointerEvents="none" />
+              <View style={[styles.iconTile, { borderColor: `${ACCENT}80`, backgroundColor: `${ACCENT}1A` }]}>
+                <Feather name="clock" size={rs(22)} color={ACCENT} />
+              </View>
+            </View>
+
+            <Text style={[styles.eyebrow, { color: ACCENT }]}>{t('settings.notifications')}</Text>
             <Text style={[styles.title, { color: theme.text }]}>{t('settings.selectTime')}</Text>
 
             {visible ? <Wheels value={value} onSelect={onSelect} onClose={onClose} /> : null}
@@ -164,13 +192,17 @@ function Wheels({
 
   return (
     <>
-      <View style={styles.wheelArea}>
+      {/* Wheel container has NO fill — fully transparent, so the sheet (bloom +
+          sheen and all) shows straight through. Its background is therefore the
+          surrounding area continued; only the thin border outlines it. The cyan
+          centre band is the single highlight that marks the selected row. */}
+      <View style={[styles.wheelArea, { borderColor: theme.borderStrong }]}>
         {/* centre selection band (behind the numbers) */}
         <View
           pointerEvents="none"
           style={[
             styles.band,
-            { backgroundColor: theme.surface, borderColor: theme.gradient[0] },
+            { backgroundColor: `${ACCENT}14`, borderColor: `${ACCENT}66` },
           ]}
         />
 
@@ -180,23 +212,20 @@ function Wheels({
           <Wheel data={MINUTES} initialIndex={initial.m} width={rs(58)} onChange={setM} />
           <Wheel data={MERIDIEM} initialIndex={initial.ap} width={rs(64)} onChange={setAp} />
         </View>
-
-        {/* top + bottom fade so edge rows recede */}
-        <LinearGradient
-          colors={[theme.bg2, `${theme.bg2}00`]}
-          style={[styles.fade, styles.fadeTop]}
-          pointerEvents="none"
-        />
-        <LinearGradient
-          colors={[`${theme.bg2}00`, theme.bg2]}
-          style={[styles.fade, styles.fadeBottom]}
-          pointerEvents="none"
-        />
       </View>
 
-      <View style={styles.cta}>
-        <GradientButton label={t('settings.setTime')} onPress={confirm} labelColor="#0A0B1A" />
-      </View>
+      {/* Primary — cyan gradient pill (matches ConfirmSheet's safe confirm). */}
+      <TouchableOpacity
+        style={styles.primaryWrap}
+        activeOpacity={0.9}
+        onPress={confirm}
+        accessibilityRole="button"
+        accessibilityLabel={t('settings.setTime')}
+      >
+        <LinearGradient colors={ACCENT_GRADIENT} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.primary}>
+          <Text style={[styles.primaryLabel, { color: '#07091A' }]}>{t('settings.setTime')}</Text>
+        </LinearGradient>
+      </TouchableOpacity>
     </>
   );
 }
@@ -211,23 +240,53 @@ const styles = StyleSheet.create({
   sheet: {
     borderTopLeftRadius: rs(24),
     borderTopRightRadius: rs(24),
-    borderWidth: 1,
+    borderWidth: 0.7,
     borderBottomWidth: 0,
     paddingTop: rs(10),
     paddingHorizontal: rs(20),
     overflow: 'hidden',
+    alignItems: 'center',
   },
-  accentLine: { position: 'absolute', top: 0, left: 0, right: 0, height: rs(2) },
+  bloom: { position: 'absolute', top: 0, left: 0, right: 0, height: rs(190) },
   grabber: {
-    alignSelf: 'center',
     width: rs(40),
     height: rs(4.5),
     borderRadius: rs(3),
-    marginBottom: rs(14),
+    marginBottom: rs(16),
   },
-  title: { fontSize: rs(16), fontFamily: 'Inter_600SemiBold', marginBottom: rs(8) },
+  iconWrap: { width: rs(52), height: rs(52), alignItems: 'center', justifyContent: 'center', marginBottom: rs(10) },
+  iconHalo: { position: 'absolute', width: rs(68), height: rs(68), borderRadius: rs(22) },
+  iconTile: {
+    width: rs(52),
+    height: rs(52),
+    borderRadius: rs(15),
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eyebrow: {
+    fontSize: rs(11),
+    fontFamily: 'HankenGrotesk_700Bold',
+    letterSpacing: 1.8,
+    textTransform: 'uppercase',
+    marginBottom: rs(6),
+  },
+  title: {
+    fontSize: rs(22),
+    lineHeight: rs(26),
+    fontFamily: 'PlayfairDisplay_700Bold',
+    textAlign: 'center',
+  },
 
-  wheelArea: { height: WHEEL_H, justifyContent: 'center', marginVertical: rs(6) },
+  wheelArea: {
+    height: WHEEL_H,
+    justifyContent: 'center',
+    marginTop: rs(12),
+    marginBottom: rs(10),
+    borderWidth: 0.3,
+    borderRadius: rs(20),
+    overflow: 'hidden',
+  },
   wheelRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -236,21 +295,29 @@ const styles = StyleSheet.create({
   },
   band: {
     position: 'absolute',
-    left: 0,
-    right: 0,
+    left: rs(8),
+    right: rs(8),
     top: PAD,
     height: ITEM_H,
-    borderRadius: rs(12),
+    borderRadius: rs(11),
     borderTopWidth: 1,
     borderBottomWidth: 1,
   },
   item: { height: ITEM_H, alignItems: 'center', justifyContent: 'center' },
-  itemText: { fontSize: rs(21), fontFamily: 'Inter_500Medium' },
-  colon: { fontSize: rs(21), fontFamily: 'Inter_600SemiBold', marginBottom: rs(2) },
+  itemText: { fontSize: rs(19), fontFamily: 'HankenGrotesk_500Medium' },
+  colon: { fontSize: rs(19), fontFamily: 'HankenGrotesk_600SemiBold', marginBottom: rs(2) },
 
-  fade: { position: 'absolute', left: 0, right: 0, height: PAD },
-  fadeTop: { top: 0 },
-  fadeBottom: { bottom: 0 },
-
-  cta: { marginTop: rs(16) },
+  primaryWrap: {
+    width: '100%',
+    marginTop: rs(16),
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  primary: {
+    height: rs(50),
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryLabel: { fontSize: rs(15.5), fontFamily: 'HankenGrotesk_700Bold' },
 });

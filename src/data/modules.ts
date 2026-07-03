@@ -19,7 +19,9 @@ export const MODULES: Module[] = [
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
     icon: '✨',
-    color: '#10B981',
+    // Radiant white — pure light/aura (Simo 2026-07-03). Its old green moved to
+    // who_jealous. Matches MODULE_THEMES.
+    color: '#FFFFFF',
     framework: 'colorWheel',
   },
   {
@@ -35,7 +37,9 @@ export const MODULES: Module[] = [
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
     icon: '✂',
-    color: '#F5C542',
+    // Emerald "green with envy" (Simo 2026-07-03) — took over energy_reading's original
+    // green; the venom-dark #046B50 read black on device. Matches MODULE_THEMES.
+    color: '#34D399',
     framework: 'sociometry',
   },
   {

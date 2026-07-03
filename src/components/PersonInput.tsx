@@ -92,11 +92,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontWeight: '700', fontSize: rs(14), fontFamily: 'Inter_700Bold' },
+  avatarText: { fontWeight: '700', fontSize: rs(14), fontFamily: 'HankenGrotesk_700Bold' },
   input: {
     flex: 1,
     fontSize: rs(15),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     minHeight: rs(40),
   },
   // 8 swatches on one evenly-spaced row (design 07-person-entry) — never wrap.

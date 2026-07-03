@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
 
   eyebrow: {
     fontSize: rs(11),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 1.5,
     marginBottom: rs(8),
   },
@@ -260,8 +260,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modeInfo: { flex: 1 },
-  modeTitle: { fontSize: rs(15), fontFamily: 'Inter_700Bold' },
-  modeSubtitle: { fontSize: rs(12), lineHeight: rs(16), fontFamily: 'Inter_400Regular', marginTop: rs(2) },
+  modeTitle: { fontSize: rs(15), fontFamily: 'HankenGrotesk_700Bold' },
+  modeSubtitle: { fontSize: rs(12), lineHeight: rs(16), fontFamily: 'HankenGrotesk_400Regular', marginTop: rs(2) },
   costBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -271,9 +271,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
   },
-  costText: { fontSize: rs(13), fontFamily: 'Inter_700Bold' },
+  costText: { fontSize: rs(13), fontFamily: 'HankenGrotesk_700Bold' },
   earnRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: rs(4), marginTop: rs(8) },
-  earnLink: { fontSize: rs(12), fontFamily: 'Inter_600SemiBold' },
+  earnLink: { fontSize: rs(12), fontFamily: 'HankenGrotesk_600SemiBold' },
 
   /* Footer */
   footer: { paddingHorizontal: rs(28), paddingTop: rs(8) },

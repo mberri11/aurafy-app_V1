@@ -44,10 +44,11 @@ export default function HomeScreen() {
   const stars = useUserStore((s) => s.stars);
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
   const dailyAnswers = useUserStore((s) => s.dailyAnswers);
+  const weekAnchorDate = useUserStore((s) => s.weekAnchorDate);
 
   // "Tonight's Read" hook — today's deterministic daily insight (see 10-Insight-1).
   const lang = i18n.language as Language;
-  const dailyInsightId = getDailyInsightId();
+  const dailyInsightId = getDailyInsightId(weekAnchorDate);
   const dailyInsight = getArticle(dailyInsightId);
   const dailyInsightContent = getArticleContent(dailyInsightId, lang);
   // Reward pill shows until today's daily ritual (article + question) is completed.
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
   hero: { paddingHorizontal: rs(4), marginTop: rs(8), marginBottom: rs(18) },
   heroEyebrow: {
     fontSize: rs(12),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: rs(8),
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   /* Section heading */
   sectionLabel: {
     fontSize: rs(12),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 1.8,
     textTransform: 'uppercase',
     marginTop: rs(4),

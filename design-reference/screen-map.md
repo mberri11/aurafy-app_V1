@@ -21,14 +21,22 @@
 | 07-person-entry_4.png | app/person-entry.tsx (name input, Energy free-trial solo) | ✅ |
 | quiz-multi.png | app/quiz.tsx | ✅ Simo-verified 2026-06-13 |
 | quiz-solo.png | app/quiz.tsx | ✅ Simo-verified 2026-06-13 |
-| loading.png | app/loading.tsx | ✅ Simo-verified 2026-06-13 |
-| result-multi.png | app/result.tsx | 🔲 |
-| result-solo.png | app/result.tsx | 🔲 |
+| loading.png | app/loading.tsx | ✅ Simo-verified 2026-06-13; C-10 atom+gate pass re-approved 2026-07-03 (canonical now `Screenshots_new/animation_ad.png` + `ad_gate*.png`) |
+| result-multi.png | app/result.tsx | ✅ matches (98%) — Simo-approved 2026-07-03 (old PNG superseded by `Screenshots_new/Result_*.png` + `aurafy-result-experience-DESIGN-SPEC.md`; two-tier Option C) |
+| result-solo.png | app/result.tsx | ✅ matches (98%) — Simo-approved 2026-07-03 (same — superseded by `Screenshots_new/`) |
 | stars.png (+ _1 / _earned / _claimed states) | app/(tabs)/stars.tsx | ✅ |
-| history.png | app/(tabs)/history.tsx | 🔲 |
+| HIstory_empty.png / HIstory_fill.png | app/(tabs)/history.tsx | ✅ matches (90%) — Simo-approved 2026-06-30 (residual: love glyph swap optional) |
 | 14-settings.png / -1 / -2 | app/(tabs)/settings.tsx | ✅ (stale `14-settings.png` shows 4 Appearance rows → re-export to 2) |
 | 14-settings_clear.png / _reset.png | app/(tabs)/settings.tsx (ConfirmSheet) | ✅ |
 | 14-settings_themes.png | app/theme-gallery.tsx (grid) | ✅ |
 | 14-settings_themes_1.png / _2.png | app/theme-gallery.tsx (ThemeUnlockDialog: need-more / affordable) | ✅ |
 | 14-settings_about.png / _about1.png | app/about-psychology.tsx | ✅ |
 | daily.png | app/daily-reading.tsx | 🔲 |
+| share_card.png (Screenshots_new/) | src/components/ShareCard.tsx — reading + weekly variants, captured from result.tsx / weekly-result.tsx | ✅ matches (98%) — Simo-approved 2026-07-03 (PNG shows pre-swap pink loves; re-export pending) |
+
+> **2026-07-03 module-color pass (Simo-approved):** `energy_reading` is now **radiant white**
+> (#FFFFFF), `who_jealous` **emerald** (#34D399, energy's old green), `who_loves_me` surfaces
+> **violet** (#8B5CF6, its true Home color), `am_i_problem` **gold** (#F5C542). Reference PNGs
+> above that name the old colors (emerald Energy in `05-module-detail_2` / `06-mode-select_1`,
+> gold Jealous in `06-mode-select_2`) show the pre-swap palette — re-export pending per the
+> source-of-truth rule.

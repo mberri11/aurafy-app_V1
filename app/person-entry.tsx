@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
+import { moduleTheme } from '@/src/themes/categoryTheme';
 import { useUserStore } from '@/src/store/userStore';
 import { useReadingStore } from '@/src/store/readingStore';
 import { MODULES, FREE_TRIAL_MODULE_ID } from '@/src/data/modules';
@@ -72,9 +73,18 @@ export default function PersonEntryScreen() {
     }));
   });
 
+  // Multi readings need distinguishable people — the quiz answers and the result's
+  // "full picture" are meaningless with two identical "A"s. Case-insensitive on the
+  // trimmed name; only counts filled fields so the hint never fires while typing
+  // into empty slots.
+  const hasDuplicates = useMemo(() => {
+    const names = persons.map((p) => p.name.trim().toLowerCase()).filter((n) => n.length > 0);
+    return new Set(names).size !== names.length;
+  }, [persons]);
+
   const canStart = useMemo(
-    () => persons.every((p) => p.name.trim().length > 0),
-    [persons],
+    () => persons.every((p) => p.name.trim().length > 0) && !hasDuplicates,
+    [persons, hasDuplicates],
   );
 
   const updateName = useCallback((idx: number, name: string) => {
@@ -117,6 +127,9 @@ export default function PersonEntryScreen() {
   if (!module) return null;
 
   const accent = module.color;
+  // Blooms use the spine's SOFT tone — dark module colors (jealous) wash out to
+  // near-black at low opacity and made this screen read unlit.
+  const bloomTint = moduleTheme(module.id).accentSoft;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -129,8 +142,8 @@ export default function PersonEntryScreen() {
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="entry_glow" cx="50%" cy="18%" r="60%">
-            <Stop offset="0%" stopColor={accent} stopOpacity={0.22} />
-            <Stop offset="55%" stopColor={accent} stopOpacity={0.07} />
+            <Stop offset="0%" stopColor={bloomTint} stopOpacity={0.22} />
+            <Stop offset="55%" stopColor={bloomTint} stopOpacity={0.07} />
             <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
           </RadialGradient>
         </Defs>
@@ -171,8 +184,22 @@ export default function PersonEntryScreen() {
         <View style={styles.entries}>
           {persons.map((person, idx) =>
             isLockedSelf ? (
-              // Self-discovery solo: name pre-filled as "You", locked — design 06-mode-select_3.png
-              <GlassCard key={person.id} style={styles.soloCard}>
+              // Self-discovery solo: name pre-filled as "You", locked — accent border +
+              // glow mirror the selected mode card on reading-mode (Simo 2026-07-03).
+              <GlassCard
+                key={person.id}
+                glowColor={accent}
+                style={[
+                  styles.soloCard,
+                  {
+                    borderColor: accent,
+                    borderWidth: 2,
+                    shadowOpacity: 0.9,
+                    shadowRadius: rs(20),
+                    elevation: 14,
+                  },
+                ]}
+              >
                 <View style={styles.soloRow}>
                   <View style={[styles.soloAvatar, { backgroundColor: accent }]}>
                     <Text style={[styles.soloAvatarText, { color: theme.background }]}>
@@ -217,6 +244,11 @@ export default function PersonEntryScreen() {
 
       {/* Pinned CTA */}
       <View style={[styles.footer, { paddingBottom: insets.bottom + rs(20) }]}>
+        {hasDuplicates && (
+          <Text style={[styles.duplicateHint, { color: theme.rose }]}>
+            {t('personEntry.duplicateNames')}
+          </Text>
+        )}
         <GradientButton
           label={isFreeTrial ? t('personEntry.startFree') : t('personEntry.startButton', { cost })}
           onPress={handleStart}
@@ -239,6 +271,8 @@ export default function PersonEntryScreen() {
         title={t('errors.notEnoughStarsTitle')}
         message={t('errors.notEnoughStars')}
         confirmLabel={t('common.ok')}
+        tone="cyan"
+        icon="star"
         onConfirm={() => setNoStars(false)}
         onClose={() => setNoStars(false)}
       />
@@ -271,7 +305,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: rs(28), paddingTop: rs(12) },
   eyebrow: {
     fontSize: rs(11),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 1.5,
     marginBottom: rs(8),
   },
@@ -284,15 +318,14 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: rs(13),
     lineHeight: rs(18),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     marginTop: rs(6),
   },
 
   entries: { gap: rs(12), marginTop: rs(22) },
 
-  /* Solo "You · locked" card — clean subtle glass: just GlassCard's surface tint + border,
-     no extra fill or glow halo, so it reads flat over the accent bloom (design _3). */
-  soloCard: { padding: rs(16), backgroundColor: 'transparent', shadowOpacity: 0, elevation: 0 },
+  /* Solo "You · locked" card — selected-state treatment (accent border + glow) applied inline. */
+  soloCard: { padding: rs(16) },
   soloRow: { flexDirection: 'row', alignItems: 'center', gap: rs(14) },
   soloAvatar: {
     width: rs(46),
@@ -301,10 +334,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  soloAvatarText: { fontSize: rs(18), fontFamily: 'Inter_700Bold' },
+  soloAvatarText: { fontSize: rs(18), fontFamily: 'HankenGrotesk_700Bold' },
   soloNameLine: { flex: 1 },
-  soloName: { fontSize: rs(16), fontFamily: 'Inter_700Bold', opacity: 0.9 },
-  soloLocked: { fontSize: rs(13), fontFamily: 'Inter_400Regular', opacity: 0.6 },
+  soloName: { fontSize: rs(16), fontFamily: 'HankenGrotesk_700Bold', opacity: 0.9 },
+  soloLocked: { fontSize: rs(13), fontFamily: 'HankenGrotesk_400Regular', opacity: 0.6 },
 
   addBtn: {
     borderWidth: 1,
@@ -315,10 +348,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: rs(50),
   },
-  addBtnText: { fontSize: rs(15), fontFamily: 'Inter_400Regular' },
+  addBtnText: { fontSize: rs(15), fontFamily: 'HankenGrotesk_400Regular' },
 
   /* Footer */
   footer: { paddingHorizontal: rs(28), paddingTop: rs(8) },
+  duplicateHint: {
+    fontSize: rs(12.5),
+    fontFamily: 'HankenGrotesk_500Medium',
+    textAlign: 'center',
+    marginBottom: rs(10),
+  },
   balanceRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -327,5 +366,5 @@ const styles = StyleSheet.create({
     marginTop: rs(10),
     opacity: 0.65,
   },
-  balanceAfter: { fontSize: rs(11.5), fontFamily: 'Inter_400Regular' },
+  balanceAfter: { fontSize: rs(11.5), fontFamily: 'HankenGrotesk_400Regular' },
 });

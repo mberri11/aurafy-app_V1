@@ -7,6 +7,26 @@ export const whoAdmiresResults: MultiResults = {
     ar: '{name} يُعجب بك أكثر مما يُظهر.',
     es: '{name} te admira más de lo que deja ver.',
   },
+  shareLines: {
+    quiet_attention: {
+      en: "Someone watches you like you're the answer.",
+      fr: "Quelqu'un te regarde comme si tu étais la réponse.",
+      ar: 'أحدهم يراقبك وكأنك الجواب.',
+      es: 'Alguien te mira como si fueras la respuesta.',
+    },
+    hidden_warmth: {
+      en: 'Admiration hides in the smallest kindnesses.',
+      fr: "L'admiration se cache dans les plus petites attentions.",
+      ar: 'الإعجاب يختبئ في أصغر اللطائف.',
+      es: 'La admiración se esconde en los gestos más pequeños.',
+    },
+    unspoken_longing: {
+      en: 'Some feelings never speak. They just stare.',
+      fr: "Certains sentiments ne parlent jamais. Ils fixent, c'est tout.",
+      ar: 'بعض المشاعر لا تتكلم أبداً — إنها تحدّق فقط.',
+      es: 'Algunos sentimientos nunca hablan. Solo miran.',
+    },
+  },
   insights: {
     quiet_attention: [
       {

@@ -23,6 +23,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { useTheme } from '@/src/themes/ThemeProvider';
+import { accentInk } from '@/src/themes/categoryTheme';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
 import { Question, ReadingMode, Language } from '@/src/types';
@@ -345,7 +346,7 @@ export default function QuizScreen() {
                     <React.Fragment key={i}>
                       {part}
                       {i < arr.length - 1 && (
-                        <Text style={{ color: accent }}>{soloPerson.name}</Text>
+                        <Text style={{ color: accentInk(accent) }}>{soloPerson.name}</Text>
                       )}
                     </React.Fragment>
                   ))
@@ -482,7 +483,7 @@ const styles = StyleSheet.create({
   breathText: {
     fontSize: rs(15),
     lineHeight: rs(22),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
     textAlign: 'center',
     opacity: 0.85,
     marginTop: rs(20),
@@ -492,7 +493,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     fontSize: rs(12),
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'HankenGrotesk_400Regular',
   },
 
   // Question phase
@@ -511,7 +512,7 @@ const styles = StyleSheet.create({
   frameworkDot: { width: rs(5), height: rs(5), borderRadius: rs(3) },
   frameworkText: {
     fontSize: rs(10.5),
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'HankenGrotesk_700Bold',
     letterSpacing: rs(0.8),
   },
   questionText: { fontSize: rs(23), lineHeight: rs(30), marginTop: rs(44) },
@@ -528,7 +529,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  answerText: { fontSize: rs(15), lineHeight: rs(21), fontFamily: 'Inter_500Medium' },
+  answerText: { fontSize: rs(15), lineHeight: rs(21), fontFamily: 'HankenGrotesk_500Medium' },
 
   // Multi person cards
   personCard: {
@@ -557,6 +558,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   personAvatarCompact: { width: rs(30), height: rs(30), borderRadius: rs(15) },
-  personAvatarText: { fontSize: rs(14.5), fontFamily: 'Inter_700Bold' },
-  personName: { flex: 1, fontSize: rs(15.5), fontFamily: 'Inter_600SemiBold' },
+  personAvatarText: { fontSize: rs(14.5), fontFamily: 'HankenGrotesk_700Bold' },
+  personName: { flex: 1, fontSize: rs(15.5), fontFamily: 'HankenGrotesk_600SemiBold' },
 });

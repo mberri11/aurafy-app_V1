@@ -1,12 +1,15 @@
 import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
+  HankenGrotesk_400Regular,
+  HankenGrotesk_500Medium,
+  HankenGrotesk_600SemiBold,
+  HankenGrotesk_700Bold,
+  HankenGrotesk_800ExtraBold,
+  HankenGrotesk_900Black,
   useFonts,
-} from "@expo-google-fonts/inter";
+} from "@expo-google-fonts/hanken-grotesk";
 import {
   PlayfairDisplay_400Regular,
+  PlayfairDisplay_400Regular_Italic,
   PlayfairDisplay_600SemiBold,
   PlayfairDisplay_700Bold,
 } from "@expo-google-fonts/playfair-display";
@@ -19,7 +22,7 @@ import {
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { Component, useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { LogBox, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -30,6 +33,14 @@ import CosmicField from "@/src/components/CosmicField";
 import "@/src/i18n";
 
 SplashScreen.preventAutoHideAsync();
+
+// Expo's dev-mode keep-awake (it pins the screen on while the JS bundle is attached to the dev
+// server) can fail to acquire the OS wake lock on some Android ROMs, surfacing a benign
+// "Unable to activate keep awake" promise rejection as a red error overlay. It cannot happen in
+// a production build (there is no dev keep-awake there), so silence only that one message in dev.
+if (__DEV__) {
+  LogBox.ignoreLogs(["Unable to activate keep awake"]);
+}
 
 /** Minimal error boundary — shows the raw error message in dev, nothing in prod */
 class AurafyErrorBoundary extends Component<
@@ -193,6 +204,23 @@ function RootLayoutNav() {
           animation: "slide_from_right",
         }}
       />
+      {/* C-10 dev panel (dev builds only) — TEST-ONLY, own glass back button. */}
+      <Stack.Screen
+        name="dev-panel"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      {/* C-10 weekly result reveal — full-screen ceremony, fade in, no swipe-dismiss. */}
+      <Stack.Screen
+        name="weekly-result"
+        options={{
+          headerShown: false,
+          animation: "fade",
+          gestureEnabled: false,
+        }}
+      />
       </Stack>
     </View>
   );
@@ -200,11 +228,18 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    // Body / UI face — Hanken Grotesk (adopted in the C-10 result-experience pass,
+    // replacing Inter). Styles still reference the family by its `HankenGrotesk_*`
+    // name; 800/900 are loaded for the share-card / big-CTA weights per the spec.
+    HankenGrotesk_400Regular,
+    HankenGrotesk_500Medium,
+    HankenGrotesk_600SemiBold,
+    HankenGrotesk_700Bold,
+    HankenGrotesk_800ExtraBold,
+    HankenGrotesk_900Black,
     PlayfairDisplay_400Regular,
+    // Share-card quote face (design shows an italic serif pull-quote).
+    PlayfairDisplay_400Regular_Italic,
     PlayfairDisplay_600SemiBold,
     PlayfairDisplay_700Bold,
     NotoNaskhArabic_400Regular,

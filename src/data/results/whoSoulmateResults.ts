@@ -7,6 +7,26 @@ export const whoSoulmateResults: MultiResults = {
     ar: '{name} هو الأكثر انسجاماً معك — أقرب ما يكون إلى تردد توأم الروح.',
     es: '{name} resuena más contigo — lo más cercano a una frecuencia de alma gemela.',
   },
+  shareLines: {
+    resonant_ease: {
+      en: "Some souls don't meet. They recognize.",
+      fr: 'Certaines âmes ne se rencontrent pas. Elles se reconnaissent.',
+      ar: 'بعض الأرواح لا تلتقي — بل تتعارف.',
+      es: 'Algunas almas no se conocen. Se reconocen.',
+    },
+    chosen_devotion: {
+      en: "A soulmate isn't found. They keep choosing you.",
+      fr: 'Une âme sœur ne se trouve pas. Elle te choisit, encore et encore.',
+      ar: 'توأم الروح لا يُعثر عليه — بل يختارك مرةً بعد مرة.',
+      es: 'Un alma gemela no se encuentra. Te sigue eligiendo.',
+    },
+    safe_presence: {
+      en: "Home isn't a place. Apparently it's a person.",
+      fr: "Chez soi n'est pas un lieu. Apparemment, c'est une personne.",
+      ar: 'البيت ليس مكاناً. يبدو أنه شخص.',
+      es: 'El hogar no es un lugar. Al parecer, es una persona.',
+    },
+  },
   insights: {
     resonant_ease: [
       {

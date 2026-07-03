@@ -97,7 +97,7 @@ export default function PickerSheet({
                         styles.optionLabel,
                         {
                           color: active ? theme.gradient[0] : theme.text,
-                          fontFamily: active ? 'Inter_600SemiBold' : 'Inter_500Medium',
+                          fontFamily: active ? 'HankenGrotesk_600SemiBold' : 'HankenGrotesk_500Medium',
                         },
                       ]}
                     >
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: rs(16),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     paddingHorizontal: rs(20),
     marginBottom: rs(6),
   },

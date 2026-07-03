@@ -7,6 +7,26 @@ export const whoLovesMeResults: MultiResults = {
     ar: '{name} يحبك أكثر من الجميع.',
     es: '{name} te ama más que nadie.',
   },
+  shareLines: {
+    secure_base: {
+      en: "The signs aren't subtle — they're just quiet.",
+      fr: 'Les signes ne sont pas subtils — ils sont juste silencieux.',
+      ar: 'العلامات ليست خفية — إنها صامتة فحسب.',
+      es: 'Las señales no son sutiles — solo son silenciosas.',
+    },
+    attunement: {
+      en: "Being seen is rare. You're being memorized.",
+      fr: "Être vu est rare. Toi, on t'apprend par cœur.",
+      ar: 'أن تُرى أمرٌ نادر. أنت، يحفظونك عن ظهر قلب.',
+      es: 'Ser visto es raro. A ti te están memorizando.',
+    },
+    emotional_safety: {
+      en: 'Real love feels less like fireworks, more like exhaling.',
+      fr: "Le vrai amour ressemble moins à un feu d'artifice qu'à une expiration.",
+      ar: 'الحب الحقيقي لا يشبه الألعاب النارية — بل يشبه تنفّس الارتياح.',
+      es: 'El amor real se parece menos a fuegos artificiales y más a exhalar.',
+    },
+  },
   insights: {
     secure_base: [
       {

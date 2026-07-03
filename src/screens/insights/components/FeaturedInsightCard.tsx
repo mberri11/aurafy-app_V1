@@ -256,9 +256,9 @@ const styles = StyleSheet.create({
   /* shared meta row */
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: rs(5) },
   dot: { width: rs(6), height: rs(6), borderRadius: 999 },
-  tagText: { fontSize: rs(10.5), fontFamily: 'Inter_700Bold', letterSpacing: 0.6 },
+  tagText: { fontSize: rs(10.5), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 0.6 },
   clock: { marginStart: rs(6) },
-  readText: { fontSize: rs(11), fontFamily: 'Inter_500Medium' },
+  readText: { fontSize: rs(11), fontFamily: 'HankenGrotesk_500Medium' },
 
   rewardPill: {
     borderWidth: 1,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: rs(9),
     paddingVertical: rs(3),
   },
-  rewardText: { fontSize: rs(11), fontFamily: 'Inter_700Bold' },
+  rewardText: { fontSize: rs(11), fontFamily: 'HankenGrotesk_700Bold' },
 
   /* hero (feed) */
   heroCard: { padding: 0 },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     start: rs(16),
     bottom: rs(12),
     fontSize: rs(13),
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'HankenGrotesk_500Medium',
   },
   heroPanel: { padding: rs(16), gap: rs(10) },
   heroTitle: {
@@ -324,8 +324,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepBadgeText: { fontSize: rs(9.5), fontFamily: 'Inter_700Bold' },
-  stepLabel: { fontSize: rs(11), fontFamily: 'Inter_600SemiBold', letterSpacing: 0.3 },
+  stepBadgeText: { fontSize: rs(9.5), fontFamily: 'HankenGrotesk_700Bold' },
+  stepLabel: { fontSize: rs(11), fontFamily: 'HankenGrotesk_600SemiBold', letterSpacing: 0.3 },
   stepSep: { width: rs(8), height: 1 },
 
   ritualTitle: {
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   ctaSheen: { position: 'absolute', top: 0, left: 0, right: 0, height: '55%' },
-  ctaText: { fontSize: rs(14.5), fontFamily: 'Inter_700Bold', color: '#0B0E25' },
+  ctaText: { fontSize: rs(14.5), fontFamily: 'HankenGrotesk_700Bold', color: '#0B0E25' },
 
   /* done state */
   doneCta: {
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: rs(4),
   },
-  doneCtaText: { fontSize: rs(13.5), fontFamily: 'Inter_600SemiBold' },
+  doneCtaText: { fontSize: rs(13.5), fontFamily: 'HankenGrotesk_600SemiBold' },
 
   /* compact (Home) */
   compactCard: { padding: 0 },

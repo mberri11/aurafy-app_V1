@@ -29,7 +29,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.textDim,
         tabBarLabelStyle: {
           fontSize: rs(11),
-          fontFamily: 'Inter_600SemiBold',
+          fontFamily: 'HankenGrotesk_600SemiBold',
           letterSpacing: 0.2,
         },
         tabBarStyle: {

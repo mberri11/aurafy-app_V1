@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   fill: { height: '100%', borderRadius: rs(5) },
   label: {
     fontSize: rs(12),
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'HankenGrotesk_500Medium',
     fontVariant: ['lining-nums'],
   },
 });

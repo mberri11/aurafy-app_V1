@@ -11,7 +11,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../themes/ThemeProvider';
 import GradientButton from './GradientButton';
 import { rs, screenWidth } from '../utils/responsive';
@@ -86,12 +86,18 @@ export default function ThemeUnlockDialog({
               pointerEvents="none"
               style={[StyleSheet.absoluteFill, { backgroundColor: theme.surface }]}
             />
-            <LinearGradient
-              colors={gradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.hero}
-            />
+            {/* Theme-preview hero with a lock badge — signals the locked theme being unlocked. */}
+            <View style={styles.heroWrap}>
+              <LinearGradient
+                colors={gradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.hero}
+              />
+              <View style={styles.heroLock} pointerEvents="none">
+                <Feather name="lock" size={rs(18)} color="#FFFFFF" />
+              </View>
+            </View>
 
             <Text style={[styles.name, { color: theme.text }]}>{themeName}</Text>
 
@@ -145,13 +151,13 @@ export default function ThemeUnlockDialog({
             )}
 
             <TouchableOpacity
-              style={styles.cancel}
+              style={[styles.cancel, { borderColor: theme.surfaceBorder }]}
               activeOpacity={0.7}
               onPress={onClose}
               accessibilityRole="button"
               accessibilityLabel={t('common.cancel')}
             >
-              <Text style={[styles.cancelLabel, { color: theme.textMuted }]}>{t('common.cancel')}</Text>
+              <Text style={[styles.cancelLabel, { color: theme.text }]}>{t('common.cancel')}</Text>
             </TouchableOpacity>
           </Pressable>
         </Animated.View>
@@ -177,10 +183,24 @@ const styles = StyleSheet.create({
     paddingTop: rs(20),
     paddingBottom: rs(20),
   },
-  hero: {
+  heroWrap: {
     width: HERO_W,
     height: rs(84),
     borderRadius: rs(14),
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hero: { ...StyleSheet.absoluteFillObject },
+  heroLock: {
+    width: rs(40),
+    height: rs(40),
+    borderRadius: 999,
+    backgroundColor: 'rgba(7,9,26,0.45)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   name: {
     fontSize: rs(22),
@@ -197,12 +217,12 @@ const styles = StyleSheet.create({
   stat: { alignItems: 'center', minWidth: rs(80) },
   statLabel: {
     fontSize: rs(10),
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 1,
     marginBottom: rs(4),
   },
   statValueRow: { flexDirection: 'row', alignItems: 'center', gap: rs(4) },
-  statValue: { fontSize: rs(17), fontFamily: 'Inter_700Bold' },
+  statValue: { fontSize: rs(17), fontFamily: 'HankenGrotesk_700Bold' },
   statDivider: { width: 1, height: rs(30), marginHorizontal: rs(14) },
   cta: { marginTop: rs(18) },
   needMore: {
@@ -215,8 +235,8 @@ const styles = StyleSheet.create({
     marginTop: rs(18),
     gap: rs(3),
   },
-  needMoreLabel: { fontSize: rs(15.5), fontFamily: 'Inter_700Bold' },
-  needMoreArrow: { fontSize: rs(15.5), fontFamily: 'Inter_700Bold' },
+  needMoreLabel: { fontSize: rs(15.5), fontFamily: 'HankenGrotesk_700Bold' },
+  needMoreArrow: { fontSize: rs(15.5), fontFamily: 'HankenGrotesk_700Bold' },
   cancel: { alignItems: 'center', paddingVertical: rs(10), marginTop: rs(6) },
-  cancelLabel: { fontSize: rs(15), fontFamily: 'Inter_500Medium' },
+  cancelLabel: { fontSize: rs(15), fontFamily: 'HankenGrotesk_500Medium' },
 });
