@@ -4,7 +4,7 @@
 //
 // Full-screen ceremony shown when a week's 7 covered rituals resolve into one
 // outcome. Category-themed (accent from the week's category). Mounting the reveal
-// is what PAYS the +10 — claimWeeklyResult() runs in an effect, so the bonus is
+// is what PAYS the +5 — claimWeeklyResult() runs in an effect, so the bonus is
 // never credited before the reveal is on screen (the STRICT ORDER from the brief).
 // Content comes from getWeekById(weeklyResult.weekId) → the matching outcome.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -36,6 +36,7 @@ import ShareCard, { SHARE_CARD_H, SHARE_CARD_W } from '@/src/components/ShareCar
 import { captureRef } from 'react-native-view-shot';
 import { saveImageToGallery, shareImage } from '@/src/utils/share';
 import { successNotification, lightTap } from '@/src/utils/haptics';
+import { playEffect } from '@/src/utils/sound';
 import { rs } from '@/src/utils/responsive';
 
 const STREAK_BONUS = 5; // mirrors STREAK_BONUS_REWARD in userStore
@@ -46,18 +47,26 @@ export default function WeeklyResultScreen() {
   const lang = i18n.language as Language;
   const insets = useSafeAreaInsets();
 
+  // Read-only reopen from History (`viewOnly: '1'` + the entry's persisted
+  // weekId/outcomeKey): render the same ceremony but claim nothing, pay nothing,
+  // chime nothing — the payoff already happened when the week completed.
+  const params = useLocalSearchParams<{ viewOnly?: string; weekId?: string; outcomeKey?: string }>();
+  const isViewOnly = params.viewOnly === '1';
+
   const weeklyResult = useUserStore((s) => s.weeklyResult);
   const stars = useUserStore((s) => s.stars);
   const claimWeeklyResult = useUserStore((s) => s.claimWeeklyResult);
 
-  // STRICT ORDER: pay the +10 only once the reveal is actually rendered. Idempotent —
+  // STRICT ORDER: pay the +5 only once the reveal is actually rendered. Idempotent —
   // returns 0 (and re-credits nothing) if this result was already claimed.
   useEffect(() => {
-    claimWeeklyResult();
-  }, [claimWeeklyResult]);
+    if (!isViewOnly) claimWeeklyResult();
+  }, [claimWeeklyResult, isViewOnly]);
 
-  const week = weeklyResult ? getWeekById(weeklyResult.weekId) : undefined;
-  const outcome = week?.outcomes.find((o) => o.key === weeklyResult?.outcomeKey);
+  const weekId = isViewOnly ? params.weekId : weeklyResult?.weekId;
+  const outcomeKey = isViewOnly ? params.outcomeKey : weeklyResult?.outcomeKey;
+  const week = weekId ? getWeekById(weekId) : undefined;
+  const outcome = week?.outcomes.find((o) => o.key === outcomeKey);
   const accent = week ? CATEGORY_COLORS[week.category] : theme.primary;
   const L = (s: LocalizedString) => s[lang] ?? s.en;
 
@@ -71,6 +80,12 @@ export default function WeeklyResultScreen() {
   useEffect(() => {
     enter.value = withTiming(1, { duration: 650, easing: Easing.out(Easing.cubic) });
     twinkle.value = withRepeat(withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.quad) }), -1, true);
+    // Weekly reveal chime, synced to the entrance start (immediate — no delay here).
+    // Guarded on `outcome` so the empty/error mount stays silent, and on view-only
+    // so History reopens stay quiet; fires once (the shared-value deps are stable,
+    // so this effect runs a single time on mount).
+    if (outcome && !isViewOnly) playEffect('revealWeekly');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enter, twinkle]);
   const colStyle = useAnimatedStyle(() => ({
     opacity: enter.value,
@@ -144,9 +159,10 @@ export default function WeeklyResultScreen() {
     }
     flashSavedMsg(t('shareCard.saveDenied'));
   };
+  // Fresh-reveal exit only — view-only reopens leave via back (the link is hidden).
   const onClose = () => router.replace('/(tabs)');
 
-  if (!weeklyResult || !week || !outcome) {
+  if (!week || !outcome) {
     return (
       <View style={[styles.root, styles.center, { backgroundColor: theme.background }]}>
         <Text style={[styles.empty, { color: theme.textMuted }]}>{t('weekly.empty')}</Text>
@@ -159,6 +175,9 @@ export default function WeeklyResultScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>
+      {/* The fresh-reveal ceremony must not be swipe-dismissed mid-claim; view-only
+          reopens keep the gesture (their way back to History) — mirrors result.tsx. */}
+      <Stack.Screen options={{ gestureEnabled: isViewOnly }} />
       {/* Category-tinted radial bloom behind the reveal. */}
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
@@ -216,30 +235,34 @@ export default function WeeklyResultScreen() {
 
           <Text style={[styles.body, { color: theme.textMuted }]}>{L(outcome.body)}</Text>
 
-          {/* +10 streak bonus — earned celebration with a tasteful star twinkle (no confetti) */}
-          <View style={[styles.bonusCard, { borderColor: `${theme.gold}45`, backgroundColor: `${theme.gold}0F` }]}>
-            <View style={styles.starWrap}>
-              <Animated.View style={[styles.starHalo, { backgroundColor: `${theme.gold}26` }, haloStyle]} pointerEvents="none" />
-              <Animated.View style={starStyle}>
-                <MaterialCommunityIcons name="star" size={rs(30)} color={theme.gold} />
-              </Animated.View>
+          {/* +5 streak bonus — earned celebration with a tasteful star twinkle (no
+              confetti). Fresh reveals only: a History reopen pays nothing, so it
+              must not re-celebrate a bonus. */}
+          {!isViewOnly && (
+            <View style={[styles.bonusCard, { borderColor: `${theme.gold}45`, backgroundColor: `${theme.gold}0F` }]}>
+              <View style={styles.starWrap}>
+                <Animated.View style={[styles.starHalo, { backgroundColor: `${theme.gold}26` }, haloStyle]} pointerEvents="none" />
+                <Animated.View style={starStyle}>
+                  <MaterialCommunityIcons name="star" size={rs(30)} color={theme.gold} />
+                </Animated.View>
+              </View>
+              <View style={styles.bonusText}>
+                <Text style={[styles.bonusTitle, { color: theme.gold }]}>
+                  {t('weekly.bonusTitle', { amount: STREAK_BONUS })}
+                </Text>
+                <Text style={[styles.bonusSub, { color: theme.textMuted }]}>
+                  {t('weekly.bonusSubtitle', { balance: stars })}
+                </Text>
+              </View>
             </View>
-            <View style={styles.bonusText}>
-              <Text style={[styles.bonusTitle, { color: theme.gold }]}>
-                {t('weekly.bonusTitle', { amount: STREAK_BONUS })}
-              </Text>
-              <Text style={[styles.bonusSub, { color: theme.textMuted }]}>
-                {t('weekly.bonusSubtitle', { balance: stars })}
-              </Text>
-            </View>
-          </View>
+          )}
 
           {/* Share my week (captured card) + save-to-gallery */}
           <View style={styles.shareRow}>
             <TouchableOpacity onPress={onShare} activeOpacity={0.9} style={styles.shareWrap} accessibilityRole="button">
               <LinearGradient colors={theme.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.shareBtn}>
-                <Feather name="share-2" size={rs(17)} color="#0B0E25" />
-                <Text style={styles.shareLabel}>{t('weekly.share')}</Text>
+                <Feather name="share-2" size={rs(17)} color={theme.bg2} />
+                <Text style={[styles.shareLabel, { color: theme.bg2 }]}>{t('weekly.share')}</Text>
               </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity
@@ -256,9 +279,14 @@ export default function WeeklyResultScreen() {
             <Text style={[styles.savedMsg, { color: theme.textMuted }]}>{savedMsg}</Text>
           )}
 
-          <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={styles.saveLink} accessibilityRole="button">
-            <Text style={[styles.saveText, { color: theme.textMuted }]}>{t('weekly.save')}</Text>
-          </TouchableOpacity>
+          {/* "Save to history" only makes sense on the fresh reveal — a History
+              reopen IS the saved entry; back (hardware/gesture) returns to History,
+              same as view-only readings on result.tsx. */}
+          {!isViewOnly && (
+            <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={styles.saveLink} accessibilityRole="button">
+              <Text style={[styles.saveText, { color: theme.textMuted }]}>{t('weekly.save')}</Text>
+            </TouchableOpacity>
+          )}
         </Animated.View>
       </ScrollView>
 
@@ -382,7 +410,7 @@ const styles = StyleSheet.create({
     height: rs(52),
     borderRadius: 999,
   },
-  shareLabel: { fontSize: rs(15.5), fontFamily: 'HankenGrotesk_700Bold', color: '#0B0E25' },
+  shareLabel: { fontSize: rs(15.5), fontFamily: 'HankenGrotesk_700Bold' },
 
   saveLink: { marginTop: rs(14), paddingVertical: rs(6) },
   saveText: { fontSize: rs(13.5), fontFamily: 'HankenGrotesk_500Medium' },

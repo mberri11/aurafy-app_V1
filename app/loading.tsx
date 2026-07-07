@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  BackHandler,
   Dimensions,
   StyleSheet,
   TouchableOpacity,
@@ -22,19 +23,24 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { categoryForModule, moduleTheme } from '@/src/themes/categoryTheme';
+import { AURA_WHEEL_HUES, categoryForModule, isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
 import { MODULES } from '@/src/data/modules';
 import { scoreReading } from '@/src/engine/scoringEngine';
-import { generateMultiResult, generateSoloResult } from '@/src/engine/resultGenerator';
+import {
+  generateCategoricalResult,
+  generateMultiResult,
+  generateSoloResult,
+} from '@/src/engine/resultGenerator';
 import { AdMobManager } from '@/src/ads/AdMobManager';
 import GradientButton from '@/src/components/GradientButton';
 import AurafyLogo from '@/src/components/AurafyLogo';
 import { ResultData, ReadingMode } from '@/src/types';
 import { rs } from '@/src/utils/responsive';
 import { lightTap } from '@/src/utils/haptics';
+import { playLoop, stopLoop } from '@/src/utils/sound';
 
 // Map moduleId → results
 import { whoLovesMeResults } from '@/src/data/results/whoLovesMeResults';
@@ -46,7 +52,8 @@ import { energyReadingResults } from '@/src/data/results/energyReadingResults';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
 import { whoCutOffResults } from '@/src/data/results/whoCutOffResults';
-import { MultiResults, SoloResults } from '@/src/types';
+import { auraColorResults } from '@/src/data/results/auraColorResults';
+import { CategoricalResults, MultiResults, SoloResults } from '@/src/types';
 
 import { whoLovesMeQuestions } from '@/src/data/questions/whoLovesMe';
 import { whoHatesMeQuestions } from '@/src/data/questions/whoHatesMe';
@@ -57,6 +64,7 @@ import { energyReadingQuestions } from '@/src/data/questions/energyReading';
 import { attachmentStyleQuestions } from '@/src/data/questions/attachmentStyle';
 import { amITheProblemQuestions } from '@/src/data/questions/amITheProblem';
 import { whoCutOffQuestions } from '@/src/data/questions/whoCutOff';
+import { auraColorQuestions } from '@/src/data/questions/auraColor';
 import { Question } from '@/src/types';
 
 const QUESTIONS_MAP: Record<string, Question[]> = {
@@ -69,6 +77,7 @@ const QUESTIONS_MAP: Record<string, Question[]> = {
   attachment_style: attachmentStyleQuestions,
   am_i_problem: amITheProblemQuestions,
   who_cut_off: whoCutOffQuestions,
+  aura_color: auraColorQuestions,
 };
 
 const MULTI_RESULTS_MAP: Record<string, MultiResults> = {
@@ -84,6 +93,12 @@ const MULTI_RESULTS_MAP: Record<string, MultiResults> = {
 const SOLO_RESULTS_MAP: Record<string, SoloResults> = {
   attachment_style: attachmentStyleResults,
   am_i_problem: amITheProblemResults,
+};
+
+// Categorical modules keep their own map — CategoricalResults' shape (categories +
+// edgeTemplate) is not a SoloResults (verdict tiers), so the two never mix.
+const CATEGORICAL_RESULTS_MAP: Record<string, CategoricalResults> = {
+  aura_color: auraColorResults,
 };
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -164,7 +179,15 @@ const HexDot = memo(function HexDot({
 /** The full loader: category-tinted bloom + faint hexagon outline + 6 chasing dots +
  *  the centered atom mark — which itself ROTATES slowly while its core breathes
  *  (spec §5: the logo moves, not just the dots). Keeps animating behind the ad-gate. */
-const HexLoader = memo(function HexLoader({ accent }: { accent: string }) {
+const HexLoader = memo(function HexLoader({
+  accent,
+  dotColors,
+}: {
+  accent: string;
+  /** Per-dot hue override — the aura prism passes the 6 wheel hues so the chase
+   *  reads as a spinning rainbow. Default: all dots in the module accent. */
+  dotColors?: readonly string[];
+}) {
   const animationsEnabled = useSettingsStore((s) => s.animationsEnabled);
   const phase = useSharedValue(0);
   const spin = useSharedValue(0);
@@ -220,7 +243,7 @@ const HexLoader = memo(function HexLoader({ accent }: { accent: string }) {
           key={i}
           x={p.x}
           y={p.y}
-          color={accent}
+          color={dotColors ? dotColors[i % dotColors.length] : accent}
           index={i}
           total={HEX_POINTS.length}
           phase={phase}
@@ -261,11 +284,37 @@ export default function LoadingScreen() {
   // by CATEGORY (the poetic lines suit the whole family).
   const category = categoryForModule(moduleId ?? '');
   const { accent, accentSoft } = moduleTheme(moduleId ?? '');
+  // Prismatic identity (aura_color, Simo 2026-07-04): rainbow hex dots, gradient
+  // blooms, iridescent orb + white ink — the violet fallback read as Who Loves Me.
+  const prism = isPrismModule(moduleId ?? '');
+  const g = theme.gradient;
 
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const [showAdGate, setShowAdGate] = useState(false);
   const [adGateState, setAdGateState] = useState<'initial' | 'adFailed'>('initial');
   const resultRef = useRef<ResultData | null>(null);
+  const loopStarted = useRef(false);
+
+  // Ambient pad: start on mount (guarded against a double-start on re-render), and
+  // stop on unmount as a backstop. Leaving via the gate stops it earlier, inside
+  // navigateToResult. playLoop itself no-ops when Ambient Audio is off.
+  useEffect(() => {
+    if (!loopStarted.current) {
+      loopStarted.current = true;
+      playLoop();
+    }
+    return () => {
+      stopLoop();
+    };
+  }, []);
+
+  // Consume hardware back while the reading resolves/gates: the stars are already
+  // spent and the result computed — popping here would strand a paid reading. The
+  // gate's free "Skip" is always available, so this never traps the user.
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+    return () => sub.remove();
+  }, []);
 
   const sheetY = useSharedValue(SCREEN_HEIGHT);
   const scrimOpacity = useSharedValue(0);
@@ -291,7 +340,10 @@ export default function LoadingScreen() {
     const seed = Date.now();
     let finalResult: ResultData;
 
-    if (moduleType === 'multi') {
+    if (module?.resultKind === 'categorical') {
+      const cr = CATEGORICAL_RESULTS_MAP[moduleId ?? ''];
+      finalResult = cr ? generateCategoricalResult(rawResult, cr, seed) : rawResult;
+    } else if (moduleType === 'multi') {
       const mr = MULTI_RESULTS_MAP[moduleId ?? ''];
       finalResult = mr ? generateMultiResult(rawResult, mr, seed) : rawResult;
     } else {
@@ -342,6 +394,8 @@ export default function LoadingScreen() {
   }));
 
   const navigateToResult = useCallback(() => {
+    // Stop the ambient pad the instant we leave — before the transition, not after.
+    stopLoop();
     router.replace({ pathname: '/result' });
   }, []);
 
@@ -360,7 +414,7 @@ export default function LoadingScreen() {
 
   const handleUnlockWithStar = useCallback(() => {
     lightTap();
-    if (spendStars(1)) {
+    if (spendStars(1, 'result_unlock')) {
       setResultUnlocked(true);
       navigateToResult();
     }
@@ -374,9 +428,9 @@ export default function LoadingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Cosmic depth base (mirrors quiz / reading-mode) */}
+      {/* Ambient depth base (mirrors quiz / reading-mode) */}
       <LinearGradient
-        colors={['#181430', '#0E0B22', '#08061A']}
+        colors={theme.fieldGradient}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -385,9 +439,18 @@ export default function LoadingScreen() {
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="load_bloom" cx="26%" cy="20%" r="65%">
-            <Stop offset="0%" stopColor={accentSoft} stopOpacity={0.18} />
-            <Stop offset="60%" stopColor={accentSoft} stopOpacity={0.05} />
-            <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+            {prism
+              ? [
+                  <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.18} />,
+                  <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.07} />,
+                  <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.03} />,
+                  <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                ]
+              : [
+                  <Stop key="s0" offset="0%" stopColor={accentSoft} stopOpacity={0.18} />,
+                  <Stop key="s1" offset="60%" stopColor={accentSoft} stopOpacity={0.05} />,
+                  <Stop key="s2" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                ]}
           </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#load_bloom)" />
@@ -398,7 +461,7 @@ export default function LoadingScreen() {
         style={[styles.center, { paddingTop: insets.top, paddingBottom: insets.bottom }, loaderStyle]}
       >
         {/* Soft tone for the whole loader — dark accents render near-invisible dots. */}
-        <HexLoader accent={accentSoft} />
+        <HexLoader accent={accentSoft} dotColors={prism ? AURA_WHEEL_HUES : undefined} />
         <Animated.View style={textStyle}>
           <Text style={[styles.loadingText, { color: theme.textMuted }]}>
             {t(`loading.pool.${category}${loadingTextIdx + 1}`)}
@@ -428,9 +491,18 @@ export default function LoadingScreen() {
             <Svg pointerEvents="none" style={styles.sheetBloom} width="100%" height="100%">
               <Defs>
                 <RadialGradient id="gate_bloom" cx="50%" cy="0%" r="65%">
-                  <Stop offset="0%" stopColor={accentSoft} stopOpacity={0.26} />
-                  <Stop offset="55%" stopColor={accentSoft} stopOpacity={0.07} />
-                  <Stop offset="100%" stopColor={accentSoft} stopOpacity={0} />
+                  {prism
+                    ? [
+                        <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.26} />,
+                        <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.1} />,
+                        <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.04} />,
+                        <Stop key="p3" offset="100%" stopColor={g[2]} stopOpacity={0} />,
+                      ]
+                    : [
+                        <Stop key="s0" offset="0%" stopColor={accentSoft} stopOpacity={0.26} />,
+                        <Stop key="s1" offset="55%" stopColor={accentSoft} stopOpacity={0.07} />,
+                        <Stop key="s2" offset="100%" stopColor={accentSoft} stopOpacity={0} />,
+                      ]}
                 </RadialGradient>
               </Defs>
               <Rect x="0" y="0" width="100%" height="100%" fill="url(#gate_bloom)" />
@@ -440,13 +512,26 @@ export default function LoadingScreen() {
 
             {/* Glowing category orb + expanding pulse ring (ad_gate_animation frames). */}
             <View style={styles.orbWrap}>
-              <Animated.View style={[styles.orbRing, { borderColor: accent }, ringStyle]} />
+              <Animated.View
+                style={[styles.orbRing, { borderColor: prism ? theme.text : accent }, ringStyle]}
+              />
               <Svg width={ORB_SIZE} height={ORB_SIZE}>
                 <Defs>
                   <RadialGradient id="gate_orb" cx="38%" cy="32%" r="78%">
-                    <Stop offset="0%" stopColor={accentSoft} stopOpacity={1} />
-                    <Stop offset="55%" stopColor={accent} stopOpacity={0.9} />
-                    <Stop offset="100%" stopColor="#07091A" stopOpacity={0.92} />
+                    {prism
+                      ? [
+                          // Iridescent sphere: white-hot core → violet body →
+                          // cyan sheen → the same dark rim as every module orb.
+                          <Stop key="p0" offset="0%" stopColor={theme.text} stopOpacity={1} />,
+                          <Stop key="p1" offset="40%" stopColor={g[1]} stopOpacity={0.95} />,
+                          <Stop key="p2" offset="75%" stopColor={g[0]} stopOpacity={0.85} />,
+                          <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0.92} />,
+                        ]
+                      : [
+                          <Stop key="s0" offset="0%" stopColor={accentSoft} stopOpacity={1} />,
+                          <Stop key="s1" offset="55%" stopColor={accent} stopOpacity={0.9} />,
+                          <Stop key="s2" offset="100%" stopColor={theme.background} stopOpacity={0.92} />,
+                        ]}
                   </RadialGradient>
                 </Defs>
                 <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={ORB_SIZE / 2} fill="url(#gate_orb)" />
@@ -454,7 +539,7 @@ export default function LoadingScreen() {
               </Svg>
             </View>
 
-            <Text style={[styles.gateEyebrow, { color: accent }]}>
+            <Text style={[styles.gateEyebrow, { color: prism ? theme.text : accent }]}>
               {t('loading.ready').toUpperCase()}
             </Text>
             <Text style={[styles.veilTitle, { color: theme.text }]}>{t('loading.veil')}</Text>

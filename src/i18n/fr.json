@@ -14,7 +14,12 @@
     "skip": "Passer",
     "tap": "Appuyer",
     "ok": "OK",
-    "done": "Terminé"
+    "done": "Terminé",
+    "adBadge": "Pub"
+  },
+  "splash": {
+    "tagline": "Décrypte l'énergie autour de toi",
+    "loading": "Chargement des étoiles"
   },
   "tabs": {
     "home": "Accueil",
@@ -39,9 +44,9 @@
     "earnUseLabel": "Utiliser",
     "earnUseAmount": "Dépense pour lire",
     "earnDailyLabel": "Quotidien",
-    "earnDailyAmount": "+2 / jour",
+    "earnDailyAmount": "+1 / jour",
     "earnWatchLabel": "Regarder",
-    "earnWatchAmount": "+1 par pub",
+    "earnWatchAmount": "+2 par pub",
     "beginButton": "Commencer mon voyage",
     "earnStars": "Gagner des étoiles",
     "spendStars": "Dépenser des étoiles",
@@ -61,7 +66,8 @@
     "minutes": "minutes",
     "fromCost": "dès {{cost}}",
     "toRead": "à lire",
-    "beginReading": "Commencer la lecture"
+    "beginReading": "Commencer la lecture",
+    "notFound": "Module introuvable"
   },
   "modules": {
     "who_loves_me": {
@@ -128,6 +134,14 @@
       "time": "5–7 min",
       "cost": "1"
     },
+    "aura_color": {
+      "title": "Couleur d'Aura",
+      "subtitle": "La couleur que porte ton énergie",
+      "description": "Ton énergie a une couleur — elle entre dans les pièces avant toi. 20 questions révèlent celle qui rayonne en toi depuis toujours.",
+      "poweredBy": "Psychologie des couleurs + lecture d'énergie",
+      "time": "5–7 min",
+      "cost": "1"
+    },
     "am_i_problem": {
       "title": "Suis-je le problème ?",
       "subtitle": "Un miroir honnête",
@@ -168,11 +182,18 @@
     },
     "heading": "Combien de personnes lisez-vous ?",
     "earnStars": "Gagner plus",
-    "free": "Gratuit"
+    "free": "Gratuit",
+    "modeA11y": "Mode {{mode}}, coûte {{cost}} étoiles",
+    "modeA11yFree": "Mode {{mode}}, gratuit"
   },
   "quiz": {
     "progressLabel": "{{current}} / {{total}}",
     "tapToAnswer": "Appuie pour sélectionner",
+    "noQuestions": "Aucune question disponible",
+    "leaveTitle": "Quitter cette lecture ?",
+    "leaveMessagePaid": "Ta progression ne sera pas enregistrée. Tes étoiles te seront remboursées ({{cost}} ✦).",
+    "leaveMessageTrial": "Ta progression ne sera pas enregistrée. Ta lecture gratuite sera restaurée.",
+    "leaveConfirm": "Quitter la lecture",
     "frameworks": {
       "attachment": "Théorie de l'attachement",
       "loveLanguages": "Langages de l'amour",
@@ -228,6 +249,7 @@
     "adUnavailable": "Pub indisponible — utilise une étoile ou passe"
   },
   "result": {
+    "notFound": "Aucun résultat trouvé.",
     "confidenceLabel": "{{confidence}}% de confiance",
     "confidenceHeadline": "Nous sommes sûrs de cette lecture à {{confidence}}%.",
     "confidenceSub": "Plus élevé que {{pct}}% de tes lectures.",
@@ -281,7 +303,10 @@
     "reasonDaily": "Bonus quotidien",
     "reasonWelcome": "Cadeau de bienvenue",
     "reasonReading": "Lecture",
-    "reasonStreak": "Série de 7 jours"
+    "reasonRefund": "Remboursement",
+    "reasonStreak": "Série de 7 jours",
+    "reasonUnlock": "Résultat débloqué",
+    "reasonTheme": "Thème débloqué"
   },
   "history": {
     "title": "Tes lectures",
@@ -312,6 +337,7 @@
     "privacyPolicy": "Politique de confidentialité",
     "rateApp": "Évaluer Aurafy",
     "shareApp": "Partager Aurafy",
+    "shareMessage": "Découvre Aurafy — l'app de lectures relationnelles fondée sur la psychologie !",
     "data": "Données",
     "resetData": "Réinitialiser toutes les données",
     "resetConfirmTitle": "Réinitialiser toutes les données ?",
@@ -339,6 +365,8 @@
     "howItWorksTitle": "Comment fonctionne Aurafy",
     "howItWorksMessage": "Choisis un module, réponds à une courte série de questions intuitives, et Aurafy transforme tes choix en lecture. Les questions s'appuient sur de vrais cadres ; le résultat est une réflexion, pas un diagnostic.",
     "termsOfUse": "Conditions d'utilisation",
+    "contactUs": "Nous contacter",
+    "contactBody": "Bonjour l'équipe Aurafy,\n\nMerci d'avoir créé Aurafy ! Je voulais vous contacter avec une suggestion / une question :\n\n[ écris ton message ici ]\n\n— Envoyé depuis l'application Aurafy",
     "clearHistory": "Effacer l'historique",
     "clearHistoryConfirmTitle": "Effacer l'historique de lecture ?",
     "clearHistoryConfirmMessage": "Cela supprime toutes les lectures enregistrées. Tes étoiles et tes réglages sont conservés.",
@@ -382,6 +410,9 @@
     "startFree": "Commencer — Gratuit",
     "balanceAfter": "Solde après : {{balance}}",
     "namePlaceholder": "Entrer un prénom...",
+    "personPlaceholder": "Personne {{n}}",
+    "personNameA11y": "Nom de la personne {{n}}",
+    "you": "Toi",
     "soloTitle": "Cette lecture est pour toi",
     "soloSubtitle": "Réponds honnêtement — toi seul la verras.",
     "locked": "verrouillé"

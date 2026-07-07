@@ -19,7 +19,6 @@ import { useTheme } from '@/src/themes/ThemeProvider';
 import GlassCard from '@/src/components/GlassCard';
 import { type Article, type ArticleContent, CATEGORY_COLORS } from '@/src/content/articles';
 import { rs } from '@/src/utils/responsive';
-import { useIsRTL } from '@/src/utils/rtl';
 import OrbitArt from './OrbitArt';
 
 export interface ArticleCardProps {
@@ -28,7 +27,9 @@ export interface ArticleCardProps {
   content?: ArticleContent;
   /** Filled dot when the article hasn't been read yet. */
   unread?: boolean;
-  onPress: () => void;
+  /** Omitted for the sponsored placeholder — that card is not tappable until a
+   *  real AdMob native ad backs it (Phase 4). */
+  onPress?: () => void;
 }
 
 const THUMB_BG = '#1B1330';
@@ -36,38 +37,36 @@ const THUMB_BG = '#1B1330';
 export default function ArticleCard({ article, content, unread, onPress }: ArticleCardProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const isRTL = useIsRTL();
   const accent = CATEGORY_COLORS[article.category];
 
   // ── Sponsored native-ad variant ──────────────────────────────────────────
+  // Deliberately NOT tappable: the placeholder has nothing to open, and a dead
+  // press reads as broken. Phase 4 wraps this in the real native-ad touchable.
   if (article.sponsored) {
     return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.85} accessibilityRole="button">
-        <GlassCard glowColor={`${accent}40`} style={styles.card}>
-          <View style={[styles.thumb, { backgroundColor: THUMB_BG }]}>
-            <OrbitArt size={rs(46)} accent={accent} />
-          </View>
-          <View style={styles.body}>
-            <Text style={[styles.sponsoredLabel, { color: theme.textDim }]}>
-              {t('insights.sponsored')}
-            </Text>
-            <Text style={[styles.title, { color: theme.text }]} numberOfLines={2}>
-              {t('insights.sponsoredTitle')}
-            </Text>
-            <View style={styles.metaRow}>
-              <View style={[styles.brandPill, { borderColor: theme.surfaceBorder }]}>
-                <Text style={[styles.brandText, { color: theme.textMuted }]}>
-                  {t('insights.sponsoredBrand')}
-                </Text>
-              </View>
-              <View style={styles.openRow}>
-                <Text style={[styles.openText, { color: theme.text }]}>{t('insights.open')}</Text>
-                <Feather name={isRTL ? 'chevron-left' : 'chevron-right'} size={rs(13)} color={theme.text} />
-              </View>
+      <GlassCard glowColor={`${accent}40`} style={styles.card} contentStyle={styles.cardContent}>
+        <View style={[styles.thumb, { backgroundColor: THUMB_BG }]}>
+          <OrbitArt size={rs(46)} accent={accent} />
+        </View>
+        <View style={styles.body}>
+          <Text style={[styles.sponsoredLabel, { color: theme.textDim }]}>
+            {t('insights.sponsored')}
+          </Text>
+          <Text style={[styles.title, { color: theme.text }]} numberOfLines={2}>
+            {t('insights.sponsoredTitle')}
+          </Text>
+          {/* No "Open ›" until Phase 4 backs this with a real native ad — the card
+              is inert, so nothing may promise an action. The row keeps the same
+              height via the brand pill, so the live ad won't cause a layout jump. */}
+          <View style={styles.metaRow}>
+            <View style={[styles.brandPill, { borderColor: theme.surfaceBorder }]}>
+              <Text style={[styles.brandText, { color: theme.textMuted }]}>
+                {t('insights.sponsoredBrand')}
+              </Text>
             </View>
           </View>
-        </GlassCard>
-      </TouchableOpacity>
+        </View>
+      </GlassCard>
     );
   }
 
@@ -77,7 +76,7 @@ export default function ArticleCard({ article, content, unread, onPress }: Artic
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85} accessibilityRole="button">
-      <GlassCard glowColor={`${accent}33`} style={styles.card}>
+      <GlassCard glowColor={`${accent}33`} style={styles.card} contentStyle={styles.cardContent}>
         {/* per-category accent line on the leading edge */}
         <View style={[styles.accent, { backgroundColor: accent }]} />
         <View style={[styles.thumb, { backgroundColor: THUMB_BG }]}>
@@ -101,13 +100,15 @@ export default function ArticleCard({ article, content, unread, onPress }: Artic
 }
 
 const styles = StyleSheet.create({
-  card: {
+  // Outer chrome vs content: the row layout must ride GlassCard's contentStyle —
+  // on `style` it lands on the outer chrome View and never reaches the children
+  // (the thumbnail stacked above the title instead of beside it).
+  card: { marginBottom: rs(12) },
+  cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: rs(12),
     padding: rs(12),
-    marginBottom: rs(12),
-    overflow: 'hidden',
   },
   accent: {
     position: 'absolute',
@@ -155,6 +156,4 @@ const styles = StyleSheet.create({
     paddingVertical: rs(2),
   },
   brandText: { fontSize: rs(10.5), fontFamily: 'HankenGrotesk_500Medium' },
-  openRow: { flexDirection: 'row', alignItems: 'center', gap: rs(1) },
-  openText: { fontSize: rs(12), fontFamily: 'HankenGrotesk_600SemiBold' },
 });

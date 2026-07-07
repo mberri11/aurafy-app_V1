@@ -1,4 +1,4 @@
-import { Question, Person, ReadingMode, ResultData, LocalizedString, ResultKind } from '../types';
+import { Question, Person, ReadingMode, ResultData, LocalizedString, Language, ResultKind } from '../types';
 
 /**
  * Core scoring logic for all reading types.
@@ -53,7 +53,9 @@ function scoreMulti(
     }
   }
 
-  // Winner = highest total score; tie-break on attachment framework questions
+  // Winner = highest total score. A tie (2+ persons at the max) is a REAL outcome:
+  // it is detected below and rendered as a tie — never silently resolved in favor
+  // of whoever was entered first.
   let winner = persons[0];
   let maxScore = scores[persons[0].id] ?? 0;
 
@@ -65,6 +67,11 @@ function scoreMulti(
     }
   }
 
+  // Everyone sharing the max score. `winner` stays the first max scorer for
+  // backward compat; rendering gates on tiedWinnerIds instead.
+  const tiedWinners = persons.filter((p) => (scores[p.id] ?? 0) === maxScore);
+  const isTie = tiedWinners.length > 1;
+
   // Confidence = how *decisively* the winner leads, not their share of the whole quiz.
   // The old `winnerScore / totalPossible` punished bigger groups: votes split N ways, so a
   // clear winner among 4 people read low even when unambiguous. Now blend the margin over
@@ -75,7 +82,9 @@ function scoreMulti(
   const runnerUpScore = sortedScores[1] ?? 0;
   const margin = totalSignal > 0 ? (maxScore - runnerUpScore) / totalSignal : 0;
   const dominance = totalSignal > 0 ? maxScore / totalSignal : 0;
-  const confidence = clamp(Math.round(55 + margin * 30 + dominance * 10), 60, 95);
+  // A tie is definitionally zero-margin — pin to the 60 floor exactly instead of
+  // letting the dominance term nudge it around.
+  const confidence = isTie ? 60 : clamp(Math.round(55 + margin * 30 + dominance * 10), 60, 95);
 
   // dominantDimension = dimension with highest winner score concentration
   let dominantDimension = 'general';
@@ -92,6 +101,8 @@ function scoreMulti(
     moduleId,
     mode,
     winner,
+    tiedWinnerIds: isTie ? tiedWinners.map((p) => p.id) : [],
+    tiedWinners: isTie ? tiedWinners : undefined,
     scores,
     dominantDimension,
     confidence,
@@ -266,6 +277,18 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
+/** Locale conjunctions for joinNames — kept here (not i18n) so the engine stays pure. */
+const NAME_CONJUNCTION: Record<Language, string> = { en: 'and', fr: 'et', ar: 'و', es: 'y' };
+
+/** Natural join of tied winners' names: 2 → "X and Y"; 3+ → "X, Y, and Z" (Oxford
+ *  comma). One implementation for any N — circle mode allows up to 10 people. */
+export function joinNames(names: string[], lang: Language): string {
+  if (names.length <= 1) return names[0] ?? '';
+  const and = NAME_CONJUNCTION[lang];
+  if (names.length === 2) return `${names[0]} ${and} ${names[1]}`;
+  return `${names.slice(0, -1).join(', ')}, ${and} ${names[names.length - 1]}`;
+}
+
 /** Localize a result template replacing {name} placeholder */
 export function localizeTemplate(template: LocalizedString, name: string): LocalizedString {
   return {
@@ -273,5 +296,21 @@ export function localizeTemplate(template: LocalizedString, name: string): Local
     fr: template.fr.replace('{name}', name),
     ar: template.ar.replace('{name}', name),
     es: template.es.replace('{name}', name),
+  };
+}
+
+/** localizeTemplate for a LOCALIZED replacement value: each locale's template gets
+ *  that locale's value (e.g. CategoricalResults.edgeTemplate's {edge} → the runner-up
+ *  category's label in the same language). */
+export function localizeTemplateLocalized(
+  template: LocalizedString,
+  placeholder: string,
+  value: LocalizedString,
+): LocalizedString {
+  return {
+    en: template.en.replace(placeholder, value.en),
+    fr: template.fr.replace(placeholder, value.fr),
+    ar: template.ar.replace(placeholder, value.ar),
+    es: template.es.replace(placeholder, value.es),
   };
 }

@@ -14,7 +14,12 @@
     "skip": "تخطي",
     "tap": "اضغط",
     "ok": "حسناً",
-    "done": "تم"
+    "done": "تم",
+    "adBadge": "إعلان"
+  },
+  "splash": {
+    "tagline": "افك شفرة الطاقة من حولك",
+    "loading": "جارٍ تحميل النجوم"
   },
   "tabs": {
     "home": "الرئيسية",
@@ -39,9 +44,9 @@
     "earnUseLabel": "استخدم",
     "earnUseAmount": "أنفق للقراءة",
     "earnDailyLabel": "يومي",
-    "earnDailyAmount": "+2 يومياً",
+    "earnDailyAmount": "+1 يومياً",
     "earnWatchLabel": "شاهد",
-    "earnWatchAmount": "+1 لكل إعلان",
+    "earnWatchAmount": "+2 لكل إعلان",
     "beginButton": "ابدأ رحلتي",
     "earnStars": "اكسب نجوماً",
     "spendStars": "أنفق نجوماً",
@@ -61,7 +66,8 @@
     "minutes": "دقائق",
     "fromCost": "من {{cost}}",
     "toRead": "للقراءة",
-    "beginReading": "ابدأ القراءة"
+    "beginReading": "ابدأ القراءة",
+    "notFound": "الوحدة غير موجودة"
   },
   "modules": {
     "who_loves_me": {
@@ -128,6 +134,14 @@
       "time": "٥–٧ دقائق",
       "cost": "١"
     },
+    "aura_color": {
+      "title": "لون الهالة",
+      "subtitle": "اللون الذي ترتديه طاقتك",
+      "description": "لطاقتك لون — يدخل الأماكن قبلك. عشرون سؤالًا تكشف اللون الذي كنت تتوهّج به طوال الوقت.",
+      "poweredBy": "علم نفس الألوان + قراءة الطاقة",
+      "time": "5–7 دقائق",
+      "cost": "1"
+    },
     "am_i_problem": {
       "title": "هل أنا المشكلة؟",
       "subtitle": "مرآة صادقة",
@@ -168,11 +182,18 @@
     },
     "heading": "كم عدد الأشخاص الذين تقرؤهم؟",
     "earnStars": "اكسب المزيد",
-    "free": "مجاني"
+    "free": "مجاني",
+    "modeA11y": "وضع {{mode}}، يكلف {{cost}} نجوم",
+    "modeA11yFree": "وضع {{mode}}، مجاني"
   },
   "quiz": {
     "progressLabel": "{{current}} / {{total}}",
     "tapToAnswer": "اضغط للاختيار",
+    "noQuestions": "لا توجد أسئلة متاحة",
+    "leaveTitle": "مغادرة هذه القراءة؟",
+    "leaveMessagePaid": "لن يُحفَظ تقدّمك. ستُعاد نجومك إلى رصيدك ({{cost}} ✦).",
+    "leaveMessageTrial": "لن يُحفَظ تقدّمك. ستستعيد قراءتك المجانية.",
+    "leaveConfirm": "مغادرة القراءة",
     "frameworks": {
       "attachment": "نظرية التعلق",
       "loveLanguages": "لغات الحب",
@@ -228,6 +249,7 @@
     "adUnavailable": "الإعلان غير متاح — استخدم نجمة أو تخطَّ"
   },
   "result": {
+    "notFound": "لم يتم العثور على نتيجة.",
     "confidenceLabel": "{{confidence}}% ثقة",
     "confidenceHeadline": "نحن واثقون من هذه القراءة بنسبة {{confidence}}%.",
     "confidenceSub": "أعلى من {{pct}}% من قراءاتك.",
@@ -281,7 +303,10 @@
     "reasonDaily": "المكافأة اليومية",
     "reasonWelcome": "هدية ترحيبية",
     "reasonReading": "قراءة",
-    "reasonStreak": "سلسلة ٧ أيام"
+    "reasonRefund": "استرداد",
+    "reasonStreak": "سلسلة ٧ أيام",
+    "reasonUnlock": "فتح النتيجة",
+    "reasonTheme": "فتح سمة"
   },
   "history": {
     "title": "قراءاتك",
@@ -312,6 +337,7 @@
     "privacyPolicy": "سياسة الخصوصية",
     "rateApp": "قيّم Aurafy",
     "shareApp": "شارك Aurafy",
+    "shareMessage": "جرّب Aurafy — تطبيق قراءات العلاقات المبني على علم النفس!",
     "data": "البيانات",
     "resetData": "إعادة تعيين جميع البيانات",
     "resetConfirmTitle": "إعادة تعيين كل البيانات؟",
@@ -339,6 +365,8 @@
     "howItWorksTitle": "كيف يعمل Aurafy",
     "howItWorksMessage": "اختر وحدة، وأجب عن مجموعة قصيرة من الأسئلة الحدسية، ويحوّل Aurafy اختياراتك إلى قراءة. ترتبط الأسئلة بأطر حقيقية؛ والنتيجة تأمل، وليست تشخيصًا.",
     "termsOfUse": "شروط الاستخدام",
+    "contactUs": "تواصل معنا",
+    "contactBody": "مرحباً فريق Aurafy،\n\nشكراً لإنشائكم Aurafy! أردت التواصل معكم لتقديم اقتراح / سؤال:\n\n[ اكتب رسالتك هنا ]\n\n— أُرسلت من تطبيق Aurafy",
     "clearHistory": "مسح سجل القراءات",
     "clearHistoryConfirmTitle": "مسح سجل القراءات؟",
     "clearHistoryConfirmMessage": "سيؤدي هذا إلى إزالة جميع القراءات المحفوظة. تبقى نجومك وإعداداتك.",
@@ -382,6 +410,9 @@
     "startFree": "ابدأ القراءة — مجاني",
     "balanceAfter": "الرصيد بعد: {{balance}}",
     "namePlaceholder": "أدخل الاسم...",
+    "personPlaceholder": "الشخص {{n}}",
+    "personNameA11y": "اسم الشخص {{n}}",
+    "you": "أنت",
     "soloTitle": "هذه القراءة لك",
     "soloSubtitle": "أجب بصدق — أنت وحدك من سيراها.",
     "locked": "مقفل"

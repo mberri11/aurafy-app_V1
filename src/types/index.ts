@@ -56,6 +56,14 @@ export interface ResultData {
   moduleId: string;
   mode: ReadingMode;
   winner?: Person;
+  /** Multi tie: ids of ALL persons sharing the max score (2+ entries), or [] for a
+   *  clear winner. `winner` still holds the first max scorer for backward compat —
+   *  rendering must gate on this, never on `winner` alone. Absent on readings
+   *  persisted before ties shipped (treat as []). */
+  tiedWinnerIds?: string[];
+  /** The tied Persons themselves (names + colors for the reveal, verdict and share
+   *  card) — carried on the result so History reopens don't depend on session state. */
+  tiedWinners?: Person[];
   verdict?: 'positive' | 'neutral' | 'negative';
   scores: Record<string, number>; // personId -> score (multi/solo) or category -> tally (categorical)
   dominantDimension: string;
@@ -67,6 +75,13 @@ export interface ResultData {
   signalTotal?: number;
   confidence: number; // clamped per scoring path (see scoringEngine)
   insights: LocalizedString[];
+  /** Multi only: the winner template minus the name ("loves you the most.") — the
+   *  subtitle under the reveal name. Derived per-locale from the RAW winnerTemplate at
+   *  generation time, so it stays correct in locales where the name sits mid-sentence
+   *  (render-time name-stripping of insights[0] did not). Absent on ties (insights[0]
+   *  IS the tie verdict) and on readings persisted before this shipped (the result
+   *  screen falls back to the legacy strip). */
+  verdictLine?: LocalizedString;
   /** Punchy social-card quote picked at generation time (the dimension/verdict
    *  shareLine — see MultiResults/SoloResults.shareLines). Optional: readings
    *  persisted before the share card shipped don't carry one. */
@@ -108,6 +123,9 @@ export interface ThemeColors {
   borderStrong: string;
   primary: string;
   gradient: [string, string, string];
+  /** The ambient screen-field gradient (top → mid → bottom) painted behind the
+   *  navigator and mirrored inline by full-bleed screens. */
+  fieldGradient: [string, string, string];
   text: string;
   textMuted: string;
   textDim: string;
@@ -119,6 +137,10 @@ export interface ThemeColors {
 
 export interface MultiResults {
   winnerTemplate: LocalizedString;
+  /** Tie verdict — used instead of winnerTemplate when 2+ persons share the max
+   *  score. {names} is replaced with the tied names joined naturally per locale
+   *  ("X and Y" / "X, Y, and Z" — see joinNames in scoringEngine). */
+  tieTemplate: LocalizedString;
   insights: Record<string, LocalizedString[]>;
   /** One designed share-card quote per dimension (same keys as `insights`) —
    *  the social-growth line on the exported card, NOT a truncated insight. */
@@ -149,5 +171,38 @@ export interface SoloResults {
     neutral: LocalizedString;
     negative: LocalizedString;
   };
+  insights: Record<string, LocalizedString[]>;
+}
+
+/**
+ * Results for `categorical` solo modules (aura_color; attachment_style once converted).
+ *
+ * Rendering contract (result screen):
+ *   - Reveal name  = categories[dominantDimension].label      (e.g. "Violet")
+ *   - Verdict line = categories[dominantDimension].verdict, and when
+ *     secondaryDimension exists append edgeTemplate with {edge} replaced by
+ *     categories[secondaryDimension].label  (→ "…with a Rose edge")
+ *   - Body card    = whatThisMeans; bullets = 3 insights selected by
+ *     selectInsights(insights, dominantDimension, seed) — pools are keyed by
+ *     CATEGORY (the winning color), not by question dimension.
+ *   - Share card   = shareLine (first-person confession voice, per solo rules)
+ */
+export interface CategoricalResults {
+  categories: Record<
+    string,
+    {
+      /** Short headline shown as the big Playfair reveal (e.g. "Violet"). */
+      label: LocalizedString;
+      /** Full verdict statement ("Your aura glows violet."). */
+      verdict: LocalizedString;
+      /** "What this means" body copy. */
+      whatThisMeans: LocalizedString;
+      /** Share-card quote — first-person confession voice. */
+      shareLine: LocalizedString;
+    }
+  >;
+  /** Runner-up phrase; {edge} is replaced with the secondary category's label. */
+  edgeTemplate: LocalizedString;
+  /** 6 insight variants per category — selected by winning category. */
   insights: Record<string, LocalizedString[]>;
 }

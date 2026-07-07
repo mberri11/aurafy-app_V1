@@ -39,9 +39,11 @@ const LANGUAGES: { code: Language; name: string }[] = [
 
 const MODE_OPTIONS: ReadingMode[] = ['solo', 'compare', 'triangle', 'circle'];
 
-const PRIVACY_URL = 'https://aurafy.app/privacy';
-const TERMS_URL = 'https://aurafy.app/terms';
+const PRIVACY_URL = 'https://aurafyapp.github.io/aurafy-legal/privacy.html';
+const TERMS_URL = 'https://aurafyapp.github.io/aurafy-legal/terms.html';
 const STORE_URL = 'market://details?id=com.simobr.aurafy';
+const CONTACT_EMAIL = 'aurafy.app26@gmail.com';
+const CONTACT_SUBJECT = 'Aurafy — Feedback & Suggestions';
 
 type SheetConfig = {
   title: string;
@@ -118,7 +120,6 @@ export default function SettingsScreen() {
     language,
     hapticsEnabled,
     soundEnabled,
-    ambientAudio,
     volume,
     dailyReminder,
     reminderTime,
@@ -130,7 +131,6 @@ export default function SettingsScreen() {
     setLanguage,
     toggleHaptics,
     toggleSound,
-    toggleAmbientAudio,
     setVolume,
     toggleDailyReminder,
     setReminderTime,
@@ -166,14 +166,16 @@ export default function SettingsScreen() {
           // `I18nManager.isRTL` under Expo Go + New Arch); it applies on the relaunch.
           I18nManager.allowRTL(willBeRTL);
           I18nManager.forceRTL(willBeRTL);
-
-          // ─── TEST-ONLY — remove before production ──────────────────────────────
-          // Begin from onboarding so the chosen language can be reviewed from the first
-          // screen. PRODUCTION: delete the two lines below and call `reloadApp()` here
-          // (re-add its import) so the new language + RTL apply via a clean relaunch.
+          // ── TEMP (Simo, 2026-07-07, testing only — REMOVE before release) ──
+          // A language change re-enters through onboarding like a first launch, so
+          // every language can be checked from the very first screen. Only the
+          // onboarding flag flips — stars/history/streak are untouched. Restore the
+          // old behavior by deleting this one line (relaunch lands on Home again).
           useUserStore.setState({ hasOnboarded: false });
-          router.replace('/onboarding');
-          // ───────────────────────────────────────────────────────────────────────
+          // Clean relaunch so the change applies in place. (Dev: JS reload. Prod:
+          // no-op until expo-updates lands in Phase D; strings already switched
+          // live via changeLanguage, only the RTL flip waits for the next launch.)
+          reloadApp();
         },
       });
     },
@@ -244,6 +246,12 @@ export default function SettingsScreen() {
     void Linking.openURL(url).catch(() => {});
   }, []);
 
+  const handleContactUs = useCallback(() => {
+    const subject = encodeURIComponent(CONTACT_SUBJECT);
+    const body = encodeURIComponent(t('settings.contactBody'));
+    openUrl(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`);
+  }, [t, openUrl]);
+
   return (
     <View style={styles.root}>
       <CosmicBloom cx="50%" cy="6%" r="60%" />
@@ -292,8 +300,8 @@ export default function SettingsScreen() {
           ))}
         </GlassCard>
 
-        {/* SOUND & AUDIO */}
-        <SectionHeader title={t('settings.soundAudio')} />
+        {/* SOUND */}
+        <SectionHeader title={t('settings.sound')} />
         <GlassCard style={styles.card}>
           <Row
             label={t('settings.soundEffects')}
@@ -302,17 +310,11 @@ export default function SettingsScreen() {
           />
           <Divider />
           <Row
-            label={t('settings.ambientAudio')}
-            sublabel={t('settings.ambientAudioDesc')}
-            right={<Toggle value={ambientAudio} onValueChange={toggleAmbientAudio} accessibilityLabel={t('settings.ambientAudio')} />}
-          />
-          <Divider />
-          <Row
             label={t('settings.volume')}
-            disabled={!soundEnabled && !ambientAudio}
+            disabled={!soundEnabled}
             right={
               <View style={styles.sliderWrap}>
-                <Slider value={volume} onChange={setVolume} disabled={!soundEnabled && !ambientAudio} />
+                <Slider value={volume} onChange={setVolume} disabled={!soundEnabled} />
               </View>
             }
           />
@@ -389,11 +391,13 @@ export default function SettingsScreen() {
           <Divider />
           <Row label={t('settings.rateApp')} chevron onPress={() => openUrl(STORE_URL)} />
           <Divider />
-          <Row label={t('settings.shareApp')} chevron onPress={() => void shareAppLink()} />
+          <Row label={t('settings.shareApp')} chevron onPress={() => void shareAppLink(t('settings.shareMessage'))} />
           <Divider />
           <Row label={t('settings.privacyPolicy')} chevron onPress={() => openUrl(PRIVACY_URL)} />
           <Divider />
           <Row label={t('settings.termsOfUse')} chevron onPress={() => openUrl(TERMS_URL)} />
+          <Divider />
+          <Row label={t('settings.contactUs')} chevron onPress={handleContactUs} />
         </GlassCard>
 
         {/* DATA */}

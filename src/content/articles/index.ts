@@ -22,6 +22,20 @@ import type { Language } from '../../types';
 export type { Language } from '../../types';
 // C-10 PILOT — Week 1 days 2–7 article metadata (day 1 reuses ten_signs_secret_love).
 import { w01Articles } from '../../data/weeks/w01_secret_signs_of_love';
+// C-10 — Week 2 "When They Pull Away" days 1–7 article metadata (all new, no reuse).
+import { w02Articles } from '../../data/weeks/w02_when_they_pull_away';
+// C-10 — Week 3 "Mixed Signals" days 1–7 article metadata (all new, no reuse).
+import { w03Articles } from '../../data/weeks/w03_mixed_signals';
+// C-10 — Week 4 "What Feels Like Home" days 1–7 article metadata (all new, no reuse).
+import { w04Articles } from '../../data/weeks/w04_what_feels_like_home';
+// C-10 — Week 5 "Situationships" days 1–7 article metadata (all new, no reuse).
+import { w05Articles } from '../../data/weeks/w05_situationships';
+// C-10 — Week 6 "Your Worth in Love" days 1–7 article metadata (first self-discovery week).
+import { w06Articles } from '../../data/weeks/w06_your_worth_in_love';
+// C-10 — Week 7 "Hidden Feelings" days 1–7 article metadata (all new, no reuse).
+import { w07Articles } from '../../data/weeks/w07_hidden_feelings';
+// C-10 — Week 8 "The Chase" days 1–7 article metadata (all new, no reuse).
+import { w08Articles } from '../../data/weeks/w08_the_chase';
 
 /** Editorial categories. Drive the feed filter chips + each card's accent tag. */
 export type ArticleCategory =
@@ -239,6 +253,20 @@ export const ARTICLES: Article[] = [
   },
   // C-10 PILOT — Week 1 "Secret Signs of Love" days 2–7 (day 1 = ten_signs_secret_love above).
   ...w01Articles,
+  // C-10 — Week 2 "When They Pull Away" days 1–7.
+  ...w02Articles,
+  // C-10 — Week 3 "Mixed Signals" days 1–7.
+  ...w03Articles,
+  // C-10 — Week 4 "What Feels Like Home" days 1–7.
+  ...w04Articles,
+  // C-10 — Week 5 "Situationships" days 1–7.
+  ...w05Articles,
+  // C-10 — Week 6 "Your Worth in Love" days 1–7 (category: self).
+  ...w06Articles,
+  // C-10 — Week 7 "Hidden Feelings" days 1–7.
+  ...w07Articles,
+  // C-10 — Week 8 "The Chase" days 1–7.
+  ...w08Articles,
 ];
 
 // ── Content resolution ─────────────────────────────────────────────────────────

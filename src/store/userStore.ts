@@ -66,9 +66,18 @@ export interface DailyRitualAnswer {
   questionId: string;
   answerIndex: number;
   dimension: string; // DailyDimension today; the week-local outcome key under C-10
+  /** C-10: id of the curriculum week active when this ritual was completed. The day-7
+   *  tally counts ONLY answers tagged with the claimed week's id, so a slow (forgiving)
+   *  cycle that spans a week boundary never pollutes the next week's result. Absent on
+   *  answers persisted before week-tagging shipped — those are excluded from tallies. */
+  weekId?: string;
 }
 
-/** C-10 — a completed week's result, re-openable from History until the next cycle. */
+/** C-10 — the most recently claimed weekly result (pending-reveal → claimed tracking).
+ *  This singleton is overwritten every cycle; it is NOT what powers History reopens —
+ *  every completed week is saved as its own entry in `weeklyHistory` below, and ALL of
+ *  those (not just the latest) reopen read-only from History indefinitely (capped at
+ *  MAX_HISTORY, same as reading history). */
 export interface WeeklyResult {
   weekId: string;
   outcomeKey: string;
@@ -138,12 +147,17 @@ export interface UserState extends ContentSlice {
   /** C-10 forced-week override (promo hook): when set, the NEXT fresh weekly cycle resolves
    *  to this week id, then auto-clears. Slot built now; unused until the pilot. */
   forcedNextWeekId: string | null;
-  /** C-10 last completed weekly result — re-openable from History until the next cycle.
-   *  Written by the day-7 reveal (pilot); null until then. */
+  /** C-10 last completed weekly result — drives the fresh reveal's claim-once-per-cycle
+   *  guard, NOT History reopening (that's `weeklyHistory`, every past week, read-only,
+   *  indefinitely). Written by the day-7 reveal (pilot); null until then. */
   weeklyResult: WeeklyResult | null;
   // Actions
-  spendStars: (amount: number) => boolean;
+  /** Deducts stars and logs the spend under the caller's reason key (see reasonLabel in
+   *  app/(tabs)/stars.tsx: 'reading' | 'result_unlock' | 'theme_unlock' | …). */
+  spendStars: (amount: number, reason: string) => boolean;
   markFreeTrialUsed: () => void;
+  /** Un-burns the free trial after an abandoned reading (no result was delivered). */
+  restoreFreeTrial: () => void;
   earnStars: (amount: number, reason: string) => void;
   /** Credits +2 for a rewarded video, enforcing the 25/day cap. Returns false when capped. */
   earnRewardedVideo: () => boolean;
@@ -191,7 +205,7 @@ export const useUserStore = create<UserState>()(
       forcedNextWeekId: null,
       weeklyResult: null,
 
-      spendStars: (amount: number): boolean => {
+      spendStars: (amount: number, reason: string): boolean => {
         const { stars } = get();
         if (stars < amount) return false;
         set((s) => {
@@ -199,7 +213,7 @@ export const useUserStore = create<UserState>()(
           const tx: StarTransaction = {
             type: 'spend',
             amount,
-            reason: 'reading',
+            reason,
             timestamp: Date.now(),
           };
           return {
@@ -272,8 +286,12 @@ export const useUserStore = create<UserState>()(
         // Pin the curriculum anchor on the FIRST-EVER ritual (local midnight); never overwrite.
         const anchor = s.weekAnchorDate ?? startOfLocalDay(at);
 
+        // Resolve the active curriculum week up front — every answer records ITS week so
+        // the day-7 tally below can filter to the claimed week only.
+        const week = getActiveWeek(anchor, at);
+
         // Record today's answer (carries the week-local outcome key for the day-7 tally).
-        const record: DailyRitualAnswer = { ...answer, date: todayKey };
+        const record: DailyRitualAnswer = { ...answer, date: todayKey, weekId: week?.id };
         const dailyAnswers = [...s.dailyAnswers, record].slice(-MAX_DAILY_ANSWERS);
 
         // Forgiving streak: +1 per ritual, capped at the cycle length. Holds across misses.
@@ -290,9 +308,13 @@ export const useUserStore = create<UserState>()(
         let weeklyResult = s.weeklyResult;
         const noPending = !s.weeklyResult || s.weeklyResult.claimedAt !== 0;
         if (streak >= STREAK_LENGTH && noPending) {
-          const week = getActiveWeek(anchor, at);
           if (week) {
-            const cycleAnswers = dailyAnswers.slice(-STREAK_LENGTH);
+            // Tally ONLY this week's answers — a forgiving (slow) cycle can span a walker
+            // week boundary, and answers from the previous week must not vote in this one.
+            // Untagged answers (persisted pre-week-tagging) are excluded too.
+            const cycleAnswers = dailyAnswers
+              .filter((a) => a.weekId === week.id)
+              .slice(-STREAK_LENGTH);
             const outcomeKey = tallyWeeklyOutcome(cycleAnswers, week.outcomes);
             weeklyResult = { weekId: week.id, outcomeKey, claimedAt: 0 }; // 0 = pending reveal
           }
@@ -367,6 +389,10 @@ export const useUserStore = create<UserState>()(
 
       markFreeTrialUsed: (): void => {
         set({ freeTrialUsed: true });
+      },
+
+      restoreFreeTrial: (): void => {
+        set({ freeTrialUsed: false });
       },
 
       resetAll: (): void => {

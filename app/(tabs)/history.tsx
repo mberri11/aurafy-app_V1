@@ -18,7 +18,7 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useUserStore, WeeklyHistoryEntry } from '@/src/store/userStore';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { moduleTheme } from '@/src/themes/categoryTheme';
+import { auraOutcomeTheme, moduleTheme } from '@/src/themes/categoryTheme';
 import { readingDisplayName } from '@/src/utils/readingDisplay';
 import { getWeekById } from '@/src/data/weeks';
 import { Language, Reading } from '@/src/types';
@@ -45,7 +45,10 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
   const lang = i18n.language as Language;
 
   // Per-MODULE theme — two modules in the same category still read distinct.
-  const { accent } = moduleTheme(reading.moduleId);
+  // Aura Color alone re-colors per past reading: the accent is the outcome color.
+  const { accent } = reading.moduleId === 'aura_color'
+    ? auraOutcomeTheme(reading.result.dominantDimension)
+    : moduleTheme(reading.moduleId);
   const name = readingDisplayName(reading, lang);
   const moduleLabel = (t(`modules.${reading.moduleId}.title`) || reading.moduleId).toUpperCase();
   const modeLabel = t(`readingModes.${reading.mode}.title`);
@@ -105,9 +108,11 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
 const WeeklyHistoryCard = memo(function WeeklyHistoryCard({
   entry,
   gid,
+  onPress,
 }: {
   entry: WeeklyHistoryEntry;
   gid: string;
+  onPress: () => void;
 }) {
   const theme = useTheme();
   const { t, i18n } = useTranslation();
@@ -119,40 +124,47 @@ const WeeklyHistoryCard = memo(function WeeklyHistoryCard({
   const meta = t('history.nights', { count: 7, date: dayjs(entry.rangeEnd).format('MMM D, YYYY') });
 
   return (
-    <View style={[styles.card, { borderColor: `${WEEKLY_CYAN}40`, backgroundColor: theme.surface }]}>
-      <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
-        <Defs>
-          <RadialGradient id={gid} cx="22%" cy="0%" r="75%">
-            <Stop offset="0%" stopColor={WEEKLY_CYAN} stopOpacity={0.18} />
-            <Stop offset="100%" stopColor={WEEKLY_CYAN} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gid})`} />
-      </Svg>
-      <View style={[styles.leftBar, { backgroundColor: WEEKLY_CYAN }]} />
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${title} — ${t('history.weeklyEyebrow')}`}
+    >
+      <View style={[styles.card, { borderColor: `${WEEKLY_CYAN}40`, backgroundColor: theme.surface }]}>
+        <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
+          <Defs>
+            <RadialGradient id={gid} cx="22%" cy="0%" r="75%">
+              <Stop offset="0%" stopColor={WEEKLY_CYAN} stopOpacity={0.18} />
+              <Stop offset="100%" stopColor={WEEKLY_CYAN} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gid})`} />
+        </Svg>
+        <View style={[styles.leftBar, { backgroundColor: WEEKLY_CYAN }]} />
 
-      {/* 7-DAY badge, pinned top-right. */}
-      <View style={[styles.badge, { borderColor: `${WEEKLY_CYAN}80` }]}>
-        <Text style={[styles.badgeText, { color: WEEKLY_CYAN }]}>{t('history.sevenDayBadge').toUpperCase()}</Text>
-      </View>
+        {/* 7-DAY badge, pinned top-right. */}
+        <View style={[styles.badge, { borderColor: `${WEEKLY_CYAN}80` }]}>
+          <Text style={[styles.badgeText, { color: WEEKLY_CYAN }]}>{t('history.sevenDayBadge').toUpperCase()}</Text>
+        </View>
 
-      <View style={styles.cardRow}>
-        <View style={[styles.tile, { backgroundColor: `${WEEKLY_CYAN}1A`, borderColor: `${WEEKLY_CYAN}55` }]}>
-          <MaterialCommunityIcons name="orbit" size={rs(26)} color={WEEKLY_CYAN} />
-        </View>
-        <View style={styles.cardContent}>
-          <Text style={[styles.eyebrow, { color: WEEKLY_CYAN }]} numberOfLines={1}>
-            {t('history.weeklyEyebrow').toUpperCase()}
-          </Text>
-          <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
-            {title}
-          </Text>
-          <Text style={[styles.date, { color: theme.textMuted, marginTop: rs(3) }]} numberOfLines={1}>
-            {meta}
-          </Text>
+        <View style={styles.cardRow}>
+          <View style={[styles.tile, { backgroundColor: `${WEEKLY_CYAN}1A`, borderColor: `${WEEKLY_CYAN}55` }]}>
+            <MaterialCommunityIcons name="orbit" size={rs(26)} color={WEEKLY_CYAN} />
+          </View>
+          <View style={styles.cardContent}>
+            <Text style={[styles.eyebrow, { color: WEEKLY_CYAN }]} numberOfLines={1}>
+              {t('history.weeklyEyebrow').toUpperCase()}
+            </Text>
+            <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
+              {title}
+            </Text>
+            <Text style={[styles.date, { color: theme.textMuted, marginTop: rs(3) }]} numberOfLines={1}>
+              {meta}
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 });
 
@@ -163,7 +175,9 @@ function SponsoredCard() {
   return (
     <View style={[styles.sponsored, { borderColor: theme.surfaceBorder }]}>
       <View style={[styles.adChip, { borderColor: theme.surfaceBorder }]}>
-        <Text style={[styles.adChipText, { color: theme.textDim }]}>AD</Text>
+        <Text style={[styles.adChipText, { color: theme.textDim }]}>
+          {t('common.adBadge').toUpperCase()}
+        </Text>
       </View>
       <Text style={[styles.sponsoredText, { color: theme.textDim }]}>{t('history.sponsored')}</Text>
     </View>
@@ -223,10 +237,20 @@ export default function HistoryScreen() {
     [setViewOnlyResult],
   );
 
+  // Weekly entries reopen the reveal read-only (no re-claim, no chime) — the
+  // outcome re-resolves from the persisted weekId + outcomeKey, so any past
+  // entry reopens, not just the latest cycle's.
+  const handleWeeklyPress = useCallback((entry: WeeklyHistoryEntry) => {
+    router.push({
+      pathname: '/weekly-result',
+      params: { viewOnly: '1', weekId: entry.weekId, outcomeKey: entry.outcomeKey },
+    });
+  }, []);
+
   const renderItem = useCallback(
     ({ item, index }: { item: Row; index: number }) =>
       item.kind === 'weekly' ? (
-        <WeeklyHistoryCard entry={item.entry} gid={`hw${index}`} />
+        <WeeklyHistoryCard entry={item.entry} gid={`hw${index}`} onPress={() => handleWeeklyPress(item.entry)} />
       ) : (
         <ReadingHistoryCard
           reading={item.reading}
@@ -234,7 +258,7 @@ export default function HistoryScreen() {
           onPress={() => handleReadingPress(item.reading)}
         />
       ),
-    [handleReadingPress],
+    [handleReadingPress, handleWeeklyPress],
   );
 
   return (
@@ -252,7 +276,11 @@ export default function HistoryScreen() {
         ]}
         ListHeaderComponent={<Text style={[styles.screenTitle, { color: theme.text }]}>{t('history.title')}</Text>}
         ListEmptyComponent={<EmptyState />}
-        ListFooterComponent={<SponsoredCard />}
+        ListFooterComponent={
+          // No AD pill under the empty state — the sponsored slot only exists
+          // once there are real rows to sit under.
+          rows.length > 0 ? <SponsoredCard /> : null
+        }
         showsVerticalScrollIndicator={false}
         scrollEnabled={rows.length > 0}
       />

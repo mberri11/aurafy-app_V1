@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
@@ -11,6 +12,7 @@ import { rs } from '@/src/utils/responsive';
 import '../src/i18n'; // initialize i18n
 
 export default function SplashScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const hasOnboarded = useUserStore((s) => s.hasOnboarded);
@@ -21,7 +23,7 @@ export default function SplashScreen() {
       if (navigated.current) return;
       navigated.current = true;
       router.replace(hasOnboarded ? '/(tabs)' : '/onboarding');
-    }, 5000);
+    }, 2000);
     return () => clearTimeout(timer);
   }, [hasOnboarded]);
 
@@ -75,7 +77,7 @@ export default function SplashScreen() {
         </View>
         <Text style={[styles.wordmark, { color: theme.text }]}>Aurafy</Text>
         <Text style={[styles.tagline, { color: theme.textMuted }]}>
-          Decode the energy around you
+          {t('splash.tagline')}
         </Text>
       </View>
 
@@ -85,7 +87,7 @@ export default function SplashScreen() {
           { color: theme.textDim, paddingBottom: insets.bottom + rs(32) },
         ]}
       >
-        LOADING THE STARS
+        {t('splash.loading').toUpperCase()}
       </Text>
     </View>
   );

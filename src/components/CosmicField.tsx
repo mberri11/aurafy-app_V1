@@ -1,22 +1,24 @@
 import React, { memo } from 'react';
 import { StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../themes/ThemeProvider';
 
 /**
- * The shared cosmic base field — the indigo→navy vertical gradient that sits
+ * The shared ambient base field — the theme's vertical field gradient that sits
  * behind Home and the module detail screen. Rendered ONCE at the root (behind
  * the navigator) so it is always painted and never re-mounts; screens that want
  * to show it keep a transparent container. This is what prevents the dark
- * (`#07091A`) base from flashing through during a stack transition while a
- * screen's own gradient/bloom/content commit a frame late.
+ * `theme.background` base from flashing through during a stack transition while
+ * a screen's own gradient/bloom/content commit a frame late.
  *
- * Pixel-identical to the gradient Home/module rendered inline before — same
- * colors and locations, just hoisted to the root.
+ * Colors come from `theme.fieldGradient` (cosmic: indigo→navy, desert: ember→
+ * near-black) — pixel-identical under Cosmic to the values it hardcoded before.
  */
 const CosmicField = memo(function CosmicField() {
+  const theme = useTheme();
   return (
     <LinearGradient
-      colors={['#181430', '#0E0B22', '#08061A']}
+      colors={theme.fieldGradient}
       locations={[0, 0.5, 1]}
       style={StyleSheet.absoluteFill}
       pointerEvents="none"

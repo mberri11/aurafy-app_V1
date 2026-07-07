@@ -35,12 +35,14 @@ import {
   type Language,
 } from '@/src/content/articles';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
+import { WEEKLY_CURRICULUM_ENABLED } from '@/src/config/flags';
+import { getArticleWeekOrdinal } from '@/src/data/weeks';
+import { getReachedWeekCount } from '@/src/data/weeks/walker';
 import { rs } from '@/src/utils/responsive';
 import FeaturedInsightCard from './components/FeaturedInsightCard';
 import ArticleCard from './components/ArticleCard';
 
 type ChipKey = ArticleCategory | 'all';
-const CHIPS: ChipKey[] = ['all', ...CATEGORY_ORDER];
 const SPONSORED_SLOT = 3; // position the native-ad card lands at in the "all" feed
 
 export default function InsightsScreen() {
@@ -68,11 +70,22 @@ export default function InsightsScreen() {
 
   const handleStarsPress = useCallback(() => router.push('/(tabs)/stars'), []);
 
-  // Build the LATEST list: non-featured, non-sponsored, newest-first, filtered
-  // by the active chip; the sponsored card is spliced in only in the "all" view.
+  // No-spoiler gate (S11): curriculum articles show only once the walker has
+  // reached their week — otherwise the feed would LEAD with future-dated weeks
+  // the user hasn't earned yet. Editorial articles (no parent week) always show;
+  // reached weeks stay visible even after the registry cycle wraps (unwrapped count).
+  const reachedWeeks = getReachedWeekCount(weekAnchorDate);
+  const isReached = (a: Article) => {
+    const ordinal = getArticleWeekOrdinal(a.id);
+    if (ordinal === undefined) return true;
+    return WEEKLY_CURRICULUM_ENABLED && ordinal <= reachedWeeks;
+  };
+
+  // Build the LATEST list: non-featured, non-sponsored, walker-reached, newest-first,
+  // filtered by the active chip; the sponsored card is spliced in only in the "all" view.
   const sponsored = ARTICLES.find((a) => a.sponsored);
-  const normal = ARTICLES.filter((a) => !a.sponsored && a.id !== dailyId).sort((a, b) =>
-    (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''),
+  const normal = ARTICLES.filter((a) => !a.sponsored && a.id !== dailyId && isReached(a)).sort(
+    (a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''),
   );
   const filtered = activeChip === 'all' ? normal : normal.filter((a) => a.category === activeChip);
   const listData: Article[] = [...filtered];
@@ -80,12 +93,17 @@ export default function InsightsScreen() {
     listData.splice(Math.min(SPONSORED_SLOT, listData.length), 0, sponsored);
   }
 
+  // Only offer chips whose category actually has a visible article (hides the
+  // zodiac chip until zodiac weeks come into reach — no guaranteed-empty filters).
+  const liveCategories = new Set(normal.map((a) => a.category));
+  const chips: ChipKey[] = ['all', ...CATEGORY_ORDER.filter((c) => liveCategories.has(c))];
+
   const renderItem: ListRenderItem<Article> = ({ item }) => (
     <ArticleCard
       article={item}
       content={getArticleContent(item.id, lang)}
       unread={!item.sponsored && !readArticleIds.includes(item.id)}
-      onPress={() => (item.sponsored ? undefined : openArticle(item.id))}
+      onPress={item.sponsored ? undefined : () => openArticle(item.id)}
     />
   );
 
@@ -131,7 +149,7 @@ export default function InsightsScreen() {
               contentContainerStyle={styles.chipsRow}
               style={styles.chipsScroll}
             >
-              {CHIPS.map((chip) => {
+              {chips.map((chip) => {
                 const active = chip === activeChip;
                 return (
                   <TouchableOpacity

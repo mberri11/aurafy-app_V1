@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../themes/ThemeProvider';
 
 /**
@@ -8,13 +9,14 @@ import { useTheme } from '../themes/ThemeProvider';
  * In Expo Go, renders a placeholder that matches the expected layout height.
  */
 const BannerAdSlot = memo(function BannerAdSlot() {
+  const { t } = useTranslation();
   const theme = useTheme();
 
   // AdMob requires native build — render empty placeholder in Expo Go
   if (__DEV__) {
     return (
       <View style={[styles.placeholder, { borderColor: theme.surfaceBorder }]}>
-        <Text style={[styles.adLabel, { color: theme.textMuted }]}>Ad</Text>
+        <Text style={[styles.adLabel, { color: theme.textMuted }]}>{t('common.adBadge')}</Text>
         <Text style={[styles.adPlaceholder, { color: theme.textMuted }]}>
           Banner ad (native build required)
         </Text>

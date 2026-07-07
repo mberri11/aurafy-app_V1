@@ -129,7 +129,7 @@ export default function ThemeUnlockDialog({
               <GradientButton
                 label={t('themeGallery.unlockForCost', { cost })}
                 onPress={onConfirm}
-                labelColor="#07091A"
+                labelColor={theme.background}
                 bold
                 glow
                 trailingIcon="star-four-points"

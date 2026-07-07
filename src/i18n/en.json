@@ -14,7 +14,12 @@
     "skip": "Skip",
     "tap": "Tap",
     "ok": "OK",
-    "done": "Done"
+    "done": "Done",
+    "adBadge": "Ad"
+  },
+  "splash": {
+    "tagline": "Decode the energy around you",
+    "loading": "Loading the stars"
   },
   "tabs": {
     "home": "Home",
@@ -39,9 +44,9 @@
     "earnUseLabel": "Use",
     "earnUseAmount": "Spend to read",
     "earnDailyLabel": "Daily",
-    "earnDailyAmount": "+2 daily",
+    "earnDailyAmount": "+1 daily",
     "earnWatchLabel": "Watch",
-    "earnWatchAmount": "+1 per ad",
+    "earnWatchAmount": "+2 per ad",
     "beginButton": "Begin my journey",
     "earnStars": "Earn Stars",
     "spendStars": "Spend Stars",
@@ -61,7 +66,8 @@
     "minutes": "minutes",
     "fromCost": "from {{cost}}",
     "toRead": "to read",
-    "beginReading": "Begin Reading"
+    "beginReading": "Begin Reading",
+    "notFound": "Module not found"
   },
   "modules": {
     "who_loves_me": {
@@ -128,6 +134,14 @@
       "time": "5–7 min",
       "cost": "1"
     },
+    "aura_color": {
+      "title": "Aura Color",
+      "subtitle": "The color your energy wears",
+      "description": "Your energy has a color — it enters rooms before you do. 20 questions reveal which one you've been glowing all along.",
+      "poweredBy": "Color psychology + energy reading",
+      "time": "5–7 min",
+      "cost": "1"
+    },
     "am_i_problem": {
       "title": "Am I The Problem?",
       "subtitle": "An honest mirror",
@@ -168,11 +182,18 @@
     },
     "heading": "How many people are you reading?",
     "earnStars": "Earn more",
-    "free": "Free"
+    "free": "Free",
+    "modeA11y": "{{mode}} mode, costs {{cost}} stars",
+    "modeA11yFree": "{{mode}} mode, free"
   },
   "quiz": {
     "progressLabel": "{{current}} / {{total}}",
     "tapToAnswer": "Tap to select",
+    "noQuestions": "No questions available",
+    "leaveTitle": "Leave this reading?",
+    "leaveMessagePaid": "Your progress won't be saved. Your stars will be refunded ({{cost}} ✦).",
+    "leaveMessageTrial": "Your progress won't be saved. Your free reading will be restored.",
+    "leaveConfirm": "Leave reading",
     "frameworks": {
       "attachment": "Attachment Theory",
       "loveLanguages": "Love Languages",
@@ -228,6 +249,7 @@
     "adUnavailable": "Ad unavailable — use a star or skip"
   },
   "result": {
+    "notFound": "No result found.",
     "confidenceLabel": "{{confidence}}% confidence",
     "confidenceHeadline": "We're {{confidence}}% confident in this reading.",
     "confidenceSub": "Higher than {{pct}}% of your readings.",
@@ -281,7 +303,10 @@
     "reasonDaily": "Daily bonus",
     "reasonWelcome": "Welcome gift",
     "reasonReading": "Reading",
-    "reasonStreak": "7-day streak"
+    "reasonRefund": "Refund",
+    "reasonStreak": "7-day streak",
+    "reasonUnlock": "Result unlock",
+    "reasonTheme": "Theme unlock"
   },
   "history": {
     "title": "Your Readings",
@@ -312,6 +337,7 @@
     "privacyPolicy": "Privacy policy",
     "rateApp": "Rate Aurafy",
     "shareApp": "Share Aurafy",
+    "shareMessage": "Check out Aurafy — the psychology-based relationship reading app!",
     "data": "Data",
     "resetData": "Reset all data",
     "resetConfirmTitle": "Reset all data?",
@@ -339,6 +365,8 @@
     "howItWorksTitle": "How Aurafy works",
     "howItWorksMessage": "Pick a module, answer a short set of intuitive questions, and Aurafy turns your taps into a reading. The questions map to real frameworks; the result is a reflection, not a diagnosis.",
     "termsOfUse": "Terms of use",
+    "contactUs": "Contact us",
+    "contactBody": "Hi Aurafy team,\n\nThank you for creating Aurafy! I wanted to reach out with a suggestion / question:\n\n[ write your message here ]\n\n— Sent from the Aurafy app",
     "clearHistory": "Clear reading history",
     "clearHistoryConfirmTitle": "Clear reading history?",
     "clearHistoryConfirmMessage": "This removes all saved readings from this device. Your Stars and settings are kept.",
@@ -382,6 +410,9 @@
     "startFree": "Start Reading — Free",
     "balanceAfter": "Balance after: {{balance}}",
     "namePlaceholder": "Enter name...",
+    "personPlaceholder": "Person {{n}}",
+    "personNameA11y": "Name for person {{n}}",
+    "you": "You",
     "soloTitle": "This reading is for you",
     "soloSubtitle": "Answer honestly — only you will see this.",
     "locked": "locked"

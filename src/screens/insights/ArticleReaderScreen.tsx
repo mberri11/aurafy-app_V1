@@ -45,6 +45,7 @@ import { getTodayOutcomeKey } from '@/src/data/weeks/walker';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
 import { lightTap } from '@/src/utils/haptics';
+import { playEffect } from '@/src/utils/sound';
 import ReadingProgressBar from './components/ReadingProgressBar';
 import ArticleBlocks from './components/ArticleBlocks';
 import OrbitArt from './components/OrbitArt';
@@ -120,7 +121,11 @@ export default function ArticleReaderScreen() {
       // C-10: record the WEEK-LOCAL outcome key (the day-7 tally reads these). Falls
       // back to the legacy lean axis when the curriculum is off/empty.
       const dimension = getTodayOutcomeKey(questionId, idx, weekAnchorDate) ?? getDailyAnswerDimension(questionId, idx);
-      completeDailyRitual({ questionId, answerIndex: idx, dimension });
+      const earned = completeDailyRitual({ questionId, answerIndex: idx, dimension });
+      // Star chime ONLY on the genuine +1 daily-ritual credit — completeDailyRitual
+      // returns 0 for a repeat same-day answer or a backwards clock (and the +5 weekly
+      // bonus is paid later on the reveal, which carries its own chime, not this one).
+      if (earned > 0) playEffect('star');
       // C-10: completing the 7th ritual (forgiving streak) stages a PENDING weekly result —
       // reveal it (after a beat so the star-earned confirmation registers first). The reveal
       // pays the +5 on mount, enforcing reveal-before-bonus.
@@ -157,7 +162,9 @@ export default function ArticleReaderScreen() {
   // skipped (skips hold the streak, they don't advance it). The anchor's calendar dayIndex still
   // picks WHICH article shows each day; it no longer drives this progress meter.
   const day = Math.min(streak, STREAK_DAYS);
-  const moduleTitle = t(`modules.${article.relatedModuleId}.title`);
+  // Articles with relatedModuleId '' have no cross-sell (C-10 brief) — don't resolve a
+  // broken i18n key for them; the CTA below is hidden entirely.
+  const moduleTitle = article.relatedModuleId ? t(`modules.${article.relatedModuleId}.title`) : '';
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -364,15 +371,20 @@ export default function ArticleReaderScreen() {
           </View>
         ) : null}
 
-        {/* End-of-article cross-sell — full-width, module contextual via relatedModuleId */}
-        <View style={[styles.endDivider, { backgroundColor: theme.surfaceBorder }]} />
-        <GradientButton
-          label={t('insights.takeReading', { module: moduleTitle })}
-          onPress={openModule}
-          labelColor="#0B0E25"
-          bold
-          trailingIcon={isRTL ? 'arrow-left' : 'arrow-right'}
-        />
+        {/* End-of-article cross-sell — full-width, module contextual via relatedModuleId.
+            Hidden when the article has no linked module (relatedModuleId ''). */}
+        {article.relatedModuleId ? (
+          <>
+            <View style={[styles.endDivider, { backgroundColor: theme.surfaceBorder }]} />
+            <GradientButton
+              label={t('insights.takeReading', { module: moduleTitle })}
+              onPress={openModule}
+              labelColor={theme.bg2}
+              bold
+              trailingIcon={isRTL ? 'arrow-left' : 'arrow-right'}
+            />
+          </>
+        ) : null}
 
         {/* Done — return Home after completing the ritual. Faint-gold "completed" pill with a
             circular check, echoing the star-earned reward so it reads as a satisfying close. */}

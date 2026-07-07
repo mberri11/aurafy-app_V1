@@ -1,6 +1,13 @@
 # Aurafy — Build Status
 
-**Last updated:** 2026-06-07 · Maintained by Claude Code at the end of every screen (Stage 4 LOCK).
+**Last updated:** 2026-07-04 · Maintained by Claude Code at the end of every screen (Stage 4 LOCK).
+
+> **EAS DEV BUILD LIVE (2026-07-04):** first Android development build (profile `development`,
+> dev-client APK, internal distribution) built + installed on Simo's device. `expo-dev-client@6.0.21`
+> added to deps. Verified on it: **gallery save works (no WARN)** and **notifications deliver**
+> (dev-panel test button). Native-dep or `app.json`-plugin changes now require an EAS rebuild;
+> JS/TS changes hot-reload via `pnpm start` as before. Build:
+> https://expo.dev/accounts/simobr/projects/aurafy/builds/712ce554-4561-485d-bf58-3d5d34f65d29
 
 ## Legend
 - ✅ **DONE** — matches design + Simo-verified on device
@@ -200,8 +207,9 @@ branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for renderi
   white energy accent, which vanished inside white question copy (every colored module keeps its
   accent); reveal names on result/card stay white-ink + accent-glow (re-approved after a blue-ink
   detour — do NOT re-tint them); planet rim softened .06→.04; download button made circular.
-- **Residual (~2%):** confirm gallery save lands on the dev/EAS build (Expo Go warns it can't
-  grant full media-library access); pre-2026-07-03 History readings carry no stored shareLine →
+- **Gallery save CONFIRMED on the EAS dev build (Simo, 2026-07-04)** — no media-library WARN,
+  PNG lands in the local gallery. (Expo Go's "limited access" warning was a Go-only artifact.)
+- **Residual (~2%):** pre-2026-07-03 History readings carry no stored shareLine →
   their cards render without the pull-quote (accepted); `share_card.png` shows pre-swap pink
   loves — re-export pending; FR/AR/ES shareLines pending native review.
 
@@ -274,9 +282,9 @@ branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for renderi
 - **Final state:** stack-screen chrome (glass back + bloom), reached from Settings → About. Matched
   over the Settings-area DIFF rounds; locked alongside Settings.
 
-### Daily reading — `app/daily-reading.tsx` — 🔲
-- **Implemented:** day-of-year question, answer cards, insight reveal animation, bonus claim, already-answered state.
-- **Watch for:** header 🌙 emoji + hardcoded; only 10 daily questions exist.
+### Daily reading — `app/daily-reading.tsx` — ✂️ REMOVED (absorbed)
+- The standalone screen was deleted: the daily ritual question now lives at the bottom of
+  the daily article in `ArticleReaderScreen` (see CLAUDE.md → Stars Economy → Key rules).
 
 ---
 
@@ -350,12 +358,11 @@ Typecheck clean (minus the 2 known `reading-mode.tsx` errors).
   silenced via `LogBox.ignoreLogs` in `app/_layout.tsx` (dev-only; cannot occur in a prod build).
 
 **FOLLOW-UP (deferred — NOT built):** **Daily reminder notification.** `expo-notifications` installed
-(`~0.32.17`); a guarded, lazy-loaded **dev-panel test button** ("Send test notification",
-`src/utils/notifications.ts`) exists so on-device delivery can be verified — **requires an EAS
-dev-client REBUILD** (native module; not in the current binary, so the button reports "Not available"
-until rebuilt). Still TODO: schedule a daily local notification at the user's `reminderTime` (the
-Settings `dailyReminder` / `streakReminder` toggles already exist), permission UX, reschedule on
-time/locale change, cancel on toggle-off. Offline, no backend.
+(`~0.32.17`); the guarded, lazy-loaded **dev-panel test button** ("Send test notification",
+`src/utils/notifications.ts`) **delivered on-device on the EAS dev build (Simo-verified 2026-07-04)**
+— the native module is in the binary and works. Still TODO: schedule a daily local notification at
+the user's `reminderTime` (the Settings `dailyReminder` / `streakReminder` toggles already exist),
+permission UX, reschedule on time/locale change, cancel on toggle-off. Offline, no backend.
 
 **Build order:** (1) rails ✅ now · (2) PILOT — Week 1 content + flip flag + day-7 reveal + route
 reader through walker (device DIFF) · (3) scale weeks 2–54 · (4) result-screen polish (built last).
@@ -411,8 +418,9 @@ optional eyebrow, serif title, **tone-gradient** primary pill, glass cancel pill
   **Rewarded video = +2★ flat, capped 25/day.** **Banners only on linger/scroll screens**
   (Insights / History / Stars) — never on quiz/loading/result/module/person-entry. **Interstitial**
   only at natural transitions, frequency-capped, and **never stacked with a rewarded ad in the same
-  flow** (current bug: `result.tsx:68` fires an interstitial every 3rd reading that can stack with
-  the `loading.tsx` rewarded ad). Native = the SPONSORED Insights card. Add **Google UMP** consent
+  flow** (✅ 2026-07-07: the every-3rd-reading interstitial in `result.tsx` — which could stack with
+  the `loading.tsx` rewarded ad — was removed; the real placement returns with the Phase-4 AdMob
+  wiring). Native = the SPONSORED Insights card. Add **Google UMP** consent
   before personalized ads (EU).
 - 🔲 EAS production AAB.
 - 🔲 Privacy policy + Play Store listing copy (AdMob requires a privacy policy URL).
@@ -422,10 +430,10 @@ optional eyebrow, serif title, **tone-gradient** primary pill, glass cancel pill
 
 ## CLEANUP BACKLOG (fix opportunistically while on the relevant screen)
 - ~~`onboarding.tsx`: hardcoded EN strings in `EarnCardsRow`; `iconOnTint = 'undefined'` dead var; `✨` appended to title.~~ ✅ resolved 2026-06-03 (i18n'd, gold vector sparkle, cleaned up).
-- `quiz.tsx`: dead/confusing `isSolo` expression.
-- `daily-reading.tsx`: `const setLastDailyQuestion = useUserStore.getState;` — unused/confused line.
+- ~~`quiz.tsx`: dead/confusing `isSolo` expression.~~ ✅ gone (no `isSolo` left in the file).
+- ~~`daily-reading.tsx`: `const setLastDailyQuestion = useUserStore.getState;` — unused/confused line.~~ ✅ moot — the file was deleted (ritual absorbed into the article reader).
 - ~~`(tabs)/index.tsx`: hardcoded `RELATIONSHIPS`, `SELF-DISCOVERY`, `Tap`, `Today's free question is ready`.~~ ✅ resolved 2026-06-04 (all via `t()`: `home.sectionRelationships/sectionSelf`, `common.tap`, `home.dailyReady`).
-- `(tabs)/stars.tsx`, `daily-reading.tsx`: emoji used as icons → vector icons + i18n.
+- `(tabs)/stars.tsx`: emoji used as icons → vector icons + i18n. (`daily-reading.tsx` no longer exists.)
   (`loading.tsx` ✅ resolved 2026-06-13 — i18n'd; ad-gate emoji is now the per-module
   `module.icon`, an intentional Simo-confirmed design choice, not a cleanup target.)
 - `app/index.tsx`: dual splash (native `app.json` splash + custom screen) + 20s debug timer → reduce to ~2s.

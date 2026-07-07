@@ -34,7 +34,7 @@ export default function AboutPsychologyScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <LinearGradient colors={['#181430', '#0E0B22', '#08061A']} locations={[0, 0.5, 1]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={theme.fieldGradient} locations={[0, 0.5, 1]} style={StyleSheet.absoluteFill} />
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="about_glow" cx="50%" cy="14%" r="60%">

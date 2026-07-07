@@ -7,6 +7,12 @@ export const whoSoulmateResults: MultiResults = {
     ar: '{name} هو الأكثر انسجاماً معك — أقرب ما يكون إلى تردد توأم الروح.',
     es: '{name} resuena más contigo — lo más cercano a una frecuencia de alma gemela.',
   },
+  tieTemplate: {
+    en: "Your frequencies match {names} equally — the universe hasn't picked a side yet.",
+    fr: "Your frequencies match {names} equally — the universe hasn't picked a side yet.",
+    ar: "Your frequencies match {names} equally — the universe hasn't picked a side yet.",
+    es: "Your frequencies match {names} equally — the universe hasn't picked a side yet.",
+  },
   shareLines: {
     resonant_ease: {
       en: "Some souls don't meet. They recognize.",

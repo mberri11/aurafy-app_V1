@@ -1,23 +1,52 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// C-10 — WEEKLY CURRICULUM registry. RAILS ONLY: `WEEKS` ships EMPTY in this pass.
-// The 54 authored weeks arrive later via the aurafy-week-generator skill; until
-// then the walker no-ops and the app uses the legacy daily pickers (flag OFF).
+// C-10 — WEEKLY CURRICULUM registry. Weeks 1–8 are authored and LIVE (flag ON
+// since the 2026-06-25 pilot); weeks 9–54 arrive via the aurafy-week-generator
+// skill. If WEEKS ever went empty again the walker would no-op and the app would
+// fall back to the legacy daily pickers.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { WeeklyTheme } from './types';
 import { w01Week } from './w01_secret_signs_of_love';
+import { w02Week } from './w02_when_they_pull_away';
+import { w03Week } from './w03_mixed_signals';
+import { w04Week } from './w04_what_feels_like_home';
+import { w05Week } from './w05_situationships';
+import { w06Week } from './w06_your_worth_in_love';
+import { w07Week } from './w07_hidden_feelings';
+import { w08Week } from './w08_the_chase';
 
 /**
- * The themed weeks. PILOT: Week 1 ("Secret Signs of Love") is live; weeks 2–54
- * arrive later via the aurafy-week-generator skill. The walker resolves the active
- * week as `isoWeekNumber % WEEKS.length`, so with a single week every ISO week maps
- * to it. An empty registry would make the walker no-op (legacy pickers).
+ * The themed weeks. Weeks 1 ("Secret Signs of Love"), 2 ("When They Pull Away"),
+ * 3 ("Mixed Signals"), 4 ("What Feels Like Home"), 5 ("Situationships"), 6 ("Your
+ * Worth in Love", the first category:'self' week), 7 ("Hidden Feelings") and 8 ("The
+ * Chase") are live; weeks 9–54 arrive later via the aurafy-week-generator skill. The
+ * walker resolves the active week as `floor(daysSinceAnchor / 7) % WEEKS.length`, so
+ * users cycle through the registry in order from their personal anchor date. An
+ * empty registry would make the walker no-op (legacy pickers).
  */
-export const WEEKS: WeeklyTheme[] = [w01Week];
+export const WEEKS: WeeklyTheme[] = [w01Week, w02Week, w03Week, w04Week, w05Week, w06Week, w07Week, w08Week];
 
 /** Look up a week by id (used by the forced-week override + History re-open). */
 export function getWeekById(id: string): WeeklyTheme | undefined {
   return WEEKS.find((w) => w.id === id);
+}
+
+// articleId → its parent week's position in WEEKS (first occurrence wins — day 1 of
+// week 1 reuses a legacy article id). Drives the Insights feed's no-spoiler gate.
+const WEEK_ORDINAL_BY_ARTICLE: Record<string, number> = {};
+WEEKS.forEach((week, ordinal) => {
+  for (const day of week.days) {
+    if (!(day.articleId in WEEK_ORDINAL_BY_ARTICLE)) WEEK_ORDINAL_BY_ARTICLE[day.articleId] = ordinal;
+  }
+});
+
+/**
+ * Position (0-based) in `WEEKS` of the week an article belongs to, or undefined
+ * for editorial articles outside the curriculum (those are always feed-visible).
+ * Compare against walker.getReachedWeekCount to gate future-week articles.
+ */
+export function getArticleWeekOrdinal(articleId: string): number | undefined {
+  return WEEK_ORDINAL_BY_ARTICLE[articleId];
 }
 
 /**

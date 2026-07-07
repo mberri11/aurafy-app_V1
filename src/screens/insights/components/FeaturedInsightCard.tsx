@@ -50,6 +50,7 @@ const GOLD_GRADIENT = ['#FBE08F', '#F5C542', '#E7AE2C'] as const;
 
 /** Gold "Begin tonight's read" button with a gentle breathing sheen (UI-thread opacity). */
 function RitualGoldCTA({ label, isRTL, gold }: { label: string; isRTL: boolean; gold: string }) {
+  const theme = useTheme();
   const glow = useSharedValue(0);
   useEffect(() => {
     glow.value = withRepeat(withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.quad) }), -1, true);
@@ -66,8 +67,8 @@ function RitualGoldCTA({ label, isRTL, gold }: { label: string; isRTL: boolean; 
             style={StyleSheet.absoluteFill}
           />
         </Animated.View>
-        <Text style={styles.ctaText}>{label}</Text>
-        <Feather name={isRTL ? 'arrow-left' : 'arrow-right'} size={rs(16)} color="#0B0E25" />
+        <Text style={[styles.ctaText, { color: theme.bg2 }]}>{label}</Text>
+        <Feather name={isRTL ? 'arrow-left' : 'arrow-right'} size={rs(16)} color={theme.bg2} />
       </LinearGradient>
     </View>
   );
@@ -354,7 +355,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   ctaSheen: { position: 'absolute', top: 0, left: 0, right: 0, height: '55%' },
-  ctaText: { fontSize: rs(14.5), fontFamily: 'HankenGrotesk_700Bold', color: '#0B0E25' },
+  ctaText: { fontSize: rs(14.5), fontFamily: 'HankenGrotesk_700Bold' },
 
   /* done state */
   doneCta: {

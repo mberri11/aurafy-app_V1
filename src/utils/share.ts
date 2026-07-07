@@ -1,12 +1,14 @@
-import { Platform } from 'react-native';
+import { Platform, Share } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { logger } from './logger';
 
 /**
- * Share the result with expo-sharing.
- * On web, falls back to navigator.share or clipboard copy.
- * TODO: implement react-native-view-shot for image capture (requires native build)
+ * Share plain text via the native share sheet (the text-only fallback — images go
+ * through shareImage below). Share.share on purpose, NOT expo-sharing:
+ * Sharing.shareAsync needs a real file URI and Android silently rejects data:
+ * URIs, so the old base64 text path never actually shared anything.
+ * On web, falls back to navigator.share when available.
  */
 export async function shareResult(text: string): Promise<boolean> {
   try {
@@ -17,20 +19,7 @@ export async function shareResult(text: string): Promise<boolean> {
       }
       return false;
     }
-
-    // Check if sharing is available
-    const isAvailable = await Sharing.isAvailableAsync();
-    if (!isAvailable) {
-      logger.warn('Sharing not available on this device');
-      return false;
-    }
-
-    // TODO: use react-native-view-shot to capture the result card as image
-    // For now, share as text only
-    await Sharing.shareAsync(
-      `data:text/plain;base64,${btoa(unescape(encodeURIComponent(text)))}`,
-      { mimeType: 'text/plain', dialogTitle: 'Share your Aurafy reading' },
-    );
+    await Share.share({ message: text });
     return true;
   } catch (err) {
     logger.error('Share failed:', err);
@@ -75,7 +64,8 @@ export async function saveImageToGallery(uri: string): Promise<boolean> {
   }
 }
 
-export async function shareAppLink(): Promise<boolean> {
-  const message = 'Check out Aurafy — the psychology-based relationship reading app!';
+/** Share the app itself. The message comes from the caller (i18n'd — utils can't hook
+ *  useTranslation), e.g. `t('settings.shareMessage')`. */
+export async function shareAppLink(message: string): Promise<boolean> {
   return shareResult(message);
 }

@@ -6,6 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { Reading, Language, SoloResults } from '@/src/types';
+import { joinNames } from '@/src/engine/scoringEngine';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
 
@@ -16,6 +17,10 @@ const SOLO_RESULTS: Record<string, SoloResults> = {
 
 export function readingDisplayName(reading: Reading, lang: Language): string {
   const { result } = reading;
+  // Tie readings reveal ALL max scorers — the History card must match, never fall
+  // back to the arbitrary backward-compat `winner`.
+  const tied = result.tiedWinners ?? [];
+  if (tied.length > 1) return joinNames(tied.map((p) => p.name), lang);
   if (result.winner?.name) return result.winner.name;
   if (result.verdict) {
     const label = SOLO_RESULTS[reading.moduleId]?.verdictLabel[result.verdict];

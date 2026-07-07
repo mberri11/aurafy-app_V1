@@ -17,6 +17,7 @@ import Svg, { Circle, Defs, RadialGradient, Rect, Stop } from 'react-native-svg'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppText as Text } from '@/src/components/AppText';
 import AurafyLogo from '@/src/components/AurafyLogo';
+import { useTheme } from '@/src/themes/ThemeProvider';
 
 /** Logical canvas — capture with { width: 1080, height: 1920 } for the export. */
 export const SHARE_CARD_W = 360;
@@ -70,12 +71,13 @@ const STARS: { x: number; y: number; r: number; o: number }[] = [
 
 export default function ShareCard(props: ShareCardProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const isReading = props.variant === 'reading';
   const accent = isReading ? props.accent : WEEKLY_ACCENT;
   const soft = isReading ? props.accentSoft : WEEKLY_SOFT;
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: theme.background }]}>
       {/* Accent-tinted night sky: top wash + central bloom + stars */}
       <Svg width={SHARE_CARD_W} height={SHARE_CARD_H} style={StyleSheet.absoluteFill}>
         <Defs>
@@ -89,7 +91,7 @@ export default function ShareCard(props: ShareCardProps) {
             <Stop offset="100%" stopColor={accent} stopOpacity={0} />
           </RadialGradient>
         </Defs>
-        <Rect width="100%" height="100%" fill="#07091A" />
+        <Rect width="100%" height="100%" fill={theme.background} />
         <Rect width="100%" height="100%" fill="url(#sc_top)" />
         <Rect width="100%" height="100%" fill="url(#sc_bloom)" />
         {/* Faint planet rim on the bloom's lower right (reading design detail) */}
@@ -193,7 +195,6 @@ const styles = StyleSheet.create({
   card: {
     width: SHARE_CARD_W,
     height: SHARE_CARD_H,
-    backgroundColor: '#07091A',
     overflow: 'hidden',
   },
   sparkle: { position: 'absolute' },

@@ -14,7 +14,12 @@
     "skip": "Omitir",
     "tap": "Tocar",
     "ok": "OK",
-    "done": "Hecho"
+    "done": "Hecho",
+    "adBadge": "Anuncio"
+  },
+  "splash": {
+    "tagline": "Descifra la energía a tu alrededor",
+    "loading": "Cargando las estrellas"
   },
   "tabs": {
     "home": "Inicio",
@@ -39,9 +44,9 @@
     "earnUseLabel": "Usar",
     "earnUseAmount": "Gasta para leer",
     "earnDailyLabel": "Diario",
-    "earnDailyAmount": "+2 al día",
+    "earnDailyAmount": "+1 al día",
     "earnWatchLabel": "Ver",
-    "earnWatchAmount": "+1 por anuncio",
+    "earnWatchAmount": "+2 por anuncio",
     "beginButton": "Comenzar mi viaje",
     "earnStars": "Ganar estrellas",
     "spendStars": "Gastar estrellas",
@@ -61,7 +66,8 @@
     "minutes": "minutos",
     "fromCost": "desde {{cost}}",
     "toRead": "para leer",
-    "beginReading": "Comenzar lectura"
+    "beginReading": "Comenzar lectura",
+    "notFound": "Módulo no encontrado"
   },
   "modules": {
     "who_loves_me": {
@@ -128,6 +134,14 @@
       "time": "5–7 min",
       "cost": "1"
     },
+    "aura_color": {
+      "title": "Color de Aura",
+      "subtitle": "El color que viste tu energía",
+      "description": "Tu energía tiene un color: entra en las salas antes que tú. 20 preguntas revelan cuál has estado irradiando todo este tiempo.",
+      "poweredBy": "Psicología del color + lectura de energía",
+      "time": "5–7 min",
+      "cost": "1"
+    },
     "am_i_problem": {
       "title": "¿Soy el problema?",
       "subtitle": "Un espejo honesto",
@@ -168,11 +182,18 @@
     },
     "heading": "¿A cuántas personas vas a leer?",
     "earnStars": "Gana más",
-    "free": "Gratis"
+    "free": "Gratis",
+    "modeA11y": "Modo {{mode}}, cuesta {{cost}} estrellas",
+    "modeA11yFree": "Modo {{mode}}, gratis"
   },
   "quiz": {
     "progressLabel": "{{current}} / {{total}}",
     "tapToAnswer": "Toca para seleccionar",
+    "noQuestions": "No hay preguntas disponibles",
+    "leaveTitle": "¿Salir de esta lectura?",
+    "leaveMessagePaid": "Tu progreso no se guardará. Tus estrellas serán reembolsadas ({{cost}} ✦).",
+    "leaveMessageTrial": "Tu progreso no se guardará. Recuperarás tu lectura gratuita.",
+    "leaveConfirm": "Salir de la lectura",
     "frameworks": {
       "attachment": "Teoría del apego",
       "loveLanguages": "Lenguajes del amor",
@@ -228,6 +249,7 @@
     "adUnavailable": "Anuncio no disponible — usa una estrella o salta"
   },
   "result": {
+    "notFound": "No se encontró ningún resultado.",
     "confidenceLabel": "{{confidence}}% de confianza",
     "confidenceHeadline": "Tenemos un {{confidence}}% de confianza en esta lectura.",
     "confidenceSub": "Más alto que el {{pct}}% de tus lecturas.",
@@ -281,7 +303,10 @@
     "reasonDaily": "Bono diario",
     "reasonWelcome": "Regalo de bienvenida",
     "reasonReading": "Lectura",
-    "reasonStreak": "Racha de 7 días"
+    "reasonRefund": "Reembolso",
+    "reasonStreak": "Racha de 7 días",
+    "reasonUnlock": "Desbloqueo del resultado",
+    "reasonTheme": "Desbloqueo de tema"
   },
   "history": {
     "title": "Tus lecturas",
@@ -312,6 +337,7 @@
     "privacyPolicy": "Política de privacidad",
     "rateApp": "Calificar Aurafy",
     "shareApp": "Compartir Aurafy",
+    "shareMessage": "Descubre Aurafy — la app de lecturas de relaciones basada en psicología.",
     "data": "Datos",
     "resetData": "Restablecer todos los datos",
     "resetConfirmTitle": "¿Restablecer todos los datos?",
@@ -339,6 +365,8 @@
     "howItWorksTitle": "Cómo funciona Aurafy",
     "howItWorksMessage": "Elige un módulo, responde una breve serie de preguntas intuitivas y Aurafy convierte tus toques en una lectura. Las preguntas se basan en marcos reales; el resultado es una reflexión, no un diagnóstico.",
     "termsOfUse": "Términos de uso",
+    "contactUs": "Contáctanos",
+    "contactBody": "Hola equipo de Aurafy,\n\n¡Gracias por crear Aurafy! Quería escribirles con una sugerencia / pregunta:\n\n[ escribe tu mensaje aquí ]\n\n— Enviado desde la app Aurafy",
     "clearHistory": "Borrar historial de lecturas",
     "clearHistoryConfirmTitle": "¿Borrar el historial de lecturas?",
     "clearHistoryConfirmMessage": "Esto elimina todas las lecturas guardadas. Tus estrellas y ajustes se conservan.",
@@ -382,6 +410,9 @@
     "startFree": "Comenzar lectura — Gratis",
     "balanceAfter": "Saldo después: {{balance}}",
     "namePlaceholder": "Ingresa un nombre...",
+    "personPlaceholder": "Persona {{n}}",
+    "personNameA11y": "Nombre de la persona {{n}}",
+    "you": "Tú",
     "soloTitle": "Esta lectura es para ti",
     "soloSubtitle": "Responde con sinceridad — solo tú la verás.",
     "locked": "bloqueado"

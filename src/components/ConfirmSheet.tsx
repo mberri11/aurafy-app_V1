@@ -72,7 +72,7 @@ export default function ConfirmSheet({
   const gradient: readonly [string, string] = isRose
     ? ['#FB7185', theme.rose]
     : ['#22D3EE', '#06B6D4'];
-  const primaryLabelColor = isRose ? '#FFFFFF' : '#07091A';
+  const primaryLabelColor = isRose ? '#FFFFFF' : theme.background;
   const iconName: ConfirmSheetIcon = icon ?? (isRose ? 'alert-triangle' : 'trash-2');
 
   return (

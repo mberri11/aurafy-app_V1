@@ -72,7 +72,7 @@ export default function AppDialog({
   const gradient: readonly [string, string] = isRose
     ? ['#FB7185', theme.rose]
     : ['#22D3EE', '#06B6D4'];
-  const primaryLabelColor = isRose ? '#FFFFFF' : '#07091A';
+  const primaryLabelColor = isRose ? '#FFFFFF' : theme.background;
   const iconName: FeatherName = icon ?? (isRose ? 'alert-triangle' : 'info');
 
   return (

@@ -17,7 +17,7 @@
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 
@@ -39,6 +39,12 @@ const DAY_MS = 86_400_000;
 const fmtDate = (ms: number | null) => (ms === null ? '—' : new Date(ms).toISOString().slice(0, 10));
 
 export default function DevPanelScreen() {
+  // Production guard — expo-router auto-registers this route file in EVERY build
+  // (including the aurafy://dev-panel deep link), so the __DEV__-gated Settings row
+  // alone is not enough. __DEV__ is a compile-time constant, so this early return
+  // is invariant per build and can never reorder the hooks below.
+  if (!__DEV__) return <Redirect href="/(tabs)" />;
+
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 

@@ -7,6 +7,12 @@ export const whoCutOffResults: MultiResults = {
     ar: '{name} انسحب عاطفياً أكثر من غيره.',
     es: '{name} se ha retirado emocionalmente más que los demás.',
   },
+  tieTemplate: {
+    en: 'The drift is equal — {names} are both pulling away at the same quiet pace.',
+    fr: 'The drift is equal — {names} are both pulling away at the same quiet pace.',
+    ar: 'The drift is equal — {names} are both pulling away at the same quiet pace.',
+    es: 'The drift is equal — {names} are both pulling away at the same quiet pace.',
+  },
   shareLines: {
     withdrawal: {
       en: 'Some goodbyes happen long before the words.',

@@ -7,6 +7,12 @@ export const energyReadingResults: MultiResults = {
     ar: '{name} يشع أكثر طاقة إيجابية تجاهك.',
     es: '{name} irradia la energía más positiva hacia ti.',
   },
+  tieTemplate: {
+    en: 'The energy is perfectly balanced between {names} — neither outweighs the other.',
+    fr: 'The energy is perfectly balanced between {names} — neither outweighs the other.',
+    ar: 'The energy is perfectly balanced between {names} — neither outweighs the other.',
+    es: 'The energy is perfectly balanced between {names} — neither outweighs the other.',
+  },
   shareLines: {
     vitality: {
       en: 'Some people are caffeine. Keep them close.',

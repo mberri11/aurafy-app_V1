@@ -11,11 +11,14 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../themes/ThemeProvider';
+import { isPrismModule } from '../themes/categoryTheme';
 import GlassCard from './GlassCard';
+import ModuleIcon from './ModuleIcon';
 import { Module } from '../types';
 import { rs } from '../utils/responsive';
 
@@ -43,6 +46,13 @@ const ModuleCard = memo(function ModuleCard({
   const theme = useTheme();
   const { t } = useTranslation();
   const scale = useSharedValue(1);
+  // Prismatic identity (aura_color): the detail screen's palette as THREE separate
+  // blooms, each hue owning its own region of the card — violet top-right, cyan
+  // bottom-left, mint bottom-right (Simo, 2026-07-04). One radial blending the
+  // hues failed twice: even mix read as Attachment's cyan, violet-led read as
+  // plain violet. Distinct regions are what make it read "mixed".
+  const prism = isPrismModule(module.id);
+  const g = theme.gradient;
 
   const handlePressIn = useCallback(() => {
     scale.value = withSpring(0.97, { stiffness: 300, damping: 20 });
@@ -100,28 +110,77 @@ const ModuleCard = memo(function ModuleCard({
         accessibilityRole="button"
         activeOpacity={1}
       >
-        <GlassCard glowColor={`${module.color}66`} style={styles.card}>
-          {/* soft color bloom emanating from the top-right corner; the card's
-              overflow:hidden clips the oversized radial to the card edges */}
-          <Svg width={300} height={300} style={styles.bloom} pointerEvents="none">
-            <Defs>
-              <RadialGradient id={`mc-${module.id}`} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor={module.color} stopOpacity={0.32} />
-                <Stop offset="50%" stopColor={module.color} stopOpacity={0.09} />
-                <Stop offset="100%" stopColor={module.color} stopOpacity={0} />
-              </RadialGradient>
-            </Defs>
-            <Rect x={0} y={0} width={300} height={300} fill={`url(#mc-${module.id})`} />
-          </Svg>
+        <GlassCard glowColor={`${prism ? g[1] : module.color}66`} style={styles.card}>
+          {/* GlassCard's content box only wraps its children — when the card's
+              minHeight rules, dead space sits below it that absolute overlays
+              (blooms) never reach. On the prism card this wrapper re-creates the
+              container's minHeight (148 minus 2×14 padding) so the content box
+              fills the card and the bloom bleed lands on the REAL bottom edge.
+              Styleless for other modules — their verified layout must not move. */}
+          <View style={prism ? styles.inner : undefined}>
+          {prism ? (
+            // Prism card: three hue regions — violet (top-right), cyan (bottom-left),
+            // mint (bottom-right) — mirroring the detail screen's mixed palette.
+            // The wrap bleeds past the card padding to the true card edges (the
+            // padded content box left a visible seam) and the oversized radii make
+            // the regions melt into each other instead of floating as blobs.
+            <View pointerEvents="none" style={styles.prismBloomWrap}>
+              <Svg width="100%" height="100%">
+                <Defs>
+                  <RadialGradient id={`mcp-v-${module.id}`} cx="85%" cy="0%" r="90%">
+                    <Stop offset="0%" stopColor={g[1]} stopOpacity={0.32} />
+                    <Stop offset="55%" stopColor={g[1]} stopOpacity={0.1} />
+                    <Stop offset="100%" stopColor={g[1]} stopOpacity={0} />
+                  </RadialGradient>
+                  <RadialGradient id={`mcp-c-${module.id}`} cx="0%" cy="100%" r="85%">
+                    <Stop offset="0%" stopColor={g[0]} stopOpacity={0.26} />
+                    <Stop offset="55%" stopColor={g[0]} stopOpacity={0.08} />
+                    <Stop offset="100%" stopColor={g[0]} stopOpacity={0} />
+                  </RadialGradient>
+                  <RadialGradient id={`mcp-m-${module.id}`} cx="95%" cy="100%" r="80%">
+                    <Stop offset="0%" stopColor={g[2]} stopOpacity={0.24} />
+                    <Stop offset="55%" stopColor={g[2]} stopOpacity={0.07} />
+                    <Stop offset="100%" stopColor={g[2]} stopOpacity={0} />
+                  </RadialGradient>
+                </Defs>
+                <Rect x="0" y="0" width="100%" height="100%" fill={`url(#mcp-v-${module.id})`} />
+                <Rect x="0" y="0" width="100%" height="100%" fill={`url(#mcp-c-${module.id})`} />
+                <Rect x="0" y="0" width="100%" height="100%" fill={`url(#mcp-m-${module.id})`} />
+              </Svg>
+            </View>
+          ) : (
+            // soft color bloom emanating from the top-right corner; the card's
+            // overflow:hidden clips the oversized radial to the card edges
+            <Svg width={300} height={300} style={styles.bloom} pointerEvents="none">
+              <Defs>
+                <RadialGradient id={`mc-${module.id}`} cx="50%" cy="50%" r="50%">
+                  <Stop offset="0%" stopColor={module.color} stopOpacity={0.32} />
+                  <Stop offset="50%" stopColor={module.color} stopOpacity={0.09} />
+                  <Stop offset="100%" stopColor={module.color} stopOpacity={0} />
+                </RadialGradient>
+              </Defs>
+              <Rect x={0} y={0} width={300} height={300} fill={`url(#mc-${module.id})`} />
+            </Svg>
+          )}
 
           <View style={styles.topRow}>
             <View
               style={[
                 styles.iconTile,
-                { backgroundColor: `${module.color}33`, borderColor: `${module.color}66` },
+                prism
+                  ? styles.iconTilePrism
+                  : { backgroundColor: `${module.color}33`, borderColor: `${module.color}66` },
               ]}
             >
-              <Text style={styles.iconChar}>{module.icon}</Text>
+              {prism ? (
+                <LinearGradient
+                  colors={[`${g[1]}2E`, `${g[2]}2E`, `${g[0]}2E`]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+              ) : null}
+              <ModuleIcon id={module.id} emoji={module.icon} size={rs(40)} />
             </View>
 
             {freeTrial ? (
@@ -149,6 +208,7 @@ const ModuleCard = memo(function ModuleCard({
               <MaterialCommunityIcons name="lock" size={rs(22)} color={theme.textMuted} />
             </View>
           ) : null}
+          </View>
         </GlassCard>
       </TouchableOpacity>
     </Animated.View>
@@ -162,6 +222,8 @@ const styles = StyleSheet.create({
     padding: rs(14),
     minHeight: rs(148),
   },
+  // Keep in sync with card: minHeight minus vertical padding.
+  inner: { minHeight: rs(120) },
   comingSoonCard: {
     borderRadius: rs(20),
     borderWidth: 1,
@@ -172,6 +234,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -95,
     end: -95,
+  },
+  // Bleeds the prism blooms past the card padding to the real card edges;
+  // GlassCard's overflow:hidden clips it to the rounded corners.
+  prismBloomWrap: {
+    position: 'absolute',
+    top: -rs(14),
+    bottom: -rs(14),
+    start: -rs(14),
+    end: -rs(14),
   },
   topRow: {
     flexDirection: 'row',
@@ -186,7 +257,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconChar: { fontSize: rs(20) },
+  iconTilePrism: {
+    borderColor: 'rgba(255,255,255,0.28)',
+    overflow: 'hidden',
+  },
   tryFreePill: {
     flexDirection: 'row',
     alignItems: 'center',

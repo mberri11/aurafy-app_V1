@@ -7,6 +7,12 @@ export const whoJealousResults: MultiResults = {
     ar: '{name} هو الأكثر حسداً لما تملكه.',
     es: '{name} es quien más envidia lo que tienes.',
   },
+  tieTemplate: {
+    en: 'The envy is tied — {names} are watching you with the same quiet edge.',
+    fr: 'The envy is tied — {names} are watching you with the same quiet edge.',
+    ar: 'The envy is tied — {names} are watching you with the same quiet edge.',
+    es: 'The envy is tied — {names} are watching you with the same quiet edge.',
+  },
   shareLines: {
     envy_mirroring: {
       en: 'Imitation is envy wearing a compliment.',

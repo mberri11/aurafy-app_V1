@@ -8,10 +8,10 @@
 import React, { memo } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, { Circle, Path } from 'react-native-svg';
-import { Category, categoryTheme, moduleTheme } from '@/src/themes/categoryTheme';
+import { AURA_WHEEL_HUES, Category, categoryTheme, moduleTheme } from '@/src/themes/categoryTheme';
 
 /** Hues for the aura colour-wheel, walking the spectrum once around the disc. */
-const WHEEL_HUES = ['#F472B6', '#FB7185', '#FBBF24', '#34D399', '#22D3EE', '#A78BFA'];
+const WHEEL_HUES = AURA_WHEEL_HUES;
 
 function ColorWheel({ size }: { size: number }) {
   const r = size / 2;

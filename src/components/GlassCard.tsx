@@ -1,12 +1,19 @@
 import React, { memo } from 'react';
-import { Platform, StyleSheet, View, ViewStyle } from 'react-native';
+import { Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme } from '../themes/ThemeProvider';
 import { rs } from '../utils/responsive';
 
 interface GlassCardProps {
   children: React.ReactNode;
-  style?: ViewStyle | ViewStyle[];
+  /** OUTER chrome View (border, radius, shadow, size, margins). Children render in a
+   *  separate inner wrapper, so flexDirection/gap/alignItems here never reach them —
+   *  pass those via `contentStyle` instead. */
+  style?: StyleProp<ViewStyle>;
+  /** INNER wrapper where `children` actually render — row/gap/padding for the card's
+   *  content belong here. The wrapper spans the full card, so absolute children
+   *  (accent bars, badges) position against the card's true edges. */
+  contentStyle?: StyleProp<ViewStyle>;
   glowColor?: string;
   intensity?: 'low' | 'medium' | 'high';
 }
@@ -27,6 +34,7 @@ const intensityMap = { low: 12, medium: 30, high: 60 };
 const GlassCard = memo(function GlassCard({
   children,
   style,
+  contentStyle,
   glowColor,
   intensity = 'medium',
 }: GlassCardProps) {
@@ -49,7 +57,7 @@ const GlassCard = memo(function GlassCard({
         // On Android/web, a flat surface color replaces the unreliable blur.
         // On iOS, leave it transparent so BlurView shows through.
         !isIOS && { backgroundColor: theme.bg2 },
-        style as ViewStyle,
+        style,
       ]}
     >
       {isIOS ? (
@@ -86,7 +94,7 @@ const GlassCard = memo(function GlassCard({
       {/* Web fallback — just the surface color (already applied via bg2 above) */}
       {isWeb ? null : null}
 
-      <View style={styles.content}>{children}</View>
+      <View style={[styles.content, contentStyle]}>{children}</View>
     </View>
   );
 });

@@ -49,8 +49,14 @@ function useReasonLabel() {
         case 'reading':
         case 'Reading':
           return t('stars.reasonReading');
+        case 'result_unlock':
+          return t('stars.reasonUnlock');
+        case 'theme_unlock':
+          return t('stars.reasonTheme');
         case 'streak':
           return t('stars.reasonStreak');
+        case 'refund':
+          return t('stars.reasonRefund');
         default:
           return reason;
       }
@@ -204,7 +210,7 @@ export default function StarsWalletScreen() {
 
   // Daily ritual: the +1 is NOT granted here anymore — the ritual is the article + question
   // flow. Tapping this card (done or not) opens today's daily article, where answering the
-  // question claims the +1 (and +10 on the 7th day) via completeDailyRitual.
+  // question claims the +1 (and +5 on the 7th day) via completeDailyRitual.
   const handleOpenDaily = useCallback(() => {
     router.push({ pathname: '/article/[id]', params: { id: getDailyInsightId(weekAnchorDate) } });
   }, [weekAnchorDate]);

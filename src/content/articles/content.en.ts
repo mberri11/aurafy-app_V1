@@ -9,9 +9,30 @@
 import type { ArticleContentMap } from './index';
 // C-10 PILOT — Week 1 days 2–7 EN bodies (day 1 'ten_signs_secret_love' lives below).
 import { w01ArticlesEn } from '../../data/weeks/w01_secret_signs_of_love';
+// C-10 — Week 2 days 1–7 EN bodies (FR/AR/ES ride the getArticleContent EN fallback).
+import { w02ArticlesEn } from '../../data/weeks/w02_when_they_pull_away';
+// C-10 — Week 3 days 1–7 EN bodies (FR/AR/ES ride the getArticleContent EN fallback).
+import { w03ArticlesEn } from '../../data/weeks/w03_mixed_signals';
+// C-10 — Week 4 days 1–7 EN bodies (FR/AR/ES ride the getArticleContent EN fallback).
+import { w04ArticlesEn } from '../../data/weeks/w04_what_feels_like_home';
+// C-10 — Week 5 days 1–7 EN bodies (FR/AR/ES ride the getArticleContent EN fallback).
+import { w05ArticlesEn } from '../../data/weeks/w05_situationships';
+// C-10 — Week 6 days 1–7 EN bodies (FR/AR/ES ride the getArticleContent EN fallback).
+import { w06ArticlesEn } from '../../data/weeks/w06_your_worth_in_love';
+// C-10 — Week 7 days 1–7 EN bodies (FR/AR/ES ride the getArticleContent EN fallback).
+import { w07ArticlesEn } from '../../data/weeks/w07_hidden_feelings';
+// C-10 — Week 8 days 1–7 EN bodies (FR/AR/ES ride the getArticleContent EN fallback).
+import { w08ArticlesEn } from '../../data/weeks/w08_the_chase';
 
 export const articlesEn: ArticleContentMap = {
   ...w01ArticlesEn,
+  ...w02ArticlesEn,
+  ...w03ArticlesEn,
+  ...w04ArticlesEn,
+  ...w05ArticlesEn,
+  ...w06ArticlesEn,
+  ...w07ArticlesEn,
+  ...w08ArticlesEn,
   // ───────────────────────────────────────────────────────────────────────────
   // FULL ARTICLE — relatedModuleId: 'who_loves_me'
   // ───────────────────────────────────────────────────────────────────────────

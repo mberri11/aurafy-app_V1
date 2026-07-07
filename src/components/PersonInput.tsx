@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../themes/ThemeProvider';
 import { rs } from '../utils/responsive';
 import GlassCard from './GlassCard';
@@ -30,6 +31,7 @@ const PersonInput = memo(function PersonInput({
   onNameChange,
   onColorChange,
 }: PersonInputProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   // Empty slot shows a "?" placeholder (design 07-person-entry); once typed, the first letter.
   const displayChar = name.trim().length > 0 ? name.trim()[0].toUpperCase() : '?';
@@ -52,10 +54,10 @@ const PersonInput = memo(function PersonInput({
           style={[styles.input, { color: theme.text }]}
           value={name}
           onChangeText={onNameChange}
-          placeholder={`Person ${index + 1}`}
+          placeholder={t('personEntry.personPlaceholder', { n: index + 1 })}
           placeholderTextColor={theme.textMuted}
           maxLength={30}
-          accessibilityLabel={`Name for person ${index + 1}`}
+          accessibilityLabel={t('personEntry.personNameA11y', { n: index + 1 })}
         />
       </View>
 

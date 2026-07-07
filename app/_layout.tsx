@@ -26,10 +26,11 @@ import { LogBox, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ThemeProvider } from "@/src/themes/ThemeProvider";
+import { ThemeProvider, useTheme } from "@/src/themes/ThemeProvider";
 import { useTransitionStore } from "@/src/store/transitionStore";
 import CosmicReveal from "@/src/components/CosmicReveal";
 import CosmicField from "@/src/components/CosmicField";
+import { preload as preloadSound } from "@/src/utils/sound";
 import "@/src/i18n";
 
 SplashScreen.preventAutoHideAsync();
@@ -103,19 +104,21 @@ function IntroOverlayHost() {
 }
 
 function RootLayoutNav() {
+  const theme = useTheme();
   return (
-    // Persistent cosmic field painted ONCE behind the whole navigator. Screens
+    // Persistent ambient field painted ONCE behind the whole navigator. Screens
     // that keep a transparent container (Home) reveal it during transitions, so a
-    // stack pop can never expose the dark `#07091A` base while the destination's
-    // own gradient/bloom/content commit a frame late.
+    // stack pop can never expose the dark `theme.background` base while the
+    // destination's own gradient/bloom/content commit a frame late.
     <View style={{ flex: 1 }}>
       <CosmicField />
       <Stack
         screenOptions={{
           headerShown: false,
           // Dark surface under every transition so a screen swap never flashes
-          // white. Kept in sync with cosmicTheme.background / app.json splash bg.
-          contentStyle: { backgroundColor: "#07091A" },
+          // white. Theme-aware (Desert renders warm-dark); app.json splash bg
+          // stays the cosmic hex since splash paints before hydration.
+          contentStyle: { backgroundColor: theme.background },
         }}
       >
       <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -253,6 +256,13 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
+
+  // Warm the sound players once at startup so the first tap / reveal / pad isn't
+  // late. No-ops (instantiates nothing) when both audio toggles are off; fire-and-
+  // forget so it can never block startup.
+  useEffect(() => {
+    preloadSound();
+  }, []);
 
   if (!fontsLoaded && !fontError) return null;
 

@@ -13,6 +13,7 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useTheme } from '@/src/themes/ThemeProvider';
+import { isPrismModule } from '@/src/themes/categoryTheme';
 import { useUserStore } from '@/src/store/userStore';
 import { MODULES } from '@/src/data/modules';
 import GradientButton from '@/src/components/GradientButton';
@@ -47,16 +48,32 @@ export default function ModuleDetailScreen() {
   }, [module]);
 
   if (!module) {
+    // Bad/stale module id (e.g. a deep link) — offer a way out instead of a dead end.
+    // With no stack beneath (cold deep link), back falls through to Home.
     return (
-      <View style={[styles.container, styles.center, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text }}>Module not found</Text>
+      <View
+        style={[styles.container, styles.center, { backgroundColor: theme.background, gap: rs(16) }]}
+      >
+        <Text style={{ color: theme.text }}>{t('moduleDetail.notFound')}</Text>
+        <TouchableOpacity
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
+          accessibilityLabel={t('common.back')}
+          accessibilityRole="button"
+          activeOpacity={0.8}
+          style={[styles.backBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+        >
+          <Feather name={isRTL ? 'chevron-right' : 'chevron-left'} size={20} color={theme.text} />
+        </TouchableOpacity>
       </View>
     );
   }
 
   // Per-module accent — drives the glow, tag, icon circle and title so each
   // module's detail reads in its own colour (design 05-module-detail_1/_2.png).
+  // Aura Color is prismatic instead: brand-gradient bloom/ring/tag, white ink.
   const accent = module.color;
+  const prism = isPrismModule(module.id);
+  const g = theme.gradient;
 
   const costs = Object.values(module.starsCost);
   const cheapestCost = Math.min(...costs);
@@ -69,9 +86,9 @@ export default function ModuleDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Cosmic depth: indigo→navy field (mirrors Home) */}
+      {/* Ambient depth field (mirrors Home) */}
       <LinearGradient
-        colors={['#181430', '#0E0B22', '#08061A']}
+        colors={theme.fieldGradient}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -81,9 +98,18 @@ export default function ModuleDetailScreen() {
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="module_glow" cx="50%" cy="20%" r="60%">
-            <Stop offset="0%" stopColor={accent} stopOpacity={0.22} />
-            <Stop offset="55%" stopColor={accent} stopOpacity={0.07} />
-            <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+            {prism
+              ? [
+                  <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.22} />,
+                  <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.09} />,
+                  <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.04} />,
+                  <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                ]
+              : [
+                  <Stop key="s0" offset="0%" stopColor={accent} stopOpacity={0.22} />,
+                  <Stop key="s1" offset="55%" stopColor={accent} stopOpacity={0.07} />,
+                  <Stop key="s2" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                ]}
           </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#module_glow)" />
@@ -106,36 +132,77 @@ export default function ModuleDetailScreen() {
 
       {/* Content block (upper portion) */}
       <View style={styles.content}>
-        {/* Module icon */}
-        <View
+        {/* Module icon — prism gets a gradient ring around a dark disc */}
+        {prism ? (
+          <LinearGradient
+            colors={g}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.iconRingPrism}
+          >
+            <View style={[styles.iconCircleInner, { backgroundColor: theme.bg2 }]}>
+              <ModuleIcon id={module.id} emoji={module.icon} size={rs(90)} />
+            </View>
+          </LinearGradient>
+        ) : (
+          <View
+            style={[
+              styles.iconCircle,
+              {
+                backgroundColor: `${accent}2E`,
+                borderColor: `${accent}66`,
+              },
+            ]}
+          >
+            <ModuleIcon id={module.id} emoji={module.icon} size={rs(90)} />
+          </View>
+        )}
+
+        {/* Title — per-module accent; prism stays white ink + violet glow */}
+        <Text
           style={[
-            styles.iconCircle,
-            {
-              backgroundColor: `${accent}2E`,
-              borderColor: `${accent}66`,
-            },
+            styles.title,
+            prism
+              ? {
+                  color: theme.text,
+                  textShadowColor: `${g[1]}B3`,
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: 16,
+                }
+              : { color: accent },
           ]}
         >
-          <ModuleIcon id={module.id} emoji={module.icon} size={rs(90)} />
-        </View>
-
-        {/* Title — per-module accent */}
-        <Text style={[styles.title, { color: accent }]}>
           {t(`modules.${module.id}.title`)}
         </Text>
 
-        {/* Framework tag — per-module accent */}
-        <View
-          style={[
-            styles.tag,
-            { backgroundColor: `${accent}1F`, borderColor: `${accent}59` },
-          ]}
-        >
-          <View style={[styles.tagDot, { backgroundColor: accent }]} />
-          <Text style={[styles.tagText, { color: accent }]}>
-            {t(`quiz.frameworks.${module.framework}`)}
-          </Text>
-        </View>
+        {/* Framework tag — per-module accent; prism gets a gradient border */}
+        {prism ? (
+          <LinearGradient
+            colors={g}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.tagRingPrism}
+          >
+            <View style={[styles.tagInnerPrism, { backgroundColor: theme.bg2 }]}>
+              <View style={[styles.tagDot, { backgroundColor: theme.text }]} />
+              <Text style={[styles.tagText, { color: theme.text }]}>
+                {t(`quiz.frameworks.${module.framework}`)}
+              </Text>
+            </View>
+          </LinearGradient>
+        ) : (
+          <View
+            style={[
+              styles.tag,
+              { backgroundColor: `${accent}1F`, borderColor: `${accent}59` },
+            ]}
+          >
+            <View style={[styles.tagDot, { backgroundColor: accent }]} />
+            <Text style={[styles.tagText, { color: accent }]}>
+              {t(`quiz.frameworks.${module.framework}`)}
+            </Text>
+          </View>
+        )}
 
         {/* Description */}
         <Text style={[styles.description, { color: theme.textMuted }]}>
@@ -232,6 +299,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: rs(24),
   },
+  iconRingPrism: {
+    width: rs(116),
+    height: rs(116),
+    borderRadius: rs(58),
+    padding: rs(1.5),
+    marginBottom: rs(24),
+  },
+  iconCircleInner: {
+    flex: 1,
+    borderRadius: rs(57),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   title: {
     fontSize: rs(29),
@@ -250,6 +330,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: rs(14),
     paddingVertical: rs(7),
     marginTop: rs(16),
+  },
+  tagRingPrism: {
+    borderRadius: 999,
+    padding: 1,
+    marginTop: rs(16),
+  },
+  tagInnerPrism: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(8),
+    borderRadius: 999,
+    paddingHorizontal: rs(14),
+    paddingVertical: rs(7),
   },
   tagDot: { width: rs(6), height: rs(6), borderRadius: rs(3) },
   tagText: {

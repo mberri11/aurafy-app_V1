@@ -76,8 +76,8 @@ export default function ThemeGalleryScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Cosmic depth base + violet bloom (stack-screen chrome) */}
-      <LinearGradient colors={['#181430', '#0E0B22', '#08061A']} locations={[0, 0.5, 1]} style={StyleSheet.absoluteFill} />
+      {/* Ambient depth base + violet bloom (stack-screen chrome) */}
+      <LinearGradient colors={theme.fieldGradient} locations={[0, 0.5, 1]} style={StyleSheet.absoluteFill} />
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="themes_glow" cx="50%" cy="16%" r="60%">
@@ -192,7 +192,7 @@ export default function ThemeGalleryScreen() {
         cost={unlock?.cost ?? 0}
         balance={stars}
         onConfirm={() => {
-          if (unlock && spendStars(unlock.cost)) {
+          if (unlock && spendStars(unlock.cost, 'theme_unlock')) {
             unlockTheme(unlock.id);
             setTheme(unlock.id);
           }

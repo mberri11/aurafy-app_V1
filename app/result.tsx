@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  BackHandler,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,7 +21,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { darkenHex, moduleTheme } from '@/src/themes/categoryTheme';
+import { auraOutcomeTheme, darkenHex, moduleTheme } from '@/src/themes/categoryTheme';
 import CategoryMotif from '@/src/components/CategoryMotif';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
@@ -32,15 +33,26 @@ import ShareCard, { SHARE_CARD_H, SHARE_CARD_W } from '@/src/components/ShareCar
 import { saveImageToGallery, shareImage, shareResult } from '@/src/utils/share';
 import { successNotification, lightTap } from '@/src/utils/haptics';
 import { MODULES } from '@/src/data/modules';
-import { Reading, Language, SoloResults } from '@/src/types';
+import { Reading, Language, SoloResults, CategoricalResults } from '@/src/types';
+import { joinNames } from '@/src/engine/scoringEngine';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
+import { auraColorResults } from '@/src/data/results/auraColorResults';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
+import { playEffect } from '@/src/utils/sound';
+
+// Delay before the reveal-name entrance begins — shared by the animation and the
+// reveal chime so the sound lands exactly when the name starts animating in.
+const REVEAL_DELAY_MS = 250;
 
 const SOLO_RESULTS: Record<string, SoloResults> = {
   attachment_style: attachmentStyleResults,
   am_i_problem: amITheProblemResults,
+};
+
+const CATEGORICAL_RESULTS: Record<string, CategoricalResults> = {
+  aura_color: auraColorResults,
 };
 
 function generateId(): string {
@@ -58,7 +70,7 @@ export default function ResultScreen() {
     useReadingStore();
   const resultUnlocked = useReadingStore((s) => s.resultUnlocked);
   const setResultUnlocked = useReadingStore((s) => s.setResultUnlocked);
-  const { addReading, incrementReadingCount, readingCount, spendStars, stars } = useUserStore();
+  const { addReading, incrementReadingCount, spendStars, stars } = useUserStore();
 
   const isViewOnly = viewOnly === '1';
   const result = isViewOnly ? viewOnlyResult : currentResult;
@@ -91,16 +103,27 @@ export default function ResultScreen() {
       createdAt: Date.now(),
     };
     addReading(reading);
+    // readingCount keeps ticking for the Phase-4 frequency-capped interstitial; the old
+    // every-3rd-reading interstitial here stacked with the loading.tsx rewarded gate and
+    // was removed — real placement returns with the AdMob wiring, at a natural transition.
     incrementReadingCount();
-    if ((readingCount + 1) % 3 === 0) AdMobManager.showInterstitial();
     successNotification();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    titleScale.value = withDelay(250, withSpring(1, { stiffness: 200, damping: 16 }));
-    titleOpacity.value = withDelay(250, withTiming(1, { duration: 500 }));
-  }, [titleScale, titleOpacity]);
+    titleScale.value = withDelay(REVEAL_DELAY_MS, withSpring(1, { stiffness: 200, damping: 16 }));
+    titleOpacity.value = withDelay(REVEAL_DELAY_MS, withTiming(1, { duration: 500 }));
+    // Reveal chime, synced to the VISIBLE start of the entrance (after the same
+    // delay) — not screen mount. This one entrance drives EVERY result type: multi
+    // winner name, solo verdict word, and the categorical (aura) label all animate
+    // in through this shared titleScale/titleOpacity, so one hook covers both paths.
+    // History reopens are review, not ceremony — the entrance still plays, the
+    // chime does not.
+    if (isViewOnly) return;
+    const chime = setTimeout(() => playEffect('reveal'), REVEAL_DELAY_MS);
+    return () => clearTimeout(chime);
+  }, [titleScale, titleOpacity, isViewOnly]);
 
   const titleStyle = useAnimatedStyle(() => ({
     transform: [{ scale: titleScale.value }],
@@ -109,13 +132,25 @@ export default function ResultScreen() {
 
   const module = result ? MODULES.find((m) => m.id === result.moduleId) : undefined;
   const isMulti = module?.type === 'multi';
+  const isCategorical = module?.resultKind === 'categorical';
 
-  // Big-title verdict word for self-discovery modules (e.g. "Secure").
+  // Winning category's content block for categorical modules (aura_color) — the
+  // label re-resolves from the persisted dominantDimension, so History reopens work.
+  const categoricalCategory = useMemo(() => {
+    if (!result || !isCategorical) return null;
+    const cr = CATEGORICAL_RESULTS[result.moduleId];
+    if (!cr) return null;
+    return cr.categories[result.dominantDimension] ?? cr.categories[Object.keys(cr.categories)[0]] ?? null;
+  }, [result, isCategorical]);
+
+  // Big-title verdict word for self-discovery modules (e.g. "Secure" / "Violet").
   const verdictWord = useMemo(() => {
-    if (!result || isMulti || !result.verdict) return null;
+    if (!result || isMulti) return null;
+    if (isCategorical) return categoricalCategory?.label ?? null;
+    if (!result.verdict) return null;
     const sr = SOLO_RESULTS[result.moduleId];
     return sr ? sr.verdictLabel[result.verdict] : null;
-  }, [result, isMulti]);
+  }, [result, isMulti, isCategorical, categoricalCategory]);
 
   // Share/Save = the off-screen ShareCard captured at story size (1080×1920); the
   // old text share stays as the Share fallback (web / capture unavailable).
@@ -186,7 +221,7 @@ export default function ResultScreen() {
 
   const handleUnlockStar = useCallback(() => {
     lightTap();
-    if (spendStars(1)) {
+    if (spendStars(1, 'result_unlock')) {
       setResultUnlocked(true);
       successNotification();
     }
@@ -194,18 +229,35 @@ export default function ResultScreen() {
 
   const handleTryAnother = useCallback(() => {
     lightTap();
-    router.replace('/(tabs)');
+    // Collapse the whole reading-flow stack (module → … → result) — a plain replace
+    // left every flow screen alive beneath the tabs, so hardware back from a tab
+    // walked into a dead quiz instead of exiting the app.
+    router.dismissAll();
+    router.navigate('/(tabs)');
   }, []);
 
   const handleSaveExit = useCallback(() => {
     lightTap();
-    router.replace('/(tabs)/history');
+    router.dismissAll();
+    router.navigate('/(tabs)/history');
   }, []);
+
+  // Hardware back on a FRESH result acts as "Save & exit" — it must never fall
+  // through into the flow beneath. View-only reopens (from History) keep the default
+  // pop back to History.
+  useEffect(() => {
+    if (isViewOnly) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleSaveExit();
+      return true;
+    });
+    return () => sub.remove();
+  }, [isViewOnly, handleSaveExit]);
 
   if (!result) {
     return (
       <View style={[styles.container, styles.center, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text }}>No result found.</Text>
+        <Text style={{ color: theme.text }}>{t('result.notFound')}</Text>
       </View>
     );
   }
@@ -214,22 +266,38 @@ export default function ResultScreen() {
   // drives every accent on this screen — glow, eyebrow, confidence bar, ✦ markers,
   // Share pill — not the winner's avatar colour. Two modules sharing a category
   // (Who Loves Me / Who Admires) still read as two different experiences.
-  const { accent, accentSoft } = moduleTheme(result.moduleId);
+  // Aura Color is the sole exception: it glows in the OUTCOME color the user got.
+  const { accent, accentSoft } = result.moduleId === 'aura_color'
+    ? auraOutcomeTheme(result.dominantDimension)
+    : moduleTheme(result.moduleId);
   const eyebrow = t(`modules.${result.moduleId}.subtitle`, { defaultValue: '' }).toUpperCase();
 
   const personCount = Object.keys(result.scores).length;
   const showComparison = isMulti && personCount > 1;
+  // Multi tie: 2+ persons at the max score — reveal ALL of them; never imply an
+  // arbitrary single winner. Readings persisted before ties shipped carry neither
+  // field → [] → normal single-winner path.
+  const tiedWinners = result.tiedWinners ?? [];
+  const isTie = isMulti && tiedWinners.length > 1;
   // Verdict line under the reveal name — the winner template minus the name itself
   // ("Simo loves you the most." → "loves you the most.", per the Result PNGs). Shown for
-  // EVERY multi reading with a winner, not just single-person ones.
+  // EVERY multi reading with a winner, not just single-person ones. On a tie,
+  // insights[0] IS the full tie verdict (no leading name to strip). result.verdictLine
+  // is derived per-locale from the RAW template at generation time; readings persisted
+  // before it shipped fall back to the legacy name-strip of the populated sentence.
   const winnerSentence = result.insights[0]?.[language] ?? result.insights[0]?.en ?? '';
-  const winnerSubtitle =
-    isMulti && result.winner
-      ? winnerSentence.replace(`${result.winner.name} `, '')
+  const winnerSubtitle = isTie
+    ? winnerSentence
+    : isMulti && result.winner
+      ? result.verdictLine?.[language] ??
+        result.verdictLine?.en ??
+        winnerSentence.replace(`${result.winner.name} `, '')
       : null;
 
   const bigTitle = isMulti
-    ? result.winner?.name ?? ''
+    ? isTie
+      ? joinNames(tiedWinners.map((p) => p.name), language)
+      : result.winner?.name ?? ''
     : (verdictWord?.[language] ?? verdictWord?.en ?? '');
 
   const confidence = result.confidence;
@@ -244,9 +312,12 @@ export default function ResultScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Cosmic base + module-tinted top bloom */}
+      {/* iOS swipe-dismiss must not fall into the flow beneath a fresh result;
+          view-only reopens keep the gesture (their way back to History). */}
+      <Stack.Screen options={{ gestureEnabled: isViewOnly }} />
+      {/* Ambient base + module-tinted top bloom */}
       <LinearGradient
-        colors={['#181430', '#0E0B22', '#08061A']}
+        colors={theme.fieldGradient}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -321,7 +392,8 @@ export default function ResultScreen() {
               multi-layer glow read as a blurry doubled name on device. */}
           <Text
             style={[styles.bigTitle, { color: theme.text, textShadowColor: accent }]}
-            numberOfLines={1}
+            // Tied reveals join 2+ names — let them wrap before auto-shrinking.
+            numberOfLines={isTie ? 3 : 1}
             adjustsFontSizeToFit
           >
             {bigTitle}
@@ -411,7 +483,11 @@ export default function ResultScreen() {
               const pct = Math.round(((result.scores[p.id] ?? 0) / maxScore) * 100);
               // Bars fill in the CATEGORY accent (winner full-strength, the rest softened)
               // so the card reads in the reading's palette; avatars keep person colours.
-              const isWinner = p.id === result.winner?.id;
+              // On a tie EVERY max-scorer gets the winner treatment — equal scores
+              // already draw equal bars, the emphasis must match.
+              const isWinner = isTie
+                ? (result.tiedWinnerIds ?? []).includes(p.id)
+                : p.id === result.winner?.id;
               return (
                 <View key={p.id} style={styles.compRow}>
                   <View style={[styles.avatar, { backgroundColor: p.color }]}>
@@ -457,9 +533,20 @@ export default function ResultScreen() {
         )}
 
         {/* What this means */}
-        {unlocked && bullets.length > 0 && (
+        {unlocked && (bullets.length > 0 || categoricalCategory) && (
           <GlassCard style={styles.card}>
             <Text style={[styles.cardTitle, { color: theme.textDim }]}>{t('result.whatThisMeans')}</Text>
+            {/* Categorical modules carry a per-category body paragraph above the bullets. */}
+            {categoricalCategory && (
+              <>
+                <Text style={[styles.meaningBody, { color: theme.text }]}>
+                  {categoricalCategory.whatThisMeans[language] ?? categoricalCategory.whatThisMeans.en}
+                </Text>
+                {bullets.length > 0 && (
+                  <View style={[styles.divider, { backgroundColor: theme.surfaceBorder }]} />
+                )}
+              </>
+            )}
             {bullets.map((insight, i) => (
               <View key={i}>
                 {i > 0 && <View style={[styles.divider, { backgroundColor: theme.surfaceBorder }]} />}
@@ -697,6 +784,7 @@ const styles = StyleSheet.create({
   theReadText: { fontSize: rs(18), lineHeight: rs(26) },
 
   // What this means
+  meaningBody: { fontSize: rs(14.5), lineHeight: rs(21), fontFamily: 'HankenGrotesk_400Regular' },
   divider: { height: 1, marginVertical: rs(12) },
   bulletRow: { flexDirection: 'row', gap: rs(12), alignItems: 'flex-start' },
   bulletStar: { fontSize: rs(15), marginTop: rs(2) },

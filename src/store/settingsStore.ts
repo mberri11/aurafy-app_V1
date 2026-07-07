@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language, ReadingMode, ThemeId } from '../types';
+// One-directional edge: the sound service reads settings via a lazy require (no
+// static import back here), so importing stopLoop creates no cycle.
+import { stopLoop } from '../utils/sound';
 
 interface SettingsState {
   language: Language;
@@ -10,7 +13,6 @@ interface SettingsState {
   hapticsEnabled: boolean;
   animationsEnabled: boolean;
   soundEnabled: boolean;
-  ambientAudio: boolean;
   volume: number; // 0–1
   dailyReminder: boolean;
   reminderTime: string; // display string e.g. "9:00 PM"
@@ -25,7 +27,6 @@ interface SettingsState {
   toggleHaptics: () => void;
   toggleAnimations: () => void;
   toggleSound: () => void;
-  toggleAmbientAudio: () => void;
   setVolume: (v: number) => void;
   toggleDailyReminder: () => void;
   setReminderTime: (t: string) => void;
@@ -43,7 +44,6 @@ const DEFAULTS = {
   hapticsEnabled: true,
   animationsEnabled: true,
   soundEnabled: true,
-  ambientAudio: false,
   volume: 0.8,
   dailyReminder: true,
   reminderTime: '9:00 PM',
@@ -55,7 +55,7 @@ const DEFAULTS = {
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...DEFAULTS,
 
       setLanguage: (lang: Language): void => {
@@ -84,10 +84,10 @@ export const useSettingsStore = create<SettingsState>()(
 
       toggleSound: (): void => {
         set((s) => ({ soundEnabled: !s.soundEnabled }));
-      },
-
-      toggleAmbientAudio: (): void => {
-        set((s) => ({ ambientAudio: !s.ambientAudio }));
+        // Sound turned OFF → stop the ambient loading pad immediately (fade-out). This
+        // single switch now gates every sound; the effect one-shots are transient (they
+        // just gate off on their next call), so only the loop needs an explicit stop.
+        if (!get().soundEnabled) stopLoop();
       },
 
       setVolume: (v: number): void => {

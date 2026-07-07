@@ -69,6 +69,17 @@ export function getDayIndex(anchor: number | null, date: Date = new Date()): num
 }
 
 /**
+ * How many week slots the user has ENTERED since their anchor (week 0 counts as
+ * entered on day 0), UNWRAPPED — unlike getActiveWeekIndex this never applies
+ * `% WEEKS.length`, so once a week is reached it stays reached even after the
+ * registry cycles. Gates feed visibility: a week's articles show only when the
+ * week's ordinal in `WEEKS` is <= this count (no pre-reading future weeks).
+ */
+export function getReachedWeekCount(anchor: number | null, date: Date = new Date()): number {
+  return Math.floor(getDaysSinceAnchor(anchor, date) / 7);
+}
+
+/**
  * Index into `WEEKS` for the active week, or -1 when the registry is empty. Pure
  * (no flag gate) so it stays unit-testable; consumers gate on the flag via
  * getActiveWeek/getTodayPairing below.

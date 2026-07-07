@@ -10,10 +10,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { moduleTheme } from '@/src/themes/categoryTheme';
+import { isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
 import { useUserStore } from '@/src/store/userStore';
 import { useReadingStore } from '@/src/store/readingStore';
 import { MODULES, FREE_TRIAL_MODULE_ID } from '@/src/data/modules';
@@ -22,7 +23,6 @@ import PersonInput from '@/src/components/PersonInput';
 import GradientButton from '@/src/components/GradientButton';
 import GlassCard from '@/src/components/GlassCard';
 import StarsBadge from '@/src/components/StarsBadge';
-import AppDialog from '@/src/components/AppDialog';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
 
@@ -49,7 +49,6 @@ export default function PersonEntryScreen() {
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
   const markFreeTrialUsed = useUserStore((s) => s.markFreeTrialUsed);
   const { startReading } = useReadingStore();
-  const [noStars, setNoStars] = useState(false);
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
   const resolvedMode: ReadingMode = (mode as ReadingMode) ?? 'solo';
@@ -57,6 +56,9 @@ export default function PersonEntryScreen() {
   // The free-trial module's first reading costs nothing (any mode) until consumed.
   const isFreeTrial = moduleId === FREE_TRIAL_MODULE_ID && !freeTrialUsed;
   const effectiveCost = isFreeTrial ? 0 : cost;
+  // Not enough stars to start (free trial is always affordable). Drives the locked/blurred
+  // "You" card and the CTA's redirect-to-Stars behavior — no blocking popup.
+  const canAfford = stars >= effectiveCost;
   const minSlots = SLOT_COUNTS[resolvedMode];
   // Only self-discovery modules (type 'solo') lock the reading to "You". Every other
   // module — even in solo mode — takes a name input (design 07-person-entry.png).
@@ -64,7 +66,7 @@ export default function PersonEntryScreen() {
 
   const [persons, setPersons] = useState<Person[]>(() => {
     if (isLockedSelf) {
-      return [{ id: generateId(), name: 'You', color: '#A78BFA' }];
+      return [{ id: generateId(), name: t('personEntry.you'), color: '#A78BFA' }];
     }
     return Array.from({ length: minSlots }, (_, i) => ({
       id: generateId(),
@@ -111,16 +113,22 @@ export default function PersonEntryScreen() {
     if (isFreeTrial) {
       // First free reading — consume the trial, no stars spent.
       markFreeTrialUsed();
+    } else if (stars < cost) {
+      // Not enough stars — no blocking popup; route to Stars to earn more, matching
+      // every other insufficient-balance entry point.
+      router.push('/(tabs)/stars');
+      return;
     } else {
-      const success = spendStars(cost);
-      if (!success) {
-        setNoStars(true);
-        return;
-      }
+      spendStars(cost, 'reading');
     }
     startReading(moduleId ?? '', resolvedMode, persons);
-    router.push({ pathname: '/quiz', params: { moduleId, mode: resolvedMode } });
-  }, [isFreeTrial, markFreeTrialUsed, spendStars, cost, t, startReading, moduleId, resolvedMode, persons]);
+    // trial flag tells the quiz what THIS attempt charged, so a mid-quiz abandon can
+    // give it back (stars refund vs. trial restore).
+    router.push({
+      pathname: '/quiz',
+      params: { moduleId, mode: resolvedMode, trial: isFreeTrial ? '1' : '0' },
+    });
+  }, [isFreeTrial, markFreeTrialUsed, spendStars, stars, cost, startReading, moduleId, resolvedMode, persons]);
 
   const handleStarsPress = useCallback(() => router.push('/(tabs)/stars'), []);
 
@@ -130,21 +138,33 @@ export default function PersonEntryScreen() {
   // Blooms use the spine's SOFT tone — dark module colors (jealous) wash out to
   // near-black at low opacity and made this screen read unlit.
   const bloomTint = moduleTheme(module.id).accentSoft;
+  // Prismatic identity (aura_color): gradient bloom / card ring / avatar.
+  const prism = isPrismModule(module.id);
+  const g = theme.gradient;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Cosmic depth base + per-module accent bloom (mirrors module detail / reading mode) */}
+      {/* Ambient depth base + per-module accent bloom (mirrors module detail / reading mode) */}
       <LinearGradient
-        colors={['#181430', '#0E0B22', '#08061A']}
+        colors={theme.fieldGradient}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="entry_glow" cx="50%" cy="18%" r="60%">
-            <Stop offset="0%" stopColor={bloomTint} stopOpacity={0.22} />
-            <Stop offset="55%" stopColor={bloomTint} stopOpacity={0.07} />
-            <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+            {prism
+              ? [
+                  <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.22} />,
+                  <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.09} />,
+                  <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.04} />,
+                  <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                ]
+              : [
+                  <Stop key="s0" offset="0%" stopColor={bloomTint} stopOpacity={0.22} />,
+                  <Stop key="s1" offset="55%" stopColor={bloomTint} stopOpacity={0.07} />,
+                  <Stop key="s2" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                ]}
           </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#entry_glow)" />
@@ -182,57 +202,100 @@ export default function PersonEntryScreen() {
         </Text>
 
         <View style={styles.entries}>
-          {persons.map((person, idx) =>
-            isLockedSelf ? (
-              // Self-discovery solo: name pre-filled as "You", locked — accent border +
-              // glow mirror the selected mode card on reading-mode (Simo 2026-07-03).
-              <GlassCard
-                key={person.id}
-                glowColor={accent}
-                style={[
-                  styles.soloCard,
-                  {
-                    borderColor: accent,
-                    borderWidth: 2,
-                    shadowOpacity: 0.9,
-                    shadowRadius: rs(20),
-                    elevation: 14,
-                  },
-                ]}
-              >
-                <View style={styles.soloRow}>
-                  <View style={[styles.soloAvatar, { backgroundColor: accent }]}>
-                    <Text style={[styles.soloAvatarText, { color: theme.background }]}>
-                      {person.name.charAt(0).toUpperCase() || 'Y'}
+          {persons.map((person, idx) => {
+            if (!isLockedSelf) {
+              return (
+                <PersonInput
+                  key={person.id}
+                  index={idx}
+                  name={person.name}
+                  color={person.color}
+                  onNameChange={(name) => updateName(idx, name)}
+                  onColorChange={(color) => updateColor(idx, color)}
+                />
+              );
+            }
+            // Self-discovery solo: name pre-filled as "You", locked — accent border +
+            // glow mirror the selected mode card on reading-mode (Simo 2026-07-03).
+            // Prism (aura_color): the accent border becomes a gradient ring and the
+            // avatar fills with the brand gradient.
+            const card = (
+              <View style={styles.soloCardWrap}>
+                <GlassCard
+                  glowColor={prism ? g[1] : accent}
+                  style={[
+                    styles.soloCard,
+                    prism
+                      ? { borderWidth: 0 }
+                      : { borderColor: accent, borderWidth: 2 },
+                    {
+                      shadowOpacity: 0.9,
+                      shadowRadius: rs(20),
+                      elevation: 14,
+                    },
+                  ]}
+                >
+                  <View style={styles.soloRow}>
+                    {prism ? (
+                      <LinearGradient
+                        colors={g}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.soloAvatar}
+                      >
+                        <Text style={[styles.soloAvatarText, { color: theme.background }]}>
+                          {person.name.charAt(0).toUpperCase() || 'Y'}
+                        </Text>
+                      </LinearGradient>
+                    ) : (
+                      <View style={[styles.soloAvatar, { backgroundColor: accent }]}>
+                        <Text style={[styles.soloAvatarText, { color: theme.background }]}>
+                          {person.name.charAt(0).toUpperCase() || 'Y'}
+                        </Text>
+                      </View>
+                    )}
+                    <Text style={styles.soloNameLine}>
+                      <Text style={[styles.soloName, { color: theme.text }]}>{person.name}</Text>
+                      <Text style={[styles.soloLocked, { color: theme.textMuted }]}>
+                        {'  ·  '}
+                        {t('personEntry.locked')}
+                      </Text>
                     </Text>
                   </View>
-                  <Text style={styles.soloNameLine}>
-                    <Text style={[styles.soloName, { color: theme.text }]}>{person.name}</Text>
-                    <Text style={[styles.soloLocked, { color: theme.textMuted }]}>
-                      {'  ·  '}
-                      {t('personEntry.locked')}
-                    </Text>
-                  </Text>
-                </View>
-              </GlassCard>
-            ) : (
-              <PersonInput
+                </GlassCard>
+
+                {/* Not enough stars → the "You" card reads as locked. Real gaussian blur
+                    in a release/native build; on Expo Go (dev) the Android BlurView no-ops,
+                    so the dark scrim underneath carries the locked look there. */}
+                {!canAfford && (
+                  <View pointerEvents="none" style={styles.lockOverlay}>
+                    <BlurView intensity={22} tint="dark" style={StyleSheet.absoluteFill} />
+                    <View style={[StyleSheet.absoluteFill, styles.lockScrim]} />
+                  </View>
+                )}
+              </View>
+            );
+            return prism ? (
+              <LinearGradient
                 key={person.id}
-                index={idx}
-                name={person.name}
-                color={person.color}
-                onNameChange={(name) => updateName(idx, name)}
-                onColorChange={(color) => updateColor(idx, color)}
-              />
-            ),
-          )}
+                colors={g}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.soloRingPrism}
+              >
+                {card}
+              </LinearGradient>
+            ) : (
+              <React.Fragment key={person.id}>{card}</React.Fragment>
+            );
+          })}
 
           {/* Add person button (circle mode only) */}
           {resolvedMode === 'circle' && persons.length < 10 && (
             <TouchableOpacity
               onPress={addPerson}
               style={[styles.addBtn, { borderColor: theme.surfaceBorder }]}
-              accessibilityLabel="Add another person"
+              accessibilityLabel={t('personEntry.addPerson')}
             >
               <Text style={[styles.addBtnText, { color: theme.textMuted }]}>
                 + {t('personEntry.addPerson')}
@@ -265,17 +328,6 @@ export default function PersonEntryScreen() {
           <MaterialCommunityIcons name="star-four-points" size={rs(12)} color={theme.textMuted} />
         </View>
       </View>
-
-      <AppDialog
-        visible={noStars}
-        title={t('errors.notEnoughStarsTitle')}
-        message={t('errors.notEnoughStars')}
-        confirmLabel={t('common.ok')}
-        tone="cyan"
-        icon="star"
-        onConfirm={() => setNoStars(false)}
-        onClose={() => setNoStars(false)}
-      />
     </View>
   );
 }
@@ -325,7 +377,17 @@ const styles = StyleSheet.create({
   entries: { gap: rs(12), marginTop: rs(22) },
 
   /* Solo "You · locked" card — selected-state treatment (accent border + glow) applied inline. */
+  soloCardWrap: { position: 'relative' },
   soloCard: { padding: rs(16) },
+  // Locked (insufficient-stars) veil over the "You" card — matches GlassCard's rs(20) radius.
+  lockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: rs(20),
+    overflow: 'hidden',
+    zIndex: 2,
+  },
+  lockScrim: { backgroundColor: 'rgba(7,9,26,0.5)' },
+  soloRingPrism: { borderRadius: rs(22), padding: rs(2) },
   soloRow: { flexDirection: 'row', alignItems: 'center', gap: rs(14) },
   soloAvatar: {
     width: rs(46),

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  BackHandler,
   Dimensions,
   Pressable,
   ScrollView,
@@ -23,17 +24,20 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { accentInk } from '@/src/themes/categoryTheme';
+import { accentInk, isPrismModule } from '@/src/themes/categoryTheme';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
+import { useUserStore } from '@/src/store/userStore';
 import { Question, ReadingMode, Language } from '@/src/types';
 import { MODULES } from '@/src/data/modules';
 import { localizeTemplate } from '@/src/engine/scoringEngine';
 import AurafyLogo from '@/src/components/AurafyLogo';
+import ConfirmSheet from '@/src/components/ConfirmSheet';
 import ProgressBar from '@/src/components/ProgressBar';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
 import { lightTap } from '@/src/utils/haptics';
+import { playEffect } from '@/src/utils/sound';
 
 // Map moduleId → questions
 import { whoLovesMeQuestions } from '@/src/data/questions/whoLovesMe';
@@ -45,6 +49,7 @@ import { energyReadingQuestions } from '@/src/data/questions/energyReading';
 import { attachmentStyleQuestions } from '@/src/data/questions/attachmentStyle';
 import { amITheProblemQuestions } from '@/src/data/questions/amITheProblem';
 import { whoCutOffQuestions } from '@/src/data/questions/whoCutOff';
+import { auraColorQuestions } from '@/src/data/questions/auraColor';
 
 const QUESTIONS_MAP: Record<string, Question[]> = {
   who_loves_me: whoLovesMeQuestions,
@@ -56,6 +61,7 @@ const QUESTIONS_MAP: Record<string, Question[]> = {
   attachment_style: attachmentStyleQuestions,
   am_i_problem: amITheProblemQuestions,
   who_cut_off: whoCutOffQuestions,
+  aura_color: auraColorQuestions,
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -72,7 +78,11 @@ const SOLO_FREQUENCY = [
 ] as const;
 
 export default function QuizScreen() {
-  const { moduleId, mode } = useLocalSearchParams<{ moduleId: string; mode: ReadingMode }>();
+  const { moduleId, mode, trial } = useLocalSearchParams<{
+    moduleId: string;
+    mode: ReadingMode;
+    trial?: string;
+  }>();
   const theme = useTheme();
   const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
@@ -82,7 +92,7 @@ export default function QuizScreen() {
   // the answered one exits toward the trailing (right) side.
   const enterX = isRTL ? -SCREEN_WIDTH : SCREEN_WIDTH;
   const exitX = isRTL ? SCREEN_WIDTH : -SCREEN_WIDTH;
-  const { currentPersons, recordAnswer } = useReadingStore();
+  const { currentPersons, recordAnswer, resetReading } = useReadingStore();
   const showFrameworkTags = useSettingsStore((s) => s.showFrameworkTags);
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
@@ -90,6 +100,13 @@ export default function QuizScreen() {
   const [phase, setPhase] = useState<'breath' | 'quiz'>('breath');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [leaveSheetVisible, setLeaveSheetVisible] = useState(false);
+  const earnStars = useUserStore((s) => s.earnStars);
+  const restoreFreeTrial = useUserStore((s) => s.restoreFreeTrial);
+  // What Start charged for THIS attempt: person-entry passes trial='1' when it consumed
+  // the free trial instead of spending stars. Abandoning gives back exactly that.
+  const wasFreeTrial = trial === '1';
+  const abandonRefund = module?.starsCost[mode ?? 'solo'] ?? 1;
 
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
@@ -101,6 +118,11 @@ export default function QuizScreen() {
   const breathDone = useRef(false);
 
   const accent = module?.color ?? theme.primary;
+  // Prismatic identity (aura_color): gradient blooms / progress fill / tag; the
+  // low-alpha answer washes keep a single tint (the gradient's violet anchor).
+  const prism = isPrismModule(module?.id ?? '');
+  const g = theme.gradient;
+  const washTint = prism ? g[1] : accent;
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
@@ -167,10 +189,33 @@ export default function QuizScreen() {
     return () => clearTimeout(timer);
   }, [phase, breathOpacity, bobY, haloPulse, dismissBreath]);
 
+  // Android hardware back mid-quiz = abandon attempt. Always confirm first — Start
+  // already charged (stars or the free trial), so a silent pop would burn it with no
+  // result. iOS swipe is already disabled on this screen (gestureEnabled: false).
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      setLeaveSheetVisible(true);
+      return true;
+    });
+    return () => sub.remove();
+  }, []);
+
+  const handleAbandonConfirm = useCallback(() => {
+    setLeaveSheetVisible(false);
+    // Honest abandon: no result will be delivered, so give back what Start charged.
+    if (wasFreeTrial) restoreFreeTrial();
+    else earnStars(abandonRefund, 'refund');
+    resetReading();
+    // Pop the whole attempt (quiz → person-entry → reading-mode) back to module
+    // detail, so restarting is one tap away.
+    router.dismissTo({ pathname: '/module/[id]', params: { id: moduleId ?? '' } });
+  }, [wasFreeTrial, restoreFreeTrial, earnStars, abandonRefund, resetReading, moduleId]);
+
   const handleAnswer = useCallback(
     (answerValue: string) => {
       if (isAnimating || !currentQuestion) return;
       lightTap();
+      playEffect('tap'); // answer-selection only — this funnel excludes the breath dismiss + nav
       recordAnswer(currentQuestion.id, answerValue);
       setIsAnimating(true);
 
@@ -179,10 +224,12 @@ export default function QuizScreen() {
       opacity.value = withTiming(0, { duration: 250 }, (finished) => {
         if (finished) {
           if (isLastQuestion) {
-            runOnJS(router.push)({
+            // Replace (not push) so the quiz never survives its own completion — it
+            // must not be reachable via back once loading takes over.
+            runOnJS(router.replace)({
               pathname: '/loading',
               params: { moduleId: moduleId ?? '', mode: mode ?? 'solo' },
-            } as Parameters<typeof router.push>[0]);
+            } as Parameters<typeof router.replace>[0]);
           } else {
             runOnJS(advanceQuestion)(currentIndex + 1);
           }
@@ -212,10 +259,30 @@ export default function QuizScreen() {
   const bobStyle = useAnimatedStyle(() => ({ transform: [{ translateY: bobY.value }] }));
   const haloStyle = useAnimatedStyle(() => ({ opacity: haloPulse.value }));
 
+  // Shared by both returns below — the back interception is active in either, so the
+  // sheet must render in either (or a back press would set state with no UI).
+  const leaveSheet = (
+    <ConfirmSheet
+      visible={leaveSheetVisible}
+      title={t('quiz.leaveTitle')}
+      message={
+        wasFreeTrial
+          ? t('quiz.leaveMessageTrial')
+          : t('quiz.leaveMessagePaid', { cost: abandonRefund })
+      }
+      confirmLabel={t('quiz.leaveConfirm')}
+      tone="rose"
+      cancelLabel={t('common.cancel')}
+      onConfirm={handleAbandonConfirm}
+      onClose={() => setLeaveSheetVisible(false)}
+    />
+  );
+
   if (!currentQuestion) {
     return (
       <View style={[styles.container, styles.center, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text }}>No questions available</Text>
+        <Text style={{ color: theme.text }}>{t('quiz.noQuestions')}</Text>
+        {leaveSheet}
       </View>
     );
   }
@@ -245,9 +312,9 @@ export default function QuizScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Cosmic depth base (mirrors module detail / reading mode) */}
+      {/* Ambient depth base (mirrors module detail / reading mode) */}
       <LinearGradient
-        colors={['#181430', '#0E0B22', '#08061A']}
+        colors={theme.fieldGradient}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -255,9 +322,18 @@ export default function QuizScreen() {
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="quiz_bloom" cx="28%" cy="16%" r="62%">
-            <Stop offset="0%" stopColor={accent} stopOpacity={0.24} />
-            <Stop offset="55%" stopColor={accent} stopOpacity={0.08} />
-            <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+            {prism
+              ? [
+                  <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.24} />,
+                  <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.1} />,
+                  <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.04} />,
+                  <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                ]
+              : [
+                  <Stop key="s0" offset="0%" stopColor={accent} stopOpacity={0.24} />,
+                  <Stop key="s1" offset="55%" stopColor={accent} stopOpacity={0.08} />,
+                  <Stop key="s2" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                ]}
           </RadialGradient>
           <RadialGradient id="quiz_teal" cx="88%" cy="90%" r="50%">
             <Stop offset="0%" stopColor={theme.gradient[0]} stopOpacity={0.09} />
@@ -283,9 +359,18 @@ export default function QuizScreen() {
                   <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
                     <Defs>
                       <RadialGradient id="breath_halo" cx="50%" cy="50%" r="50%">
-                        <Stop offset="0%" stopColor={accent} stopOpacity={0.45} />
-                        <Stop offset="60%" stopColor={accent} stopOpacity={0.16} />
-                        <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+                        {prism
+                          ? [
+                              <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.45} />,
+                              <Stop key="p1" offset="50%" stopColor={g[0]} stopOpacity={0.2} />,
+                              <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.08} />,
+                              <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                            ]
+                          : [
+                              <Stop key="s0" offset="0%" stopColor={accent} stopOpacity={0.45} />,
+                              <Stop key="s1" offset="60%" stopColor={accent} stopOpacity={0.16} />,
+                              <Stop key="s2" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                            ]}
                       </RadialGradient>
                     </Defs>
                     <Circle cx="50%" cy="50%" r="50%" fill="url(#breath_halo)" />
@@ -317,23 +402,39 @@ export default function QuizScreen() {
               current={currentIndex + 1}
               total={questions.length}
               accentColor={accent}
+              gradientColors={prism ? g : undefined}
             />
           </View>
 
           <Animated.View style={[styles.quizBody, cardStyle]}>
-            {showFrameworkTags && (
-              <View
-                style={[
-                  styles.frameworkTag,
-                  { backgroundColor: `${accent}14`, borderColor: `${accent}66` },
-                ]}
-              >
-                <View style={[styles.frameworkDot, { backgroundColor: accent }]} />
-                <Text style={[styles.frameworkText, { color: accent }]}>
-                  {t(`quiz.frameworks.${frameworkKey}`).toUpperCase()}
-                </Text>
-              </View>
-            )}
+            {showFrameworkTags &&
+              (prism ? (
+                <LinearGradient
+                  colors={g}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.frameworkTagRingPrism}
+                >
+                  <View style={[styles.frameworkTagInnerPrism, { backgroundColor: theme.bg2 }]}>
+                    <View style={[styles.frameworkDot, { backgroundColor: theme.text }]} />
+                    <Text style={[styles.frameworkText, { color: theme.text }]}>
+                      {t(`quiz.frameworks.${frameworkKey}`).toUpperCase()}
+                    </Text>
+                  </View>
+                </LinearGradient>
+              ) : (
+                <View
+                  style={[
+                    styles.frameworkTag,
+                    { backgroundColor: `${accent}14`, borderColor: `${accent}66` },
+                  ]}
+                >
+                  <View style={[styles.frameworkDot, { backgroundColor: accent }]} />
+                  <Text style={[styles.frameworkText, { color: accent }]}>
+                    {t(`quiz.frameworks.${frameworkKey}`).toUpperCase()}
+                  </Text>
+                </View>
+              ))}
 
             <Text
               style={[
@@ -376,7 +477,7 @@ export default function QuizScreen() {
                     ]}
                   >
                     <LinearGradient
-                      colors={[`${accent}1F`, 'rgba(255,255,255,0.02)']}
+                      colors={[`${washTint}1F`, 'rgba(255,255,255,0.02)']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       style={StyleSheet.absoluteFill}
@@ -403,7 +504,7 @@ export default function QuizScreen() {
                     ]}
                   >
                     <LinearGradient
-                      colors={[`${accent}1F`, 'rgba(255,255,255,0.02)']}
+                      colors={[`${washTint}1F`, 'rgba(255,255,255,0.02)']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       style={StyleSheet.absoluteFill}
@@ -458,6 +559,7 @@ export default function QuizScreen() {
           </Animated.View>
         </>
       )}
+      {leaveSheet}
     </View>
   );
 }
@@ -505,6 +607,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: rs(6),
     borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: rs(10),
+    paddingVertical: rs(4.5),
+  },
+  frameworkTagRingPrism: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    padding: 1,
+  },
+  frameworkTagInnerPrism: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(6),
     borderRadius: 999,
     paddingHorizontal: rs(10),
     paddingVertical: rs(4.5),

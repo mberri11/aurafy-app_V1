@@ -12,6 +12,8 @@ export const cosmicTheme: ThemeColors = {
   borderStrong: 'rgba(255,255,255,0.14)',
   primary: '#A78BFA',
   gradient: ['#22D3EE', '#A855F7', '#2FEAAC'],
+  // The ambient field (CosmicField + inline screen bases) — indigo → navy → deep.
+  fieldGradient: ['#181430', '#0E0B22', '#08061A'],
   text: '#FFFFFF',
   textMuted: '#A0A4B8',
   textDim: '#6E7290',

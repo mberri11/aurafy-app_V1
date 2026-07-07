@@ -63,9 +63,9 @@ export default function ReadingModeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Cosmic depth base (mirrors module detail) */}
+      {/* Ambient depth base (mirrors module detail) */}
       <LinearGradient
-        colors={['#181430', '#0E0B22', '#08061A']}
+        colors={theme.fieldGradient}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -117,9 +117,11 @@ export default function ReadingModeScreen() {
                 key={mode}
                 onPress={() => canAfford && setSelectedMode(mode)}
                 disabled={!canAfford}
-                accessibilityLabel={`${t(`readingModes.${mode}.title`)} mode, ${
-                  isFreeTrial ? t('readingModes.free') : `costs ${cost} stars`
-                }`}
+                accessibilityLabel={
+                  isFreeTrial
+                    ? t('readingModes.modeA11yFree', { mode: t(`readingModes.${mode}.title`) })
+                    : t('readingModes.modeA11y', { mode: t(`readingModes.${mode}.title`), cost })
+                }
                 accessibilityRole="button"
                 activeOpacity={0.85}
               >

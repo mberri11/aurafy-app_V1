@@ -7,6 +7,12 @@ export const whoLovesMeResults: MultiResults = {
     ar: '{name} يحبك أكثر من الجميع.',
     es: '{name} te ama más que nadie.',
   },
+  tieTemplate: {
+    en: 'The love is split evenly — {names} both hold a real piece of your heart.',
+    fr: 'The love is split evenly — {names} both hold a real piece of your heart.',
+    ar: 'The love is split evenly — {names} both hold a real piece of your heart.',
+    es: 'The love is split evenly — {names} both hold a real piece of your heart.',
+  },
   shareLines: {
     secure_base: {
       en: "The signs aren't subtle — they're just quiet.",

@@ -11,6 +11,9 @@ export const desertOracleTheme: ThemeColors = {
   primary: '#E8A04A',
   // Sunset gradient (orange → pink → purple) sampled from 14-settings_themes.png.
   gradient: ['#F2AA52', '#E85C8E', '#8D3BDF'],
+  // Warm dark field — ember → bg2 → near-black, same lighter→darker relationship
+  // to background/bg2 that cosmic's field has to its own.
+  fieldGradient: ['#2B1710', '#1A0E06', '#0C0602'],
   text: '#FFFFFF',
   textMuted: '#A0A4B8',
   textDim: '#6E7290',

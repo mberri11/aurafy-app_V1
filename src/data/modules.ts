@@ -76,6 +76,26 @@ export const MODULES: Module[] = [
     framework: 'mixed',
     comingSoon: true,
   },
+  {
+    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    id: 'who_will_hurt_me',
+    type: 'multi',
+    starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
+    icon: '🔒',
+    color: '#6E7290',
+    framework: 'mixed',
+    comingSoon: true,
+  },
+  {
+    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    id: 'red_green_flag',
+    type: 'multi',
+    starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
+    icon: '🔒',
+    color: '#6E7290',
+    framework: 'mixed',
+    comingSoon: true,
+  },
   // SELF-DISCOVERY MODULES (solo)
   {
     id: 'attachment_style',
@@ -84,6 +104,17 @@ export const MODULES: Module[] = [
     icon: '🧠',
     color: '#22D3EE',
     framework: 'attachment',
+  },
+  {
+    // Categorical solo: answers vote for one of 6 aura colors; winner + "edge"
+    // runner-up (scoreCategorical). Violet — matches MODULE_THEMES.aura_color.
+    id: 'aura_color',
+    type: 'solo',
+    resultKind: 'categorical',
+    starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
+    icon: '🌈',
+    color: '#A78BFA',
+    framework: 'colorWheel',
   },
   {
     id: 'am_i_problem',
@@ -96,6 +127,26 @@ export const MODULES: Module[] = [
   {
     // Placeholder — locked "Coming soon" card on Home (no reading content yet).
     id: 'am_i_healing',
+    type: 'solo',
+    starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
+    icon: '🔒',
+    color: '#6E7290',
+    framework: 'mixed',
+    comingSoon: true,
+  },
+  {
+    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    id: 'shadow_self',
+    type: 'solo',
+    starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
+    icon: '🔒',
+    color: '#6E7290',
+    framework: 'mixed',
+    comingSoon: true,
+  },
+  {
+    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    id: 'inner_child',
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
     icon: '🔒',

@@ -36,6 +36,13 @@
           "savePhotosPermission": "Allow Aurafy to save your reading cards to your photos.",
           "isAccessMediaLocationEnabled": false
         }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "experiments": {

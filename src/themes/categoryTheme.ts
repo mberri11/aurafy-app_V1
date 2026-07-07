@@ -97,6 +97,53 @@ const MODULE_THEMES: Record<string, CategoryTheme> = {
   aura_color: { accent: '#A78BFA', accentSoft: '#C4B5FD', motif: { kind: 'wheel' } },
 };
 
+/**
+ * AURA COLOR ONLY — the one deliberate exception to the "one accent per module"
+ * rule above. The module's whole premise is that the OUTCOME is a color, so the
+ * result / share card / History entry glow in the color the user actually got
+ * (keyed by `result.dominantDimension`). The static `MODULE_THEMES.aura_color`
+ * violet stays as the PRE-REVEAL identity (Home card, module detail). No other
+ * module may resolve accents per-outcome.
+ */
+export const AURA_OUTCOME_THEME: Record<string, CategoryTheme> = {
+  violet: { accent: '#A78BFA', accentSoft: '#C4B5FD', motif: { kind: 'wheel' } },
+  blue: { accent: '#38BDF8', accentSoft: '#7DD3FC', motif: { kind: 'wheel' } },
+  green: { accent: '#4ADE80', accentSoft: '#86EFAC', motif: { kind: 'wheel' } },
+  gold: { accent: '#FBBF24', accentSoft: '#FCD34D', motif: { kind: 'wheel' } },
+  red: { accent: '#EF4444', accentSoft: '#FCA5A5', motif: { kind: 'wheel' } },
+  rose: { accent: '#FB7185', accentSoft: '#FDA4AF', motif: { kind: 'wheel' } },
+};
+
+export function auraOutcomeTheme(category: string): CategoryTheme {
+  return AURA_OUTCOME_THEME[category] ?? MODULE_THEMES.aura_color;
+}
+
+/**
+ * AURA COLOR ONLY (Simo, 2026-07-04) — the namesake module's PRE-REVEAL identity
+ * is PRISMATIC, not a single hue: Home card, module detail, person entry and quiz
+ * render the brand `theme.gradient` (blooms, rings, borders, progress fill) with
+ * white ink, because every single hue already belongs to another module (the old
+ * static violet read as Who Loves Me). `MODULE_THEMES.aura_color`'s violet stays
+ * as the single-color fallback for surfaces that can't take a gradient (loading
+ * bloom, low-alpha washes). The post-reveal accent stays per-outcome (above).
+ */
+export function isPrismModule(moduleId: string): boolean {
+  return moduleId === 'aura_color';
+}
+
+/** The aura colour-wheel hues (one walk around the spectrum) — drawn by
+ *  CategoryMotif's wheel disc and reused by prism surfaces (Home card halo,
+ *  loading hex dots) so the rainbow always matches the icon.
+ *  Order: rose, coral, gold, emerald, cyan, violet. */
+export const AURA_WHEEL_HUES = [
+  '#F472B6',
+  '#FB7185',
+  '#FBBF24',
+  '#34D399',
+  '#22D3EE',
+  '#A78BFA',
+] as const;
+
 export function categoryForModule(moduleId: string): Category {
   return MODULE_CATEGORY[moduleId] ?? 'attachment';
 }

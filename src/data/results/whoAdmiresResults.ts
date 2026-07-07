@@ -7,6 +7,12 @@ export const whoAdmiresResults: MultiResults = {
     ar: '{name} يُعجب بك أكثر مما يُظهر.',
     es: '{name} te admira más de lo que deja ver.',
   },
+  tieTemplate: {
+    en: 'The admiration is split evenly — {names} both think of you more than you know.',
+    fr: 'The admiration is split evenly — {names} both think of you more than you know.',
+    ar: 'The admiration is split evenly — {names} both think of you more than you know.',
+    es: 'The admiration is split evenly — {names} both think of you more than you know.',
+  },
   shareLines: {
     quiet_attention: {
       en: "Someone watches you like you're the answer.",

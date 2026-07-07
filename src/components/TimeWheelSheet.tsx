@@ -223,7 +223,7 @@ function Wheels({
         accessibilityLabel={t('settings.setTime')}
       >
         <LinearGradient colors={ACCENT_GRADIENT} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.primary}>
-          <Text style={[styles.primaryLabel, { color: '#07091A' }]}>{t('settings.setTime')}</Text>
+          <Text style={[styles.primaryLabel, { color: theme.background }]}>{t('settings.setTime')}</Text>
         </LinearGradient>
       </TouchableOpacity>
     </>

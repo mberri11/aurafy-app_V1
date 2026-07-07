@@ -7,6 +7,12 @@ export const whoHatesMeResults: MultiResults = {
     ar: '{name} يحمل أكبر قدر من الضغينة تجاهك.',
     es: '{name} alberga más resentimiento hacia ti.',
   },
+  tieTemplate: {
+    en: 'The resentment is split — {names} carry it in equal measure.',
+    fr: 'The resentment is split — {names} carry it in equal measure.',
+    ar: 'The resentment is split — {names} carry it in equal measure.',
+    es: 'The resentment is split — {names} carry it in equal measure.',
+  },
   shareLines: {
     negative_affect: {
       en: 'Not everyone clapping was cheering.',

@@ -4,6 +4,20 @@ import { localDateKey } from '../content/articles/dailyInsight';
 // C-10 PILOT — curriculum walker + Week 1's 7 paired questions.
 import { getTodayPairing } from './weeks/walker';
 import { w01Questions } from './weeks/w01_secret_signs_of_love';
+// C-10 — Week 2's 7 paired questions.
+import { w02Questions } from './weeks/w02_when_they_pull_away';
+// C-10 — Week 3's 7 paired questions.
+import { w03Questions } from './weeks/w03_mixed_signals';
+// C-10 — Week 4's 7 paired questions.
+import { w04Questions } from './weeks/w04_what_feels_like_home';
+// C-10 — Week 5's 7 paired questions.
+import { w05Questions } from './weeks/w05_situationships';
+// C-10 — Week 6's 7 paired questions.
+import { w06Questions } from './weeks/w06_your_worth_in_love';
+// C-10 — Week 7's 7 paired questions.
+import { w07Questions } from './weeks/w07_hidden_feelings';
+// C-10 — Week 8's 7 paired questions.
+import { w08Questions } from './weeks/w08_the_chase';
 
 export interface DailyQuestion {
   id: string;
@@ -287,7 +301,21 @@ export const dailyQuestions: DailyQuestion[] = [
   },
   // C-10 PILOT — Week 1's 7 daily-ritual questions (paired to its 7 articles via the walker).
   ...w01Questions,
-  // TODO: add 355 more daily questions before production
+  // C-10 — Week 2's 7 daily-ritual questions (paired to its 7 articles via the walker).
+  ...w02Questions,
+  // C-10 — Week 3's 7 daily-ritual questions (paired to its 7 articles via the walker).
+  ...w03Questions,
+  // C-10 — Week 4's 7 daily-ritual questions (paired to its 7 articles via the walker).
+  ...w04Questions,
+  // C-10 — Week 5's 7 daily-ritual questions (paired to its 7 articles via the walker).
+  ...w05Questions,
+  // C-10 — Week 6's 7 daily-ritual questions (paired to its 7 articles via the walker).
+  ...w06Questions,
+  // C-10 — Week 7's 7 daily-ritual questions (paired to its 7 articles via the walker).
+  ...w07Questions,
+  // C-10 — Week 8's 7 daily-ritual questions (paired to its 7 articles via the walker).
+  ...w08Questions,
+  // TODO: add 306 more daily questions before production
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
