@@ -1,15 +1,37 @@
+import type {
+  RewardedAd as RewardedAdT,
+  InterstitialAd as InterstitialAdT,
+} from 'react-native-google-mobile-ads';
+
+import { AD_UNIT_IDS } from '@/src/config/ads';
+import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
 import { logger } from '../utils/logger';
 
 /**
- * AdMob singleton manager.
- * NOTE: react-native-google-mobile-ads requires a native build (EAS Build / Expo Launch).
- * In Expo Go / web, all ad methods return false gracefully.
- * TODO: Install react-native-google-mobile-ads and wire real ad units for production.
+ * AdMob singleton — imperative rewarded + interstitial ads.
+ *
+ * Kept as an imperative service (not a hook) because the existing gates
+ * (loading.tsx, result.tsx) `await showRewarded()` inside callbacks and branch on
+ * the boolean. showRewarded() resolves `true` ONLY when the ad was fully watched.
+ *
+ * The native module only exists in a dev-client / EAS build. In Expo Go, ADS_AVAILABLE
+ * is false and every method no-ops (showRewarded → false, so callers fall back to the
+ * 1★ path). Declarative surfaces (banner, dev-panel test buttons) use the hooks instead.
  */
+
+const REQUEST_OPTS = { requestNonPersonalizedAdsOnly: true };
+
+// Lazy accessor for the native library — never touched at import time (Expo Go safe).
+function lib() {
+  return require('react-native-google-mobile-ads');
+}
+
 class AdMobManagerClass {
   private static instance: AdMobManagerClass;
-  private interstitialLoaded = false;
+  private rewarded: RewardedAdT | null = null;
   private rewardedLoaded = false;
+  private interstitial: InterstitialAdT | null = null;
+  private interstitialLoaded = false;
 
   static getInstance(): AdMobManagerClass {
     if (!AdMobManagerClass.instance) {
@@ -18,60 +40,140 @@ class AdMobManagerClass {
     return AdMobManagerClass.instance;
   }
 
+  /** Preload both formats. Called once after the SDK finishes initializing. */
   initialize(): void {
-    try {
-      logger.log('AdMobManager initialized (stub mode)');
-      // TODO: MobileAds().initialize() when react-native-google-mobile-ads is installed
-    } catch (err) {
-      logger.error('AdMob init failed:', err);
-    }
+    if (!ADS_AVAILABLE) return;
+    this.preloadRewarded();
+    this.preloadInterstitial();
   }
 
-  preloadInterstitial(): void {
+  // ── Rewarded ──────────────────────────────────────────────────────────────
+  preloadRewarded(): void {
+    if (!ADS_AVAILABLE) return;
     try {
-      // TODO: InterstitialAd.createForAdRequest(AD_UNIT_IDS.interstitial)
-      logger.log('Preloading interstitial (stub)');
-      this.interstitialLoaded = false;
-    } catch (err) {
-      logger.error('Preload interstitial failed:', err);
-    }
-  }
-
-  /** Show interstitial if loaded, return true on success. */
-  async showInterstitial(): Promise<boolean> {
-    try {
-      if (!this.interstitialLoaded) {
-        logger.log('Interstitial not loaded, skipping');
-        return false;
-      }
-      // TODO: interstitial.show()
-      this.interstitialLoaded = false;
-      this.preloadInterstitial();
-      return true;
-    } catch (err) {
-      logger.error('Show interstitial failed:', err);
-      return false;
-    }
-  }
-
-  /**
-   * Show rewarded ad.
-   * Returns true only if fully watched.
-   * Returns false if closed early or not loaded.
-   */
-  async showRewarded(): Promise<boolean> {
-    try {
-      if (!this.rewardedLoaded) {
-        logger.log('Rewarded not loaded, skipping');
-        return false;
-      }
-      // TODO: rewarded.show() + listen for reward event
+      const { RewardedAd, RewardedAdEventType, AdEventType } = lib();
+      const ad: RewardedAdT = RewardedAd.createForAdRequest(AD_UNIT_IDS.rewarded, REQUEST_OPTS);
+      this.rewarded = ad;
       this.rewardedLoaded = false;
-      return false; // stub: always return false (not watched)
+      ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
+        this.rewardedLoaded = true;
+      });
+      ad.addAdEventListener(AdEventType.ERROR, (err: unknown) => {
+        logger.error('Rewarded load failed:', err);
+        this.rewardedLoaded = false;
+      });
+      ad.load();
     } catch (err) {
-      logger.error('Show rewarded failed:', err);
-      return false;
+      logger.error('preloadRewarded failed:', err);
     }
+  }
+
+  /** Show rewarded ad. Resolves true only if fully watched (reward earned). */
+  showRewarded(): Promise<boolean> {
+    if (!ADS_AVAILABLE) return Promise.resolve(false);
+    const ad = this.rewarded;
+    if (!ad || !this.rewardedLoaded) {
+      this.preloadRewarded(); // not ready — will be there next time
+      return Promise.resolve(false);
+    }
+    return new Promise<boolean>((resolve) => {
+      try {
+        const { RewardedAdEventType, AdEventType } = lib();
+        let earned = false;
+        let settled = false;
+        const subs: Array<() => void> = [];
+        const finish = (result: boolean) => {
+          if (settled) return;
+          settled = true;
+          subs.forEach((u) => {
+            try {
+              u();
+            } catch {
+              /* listener already gone */
+            }
+          });
+          this.rewardedLoaded = false;
+          this.preloadRewarded(); // queue the next one
+          resolve(result);
+        };
+        subs.push(ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+          earned = true;
+        }));
+        subs.push(ad.addAdEventListener(AdEventType.CLOSED, () => finish(earned)));
+        subs.push(ad.addAdEventListener(AdEventType.ERROR, (err: unknown) => {
+          logger.error('Rewarded show failed:', err);
+          finish(false);
+        }));
+        ad.show();
+      } catch (err) {
+        logger.error('showRewarded failed:', err);
+        resolve(false);
+      }
+    });
+  }
+
+  // ── Interstitial ──────────────────────────────────────────────────────────
+  preloadInterstitial(): void {
+    if (!ADS_AVAILABLE) return;
+    try {
+      const { InterstitialAd, AdEventType } = lib();
+      const ad: InterstitialAdT = InterstitialAd.createForAdRequest(
+        AD_UNIT_IDS.interstitial,
+        REQUEST_OPTS,
+      );
+      this.interstitial = ad;
+      this.interstitialLoaded = false;
+      ad.addAdEventListener(AdEventType.LOADED, () => {
+        this.interstitialLoaded = true;
+      });
+      ad.addAdEventListener(AdEventType.ERROR, (err: unknown) => {
+        logger.error('Interstitial load failed:', err);
+        this.interstitialLoaded = false;
+      });
+      ad.load();
+    } catch (err) {
+      logger.error('preloadInterstitial failed:', err);
+    }
+  }
+
+  /** Show interstitial if loaded. Resolves true once the ad was shown and closed. */
+  showInterstitial(): Promise<boolean> {
+    if (!ADS_AVAILABLE) return Promise.resolve(false);
+    const ad = this.interstitial;
+    if (!ad || !this.interstitialLoaded) {
+      this.preloadInterstitial();
+      return Promise.resolve(false);
+    }
+    return new Promise<boolean>((resolve) => {
+      try {
+        const { AdEventType } = lib();
+        let settled = false;
+        const subs: Array<() => void> = [];
+        const finish = (result: boolean) => {
+          if (settled) return;
+          settled = true;
+          subs.forEach((u) => {
+            try {
+              u();
+            } catch {
+              /* listener already gone */
+            }
+          });
+          this.interstitialLoaded = false;
+          this.preloadInterstitial();
+          resolve(result);
+        };
+        subs.push(ad.addAdEventListener(AdEventType.CLOSED, () => finish(true)));
+        subs.push(ad.addAdEventListener(AdEventType.ERROR, (err: unknown) => {
+          logger.error('Interstitial show failed:', err);
+          finish(false);
+        }));
+        ad.show();
+      } catch (err) {
+        logger.error('showInterstitial failed:', err);
+        resolve(false);
+      }
+    });
   }
 }
 

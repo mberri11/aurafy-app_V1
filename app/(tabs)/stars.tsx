@@ -24,6 +24,8 @@ import { useUserStore } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import GlassCard from '@/src/components/GlassCard';
 import CosmicBloom from '@/src/components/CosmicBloom';
+import AdBanner from '@/src/ads/AdBanner';
+import { AdMobManager } from '@/src/ads/AdMobManager';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
 import { rs } from '@/src/utils/responsive';
 
@@ -202,10 +204,13 @@ export default function StarsWalletScreen() {
     transform: [{ translateY: toastY.value }],
   }));
 
-  // Rewarded video: +2 flat, capped at 25/day in the store. Phase D replaces this direct
-  // call with a real AdMobManager.showRewarded() gate before crediting.
-  const handleWatchVideo = useCallback(() => {
-    if (earnRewardedVideo()) showEarnedToast(2);
+  // Rewarded video: +2 flat, capped at 25/day in the store. Gated behind a real
+  // rewarded ad — credit only fires on a fully-watched ad. In Expo Go / when no ad is
+  // loaded, showRewarded resolves false and nothing is credited (no exploit, no crash).
+  // The store's earnRewardedVideo still enforces the 25/day cap on top of the ad gate.
+  const handleWatchVideo = useCallback(async () => {
+    const watched = await AdMobManager.showRewarded();
+    if (watched && earnRewardedVideo()) showEarnedToast(2);
   }, [earnRewardedVideo, showEarnedToast]);
 
   // Daily ritual: the +1 is NOT granted here anymore — the ritual is the article + question
@@ -335,6 +340,10 @@ export default function StarsWalletScreen() {
             </GlassCard>
           </>
         )}
+
+        {/* Anchored banner at the feed footer (linger screen — allowed per the ad
+            strategy). Collapses to nothing in Expo Go or on load failure. */}
+        <AdBanner style={styles.banner} />
       </ScrollView>
 
       {/* "+N earned" toast overlay — light/neutral, not gold (per design) */}
@@ -355,6 +364,7 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { flex: 1 },
   content: { paddingHorizontal: rs(22), gap: rs(9) },
+  banner: { marginTop: rs(16) },
 
   // Hero
   heroBlock: { alignItems: 'center' },

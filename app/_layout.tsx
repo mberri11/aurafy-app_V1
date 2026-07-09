@@ -31,6 +31,7 @@ import { useTransitionStore } from "@/src/store/transitionStore";
 import CosmicReveal from "@/src/components/CosmicReveal";
 import CosmicField from "@/src/components/CosmicField";
 import { preload as preloadSound } from "@/src/utils/sound";
+import { initAds } from "@/src/ads/adsRuntime";
 import "@/src/i18n";
 
 SplashScreen.preventAutoHideAsync();
@@ -262,6 +263,13 @@ export default function RootLayout() {
   // forget so it can never block startup.
   useEffect(() => {
     preloadSound();
+  }, []);
+
+  // Initialize the AdMob SDK once at startup. No-ops in Expo Go and never blocks
+  // startup (fire-and-forget inside initAds). Needed before any banner/interstitial/
+  // rewarded ad can load.
+  useEffect(() => {
+    initAds();
   }, []);
 
   if (!fontsLoaded && !fontError) return null;

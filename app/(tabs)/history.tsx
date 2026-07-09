@@ -26,6 +26,7 @@ import GradientButton from '@/src/components/GradientButton';
 import CategoryMotif from '@/src/components/CategoryMotif';
 import CosmicBloom from '@/src/components/CosmicBloom';
 import AurafyLogo from '@/src/components/AurafyLogo';
+import AdBanner from '@/src/ads/AdBanner';
 import { rs } from '@/src/utils/responsive';
 
 const WEEKLY_CYAN = '#22D3EE'; // weekly entries use a constant brand-cyan treatment (spec §7)
@@ -278,8 +279,15 @@ export default function HistoryScreen() {
         ListEmptyComponent={<EmptyState />}
         ListFooterComponent={
           // No AD pill under the empty state — the sponsored slot only exists
-          // once there are real rows to sit under.
-          rows.length > 0 ? <SponsoredCard /> : null
+          // once there are real rows to sit under. The anchored banner follows it
+          // (linger screen — allowed per the ad strategy); it self-collapses in
+          // Expo Go / on load failure.
+          rows.length > 0 ? (
+            <>
+              <SponsoredCard />
+              <AdBanner style={styles.banner} />
+            </>
+          ) : null
         }
         showsVerticalScrollIndicator={false}
         scrollEnabled={rows.length > 0}
@@ -348,6 +356,7 @@ const styles = StyleSheet.create({
   adChip: { paddingHorizontal: rs(6), paddingVertical: rs(2), borderRadius: rs(5), borderWidth: 1 },
   adChipText: { fontSize: rs(9), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 1 },
   sponsoredText: { fontSize: rs(13), fontFamily: 'HankenGrotesk_400Regular' },
+  banner: { marginTop: rs(12) },
 
   // Empty state
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: rs(14), paddingBottom: rs(24) },

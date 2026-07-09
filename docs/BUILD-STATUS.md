@@ -320,7 +320,10 @@ branch their glyph on `useIsRTL()`. **Never read `I18nManager.isRTL` for renderi
 system. Full spec in **CLAUDE.md → "C-10 — Weekly Curriculum & Result System"**; data plan in
 **`docs/aurafy-article-content-map.md`** (54-week canonical map). Current app behavior unchanged
 (`WEEKLY_CURRICULUM_ENABLED = false`, `WEEKS` empty → walker no-ops, legacy daily pickers still run).
-Typecheck clean (minus the 2 known `reading-mode.tsx` errors).
+Typecheck clean. (The 2 `reading-mode.tsx` errors noted here at the time — both caused by
+`GlassCard`'s `style` prop being typed `ViewStyle | ViewStyle[]` instead of `StyleProp<ViewStyle>`,
+which rejected the conditional `style={[...]}` arrays used for the selected-mode-card treatment —
+were fixed 2026-07-07 by retyping `GlassCard.style` to `StyleProp<ViewStyle>`.)
 
 | Piece | File | Status |
 |---|---|---|

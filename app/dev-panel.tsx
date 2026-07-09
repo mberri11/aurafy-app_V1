@@ -34,6 +34,10 @@ import {
 } from '@/src/data/weeks/walker';
 import { sendTestNotification } from '@/src/utils/notifications';
 import { rs } from '@/src/utils/responsive';
+import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
+import { useInterstitialAd } from '@/src/ads/useInterstitialAd';
+import { useRewardedAd } from '@/src/ads/useRewardedAd';
+import AdBanner from '@/src/ads/AdBanner';
 
 const DAY_MS = 86_400_000;
 const fmtDate = (ms: number | null) => (ms === null ? '—' : new Date(ms).toISOString().slice(0, 10));
@@ -59,6 +63,29 @@ export default function DevPanelScreen() {
   // Simulated clock: real now + offsetDays. Drives every machine computation below.
   const [offsetDays, setOffsetDays] = useState(0);
   const simDate = new Date(Date.now() + offsetDays * DAY_MS);
+
+  // ── Ad test harness (Step 4) — hooks preload on mount; buttons show on demand. ──
+  const interstitial = useInterstitialAd();
+  const rewarded = useRewardedAd();
+  const [showBanner, setShowBanner] = useState(false);
+
+  const notReadyMsg = ADS_AVAILABLE
+    ? 'Not loaded yet — wait a second and try again.'
+    : 'Ads need a dev/EAS build — they never load in Expo Go.';
+
+  const onShowInterstitial = () => {
+    const shown = interstitial.showAd(() => Alert.alert('Interstitial', 'Ad closed.'));
+    if (!shown) Alert.alert('Interstitial', notReadyMsg);
+  };
+  const onShowRewarded = () => {
+    const shown = rewarded.showAd((reward) =>
+      Alert.alert(
+        'Rewarded',
+        `Reward earned${reward ? `: ${reward.amount} ${reward.type}` : ''} — no Stars credited in this test harness.`,
+      ),
+    );
+    if (!shown) Alert.alert('Rewarded', notReadyMsg);
+  };
 
   const daysSince = getDaysSinceAnchor(weekAnchorDate, simDate);
   const dayIndex = getDayIndex(weekAnchorDate, simDate);
@@ -216,6 +243,19 @@ export default function DevPanelScreen() {
           <Btn label="Send test notification" onPress={onTestNotification} tone="cyan" />
         </View>
 
+        {/* ── Ads (test units — verify each format renders) ─────────────── */}
+        <Text style={[styles.section, { color: theme.textDim }]}>ADS (Google TEST units)</Text>
+        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+          <Stat k="ads available" v={ADS_AVAILABLE ? 'yes ✓ (native build)' : 'no (Expo Go)'} accent={ADS_AVAILABLE} />
+          <Stat k="interstitial loaded" v={interstitial.isLoaded ? 'yes ✓' : 'loading…'} />
+          <Stat k="rewarded loaded" v={rewarded.isLoaded ? 'yes ✓' : 'loading…'} />
+        </View>
+        <View style={styles.row}>
+          <Btn label="Show interstitial" onPress={onShowInterstitial} tone="cyan" />
+          <Btn label="Show rewarded" onPress={onShowRewarded} tone="gold" />
+          <Btn label={showBanner ? 'Hide banner' : 'Show banner'} onPress={() => setShowBanner((v) => !v)} />
+        </View>
+
         {/* ── Stars (set balance for testing) ───────────────────────────── */}
         <Text style={[styles.section, { color: theme.textDim }]}>SET STARS</Text>
         <View style={styles.row}>
@@ -242,6 +282,11 @@ export default function DevPanelScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* Test banner — pinned bottom, above the safe-area inset. Collapses on failure. */}
+      {showBanner && (
+        <AdBanner style={{ position: 'absolute', left: 0, right: 0, bottom: insets.bottom }} />
+      )}
     </View>
   );
 }

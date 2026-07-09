@@ -26,6 +26,7 @@ import { useUserStore } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import StarsBadge from '@/src/components/StarsBadge';
 import CosmicBloom from '@/src/components/CosmicBloom';
+import AdBanner from '@/src/ads/AdBanner';
 import {
   ARTICLES,
   CATEGORY_ORDER,
@@ -185,6 +186,11 @@ export default function InsightsScreen() {
         ListEmptyComponent={
           <Text style={[styles.empty, { color: theme.textDim }]}>{t('insights.empty')}</Text>
         }
+        ListFooterComponent={
+          // Anchored banner at the feed footer (design note: "banner may sit at the
+          // feed footer"). Only under real rows; self-collapses in Expo Go / on failure.
+          listData.length > 0 ? <AdBanner style={styles.banner} /> : null
+        }
       />
     </View>
   );
@@ -235,4 +241,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: rs(40),
   },
+  banner: { marginTop: rs(16) },
 });
