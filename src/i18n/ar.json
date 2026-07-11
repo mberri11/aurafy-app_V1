@@ -1,4 +1,10 @@
 {
+  "notify": {
+    "dailyTitle": "Aurafy ✦",
+    "dailyBody": "قراءة هذا المساء جاهزة — أجب عن سؤالك اليومي للحفاظ على سلسلتك.",
+    "streakTitle": "لا تفقد سلسلتك 🔥",
+    "streakBody": "لم تُجب عن سؤال اليوم بعد. أجب قبل منتصف الليل للحفاظ على سلسلتك."
+  },
   "common": {
     "begin": "ابدأ",
     "continue": "متابعة",
@@ -18,7 +24,7 @@
     "adBadge": "إعلان"
   },
   "splash": {
-    "tagline": "افك شفرة الطاقة من حولك",
+    "tagline": "فك شفرة الطاقة من حولك",
     "loading": "جارٍ تحميل النجوم"
   },
   "tabs": {
@@ -29,7 +35,7 @@
     "settings": "الإعدادات"
   },
   "onboarding": {
-    "slide1Title": "افك شفرة الطاقة من حولك",
+    "slide1Title": "فك شفرة الطاقة من حولك",
     "slide1Subtitle": "اختر وحدة. أدخل الأشخاص في حياتك. احصل على قراءة قوية في أقل من 3 دقائق.",
     "slide2Title": "مبني على علم النفس الحقيقي",
     "slide2Subtitle": "نظرية التعلق، القياس الاجتماعي، لغات الحب، علم نفس الألوان — كلها مفكوكة الشفرة من أجلك.",
@@ -157,6 +163,18 @@
     "am_i_healing": {
       "title": "هل أتعافى؟",
       "subtitle": "قريباً"
+    },
+    "who_will_hurt_me": {
+      "title": "من سيجرحني؟"
+    },
+    "red_green_flag": {
+      "title": "علامة حمراء أم خضراء؟"
+    },
+    "shadow_self": {
+      "title": "الجانب الخفي"
+    },
+    "inner_child": {
+      "title": "الطفل الداخلي"
     }
   },
   "readingModes": {
@@ -301,6 +319,7 @@
     "reasonWatch": "شاهدت مقطعاً",
     "reasonShare": "تمت مشاركة Aurafy",
     "reasonDaily": "المكافأة اليومية",
+    "reasonInsight": "قراءة اليوم",
     "reasonWelcome": "هدية ترحيبية",
     "reasonReading": "قراءة",
     "reasonRefund": "استرداد",
@@ -315,6 +334,7 @@
     "ctaButton": "ابدأ قراءة",
     "modeLabel": "قراءة {{mode}}",
     "confidenceLine": "{{pct}}% ثقة",
+    "titleLine": "{{name}} — ثقة {{pct}}٪",
     "weeklyEyebrow": "قراءة أسبوعية",
     "sevenDayBadge": "7 أيام",
     "nights": "{{count}} ليالٍ · اكتمل في {{date}}",
@@ -324,7 +344,7 @@
     "title": "الإعدادات",
     "appearance": "المظهر",
     "theme": "السمة",
-    "haptics": "التغذية الراجعة اللمسية",
+    "haptics": "ردود الفعل اللمسية",
     "animations": "رسوم الخلفية",
     "language": "اللغة",
     "restartTitle": "إعادة التشغيل لتطبيق اللغة؟",

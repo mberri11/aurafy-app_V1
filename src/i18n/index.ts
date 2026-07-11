@@ -1,6 +1,5 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
 import { I18nManager } from 'react-native';
 
 import en from './en.json';
@@ -8,19 +7,7 @@ import fr from './fr.json';
 import ar from './ar.json';
 import es from './es.json';
 import { useSettingsStore } from '@/src/store/settingsStore';
-
-const SUPPORTED_LANGUAGES = ['en', 'fr', 'ar', 'es'] as const;
-
-/** Detect device language, fall back to 'en' if not supported. */
-function detectLanguage(): string {
-  try {
-    const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'en';
-    const twoChar = deviceLang.slice(0, 2);
-    return (SUPPORTED_LANGUAGES as readonly string[]).includes(twoChar) ? twoChar : 'en';
-  } catch {
-    return 'en';
-  }
-}
+import { syncDayjsLocale } from '@/src/utils/dateLocale';
 
 /** Apply RTL/LTR layout direction for a language (Arabic = RTL). Set the native flag
  *  UNCONDITIONALLY — don't gate on `I18nManager.isRTL`, which can read stale under Expo
@@ -33,13 +20,13 @@ function applyDirection(lang: string): void {
 }
 
 /** Boot language: the persisted store value if it has already hydrated,
- *  otherwise the device language as a placeholder (re-synced in
- *  syncFromStore once hydration finishes). */
+ *  otherwise a hard 'en' default (re-synced in syncFromStore once hydration
+ *  finishes). The device locale is never consulted. */
 function initialLanguage(): string {
   const persisted = useSettingsStore.persist.hasHydrated()
     ? useSettingsStore.getState().language
     : null;
-  return persisted ?? detectLanguage();
+  return persisted ?? 'en';
 }
 
 const bootLanguage = initialLanguage();
@@ -62,6 +49,7 @@ i18n
   });
 
 applyDirection(bootLanguage);
+syncDayjsLocale(bootLanguage);
 
 /** Pull the persisted language from the settings store (the single source of
  *  truth) into i18n + the native layout direction. */
@@ -71,6 +59,7 @@ function syncFromStore(): void {
     void i18n.changeLanguage(lang);
   }
   applyDirection(lang);
+  syncDayjsLocale(lang);
 }
 
 // settingsStore persists to AsyncStorage and rehydrates asynchronously, so at

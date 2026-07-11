@@ -28,26 +28,42 @@ let initStarted = false;
 export function initAds(): void {
   if (!ADS_AVAILABLE || initStarted) return;
   initStarted = true;
-  try {
-    // Lazy require so the native module is never touched at import time (belt-and-
-    // suspenders for Expo Go — this file is loaded during app bootstrap).
-    const mobileAds = require('react-native-google-mobile-ads').default;
-    mobileAds()
-      .initialize()
-      .then(() => {
-        logger.log('AdMob initialized');
-        // Preload the imperative rewarded/interstitial units now that the SDK is
-        // ready. Lazy require avoids a static import cycle (AdMobManager imports
-        // ADS_AVAILABLE from this module).
-        try {
-          require('@/src/ads/AdMobManager').AdMobManager.initialize();
-        } catch (err) {
-          logger.error('Ad preload failed:', err);
-        }
-      })
-      .catch((err: unknown) => logger.error('AdMob init failed:', err));
-  } catch (err) {
-    // Native module missing (e.g. an old dev client built before ads were added).
-    logger.error('AdMob module unavailable:', err);
-  }
+  // Lazy require so the native module is never touched at import time (belt-and-
+  // suspenders for Expo Go — this file is loaded during app bootstrap). Wrapped in
+  // an async IIFE (not `async function initAds`) so the public signature stays a
+  // fire-and-forget `void` call — ad init must never be awaited by app startup.
+  (async () => {
+    try {
+      const rnGoogleMobileAds = require('react-native-google-mobile-ads');
+      const mobileAds = rnGoogleMobileAds.default;
+      const { AdsConsent } = rnGoogleMobileAds;
+
+      // UMP consent — Google geotargets the form to EEA/UK only, so Morocco/US
+      // users never see it. Must never block or fail startup: any consent error
+      // is logged and swallowed, then we proceed to initialize() regardless.
+      try {
+        await AdsConsent.requestInfoUpdate();
+        await AdsConsent.loadAndShowConsentFormIfRequired();
+      } catch (err) {
+        logger.error('UMP consent flow failed (continuing to init ads):', err);
+      }
+
+      await mobileAds().initialize();
+      // 16+ content rating — matches the app's store listing.
+      mobileAds().setRequestConfiguration({ maxAdContentRating: 'T' });
+      logger.log('AdMob initialized');
+      // Preload the imperative rewarded/interstitial units now that the SDK is
+      // ready. Lazy require avoids a static import cycle (AdMobManager imports
+      // ADS_AVAILABLE from this module).
+      try {
+        require('@/src/ads/AdMobManager').AdMobManager.initialize();
+      } catch (err) {
+        logger.error('Ad preload failed:', err);
+      }
+    } catch (err) {
+      // Native module missing (e.g. an old dev client built before ads were added)
+      // or SDK initialize() itself rejected.
+      logger.error('AdMob init failed:', err);
+    }
+  })();
 }

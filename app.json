@@ -8,6 +8,14 @@
     "scheme": "aurafy",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/00ce7c28-5a3d-4318-a8c0-bd3644bcbe92",
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0
+    },
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
@@ -47,7 +55,7 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "androidAppId": "ca-app-pub-7799898340675704~6235800504",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ]

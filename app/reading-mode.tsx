@@ -14,6 +14,7 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { useUserStore } from '@/src/store/userStore';
+import { useSettingsStore } from '@/src/store/settingsStore';
 import { MODULES, FREE_TRIAL_MODULE_ID } from '@/src/data/modules';
 import { ReadingMode } from '@/src/types';
 import GlassCard from '@/src/components/GlassCard';
@@ -41,12 +42,22 @@ export default function ReadingModeScreen() {
   const insets = useSafeAreaInsets();
   const stars = useUserStore((s) => s.stars);
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
-  const [selectedMode, setSelectedMode] = useState<ReadingMode | null>(null);
+  const defaultMode = useSettingsStore((s) => s.defaultMode);
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
 
   // The free-trial module's first reading is free in ANY mode until consumed.
   const isFreeTrial = moduleId === FREE_TRIAL_MODULE_ID && !freeTrialUsed;
+
+  // Pre-select the user's Default mode (Settings → Reading preferences) so every
+  // relationship module opens with their preferred mode already highlighted — but
+  // only when they can actually afford it (else leave the choice open). Lazy init
+  // runs once on mount, so it never overrides a later manual selection.
+  const [selectedMode, setSelectedMode] = useState<ReadingMode | null>(() => {
+    if (!module) return null;
+    const cost = module.starsCost[defaultMode];
+    return isFreeTrial || stars >= cost ? defaultMode : null;
+  });
 
   const handleContinue = useCallback(() => {
     if (!selectedMode || !moduleId) return;

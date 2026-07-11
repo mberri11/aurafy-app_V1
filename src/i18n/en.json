@@ -1,4 +1,10 @@
 {
+  "notify": {
+    "dailyTitle": "Aurafy ✦",
+    "dailyBody": "Tonight's reading is ready — answer your daily question to keep your streak alive.",
+    "streakTitle": "Don't lose your streak 🔥",
+    "streakBody": "You haven't answered today's question yet. Answer before midnight to keep your streak."
+  },
   "common": {
     "begin": "Begin",
     "continue": "Continue",
@@ -157,6 +163,18 @@
     "am_i_healing": {
       "title": "Am I Healing?",
       "subtitle": "Coming soon"
+    },
+    "who_will_hurt_me": {
+      "title": "Who Will Hurt Me?"
+    },
+    "red_green_flag": {
+      "title": "Red Flag or Green Flag?"
+    },
+    "shadow_self": {
+      "title": "Shadow Self"
+    },
+    "inner_child": {
+      "title": "Inner Child"
     }
   },
   "readingModes": {
@@ -301,6 +319,7 @@
     "reasonWatch": "Watched a video",
     "reasonShare": "Shared Aurafy",
     "reasonDaily": "Daily bonus",
+    "reasonInsight": "Daily read",
     "reasonWelcome": "Welcome gift",
     "reasonReading": "Reading",
     "reasonRefund": "Refund",
@@ -315,6 +334,7 @@
     "ctaButton": "Start a reading",
     "modeLabel": "{{mode}} reading",
     "confidenceLine": "{{pct}}% confidence",
+    "titleLine": "{{name}} — {{pct}}% confidence",
     "weeklyEyebrow": "Weekly reading",
     "sevenDayBadge": "7-Day",
     "nights": "{{count}} nights · completed {{date}}",

@@ -1,4 +1,10 @@
 {
+  "notify": {
+    "dailyTitle": "Aurafy ✦",
+    "dailyBody": "Ta lecture du soir est prête — réponds à ta question du jour pour garder ta série.",
+    "streakTitle": "Ne perds pas ta série 🔥",
+    "streakBody": "Tu n'as pas encore répondu à la question d'aujourd'hui. Réponds avant minuit pour garder ta série."
+  },
   "common": {
     "begin": "Commencer",
     "continue": "Continuer",
@@ -157,6 +163,18 @@
     "am_i_healing": {
       "title": "Est-ce que je guéris ?",
       "subtitle": "Bientôt disponible"
+    },
+    "who_will_hurt_me": {
+      "title": "Qui va me blesser ?"
+    },
+    "red_green_flag": {
+      "title": "Red flag ou green flag ?"
+    },
+    "shadow_self": {
+      "title": "Ton côté ombre"
+    },
+    "inner_child": {
+      "title": "Enfant intérieur"
     }
   },
   "readingModes": {
@@ -301,6 +319,7 @@
     "reasonWatch": "Vidéo regardée",
     "reasonShare": "Aurafy partagé",
     "reasonDaily": "Bonus quotidien",
+    "reasonInsight": "Lecture du jour",
     "reasonWelcome": "Cadeau de bienvenue",
     "reasonReading": "Lecture",
     "reasonRefund": "Remboursement",
@@ -315,6 +334,7 @@
     "ctaButton": "Commencer une lecture",
     "modeLabel": "Lecture {{mode}}",
     "confidenceLine": "{{pct}} % de confiance",
+    "titleLine": "{{name}} — {{pct}} % de confiance",
     "weeklyEyebrow": "Lecture hebdomadaire",
     "sevenDayBadge": "7 jours",
     "nights": "{{count}} nuits · terminé le {{date}}",

@@ -99,14 +99,21 @@ export default function InsightsScreen() {
   const liveCategories = new Set(normal.map((a) => a.category));
   const chips: ChipKey[] = ['all', ...CATEGORY_ORDER.filter((c) => liveCategories.has(c))];
 
-  const renderItem: ListRenderItem<Article> = ({ item }) => (
-    <ArticleCard
-      article={item}
-      content={getArticleContent(item.id, lang)}
-      unread={!item.sponsored && !readArticleIds.includes(item.id)}
-      onPress={item.sponsored ? undefined : () => openArticle(item.id)}
-    />
-  );
+  const renderItem: ListRenderItem<Article> = ({ item }) => {
+    // The in-feed ad slot is a real banner ad, not a faux "SPONSORED" article card:
+    // the old card carried a headline + fake source ("Astra · مواعدة") that read like
+    // a genuine article and pointed nowhere. A banner is honest and self-collapses in
+    // Expo Go / on load failure, so the slot simply vanishes when there's no ad.
+    if (item.sponsored) return <AdBanner style={styles.inlineBanner} />;
+    return (
+      <ArticleCard
+        article={item}
+        content={getArticleContent(item.id, lang)}
+        unread={!readArticleIds.includes(item.id)}
+        onPress={() => openArticle(item.id)}
+      />
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -242,4 +249,6 @@ const styles = StyleSheet.create({
     marginTop: rs(40),
   },
   banner: { marginTop: rs(16) },
+  // In-feed banner occupies the old SPONSORED slot; match the article-card rhythm.
+  inlineBanner: { marginBottom: rs(12) },
 });

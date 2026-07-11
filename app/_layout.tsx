@@ -32,6 +32,7 @@ import CosmicReveal from "@/src/components/CosmicReveal";
 import CosmicField from "@/src/components/CosmicField";
 import { preload as preloadSound } from "@/src/utils/sound";
 import { initAds } from "@/src/ads/adsRuntime";
+import { syncReminders } from "@/src/utils/notifications";
 import "@/src/i18n";
 
 SplashScreen.preventAutoHideAsync();
@@ -270,6 +271,12 @@ export default function RootLayout() {
   // rewarded ad can load.
   useEffect(() => {
     initAds();
+  }, []);
+
+  // Re-lay-down the daily + streak reminders from current settings/streak state.
+  // Idempotent + fire-and-forget; no-ops in Expo Go / when reminders are off.
+  useEffect(() => {
+    void syncReminders();
   }, []);
 
   if (!fontsLoaded && !fontError) return null;

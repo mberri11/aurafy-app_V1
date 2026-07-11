@@ -43,11 +43,16 @@ const TEST = {
 
 // ── PRODUCTION unit IDs — paste your real AdMob units here, then flip USE_TEST_ADS. ──
 // (Aurafy ships to Google Play only, so Android is what matters; iOS kept for symmetry.)
+//
+// LIVE IDS — never run a production build against these while clicking ads yourself.
+// Tapping/clicking your own live ads (even "just testing") is invalid traffic under
+// AdMob policy and can get the account suspended. Verify with USE_TEST_ADS forced to
+// `true` on a production build first; only rely on real ad delivery, never manual taps.
 const PROD = {
   android: {
-    banner: 'REPLACE_WITH_REAL_ANDROID_BANNER_ID',
-    interstitial: 'REPLACE_WITH_REAL_ANDROID_INTERSTITIAL_ID',
-    rewarded: 'REPLACE_WITH_REAL_ANDROID_REWARDED_ID',
+    banner: 'ca-app-pub-7799898340675704/2580676271',
+    interstitial: 'ca-app-pub-7799898340675704/7599857214',
+    rewarded: 'ca-app-pub-7799898340675704/4398978808',
   },
   ios: {
     banner: 'REPLACE_WITH_REAL_IOS_BANNER_ID',
@@ -70,3 +75,17 @@ export const AD_UNIT_IDS = {
 } as const;
 
 export type AdUnitKey = keyof typeof AD_UNIT_IDS;
+
+// ── Frequency-capped interstitial (Phase 4) ──────────────────────────────────
+// Tuning knobs for the "leaving the result screen" interstitial. Kept here (this
+// module is dependency-light) so production tuning happens in ONE file.
+export const INTERSTITIAL = {
+  /** Probability an eligible exit shows the ad. 0.15 = ~15% of exits. Tune freely. */
+  CHANCE: 0.20,
+  /** Never show before the user has this many completed readings (protect onboarding). */
+  MIN_READINGS_BEFORE: 3,
+  /** Hard floor between two interstitials, ms. */
+  COOLDOWN_MS: 3 * 60_000,
+  /** Never show within this window after ANY rewarded ad completed, ms. */
+  SUPPRESS_AFTER_REWARDED_MS: 90_000,
+} as const;

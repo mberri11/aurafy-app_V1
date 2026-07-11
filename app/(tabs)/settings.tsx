@@ -3,7 +3,6 @@ import {
   I18nManager,
   Linking,
   ScrollView,
-  Share,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -26,6 +25,8 @@ import ConfirmSheet, { type ConfirmSheetIcon } from '@/src/components/ConfirmShe
 import i18n from '@/src/i18n';
 import { clear as storageClear } from '@/src/utils/storage';
 import { reloadApp } from '@/src/utils/reloadApp';
+import { syncDayjsLocale, formatReminderTimeDisplay } from '@/src/utils/dateLocale';
+import { syncReminders } from '@/src/utils/notifications';
 import { shareAppLink } from '@/src/utils/share';
 import { useIsRTL } from '@/src/utils/rtl';
 import { rs } from '@/src/utils/responsive';
@@ -41,7 +42,10 @@ const MODE_OPTIONS: ReadingMode[] = ['solo', 'compare', 'triangle', 'circle'];
 
 const PRIVACY_URL = 'https://aurafyapp.github.io/aurafy-legal/privacy.html';
 const TERMS_URL = 'https://aurafyapp.github.io/aurafy-legal/terms.html';
+// market:// opens the Play Store app straight to the listing (Rate). The https form is
+// what we SHARE — it resolves in any app/browser and still deep-links to Play on device.
 const STORE_URL = 'market://details?id=com.simobr.aurafy';
+const STORE_URL_HTTPS = 'https://play.google.com/store/apps/details?id=com.simobr.aurafy';
 const CONTACT_EMAIL = 'aurafy.app26@gmail.com';
 const CONTACT_SUBJECT = 'Aurafy — Feedback & Suggestions';
 
@@ -140,7 +144,7 @@ export default function SettingsScreen() {
     toggleAutoCentering,
     resetAll: resetSettings,
   } = useSettingsStore();
-  const { history, clearHistory, resetAll: resetUser } = useUserStore();
+  const { clearHistory, resetAll: resetUser } = useUserStore();
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [sheet, setSheet] = useState<SheetConfig | null>(null);
 
@@ -162,6 +166,7 @@ export default function SettingsScreen() {
           const willBeRTL = lang === 'ar';
           setLanguage(lang);
           i18n.changeLanguage(lang);
+          syncDayjsLocale(lang);
           // RTL is a native flag — set unconditionally for the target language (stale
           // `I18nManager.isRTL` under Expo Go + New Arch); it applies on the relaunch.
           I18nManager.allowRTL(willBeRTL);
@@ -182,6 +187,26 @@ export default function SettingsScreen() {
     [language, setLanguage, t],
   );
 
+  // Notification setting changes must re-schedule immediately so the daily time /
+  // streak reminders reflect the new state (syncReminders reads fresh store values).
+  const handleToggleDailyReminder = useCallback(() => {
+    toggleDailyReminder();
+    void syncReminders();
+  }, [toggleDailyReminder]);
+
+  const handleToggleStreakReminder = useCallback(() => {
+    toggleStreakReminder();
+    void syncReminders();
+  }, [toggleStreakReminder]);
+
+  const handleReminderTime = useCallback(
+    (value: string) => {
+      setReminderTime(value);
+      void syncReminders();
+    },
+    [setReminderTime],
+  );
+
   // Default mode cycles through the options on tap — no popup.
   const handleDefaultMode = useCallback(() => {
     const idx = MODE_OPTIONS.indexOf(defaultMode);
@@ -197,24 +222,13 @@ export default function SettingsScreen() {
       tone: 'cyan',
       icon: 'trash-2',
       cancelLabel: t('common.cancel'),
-      onConfirm: () => clearHistory(),
+      // Clear, then relaunch so no stale History/Home UI lingers (Simo 2026-07-11).
+      onConfirm: () => {
+        clearHistory();
+        reloadApp();
+      },
     });
   }, [t, clearHistory]);
-
-  const handleExport = useCallback(() => {
-    if (history.length === 0) {
-      setSheet({
-        title: t('settings.exportReadings'),
-        message: t('settings.exportEmpty'),
-        confirmLabel: t('common.ok'),
-        tone: 'cyan',
-        icon: 'inbox',
-        onConfirm: () => {},
-      });
-      return;
-    }
-    void Share.share({ message: JSON.stringify(history, null, 2) });
-  }, [history, t]);
 
   const handleReset = useCallback(() => {
     setSheet({
@@ -245,6 +259,23 @@ export default function SettingsScreen() {
   const openUrl = useCallback((url: string) => {
     void Linking.openURL(url).catch(() => {});
   }, []);
+
+  // Rate Aurafy — prefer the native in-app review popup (rate without leaving the app);
+  // fall back to opening the Play Store listing when it's unavailable (quota/emulator).
+  const handleRate = useCallback(() => {
+    void (async () => {
+      try {
+        const StoreReview = await import('expo-store-review');
+        if ((await StoreReview.isAvailableAsync()) && (await StoreReview.hasAction())) {
+          await StoreReview.requestReview();
+          return;
+        }
+      } catch {
+        // fall through to the store listing
+      }
+      openUrl(STORE_URL);
+    })();
+  }, [openUrl]);
 
   const handleContactUs = useCallback(() => {
     const subject = encodeURIComponent(CONTACT_SUBJECT);
@@ -326,12 +357,12 @@ export default function SettingsScreen() {
           <Row
             label={t('settings.dailyReminder')}
             sublabel={t('settings.dailyReminderDesc')}
-            right={<Toggle value={dailyReminder} onValueChange={toggleDailyReminder} accessibilityLabel={t('settings.dailyReminder')} />}
+            right={<Toggle value={dailyReminder} onValueChange={handleToggleDailyReminder} accessibilityLabel={t('settings.dailyReminder')} />}
           />
           <Divider />
           <Row
             label={t('settings.reminderTime')}
-            value={reminderTime}
+            value={formatReminderTimeDisplay(reminderTime, language)}
             chevron
             disabled={!dailyReminder}
             onPress={() => setTimePickerVisible(true)}
@@ -340,7 +371,7 @@ export default function SettingsScreen() {
           <Row
             label={t('settings.streakReminder')}
             sublabel={t('settings.streakReminderDesc')}
-            right={<Toggle value={streakReminder} onValueChange={toggleStreakReminder} accessibilityLabel={t('settings.streakReminder')} />}
+            right={<Toggle value={streakReminder} onValueChange={handleToggleStreakReminder} accessibilityLabel={t('settings.streakReminder')} />}
           />
         </GlassCard>
 
@@ -389,9 +420,13 @@ export default function SettingsScreen() {
             onPress={() => router.push('/onboarding')}
           />
           <Divider />
-          <Row label={t('settings.rateApp')} chevron onPress={() => openUrl(STORE_URL)} />
+          <Row label={t('settings.rateApp')} chevron onPress={handleRate} />
           <Divider />
-          <Row label={t('settings.shareApp')} chevron onPress={() => void shareAppLink(t('settings.shareMessage'))} />
+          <Row
+            label={t('settings.shareApp')}
+            chevron
+            onPress={() => void shareAppLink(`${t('settings.shareMessage')}\n${STORE_URL_HTTPS}`)}
+          />
           <Divider />
           <Row label={t('settings.privacyPolicy')} chevron onPress={() => openUrl(PRIVACY_URL)} />
           <Divider />
@@ -404,8 +439,6 @@ export default function SettingsScreen() {
         <SectionHeader title={t('settings.data')} />
         <GlassCard style={styles.card}>
           <Row label={t('settings.clearHistory')} chevron onPress={handleClearHistory} />
-          <Divider />
-          <Row label={t('settings.exportReadings')} chevron onPress={handleExport} />
           <Divider />
           <Row label={t('settings.resetData')} chevron destructive onPress={handleReset} />
         </GlassCard>
@@ -437,7 +470,7 @@ export default function SettingsScreen() {
       <TimeWheelSheet
         visible={timePickerVisible}
         value={reminderTime}
-        onSelect={setReminderTime}
+        onSelect={handleReminderTime}
         onClose={() => setTimePickerVisible(false)}
       />
 

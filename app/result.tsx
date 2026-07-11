@@ -26,6 +26,7 @@ import CategoryMotif from '@/src/components/CategoryMotif';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
 import { AdMobManager } from '@/src/ads/AdMobManager';
+import { maybeShowInterstitial } from '@/src/ads/interstitialGate';
 import { captureRef } from 'react-native-view-shot';
 import GlassCard from '@/src/components/GlassCard';
 import GradientButton from '@/src/components/GradientButton';
@@ -71,6 +72,7 @@ export default function ResultScreen() {
   const resultUnlocked = useReadingStore((s) => s.resultUnlocked);
   const setResultUnlocked = useReadingStore((s) => s.setResultUnlocked);
   const { addReading, incrementReadingCount, spendStars, stars } = useUserStore();
+  const readingCount = useUserStore((s) => s.readingCount);
 
   const isViewOnly = viewOnly === '1';
   const result = isViewOnly ? viewOnlyResult : currentResult;
@@ -227,20 +229,30 @@ export default function ResultScreen() {
     }
   }, [spendStars, setResultUnlocked]);
 
+  // Frequency-capped interstitial on a user-initiated EXIT of a FRESH reading only
+  // (never on share, never on unmount, never on a History reopen). Fire-and-forget:
+  // the SDK overlays on top and we're already home when it closes — so we do NOT await.
+  const maybeInterstitialOnExit = useCallback(() => {
+    if (isViewOnly) return;
+    void maybeShowInterstitial(readingCount);
+  }, [isViewOnly, readingCount]);
+
   const handleTryAnother = useCallback(() => {
     lightTap();
+    maybeInterstitialOnExit();
     // Collapse the whole reading-flow stack (module → … → result) — a plain replace
     // left every flow screen alive beneath the tabs, so hardware back from a tab
     // walked into a dead quiz instead of exiting the app.
     router.dismissAll();
     router.navigate('/(tabs)');
-  }, []);
+  }, [maybeInterstitialOnExit]);
 
   const handleSaveExit = useCallback(() => {
     lightTap();
+    maybeInterstitialOnExit();
     router.dismissAll();
     router.navigate('/(tabs)/history');
-  }, []);
+  }, [maybeInterstitialOnExit]);
 
   // Hardware back on a FRESH result acts as "Save & exit" — it must never fall
   // through into the flow beneath. View-only reopens (from History) keep the default
@@ -614,7 +626,9 @@ export default function ResultScreen() {
               activeOpacity={0.8}
               style={[styles.pill, { backgroundColor: theme.surface, borderColor: theme.borderStrong }]}
             >
-              <Text style={[styles.pillText, { color: theme.text }]}>{t('result.retryButton')}</Text>
+              <Text style={[styles.pillText, { color: theme.text }]} numberOfLines={1}>
+                {t('result.retryButton')}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleSaveExit}
@@ -623,7 +637,9 @@ export default function ResultScreen() {
               activeOpacity={0.8}
               style={[styles.pill, { backgroundColor: theme.surface, borderColor: theme.borderStrong }]}
             >
-              <Text style={[styles.pillText, { color: theme.text }]}>{t('result.saveButton')}</Text>
+              <Text style={[styles.pillText, { color: theme.text }]} numberOfLines={1}>
+                {t('result.saveButton')}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -817,6 +833,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: rs(8),
   },
-  pillText: { fontSize: rs(15), fontFamily: 'HankenGrotesk_600SemiBold' },
+  pillText: { fontSize: rs(13), fontFamily: 'HankenGrotesk_600SemiBold', textAlign: 'center' },
 });

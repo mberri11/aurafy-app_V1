@@ -17,6 +17,7 @@ import ModuleCard from '@/src/components/ModuleCard';
 import StarsBadge from '@/src/components/StarsBadge';
 import AurafyLogo from '@/src/components/AurafyLogo';
 import CosmicBloom from '@/src/components/CosmicBloom';
+import AdBanner from '@/src/ads/AdBanner';
 import FeaturedInsightCard from '@/src/screens/insights/components/FeaturedInsightCard';
 import { getArticle, getArticleContent, type Language } from '@/src/content/articles';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
@@ -141,6 +142,11 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + rs(100) }]}
+        ListFooterComponent={
+          // Anchored adaptive banner below the self modules — self-collapses in Expo
+          // Go and on load failure, so it never reserves dead space. (Phase-4 ads.)
+          <AdBanner style={styles.footerBanner} />
+        }
         ListHeaderComponent={
           <>
             {/* Hero question */}
@@ -231,4 +237,5 @@ const styles = StyleSheet.create({
   rowItem: {
     flex: 1,
   },
+  footerBanner: { marginTop: rs(12) },
 });

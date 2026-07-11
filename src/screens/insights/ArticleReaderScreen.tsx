@@ -3,15 +3,14 @@
 // Route: app/article/[id].tsx (root Stack) re-exports this.
 // Design: design-reference/screenshots/10-Insight-3.png / 10-Insight-4.png
 //
-// Top reading-progress bar (scroll-driven, UI thread) + glass back/share, orbit
+// Top reading-progress bar (scroll-driven, UI thread) + glass back button, orbit
 // hero, category tag, Playfair title, structured ArticleBlocks (scroll-reveal),
-// end-of-article cross-sell CTA → relatedModule, Share, and the daily "Claim +1 ✦"
+// end-of-article cross-sell CTA → relatedModule, and the daily "Claim +1 ✦"
 // reward. markRead() fires on open so the reward gate + History pick it up.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Share,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -46,6 +45,8 @@ import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
 import { lightTap } from '@/src/utils/haptics';
 import { playEffect } from '@/src/utils/sound';
+import { syncReminders } from '@/src/utils/notifications';
+import { maybeShowInterstitial } from '@/src/ads/interstitialGate';
 import ReadingProgressBar from './components/ReadingProgressBar';
 import ArticleBlocks from './components/ArticleBlocks';
 import OrbitArt from './components/OrbitArt';
@@ -70,6 +71,15 @@ export default function ArticleReaderScreen() {
   const stars = useUserStore((s) => s.stars);
   const weekAnchorDate = useUserStore((s) => s.weekAnchorDate);
   const streak = useUserStore((s) => s.streak);
+  const readingCount = useUserStore((s) => s.readingCount);
+
+  // Leaving the reader back to the feed is a natural transition — fire the frequency-
+  // capped interstitial here (milestone spot, ignores the onboarding min-readings floor;
+  // the shared cooldown still prevents it firing on every daily read). Fire-and-forget.
+  const handleBack = useCallback(() => {
+    void maybeShowInterstitial(readingCount, { ignoreMinReadings: true });
+    router.back();
+  }, [readingCount]);
 
   // Daily ritual question — answered at the foot of the daily article. Picking an answer
   // claims the +1★ ritual reward + advances the streak via completeDailyRitual. The answer
@@ -104,11 +114,6 @@ export default function ArticleReaderScreen() {
     progress.value = max > 0 ? e.contentOffset.y / max : 0;
   });
 
-  const onShare = useCallback(() => {
-    if (!content) return;
-    Share.share({ message: `${content.title} — Aurafy` }).catch(() => {});
-  }, [content]);
-
   const onAnswer = useCallback(
     (idx: number, questionId: string) => {
       if (answered) return;
@@ -122,6 +127,9 @@ export default function ArticleReaderScreen() {
       // back to the legacy lean axis when the curriculum is off/empty.
       const dimension = getTodayOutcomeKey(questionId, idx, weekAnchorDate) ?? getDailyAnswerDimension(questionId, idx);
       const earned = completeDailyRitual({ questionId, answerIndex: idx, dimension });
+      // Answering re-syncs the reminders so tonight's 11 PM streak nudge is dropped now
+      // that today's question is done (and the streak count it protects is up to date).
+      void syncReminders();
       // Star chime ONLY on the genuine +1 daily-ritual credit — completeDailyRitual
       // returns 0 for a repeat same-day answer or a backwards clock (and the +5 weekly
       // bonus is paid later on the reveal, which carries its own chime, not this one).
@@ -183,23 +191,15 @@ export default function ArticleReaderScreen() {
           paddingBottom: insets.bottom + rs(40),
         }}
       >
-        {/* Back + Share */}
+        {/* Back only — the reader has no share action (Simo 2026-07-11). */}
         <View style={styles.topRow}>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={handleBack}
             style={[styles.circleBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
             accessibilityLabel={t('common.back')}
             accessibilityRole="button"
           >
             <Feather name={isRTL ? 'chevron-right' : 'chevron-left'} size={rs(20)} color={theme.text} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={onShare}
-            style={[styles.circleBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
-            accessibilityLabel={t('common.share')}
-            accessibilityRole="button"
-          >
-            <Feather name="share-2" size={rs(17)} color={theme.text} />
           </TouchableOpacity>
         </View>
 

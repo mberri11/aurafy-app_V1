@@ -41,20 +41,44 @@ const EFFECT_SOURCES: Record<EffectKey, number> = {
   revealWeekly: require('../../assets/sounds/reveal-weekly.mp3'),
   star: require('../../assets/sounds/star.mp3'),
 };
-const LOOP_SOURCE: number = require('../../assets/sounds/Loading.mp3');
+// Named ambient loops. Generalized from the single loading pad so the quiz can play
+// its own mood bed under the questions and hand off cleanly into the loading pad.
+// NB: `Loading.mp3` is capitalized on disk — Metro's require is case-sensitive on
+// Android, so every case here MUST match the filename on disk exactly.
+export type LoopKey = 'loading' | 'quizRelationship' | 'quizSelf';
+const LOOP_SOURCES: Record<LoopKey, number> = {
+  loading: require('../../assets/sounds/Loading.mp3'),
+  quizRelationship: require('../../assets/sounds/quiz-relationships.mp3'),
+  quizSelf: require('../../assets/sounds/quiz-self.mp3'),
+};
 
-// Base mix levels (brief: pad ~0.4, one-shots ~0.6). Each is scaled by the user's
-// master Volume setting so the Settings slider stays meaningful.
-const LOOP_BASE = 0.4;
+// ── VOLUME SAFETY — read before "fixing" these numbers ──────────────────────────
+// An app CANNOT lower the device's hardware volume — Android does not permit it, and
+// it would be hostile UX. What we control is the MIX LEVEL of our OWN players. That's
+// what LOOP_BASE / EFFECT_BASE are: a fraction of whatever the device is set to. On a
+// loud device the pad is proportionally loud but STILL recessed behind the taps/chimes,
+// because the ratio (0.6 one-shot vs 0.22 pad ≈ a third) is fixed. That is the correct
+// and only correct behavior — do NOT attempt any native volume manipulation, and do
+// NOT raise the quiz pads above 0.25 (they must sit under the tap, playing while the
+// user reads and thinks). Every value below is ALSO scaled by masterVolume() (the
+// Settings slider), so the slider stays meaningful.
+const LOOP_BASE: Record<LoopKey, number> = {
+  loading: 0.4, // unchanged — existing brief value for the loading pad
+  quizRelationship: 0.18, // deliberately low — background, never competes with the tap
+  quizSelf: 0.18,
+};
 const EFFECT_BASE = 0.6;
 const FADE_IN_MS = 600;
 const FADE_OUT_MS = 300;
 const FADE_STEP_MS = 50;
 
 let configured = false;
-let loopPlayer: AudioPlayer | null = null;
-let loopActive = false;
-let loopFadeTimer: ReturnType<typeof setInterval> | null = null;
+// Keyed loop registry: each loop gets its own reused player AND its own fade timer, so
+// two loops can ramp INDEPENDENTLY and simultaneously (a crossfade needs both ramping at
+// once — a single shared timer would have them cancel each other).
+const loopPlayers: Partial<Record<LoopKey, AudioPlayer>> = {};
+let activeLoop: LoopKey | null = null;
+const loopFadeTimers: Partial<Record<LoopKey, ReturnType<typeof setInterval>>> = {};
 const effectPlayers: Partial<Record<EffectKey, AudioPlayer>> = {};
 
 const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
@@ -124,18 +148,19 @@ function ensureConfigured(): void {
   }).catch(() => {});
 }
 
-function getLoop(): AudioPlayer | null {
-  if (!loopPlayer) {
+function getLoop(key: LoopKey): AudioPlayer | null {
+  if (!loopPlayers[key]) {
     const a = audio();
     if (!a) return null;
     try {
-      loopPlayer = a.createAudioPlayer(LOOP_SOURCE);
-      loopPlayer.loop = true;
+      const p = a.createAudioPlayer(LOOP_SOURCES[key]);
+      p.loop = true;
+      loopPlayers[key] = p;
     } catch {
-      loopPlayer = null;
+      return null;
     }
   }
-  return loopPlayer;
+  return loopPlayers[key] ?? null;
 }
 
 function getEffect(key: EffectKey): AudioPlayer | null {
@@ -151,12 +176,22 @@ function getEffect(key: EffectKey): AudioPlayer | null {
   return effectPlayers[key] ?? null;
 }
 
-// Ramp the LOOP player's volume on the JS thread (expo-audio has no built-in
-// fade). Never touches the UI thread / Reanimated, so it can't stutter animation.
-function fadeLoop(player: AudioPlayer, to: number, ms: number, onDone?: () => void): void {
-  if (loopFadeTimer) {
-    clearInterval(loopFadeTimer);
-    loopFadeTimer = null;
+// Ramp ONE loop player's volume on the JS thread (expo-audio has no built-in fade).
+// Never touches the UI thread / Reanimated, so it can't stutter animation. Keyed by
+// LoopKey so each loop has an independent timer — this is what lets a crossfade run two
+// ramps at once without one clearing the other (the single-timer version was the one
+// real bug risk in generalizing this module).
+function fadeLoop(
+  key: LoopKey,
+  player: AudioPlayer,
+  to: number,
+  ms: number,
+  onDone?: () => void,
+): void {
+  const existing = loopFadeTimers[key];
+  if (existing) {
+    clearInterval(existing);
+    delete loopFadeTimers[key];
   }
   let from = 0;
   try {
@@ -166,7 +201,7 @@ function fadeLoop(player: AudioPlayer, to: number, ms: number, onDone?: () => vo
   }
   const steps = Math.max(1, Math.round(ms / FADE_STEP_MS));
   let i = 0;
-  loopFadeTimer = setInterval(() => {
+  const timer = setInterval(() => {
     i += 1;
     const v = from + (to - from) * (i / steps);
     try {
@@ -175,9 +210,10 @@ function fadeLoop(player: AudioPlayer, to: number, ms: number, onDone?: () => vo
       // player gone — stop ramping
     }
     if (i >= steps) {
-      if (loopFadeTimer) {
-        clearInterval(loopFadeTimer);
-        loopFadeTimer = null;
+      const t = loopFadeTimers[key];
+      if (t) {
+        clearInterval(t);
+        delete loopFadeTimers[key];
       }
       try {
         onDone?.();
@@ -186,6 +222,7 @@ function fadeLoop(player: AudioPlayer, to: number, ms: number, onDone?: () => vo
       }
     }
   }, FADE_STEP_MS);
+  loopFadeTimers[key] = timer;
 }
 
 // ── public API ───────────────────────────────────────────────────────────────
@@ -199,39 +236,70 @@ export function preload(): void {
   if (!isEffectsOn() && !isAmbientOn()) return;
   ensureConfigured();
   try {
-    getLoop();
+    // Warm ONLY the loading pad + the one-shots. The two quiz pads are ~126s of audio
+    // combined — the quiz screen warms its own track on demand, so we never decode both
+    // eagerly at startup.
+    getLoop('loading');
     (Object.keys(EFFECT_SOURCES) as EffectKey[]).forEach((k) => getEffect(k));
   } catch {
     // ignore — playback will lazily retry
   }
 }
 
-/** Start the ambient loading pad (looping, ~0.4 vol, fade-in). No-op when ambient is off. */
-export function playLoop(): void {
+/**
+ * Start (or switch to) a named ambient loop with a fade-in. No-op when ambient is off.
+ * If a DIFFERENT loop is already active, this crossfades: the old one fades to 0 and
+ * pauses while the new one fades up — both ramps run concurrently (keyed timers).
+ * Idempotent: a re-call for the already-active loop is a no-op (re-render safe).
+ */
+export function playLoop(key: LoopKey): void {
   if (!isAmbientOn()) return;
   ensureConfigured();
-  const p = getLoop();
+  if (activeLoop === key) return; // guard double-start (re-render / re-entry)
+  const p = getLoop(key);
   if (!p) return;
-  if (loopActive) return; // guard double-start (re-render / re-entry)
-  loopActive = true;
+  // A different loop is playing → fade it out concurrently (crossfade).
+  if (activeLoop && activeLoop !== key) {
+    const prevKey = activeLoop;
+    const prev = loopPlayers[prevKey];
+    if (prev) {
+      fadeLoop(prevKey, prev, 0, FADE_OUT_MS, () => {
+        try {
+          prev.pause();
+          prev.seekTo(0).catch(() => {});
+        } catch {
+          // ignore
+        }
+      });
+    }
+  }
+  activeLoop = key;
   try {
     p.loop = true;
     p.volume = 0;
     p.seekTo(0).catch(() => {});
     p.play();
-    fadeLoop(p, LOOP_BASE * masterVolume(), FADE_IN_MS);
+    fadeLoop(key, p, LOOP_BASE[key] * masterVolume(), FADE_IN_MS);
   } catch {
-    loopActive = false;
+    if (activeLoop === key) activeLoop = null;
   }
 }
 
-/** Fade the loading pad out (~300ms) then pause — never a hard cut. Safe anytime. */
-export function stopLoop(): void {
-  loopActive = false;
-  const p = loopPlayer;
+/**
+ * Fade a loop out (~300ms) then pause + rewind — never a hard cut. Safe anytime.
+ * No arg → stop whatever loop is currently active (preserves the settingsStore
+ * sound-off call). With a key → stop that specific loop, and only clear `activeLoop`
+ * if it was the one stopped (so stopping a quiz pad never kills a loading pad that has
+ * meanwhile become active).
+ */
+export function stopLoop(key?: LoopKey): void {
+  const target = key ?? activeLoop;
+  if (!target) return;
+  if (activeLoop === target) activeLoop = null;
+  const p = loopPlayers[target];
   if (!p) return;
   try {
-    fadeLoop(p, 0, FADE_OUT_MS, () => {
+    fadeLoop(target, p, 0, FADE_OUT_MS, () => {
       try {
         p.pause();
         p.seekTo(0).catch(() => {});

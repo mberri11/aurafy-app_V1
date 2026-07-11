@@ -1,8 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // History ("Your Readings") — DESIGN-SPEC §7 + Screenshots_new/HIstory_*.png.
 // Category-themed reading cards (accent + motif from the category spine), a
-// distinct cyan "Weekly reading" entry, a sponsored placeholder, and an atom-mark
-// empty state. Reading + weekly entries merge into one date-sorted timeline.
+// distinct cyan "Weekly reading" entry, a real anchored ad banner in the reserved
+// slot, and an atom-mark empty state. Reading + weekly entries merge into one
+// date-sorted timeline.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -27,6 +28,7 @@ import CategoryMotif from '@/src/components/CategoryMotif';
 import CosmicBloom from '@/src/components/CosmicBloom';
 import AurafyLogo from '@/src/components/AurafyLogo';
 import AdBanner from '@/src/ads/AdBanner';
+import { useIsRTL } from '@/src/utils/rtl';
 import { rs } from '@/src/utils/responsive';
 
 const WEEKLY_CYAN = '#22D3EE'; // weekly entries use a constant brand-cyan treatment (spec §7)
@@ -44,6 +46,7 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
   const theme = useTheme();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as Language;
+  const isRTL = useIsRTL();
 
   // Per-MODULE theme — two modules in the same category still read distinct.
   // Aura Color alone re-colors per past reading: the accent is the outcome color.
@@ -53,8 +56,14 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
   const name = readingDisplayName(reading, lang);
   const moduleLabel = (t(`modules.${reading.moduleId}.title`) || reading.moduleId).toUpperCase();
   const modeLabel = t(`readingModes.${reading.mode}.title`);
-  const confLine = t('history.confidenceLine', { pct: reading.result.confidence });
-  const date = dayjs(reading.createdAt).format('MMM D, YYYY');
+  // One localized line ("{name} — {pct}% confidence") so each locale controls the
+  // separator and word order (Arabic: "… — ثقة ٪…"). Split on the interpolated name
+  // to keep the name emphasized (serif/bright) without any hardcoded " — ".
+  const titleLine = t('history.titleLine', { name, pct: reading.result.confidence });
+  const nameAt = titleLine.indexOf(name);
+  const beforeName = nameAt >= 0 ? titleLine.slice(0, nameAt) : '';
+  const afterName = nameAt >= 0 ? titleLine.slice(nameAt + name.length) : '';
+  const date = dayjs(reading.createdAt).format('ll');
 
   return (
     <TouchableOpacity
@@ -67,7 +76,7 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
         {/* Soft category bloom rising from behind the icon. */}
         <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
           <Defs>
-            <RadialGradient id={gid} cx="13%" cy="50%" r="58%">
+            <RadialGradient id={gid} cx={isRTL ? '87%' : '13%'} cy="50%" r="58%">
               <Stop offset="0%" stopColor={accent} stopOpacity={0.2} />
               <Stop offset="100%" stopColor={accent} stopOpacity={0} />
             </RadialGradient>
@@ -89,8 +98,9 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
               </Text>
             </View>
             <Text style={styles.titleLine} numberOfLines={1}>
+              <Text style={[styles.conf, { color: theme.textMuted }]}>{beforeName}</Text>
               <Text style={[styles.name, { color: theme.text }]}>{name}</Text>
-              <Text style={[styles.conf, { color: theme.textMuted }]}>{` — ${confLine}`}</Text>
+              <Text style={[styles.conf, { color: theme.textMuted }]}>{afterName}</Text>
             </Text>
             <View style={styles.metaRow}>
               <View style={[styles.modePill, { borderColor: theme.surfaceBorder }]}>
@@ -118,11 +128,12 @@ const WeeklyHistoryCard = memo(function WeeklyHistoryCard({
   const theme = useTheme();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as Language;
+  const isRTL = useIsRTL();
 
   const week = getWeekById(entry.weekId);
   const outcome = week?.outcomes.find((o) => o.key === entry.outcomeKey);
   const title = outcome ? outcome.title[lang] ?? outcome.title.en : '';
-  const meta = t('history.nights', { count: 7, date: dayjs(entry.rangeEnd).format('MMM D, YYYY') });
+  const meta = t('history.nights', { count: 7, date: dayjs(entry.rangeEnd).format('ll') });
 
   return (
     <TouchableOpacity
@@ -134,7 +145,7 @@ const WeeklyHistoryCard = memo(function WeeklyHistoryCard({
       <View style={[styles.card, { borderColor: `${WEEKLY_CYAN}40`, backgroundColor: theme.surface }]}>
         <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
           <Defs>
-            <RadialGradient id={gid} cx="22%" cy="0%" r="75%">
+            <RadialGradient id={gid} cx={isRTL ? '78%' : '22%'} cy="0%" r="75%">
               <Stop offset="0%" stopColor={WEEKLY_CYAN} stopOpacity={0.18} />
               <Stop offset="100%" stopColor={WEEKLY_CYAN} stopOpacity={0} />
             </RadialGradient>
@@ -168,22 +179,6 @@ const WeeklyHistoryCard = memo(function WeeklyHistoryCard({
     </TouchableOpacity>
   );
 });
-
-// ── Sponsored placeholder (online-only native ad slot) ───────────────────────
-function SponsoredCard() {
-  const { t } = useTranslation();
-  const theme = useTheme();
-  return (
-    <View style={[styles.sponsored, { borderColor: theme.surfaceBorder }]}>
-      <View style={[styles.adChip, { borderColor: theme.surfaceBorder }]}>
-        <Text style={[styles.adChipText, { color: theme.textDim }]}>
-          {t('common.adBadge').toUpperCase()}
-        </Text>
-      </View>
-      <Text style={[styles.sponsoredText, { color: theme.textDim }]}>{t('history.sponsored')}</Text>
-    </View>
-  );
-}
 
 // ── Empty state (atom mark + bloom + CTA) ────────────────────────────────────
 function EmptyState() {
@@ -278,16 +273,11 @@ export default function HistoryScreen() {
         ListHeaderComponent={<Text style={[styles.screenTitle, { color: theme.text }]}>{t('history.title')}</Text>}
         ListEmptyComponent={<EmptyState />}
         ListFooterComponent={
-          // No AD pill under the empty state — the sponsored slot only exists
-          // once there are real rows to sit under. The anchored banner follows it
-          // (linger screen — allowed per the ad strategy); it self-collapses in
-          // Expo Go / on load failure.
-          rows.length > 0 ? (
-            <>
-              <SponsoredCard />
-              <AdBanner style={styles.banner} />
-            </>
-          ) : null
+          // The real anchored banner sits in the reserved ad area under the readings
+          // (linger screen — allowed per the ad strategy). The old "appears when
+          // online" placeholder card was dropped: the banner self-collapses in Expo Go
+          // / on load failure, so no dead space is ever reserved when there's no ad.
+          rows.length > 0 ? <AdBanner style={styles.banner} /> : null
         }
         showsVerticalScrollIndicator={false}
         scrollEnabled={rows.length > 0}
@@ -308,7 +298,9 @@ const styles = StyleSheet.create({
     padding: rs(14),
     overflow: 'hidden',
   },
-  leftBar: { position: 'absolute', left: 0, top: 0, bottom: 0, width: rs(3) },
+  // `start` (not `left`) so the accent bar follows the icon side — physical left in
+  // LTR, physical right in RTL — auto-mirrored by the native layout.
+  leftBar: { position: 'absolute', start: 0, top: 0, bottom: 0, width: rs(3) },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: rs(14) },
   tile: {
     width: rs(52),
@@ -321,20 +313,24 @@ const styles = StyleSheet.create({
   cardContent: { flex: 1, gap: rs(3) },
   eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: rs(6) },
   dot: { width: rs(6), height: rs(6), borderRadius: rs(3) },
-  eyebrow: { fontSize: rs(10.5), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 1.2 },
-  titleLine: {},
-  name: { fontSize: rs(18), fontFamily: 'PlayfairDisplay_700Bold' },
-  conf: { fontSize: rs(12.5), fontFamily: 'HankenGrotesk_400Regular' },
+  // Explicit lineHeight on EVERY card text line: without it, Arabic (Noto Naskh) uses
+  // its tall intrinsic line box (~1.8×) and the whole card grows well past the EN
+  // version. Pinning to EN's natural height keeps all four locales the same size.
+  eyebrow: { fontSize: rs(10.5), lineHeight: rs(15), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 1.2 },
+  titleLine: { lineHeight: rs(24) },
+  name: { fontSize: rs(18), lineHeight: rs(24), fontFamily: 'PlayfairDisplay_700Bold' },
+  conf: { fontSize: rs(12.5), lineHeight: rs(24), fontFamily: 'HankenGrotesk_400Regular' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: rs(8), marginTop: rs(3) },
   modePill: { paddingHorizontal: rs(8), paddingVertical: rs(3), borderRadius: rs(7), borderWidth: 1 },
-  modeText: { fontSize: rs(10.5), fontFamily: 'HankenGrotesk_600SemiBold' },
-  date: { fontSize: rs(12), fontFamily: 'HankenGrotesk_400Regular' },
+  modeText: { fontSize: rs(10.5), lineHeight: rs(15), fontFamily: 'HankenGrotesk_600SemiBold' },
+  date: { fontSize: rs(12), lineHeight: rs(16), fontFamily: 'HankenGrotesk_400Regular' },
 
   // Weekly extras
   badge: {
     position: 'absolute',
     top: rs(12),
-    right: rs(12),
+    // `end` so the 7-DAY badge pins top-right in LTR and top-left in RTL.
+    end: rs(12),
     paddingHorizontal: rs(8),
     paddingVertical: rs(3),
     borderRadius: 999,
@@ -342,21 +338,9 @@ const styles = StyleSheet.create({
   },
   badgeText: { fontSize: rs(9.5), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 1 },
 
-  // Sponsored
-  sponsored: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: rs(8),
-    height: rs(56),
-    borderRadius: rs(14),
-    borderWidth: 1,
-    marginTop: rs(4),
-  },
-  adChip: { paddingHorizontal: rs(6), paddingVertical: rs(2), borderRadius: rs(5), borderWidth: 1 },
-  adChipText: { fontSize: rs(9), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 1 },
-  sponsoredText: { fontSize: rs(13), fontFamily: 'HankenGrotesk_400Regular' },
-  banner: { marginTop: rs(12) },
+  // Real banner sits in the reserved ad area under the readings (a touch of breathing
+  // room above so it doesn't crowd the last card).
+  banner: { marginTop: rs(16) },
 
   // Empty state
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: rs(14), paddingBottom: rs(24) },

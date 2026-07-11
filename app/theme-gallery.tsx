@@ -36,7 +36,7 @@ interface ThemeEntry {
 
 const THEMES: ThemeEntry[] = [
   { id: 'cosmic', gradient: cosmicTheme.gradient, cost: 0 },
-  { id: 'desertOracle', gradient: desertOracleTheme.gradient, cost: 50 },
+  { id: 'desertOracle', gradient: desertOracleTheme.gradient, cost: 30 },
 ];
 
 // Placeholder themes — locked, "Soon". Subtle 2-stops sampled around the design's

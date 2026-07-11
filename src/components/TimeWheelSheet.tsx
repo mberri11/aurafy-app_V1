@@ -20,6 +20,7 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../themes/ThemeProvider';
 import { rs } from '../utils/responsive';
+import { toArabicDigits, arMeridiem } from '../utils/dateLocale';
 
 interface TimeWheelSheetProps {
   visible: boolean;
@@ -91,7 +92,7 @@ function Wheel({
     >
       {data.map((d) => (
         <View key={d} style={styles.item}>
-          <Text style={[styles.itemText, { color: theme.text }]}>{d}</Text>
+          <Text style={[styles.itemText, { color: theme.text }]} numberOfLines={1}>{d}</Text>
         </View>
       ))}
     </ScrollView>
@@ -179,11 +180,20 @@ function Wheels({
   onClose: () => void;
 }) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const initial = parseTime(value);
   const [h, setH] = useState(initial.h);
   const [m, setM] = useState(initial.m);
   const [ap, setAp] = useState(initial.ap);
+
+  // Arabic: show Arabic-Indic numerals + صباحًا/مساءً in the wheels. Selection is still
+  // index-based, and confirm() below always emits the canonical Latin "h:mm AM/PM" so the
+  // stored value + scheduler stay language-independent. (AppText applies the Naskh face,
+  // and the app's global RTL mirrors the row.)
+  const isAr = i18n.language === 'ar';
+  const hoursDisplay = isAr ? HOURS.map(toArabicDigits) : HOURS;
+  const minutesDisplay = isAr ? MINUTES.map(toArabicDigits) : MINUTES;
+  const meridiemDisplay = isAr ? [arMeridiem(false), arMeridiem(true)] : MERIDIEM;
 
   const confirm = () => {
     onSelect(`${HOURS[h]}:${MINUTES[m]} ${MERIDIEM[ap]}`);
@@ -207,10 +217,10 @@ function Wheels({
         />
 
         <View style={styles.wheelRow}>
-          <Wheel data={HOURS} initialIndex={initial.h} width={rs(58)} onChange={setH} />
+          <Wheel data={hoursDisplay} initialIndex={initial.h} width={rs(58)} onChange={setH} />
           <Text style={[styles.colon, { color: theme.text }]}>:</Text>
-          <Wheel data={MINUTES} initialIndex={initial.m} width={rs(58)} onChange={setM} />
-          <Wheel data={MERIDIEM} initialIndex={initial.ap} width={rs(64)} onChange={setAp} />
+          <Wheel data={minutesDisplay} initialIndex={initial.m} width={rs(58)} onChange={setM} />
+          <Wheel data={meridiemDisplay} initialIndex={initial.ap} width={isAr ? rs(92) : rs(64)} onChange={setAp} />
         </View>
       </View>
 

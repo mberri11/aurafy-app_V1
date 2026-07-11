@@ -38,6 +38,8 @@ import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
 import { useInterstitialAd } from '@/src/ads/useInterstitialAd';
 import { useRewardedAd } from '@/src/ads/useRewardedAd';
 import AdBanner from '@/src/ads/AdBanner';
+import { INTERSTITIAL } from '@/src/config/ads';
+import { forceEligible, msSinceLastInterstitial } from '@/src/ads/interstitialGate';
 
 const DAY_MS = 86_400_000;
 const fmtDate = (ms: number | null) => (ms === null ? '—' : new Date(ms).toISOString().slice(0, 10));
@@ -55,6 +57,7 @@ export default function DevPanelScreen() {
   const weekAnchorDate = useUserStore((s) => s.weekAnchorDate);
   const streak = useUserStore((s) => s.streak);
   const stars = useUserStore((s) => s.stars);
+  const readingCount = useUserStore((s) => s.readingCount);
   const weeklyResult = useUserStore((s) => s.weeklyResult);
   const dailyAnswers = useUserStore((s) => s.dailyAnswers);
   const completeDailyRitual = useUserStore((s) => s.completeDailyRitual);
@@ -68,6 +71,13 @@ export default function DevPanelScreen() {
   const interstitial = useInterstitialAd();
   const rewarded = useRewardedAd();
   const [showBanner, setShowBanner] = useState(false);
+  // Bumped after "Force eligible" so the frequency-gate readout re-renders immediately.
+  const [, setGateTick] = useState(0);
+
+  const onForceEligible = () => {
+    forceEligible();
+    setGateTick((n) => n + 1);
+  };
 
   const notReadyMsg = ADS_AVAILABLE
     ? 'Not loaded yet — wait a second and try again.'
@@ -250,10 +260,18 @@ export default function DevPanelScreen() {
           <Stat k="interstitial loaded" v={interstitial.isLoaded ? 'yes ✓' : 'loading…'} />
           <Stat k="rewarded loaded" v={rewarded.isLoaded ? 'yes ✓' : 'loading…'} />
         </View>
+        {/* Frequency-gate readout — verify the result-exit interstitial gating on device. */}
+        <Text style={[styles.section, { color: theme.textDim }]}>INTERSTITIAL FREQUENCY GATE</Text>
+        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+          <Stat k="readingCount" v={`${readingCount} (min ${INTERSTITIAL.MIN_READINGS_BEFORE})`} accent />
+          <Stat k="since last interstitial" v={`${Math.round(msSinceLastInterstitial() / 1000)}s (cooldown ${INTERSTITIAL.COOLDOWN_MS / 1000}s)`} />
+          <Stat k="show chance" v={`${Math.round(INTERSTITIAL.CHANCE * 100)}%`} />
+        </View>
         <View style={styles.row}>
           <Btn label="Show interstitial" onPress={onShowInterstitial} tone="cyan" />
           <Btn label="Show rewarded" onPress={onShowRewarded} tone="gold" />
           <Btn label={showBanner ? 'Hide banner' : 'Show banner'} onPress={() => setShowBanner((v) => !v)} />
+          <Btn label="Force eligible" onPress={onForceEligible} />
         </View>
 
         {/* ── Stars (set balance for testing) ───────────────────────────── */}

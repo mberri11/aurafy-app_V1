@@ -5,6 +5,7 @@ import type {
 
 import { AD_UNIT_IDS } from '@/src/config/ads';
 import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
+import { noteRewardedShown } from '@/src/ads/interstitialGate';
 import { logger } from '../utils/logger';
 
 /**
@@ -98,6 +99,9 @@ class AdMobManagerClass {
         };
         subs.push(ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
           earned = true;
+          // Suppress the frequency-capped interstitial so it never stacks with this
+          // rewarded ad in the same transition.
+          noteRewardedShown();
         }));
         subs.push(ad.addAdEventListener(AdEventType.CLOSED, () => finish(earned)));
         subs.push(ad.addAdEventListener(AdEventType.ERROR, (err: unknown) => {

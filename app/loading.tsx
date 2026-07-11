@@ -295,15 +295,18 @@ export default function LoadingScreen() {
   const resultRef = useRef<ResultData | null>(null);
   const loopStarted = useRef(false);
 
-  // Ambient pad: start on mount (guarded against a double-start on re-render), and
-  // stop on unmount as a backstop. Leaving via the gate stops it earlier, inside
-  // navigateToResult. playLoop itself no-ops when Ambient Audio is off.
+  // Ambient loading pad: start after a ~1000ms delay so there's a deliberate beat of
+  // silence following the quiz pad's fade-out on the previous screen (the "breath before
+  // the reveal"). Each screen owns its own audio — the quiz fades ITS pad out on unmount,
+  // this screen owns only its delayed bloom — so no cross-screen callback is needed. The
+  // timer is cleared on unmount so a fast bounce can't fire a stale start. playLoop itself
+  // no-ops when Sound is off, and is idempotent (guarded on activeLoop).
   useEffect(() => {
-    if (!loopStarted.current) {
-      loopStarted.current = true;
-      playLoop();
-    }
+    if (loopStarted.current) return;
+    loopStarted.current = true;
+    const timer = setTimeout(() => playLoop('loading'), 1000);
     return () => {
+      clearTimeout(timer);
       stopLoop();
     };
   }, []);

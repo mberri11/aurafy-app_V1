@@ -46,6 +46,8 @@ function useReasonLabel() {
         case 'daily_bonus':
         case 'Daily bonus':
           return t('stars.reasonDaily');
+        case 'insight_read':
+          return t('stars.reasonInsight');
         case 'welcome':
           return t('stars.reasonWelcome');
         case 'reading':

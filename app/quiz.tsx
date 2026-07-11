@@ -37,7 +37,7 @@ import ProgressBar from '@/src/components/ProgressBar';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
 import { lightTap } from '@/src/utils/haptics';
-import { playEffect } from '@/src/utils/sound';
+import { playEffect, playLoop, stopLoop, type LoopKey } from '@/src/utils/sound';
 
 // Map moduleId → questions
 import { whoLovesMeQuestions } from '@/src/data/questions/whoLovesMe';
@@ -94,10 +94,17 @@ export default function QuizScreen() {
   const exitX = isRTL ? SCREEN_WIDTH : -SCREEN_WIDTH;
   const { currentPersons, recordAnswer, resetReading } = useReadingStore();
   const showFrameworkTags = useSettingsStore((s) => s.showFrameworkTags);
+  const autoCentering = useSettingsStore((s) => s.autoCentering);
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
   const questions = useMemo(() => QUESTIONS_MAP[moduleId ?? ''] ?? [], [moduleId]);
-  const [phase, setPhase] = useState<'breath' | 'quiz'>('breath');
+
+  // Ambient quiz pad: the mood follows the MODULE's subject matter, not the person
+  // count — a relationship module read in solo mode still gets the relationship pad.
+  const loopKey: LoopKey = module?.type === 'solo' ? 'quizSelf' : 'quizRelationship';
+  // Auto-centering (Settings → Reading preferences) gates the pre-quiz "Take a breath"
+  // centering moment. Off → open straight into the first question (no breath phase).
+  const [phase, setPhase] = useState<'breath' | 'quiz'>(autoCentering ? 'breath' : 'quiz');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [leaveSheetVisible, setLeaveSheetVisible] = useState(false);
@@ -188,6 +195,18 @@ export default function QuizScreen() {
     const timer = setTimeout(dismissBreath, 4500);
     return () => clearTimeout(timer);
   }, [phase, breathOpacity, bobY, haloPulse, dismissBreath]);
+
+  // Ambient quiz pad: bloom it in the moment the first question becomes visible — i.e.
+  // when we leave the silent breath beat and enter the 'quiz' phase (or immediately on
+  // mount when auto-centering is off and there is no breath). Fade it out on unmount so
+  // the pad can never leak into another screen (silence is every screen's default).
+  useEffect(() => {
+    if (phase !== 'quiz') return;
+    playLoop(loopKey);
+    return () => {
+      stopLoop(loopKey);
+    };
+  }, [phase, loopKey]);
 
   // Android hardware back mid-quiz = abandon attempt. Always confirm first — Start
   // already charged (stars or the free trial), so a silent pop would burn it with no

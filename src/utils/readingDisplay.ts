@@ -5,14 +5,22 @@
 // dimension for categorical reads. Shared by History cards (and the Result spine).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Reading, Language, SoloResults } from '@/src/types';
+import { Reading, Language, SoloResults, CategoricalResults } from '@/src/types';
 import { joinNames } from '@/src/engine/scoringEngine';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
+import { auraColorResults } from '@/src/data/results/auraColorResults';
 
 const SOLO_RESULTS: Record<string, SoloResults> = {
   attachment_style: attachmentStyleResults,
   am_i_problem: amITheProblemResults,
+};
+
+// Categorical modules resolve the dominant dimension to its localized label — the
+// same lookup-by-moduleId shape as SOLO_RESULTS, so a future categorical module
+// plugs in with one line here.
+const CATEGORICAL_RESULTS: Record<string, CategoricalResults> = {
+  aura_color: auraColorResults,
 };
 
 export function readingDisplayName(reading: Reading, lang: Language): string {
@@ -26,5 +34,6 @@ export function readingDisplayName(reading: Reading, lang: Language): string {
     const label = SOLO_RESULTS[reading.moduleId]?.verdictLabel[result.verdict];
     if (label) return label[lang] ?? label.en;
   }
-  return result.dominantDimension || '';
+  const category = CATEGORICAL_RESULTS[reading.moduleId]?.categories[result.dominantDimension];
+  return category?.label?.[lang] ?? category?.label?.en ?? result.dominantDimension;
 }

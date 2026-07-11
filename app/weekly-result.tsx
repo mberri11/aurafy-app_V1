@@ -37,6 +37,7 @@ import { captureRef } from 'react-native-view-shot';
 import { saveImageToGallery, shareImage } from '@/src/utils/share';
 import { successNotification, lightTap } from '@/src/utils/haptics';
 import { playEffect } from '@/src/utils/sound';
+import { maybeShowInterstitial } from '@/src/ads/interstitialGate';
 import { rs } from '@/src/utils/responsive';
 
 const STREAK_BONUS = 5; // mirrors STREAK_BONUS_REWARD in userStore
@@ -55,6 +56,7 @@ export default function WeeklyResultScreen() {
 
   const weeklyResult = useUserStore((s) => s.weeklyResult);
   const stars = useUserStore((s) => s.stars);
+  const readingCount = useUserStore((s) => s.readingCount);
   const claimWeeklyResult = useUserStore((s) => s.claimWeeklyResult);
 
   // STRICT ORDER: pay the +5 only once the reveal is actually rendered. Idempotent —
@@ -160,7 +162,12 @@ export default function WeeklyResultScreen() {
     flashSavedMsg(t('shareCard.saveDenied'));
   };
   // Fresh-reveal exit only — view-only reopens leave via back (the link is hidden).
-  const onClose = () => router.replace('/(tabs)');
+  // Fire the frequency-capped interstitial on this natural end-transition (milestone,
+  // so it ignores the onboarding min-readings floor); fire-and-forget, never awaited.
+  const onClose = () => {
+    void maybeShowInterstitial(readingCount, { ignoreMinReadings: true });
+    router.replace('/(tabs)');
+  };
 
   if (!week || !outcome) {
     return (

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { AD_UNIT_IDS } from '@/src/config/ads';
 import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
+import { noteRewardedShown } from '@/src/ads/interstitialGate';
 
 export type AdReward = { type: string; amount: number } | null;
 type RewardCb = (reward: AdReward) => void;
@@ -49,7 +50,12 @@ function useRewardedAdImpl(): UseRewardedAd {
 
   useEffect(() => {
     if (!isClosed) return;
-    if (earnedRef.current) onRewardRef.current?.((reward as AdReward) ?? null);
+    if (earnedRef.current) {
+      // Suppress the frequency-capped interstitial after a rewarded completion so the
+      // two never stack in one flow.
+      noteRewardedShown();
+      onRewardRef.current?.((reward as AdReward) ?? null);
+    }
     earnedRef.current = false;
     onRewardRef.current = null;
     retriedRef.current = false;
