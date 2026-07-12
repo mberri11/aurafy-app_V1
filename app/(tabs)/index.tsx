@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   FlatList,
   ListRenderItem,
@@ -44,8 +44,25 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const stars = useUserStore((s) => s.stars);
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
+  const unlockedModules = useUserStore((s) => s.unlockedModules);
   const dailyAnswers = useUserStore((s) => s.dailyAnswers);
   const weekAnchorDate = useUserStore((s) => s.weekAnchorDate);
+
+  // Home ordering: live (playable) → unlockable (paid, not yet owned) → coming-soon.
+  // Owned paid modules fall back into the live bucket. Array.sort is stable (Hermes),
+  // so within a bucket the modules.ts order is preserved.
+  const { relationshipModules, selfModules } = useMemo(() => {
+    const bucket = (m: (typeof MODULES)[number]) => {
+      if (m.comingSoon) return 2;
+      if (m.unlockCost != null && !unlockedModules.includes(m.id)) return 1;
+      return 0;
+    };
+    const order = (list: typeof MODULES) => [...list].sort((a, b) => bucket(a) - bucket(b));
+    return {
+      relationshipModules: order(RELATIONSHIP_MODULES),
+      selfModules: order(SELF_MODULES),
+    };
+  }, [unlockedModules]);
 
   // "Tonight's Read" hook — today's deterministic daily insight (see 10-Insight-1).
   const lang = i18n.language as Language;
@@ -69,13 +86,13 @@ export default function HomeScreen() {
 
   const listData: HomeListItem[] = [
     { id: 'relationships-header', kind: 'section', label: t('home.sectionRelationships') },
-    ...makeRows(RELATIONSHIP_MODULES).map((row, index) => ({
+    ...makeRows(relationshipModules).map((row, index) => ({
       id: `relationships-row-${index}`,
       kind: 'row' as const,
       modules: row,
     })),
     { id: 'self-header', kind: 'section', label: t('home.sectionSelf') },
-    ...makeRows(SELF_MODULES).map((row, index) => ({
+    ...makeRows(selfModules).map((row, index) => ({
       id: `self-row-${index}`,
       kind: 'row' as const,
       modules: row,
@@ -101,6 +118,11 @@ export default function HomeScreen() {
               }
               comingSoon={module.comingSoon}
               freeTrial={module.id === FREE_TRIAL_MODULE_ID && !freeTrialUsed}
+              unlockCost={
+                module.unlockCost != null && !unlockedModules.includes(module.id)
+                  ? module.unlockCost
+                  : undefined
+              }
               onPress={() => handleModulePress(module.id)}
             />
           </View>

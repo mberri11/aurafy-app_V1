@@ -37,8 +37,8 @@ import {
 } from '@/src/content/articles';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
 import { WEEKLY_CURRICULUM_ENABLED } from '@/src/config/flags';
-import { getArticleWeekOrdinal } from '@/src/data/weeks';
-import { getReachedWeekCount } from '@/src/data/weeks/walker';
+import { getArticleRevealDay } from '@/src/data/weeks';
+import { getDaysSinceAnchor } from '@/src/data/weeks/walker';
 import { rs } from '@/src/utils/responsive';
 import FeaturedInsightCard from './components/FeaturedInsightCard';
 import ArticleCard from './components/ArticleCard';
@@ -71,21 +71,23 @@ export default function InsightsScreen() {
 
   const handleStarsPress = useCallback(() => router.push('/(tabs)/stars'), []);
 
-  // No-spoiler gate (S11): curriculum articles show only once the walker has
-  // reached their week — otherwise the feed would LEAD with future-dated weeks
-  // the user hasn't earned yet. Editorial articles (no parent week) always show;
-  // reached weeks stay visible even after the registry cycle wraps (unwrapped count).
-  const reachedWeeks = getReachedWeekCount(weekAnchorDate);
-  const isReached = (a: Article) => {
-    const ordinal = getArticleWeekOrdinal(a.id);
-    if (ordinal === undefined) return true;
-    return WEEKLY_CURRICULUM_ENABLED && ordinal <= reachedWeeks;
+  // Reveal gate (2026-07-12): a curriculum article appears in the feed only once its
+  // day has ARRIVED — i.e. the day the walker actually serves it as the daily pick,
+  // day-granular off the user's anchor. So an UPCOMING daily pick (tomorrow's, etc.)
+  // stays hidden until its day; past dailies fall back into the feed; today's daily is
+  // in "Tonight's Read". Editorial (non-curriculum) articles are always browsable. With
+  // the curriculum flag off there is no pacing, so everything shows.
+  const daysSinceAnchor = getDaysSinceAnchor(weekAnchorDate);
+  const isRevealed = (a: Article) => {
+    const revealDay = getArticleRevealDay(a.id);
+    if (revealDay === undefined || !WEEKLY_CURRICULUM_ENABLED) return true;
+    return daysSinceAnchor >= revealDay;
   };
 
-  // Build the LATEST list: non-featured, non-sponsored, walker-reached, newest-first,
-  // filtered by the active chip; the sponsored card is spliced in only in the "all" view.
+  // Build the LATEST list: non-sponsored, revealed, newest-first, filtered by the active
+  // chip; the sponsored card is spliced in only in the "all" view.
   const sponsored = ARTICLES.find((a) => a.sponsored);
-  const normal = ARTICLES.filter((a) => !a.sponsored && a.id !== dailyId && isReached(a)).sort(
+  const normal = ARTICLES.filter((a) => !a.sponsored && a.id !== dailyId && isRevealed(a)).sort(
     (a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''),
   );
   const filtered = activeChip === 'all' ? normal : normal.filter((a) => a.category === activeChip);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -42,9 +42,18 @@ export default function ReadingModeScreen() {
   const insets = useSafeAreaInsets();
   const stars = useUserStore((s) => s.stars);
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
+  const unlockedModules = useUserStore((s) => s.unlockedModules);
   const defaultMode = useSettingsStore((s) => s.defaultMode);
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
+
+  // Gate deep links: a paid module that isn't unlocked must not start a reading here —
+  // bounce back to the module screen, which owns the unlock dialog.
+  useEffect(() => {
+    if (module?.unlockCost != null && !unlockedModules.includes(module.id)) {
+      router.replace({ pathname: '/module/[id]', params: { id: module.id } });
+    }
+  }, [module, unlockedModules]);
 
   // The free-trial module's first reading is free in ANY mode until consumed.
   const isFreeTrial = moduleId === FREE_TRIAL_MODULE_ID && !freeTrialUsed;

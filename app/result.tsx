@@ -135,6 +135,11 @@ export default function ResultScreen() {
   const module = result ? MODULES.find((m) => m.id === result.moduleId) : undefined;
   const isMulti = module?.type === 'multi';
   const isCategorical = module?.resultKind === 'categorical';
+  // A MIGRATED `multi` module read in SOLO mode → a "signs present" COUNT about one
+  // person, not a contest. Gated on the persisted `isCountResult` flag (set only by
+  // generateCountResult), NOT on signalTotal — that's set for EVERY solo-read multi,
+  // including ones still on the winner-race fallback. Persisted, so History reopens too.
+  const isCount = isMulti && !!result?.isCountResult;
 
   // Winning category's content block for categorical modules (aura_color) — the
   // label re-resolves from the persisted dominantDimension, so History reopens work.
@@ -282,10 +287,14 @@ export default function ResultScreen() {
   const { accent, accentSoft } = result.moduleId === 'aura_color'
     ? auraOutcomeTheme(result.dominantDimension)
     : moduleTheme(result.moduleId);
-  const eyebrow = t(`modules.${result.moduleId}.subtitle`, { defaultValue: '' }).toUpperCase();
+  // Count path frames the reveal as being ABOUT the person ("ABOUT SIMO"), not a module
+  // subtitle — the person's name lives in the eyebrow, the ratio is the reveal itself.
+  const eyebrow = isCount
+    ? t('result.count.aboutEyebrow', { name: result.winner?.name ?? '' }).toUpperCase()
+    : t(`modules.${result.moduleId}.subtitle`, { defaultValue: '' }).toUpperCase();
 
   const personCount = Object.keys(result.scores).length;
-  const showComparison = isMulti && personCount > 1;
+  const showComparison = isMulti && !isCount && personCount > 1;
   // Multi tie: 2+ persons at the max score — reveal ALL of them; never imply an
   // arbitrary single winner. Readings persisted before ties shipped carry neither
   // field → [] → normal single-winner path.
@@ -300,17 +309,24 @@ export default function ResultScreen() {
   const winnerSentence = result.insights[0]?.[language] ?? result.insights[0]?.en ?? '';
   const winnerSubtitle = isTie
     ? winnerSentence
-    : isMulti && result.winner
-      ? result.verdictLine?.[language] ??
-        result.verdictLine?.en ??
-        winnerSentence.replace(`${result.winner.name} `, '')
-      : null;
+    : isCount
+      ? winnerSentence // the tiered template already reads as a full descriptive sentence
+      : isMulti && result.winner
+        ? result.verdictLine?.[language] ??
+          result.verdictLine?.en ??
+          winnerSentence.replace(`${result.winner.name} `, '')
+        : null;
 
-  const bigTitle = isMulti
-    ? isTie
-      ? joinNames(tiedWinners.map((p) => p.name), language)
-      : result.winner?.name ?? ''
-    : (verdictWord?.[language] ?? verdictWord?.en ?? '');
+  // Count path: the reveal is the honest signal PERCENTAGE (confidence now IS the share,
+  // post floor-removal), NOT a name-as-verdict — same big typography as a winner name.
+  // The ratio demotes to the sub-line below; the percentage is the one hero number.
+  const bigTitle = isCount
+    ? `${result.confidence}%`
+    : isMulti
+      ? isTie
+        ? joinNames(tiedWinners.map((p) => p.name), language)
+        : result.winner?.name ?? ''
+      : (verdictWord?.[language] ?? verdictWord?.en ?? '');
 
   const confidence = result.confidence;
   // §3: percentile of this confidence against the user's own past readings (strictly
@@ -410,6 +426,15 @@ export default function ResultScreen() {
           >
             {bigTitle}
           </Text>
+          {/* Count path: the ratio explainer under the hero percentage. */}
+          {isCount && (
+            <Text style={[styles.countLabel, { color: theme.textMuted }]}>
+              {t('result.count.signsRatio', {
+                count: result.signalCount ?? 0,
+                total: result.signalTotal ?? 0,
+              })}
+            </Text>
+          )}
           {!!winnerSubtitle && (
             <Text style={[styles.winnerSubtitle, { color: theme.text }]}>{winnerSubtitle}</Text>
           )}
@@ -418,7 +443,11 @@ export default function ResultScreen() {
         {/* Confidence */}
         <GlassCard style={styles.card}>
           {(() => {
-            const head = t('result.confidenceHeadline', { confidence });
+            // Count path relabels this as "Signal strength: N%" — the same honest ratio,
+            // just not phrased as a confidence-in-a-verdict claim. Same bar, same number.
+            const head = t(isCount ? 'result.count.signalStrength' : 'result.confidenceHeadline', {
+              confidence,
+            });
             const token = `${confidence}%`;
             const parts = head.split(token);
             return (
@@ -726,6 +755,14 @@ const styles = StyleSheet.create({
     fontFamily: 'HankenGrotesk_400Regular',
     textAlign: 'center',
     marginTop: rs(4),
+  },
+  countLabel: {
+    fontSize: rs(12.5),
+    fontFamily: 'HankenGrotesk_600SemiBold',
+    letterSpacing: rs(0.6),
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    marginTop: rs(2),
   },
 
   // NOTE: no `gap` here — GlassCard wraps children in an inner content View, so a

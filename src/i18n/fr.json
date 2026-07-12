@@ -9,19 +9,11 @@
     "begin": "Commencer",
     "continue": "Continuer",
     "back": "Retour",
-    "share": "Partager",
-    "save": "Sauvegarder",
-    "retry": "Réessayer",
     "cancel": "Annuler",
     "cannotBeUndone": "Irréversible",
-    "later": "Plus tard",
-    "confirm": "Confirmer",
-    "close": "Fermer",
     "skip": "Passer",
-    "tap": "Appuyer",
     "ok": "OK",
-    "done": "Terminé",
-    "adBadge": "Pub"
+    "done": "Terminé"
   },
   "splash": {
     "tagline": "Décrypte l'énergie autour de toi",
@@ -52,16 +44,11 @@
     "earnDailyLabel": "Quotidien",
     "earnDailyAmount": "+1 / jour",
     "earnWatchLabel": "Regarder",
-    "earnWatchAmount": "+2 par pub",
-    "beginButton": "Commencer mon voyage",
-    "earnStars": "Gagner des étoiles",
-    "spendStars": "Dépenser des étoiles",
-    "dailyBonus": "Bonus quotidien"
+    "earnWatchAmount": "+2 par pub"
   },
   "home": {
     "heroEyebrow": "La question de ce soir",
     "heroTitle": "Que veux-tu découvrir ?",
-    "dailyReady": "Ta question gratuite du jour est prête",
     "tryFree": "Essai gratuit",
     "comingSoon": "Bientôt disponible",
     "sectionRelationships": "Relations",
@@ -165,13 +152,23 @@
       "subtitle": "Bientôt disponible"
     },
     "who_will_hurt_me": {
-      "title": "Qui va me blesser ?"
+      "title": "Qui va me blesser ?",
+      "subtitle": "Lire les signaux d'alerte tôt",
+      "description": "Analyse sociométrique des schémas de risque dans ton entourage — confidences trahies, comptes tenus, limites testées — et de qui les porte.",
+      "poweredBy": "Sociométrie",
+      "time": "5–7 min",
+      "cost": "Dès 1"
     },
     "red_green_flag": {
       "title": "Red flag ou green flag ?"
     },
     "shadow_self": {
-      "title": "Ton côté ombre"
+      "title": "Ton côté ombre",
+      "subtitle": "Rencontre le côté que tu caches",
+      "description": "Vingt questions fondées sur le travail de l'ombre de Jung révèlent quelle part de ton côté caché tu assumes — et quelle part parle encore à travers toi sans que tu le remarques.",
+      "poweredBy": "Psychologie jungienne",
+      "time": "5–7 min",
+      "cost": "1"
     },
     "inner_child": {
       "title": "Enfant intérieur"
@@ -206,7 +203,6 @@
   },
   "quiz": {
     "progressLabel": "{{current}} / {{total}}",
-    "tapToAnswer": "Appuie pour sélectionner",
     "noQuestions": "Aucune question disponible",
     "leaveTitle": "Quitter cette lecture ?",
     "leaveMessagePaid": "Ta progression ne sera pas enregistrée. Tes étoiles te seront remboursées ({{cost}} ✦).",
@@ -268,15 +264,12 @@
   },
   "result": {
     "notFound": "Aucun résultat trouvé.",
-    "confidenceLabel": "{{confidence}}% de confiance",
     "confidenceHeadline": "Nous sommes sûrs de cette lecture à {{confidence}}%.",
     "confidenceSub": "Plus élevé que {{pct}}% de tes lectures.",
     "lockedEyebrow": "Encore voilé",
     "lockedBody": "Ce que ça signifie, le tableau complet et ta carte à partager sont à un voile près.",
     "unlockWatch": "Regarder pour débloquer",
     "unlockStar": "Lève-le maintenant",
-    "attachmentStyle": "Dynamique d'attachement",
-    "loveLanguage": "Signal de langage d'amour",
     "shareButton": "Partager cette lecture",
     "saveButton": "Sauvegarder et quitter",
     "retryButton": "Essayer autre chose",
@@ -284,40 +277,30 @@
     "insightPrefix": "✦",
     "comparison": "Le tableau complet",
     "theRead": "La lecture",
-    "whatThisMeans": "Ce que cela signifie"
+    "whatThisMeans": "Ce que cela signifie",
+    "count": {
+      "aboutEyebrow": "À propos de {{name}}",
+      "signsRatio": "{{count}} signes présents sur {{total}}",
+      "signalStrength": "Force du signal : {{confidence}}%"
+    }
   },
   "stars": {
     "walletTitle": "Tes étoiles",
-    "balanceLabel": "{{balance}} étoiles",
     "earnTitle": "Gagner Plus",
     "watchVideo": "Regarder une vidéo",
-    "watchVideoAmount": "+1",
-    "dailyBonus": "Bonus quotidien",
-    "dailyBonusAmount": "+2",
     "streakBonus": "Série de 7 jours",
     "streakBonusAmount": "+5",
-    "shareApp": "Partager Aurafy",
-    "shareAppAmount": "+1",
-    "watchNow": "Regarder maintenant",
-    "claim": "Réclamer",
-    "share": "Partager",
-    "readyIn": "Prêt dans {{hours}}h {{minutes}}m",
     "dayProgress": "Jour {{streak}} sur 7",
     "activityTitle": "Activité récente",
-    "earnReason": "Gagné",
-    "spendReason": "Dépensé",
     "watchVideoDesc": "Une courte pub, récompense immédiate",
-    "dailyBonusDesc": "Une fois par jour",
     "dailyQuestion": "Question du jour",
     "dailyQuestionDesc": "Réponds à la question du jour",
     "streakDesc": "Maintiens ton rituel quotidien",
     "streakLabel": "Série de {{streak}} jours",
-    "shareDesc": "Invite un ami à lire",
     "comeBack": "Reviens dans 24h",
     "claimed": "Réclamé",
     "earnedSuffix": "gagné",
     "reasonWatch": "Vidéo regardée",
-    "reasonShare": "Aurafy partagé",
     "reasonDaily": "Bonus quotidien",
     "reasonInsight": "Lecture du jour",
     "reasonWelcome": "Cadeau de bienvenue",
@@ -325,27 +308,25 @@
     "reasonRefund": "Remboursement",
     "reasonStreak": "Série de 7 jours",
     "reasonUnlock": "Résultat débloqué",
-    "reasonTheme": "Thème débloqué"
+    "reasonTheme": "Thème débloqué",
+    "reasonModuleUnlock": "Module débloqué"
   },
   "history": {
     "title": "Tes lectures",
     "emptyTitle": "Tes lectures vivront ici",
     "emptyMessage": "Chaque nom, couleur et schéma que tu découvres est conservé ici — une carte intime de ce que tu apprends sur toi.",
     "ctaButton": "Commencer une lecture",
-    "modeLabel": "Lecture {{mode}}",
-    "confidenceLine": "{{pct}} % de confiance",
     "titleLine": "{{name}} — {{pct}} % de confiance",
+    "titleLineSignal": "{{name}} — {{pct}} % de signal",
     "weeklyEyebrow": "Lecture hebdomadaire",
     "sevenDayBadge": "7 jours",
-    "nights": "{{count}} nuits · terminé le {{date}}",
-    "sponsored": "Sponsorisé — visible en ligne"
+    "nights": "{{count}} nuits · terminé le {{date}}"
   },
   "settings": {
     "title": "Paramètres",
     "appearance": "Apparence",
     "theme": "Thème",
     "haptics": "Retour haptique",
-    "animations": "Animations de fond",
     "language": "Langue",
     "restartTitle": "Redémarrer pour appliquer la langue ?",
     "restartMessage": "Aurafy doit redémarrer pour appliquer la nouvelle langue.",
@@ -364,10 +345,7 @@
     "resetConfirmMessage": "Réinitialisation complète — étoiles, historique, réglages et intro seront tous effacés.",
     "resetConfirmAction": "Tout réinitialiser",
     "version": "Aurafy v1.0.0",
-    "soundAudio": "Son et audio",
     "soundEffectsDesc": "Carillons au toucher, cloche à la révélation",
-    "ambientAudio": "Audio d'ambiance",
-    "ambientAudioDesc": "Une nappe douce pendant les lectures",
     "volume": "Volume",
     "notifications": "Notifications",
     "dailyReminder": "Rappel quotidien",
@@ -382,8 +360,6 @@
     "autoCentering": "Centrage automatique",
     "autoCenteringDesc": "Le moment de respiration de 2 secondes",
     "howAurafyWorks": "Comment fonctionne Aurafy",
-    "howItWorksTitle": "Comment fonctionne Aurafy",
-    "howItWorksMessage": "Choisis un module, réponds à une courte série de questions intuitives, et Aurafy transforme tes choix en lecture. Les questions s'appuient sur de vrais cadres ; le résultat est une réflexion, pas un diagnostic.",
     "termsOfUse": "Conditions d'utilisation",
     "contactUs": "Nous contacter",
     "contactBody": "Bonjour l'équipe Aurafy,\n\nMerci d'avoir créé Aurafy ! Je voulais vous contacter avec une suggestion / une question :\n\n[ écris ton message ici ]\n\n— Envoyé depuis l'application Aurafy",
@@ -391,35 +367,17 @@
     "clearHistoryConfirmTitle": "Effacer l'historique de lecture ?",
     "clearHistoryConfirmMessage": "Cela supprime toutes les lectures enregistrées. Tes étoiles et tes réglages sont conservés.",
     "clearHistoryConfirmAction": "Effacer l'historique",
-    "exportReadings": "Exporter les lectures",
-    "exportEmpty": "Aucune lecture à exporter pour l'instant.",
     "madeWith": "Fait avec",
-    "selectMode": "Mode par défaut",
     "selectTime": "Heure du rappel",
     "setTime": "Définir l'heure"
   },
   "daily": {
     "title": "Question du jour",
-    "dateFormat": "dddd D MMMM",
-    "doneButton": "Terminé — à demain",
-    "alreadyAnsweredTitle": "Tu as déjà répondu aujourd'hui",
-    "alreadyAnsweredMessage": "Reviens demain pour une nouvelle question.",
-    "returnLabel": "Revenir demain",
-    "streakBadge": "{{streak}} jours de suite",
-    "bonusClaimed": "+2 réclamés !",
     "starEarned": "Étoile gagnée",
     "balanceNow": "Ton solde est maintenant de {{balance}} ✦",
-    "weekProgress": "Jour {{day}} sur 7 — chaque réponse complète le tableau. Termine la semaine pour débloquer ta lecture.",
     "comeBackTomorrow": "Reviens demain pour le prochain texte.",
     "dayOf": "Jour {{day}} sur 7",
     "weekCaption": "Chaque réponse complète le tableau. Termine la semaine pour débloquer ta lecture."
-  },
-  "errors": {
-    "notEnoughStars": "Pas assez d'étoiles — visite la section Étoiles pour en gagner plus",
-    "adFailed": "Échec du chargement de la publicité",
-    "adNotAvailable": "Publicité non disponible pour le moment",
-    "generic": "Quelque chose s'est mal passé. Veuillez réessayer.",
-    "notEnoughStarsTitle": "Pas assez d'étoiles"
   },
   "personEntry": {
     "title": "Qui lis-tu ?",
@@ -428,14 +386,18 @@
     "addPerson": "Ajouter une personne",
     "startButton": "Commencer — {{cost}}",
     "startFree": "Commencer — Gratuit",
-    "balanceAfter": "Solde après : {{balance}}",
-    "namePlaceholder": "Entrer un prénom...",
     "personPlaceholder": "Personne {{n}}",
     "personNameA11y": "Nom de la personne {{n}}",
     "you": "Toi",
     "soloTitle": "Cette lecture est pour toi",
     "soloSubtitle": "Réponds honnêtement — toi seul la verras.",
     "locked": "verrouillé"
+  },
+  "moduleUnlock": {
+    "cost": "Coût",
+    "balance": "Solde",
+    "unlockForCost": "Débloquer pour {{cost}}",
+    "needMore": "Encore {{count}}"
   },
   "themeGallery": {
     "title": "Thèmes",
@@ -478,10 +440,6 @@
     "minRead": "{{n}} min de lecture",
     "min": "{{n}} min",
     "takeReading": "Faire la lecture {{module}}",
-    "claimReward": "Réclamer +1 ✦",
-    "claimed": "Réclamé",
-    "todaysReward": "Récompense de lecture du jour",
-    "open": "Ouvrir",
     "empty": "Aucun article ici pour l'instant.",
     "sponsoredTitle": "Trouve ton match cosmique ce soir",
     "sponsoredBrand": "Astra · Rencontres",
@@ -495,7 +453,6 @@
       "jealousy": "Jalousie",
       "zodiac": "Zodiaque"
     },
-    "ritualLead": "Lis le texte de ce soir, réponds à la question à l'intérieur, gagne ton ✦.",
     "beginRead": "Commencer la lecture de ce soir",
     "stepRead": "Lire",
     "stepAnswer": "Répondre",
@@ -510,9 +467,10 @@
     "save": "Enregistrer dans l'historique",
     "empty": "Pas encore de résultat hebdomadaire."
   },
+  "share": {
+    "getYours": "Fais ta lecture"
+  },
   "shareCard": {
-    "ctaReading": "Découvre la tienne →",
-    "ctaWeekly": "Commence ta semaine →",
     "weekEyebrow": "Ma semaine révélée",
     "watermark": "@aurafy.app",
     "dialogTitle": "Partage ta lecture Aurafy",

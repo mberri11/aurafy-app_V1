@@ -14,6 +14,7 @@ import {
   ScrollView,
 } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
@@ -30,9 +31,10 @@ interface TimeWheelSheetProps {
   onClose: () => void;
 }
 
-// "System Sheet" cyan accent — matches ConfirmSheet's safe/info tone.
-const ACCENT = '#22D3EE';
-const ACCENT_GRADIENT: readonly [string, string] = ['#22D3EE', '#06B6D4'];
+// "System Sheet" grammar (see ConfirmSheet), but the Reminder-time sheet gets its OWN
+// accent so it reads distinct from Clear-history (cyan) and Reset-all (rose): mint.
+const ACCENT = '#2FEAAC';
+const ACCENT_GRADIENT: readonly [string, string] = ['#2FEAAC', '#14B8A6'];
 
 const ITEM_H = rs(36);
 const VISIBLE = 5; // odd → one centred row
@@ -136,16 +138,25 @@ export default function TimeWheelSheet({ visible, value, onSelect, onClose }: Ti
             {/* White-5% sheen over bg2 → lifted app-glass (matches GlassCard / ConfirmSheet). */}
             <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: theme.surface }]} />
 
-            {/* Cyan bloom rising from behind the icon. */}
+            {/* Soft accent wash — a focal bloom rising from behind the icon plus a faint
+                ambient fill, matching the ConfirmSheet "System Sheet" grammar (clear/reset).
+                Subtle, NOT a flood: the sheet body stays dark navy, only accented. */}
             <Svg pointerEvents="none" style={styles.bloom} width="100%" height="100%">
               <Defs>
-                <RadialGradient id="tw_bloom" cx="50%" cy="0%" r="62%">
+                {/* Bright cyan bloom rising from behind the icon (top-centre). */}
+                <RadialGradient id="tw_bloom" cx="50%" cy="0%" r="58%">
                   <Stop offset="0%" stopColor={ACCENT} stopOpacity={0.3} />
-                  <Stop offset="55%" stopColor={ACCENT} stopOpacity={0.07} />
+                  <Stop offset="55%" stopColor={ACCENT} stopOpacity={0.08} />
+                  <Stop offset="100%" stopColor={ACCENT} stopOpacity={0} />
+                </RadialGradient>
+                {/* Faint ambient fill for the lower half + both corners. */}
+                <RadialGradient id="tw_fill" cx="50%" cy="82%" r="95%">
+                  <Stop offset="0%" stopColor={ACCENT} stopOpacity={0.055} />
                   <Stop offset="100%" stopColor={ACCENT} stopOpacity={0} />
                 </RadialGradient>
               </Defs>
               <Rect x="0" y="0" width="100%" height="100%" fill="url(#tw_bloom)" />
+              <Rect x="0" y="0" width="100%" height="100%" fill="url(#tw_fill)" />
             </Svg>
 
             <View style={[styles.grabber, { backgroundColor: theme.surfaceBorder }]} />
@@ -201,11 +212,14 @@ function Wheels({
   };
 
   return (
-    <>
-      {/* Wheel container has NO fill — fully transparent, so the sheet (bloom +
-          sheen and all) shows straight through. Its background is therefore the
-          surrounding area continued; only the thin border outlines it. The cyan
-          centre band is the single highlight that marks the selected row. */}
+    // Fade the wheel body in as the sheet slides up. The wheels seed their scroll
+    // offset in onLayout (animated:false), which otherwise flashes the top row
+    // ("1 / 00 / AM") then snaps to the current time — reading as a jump. Fading
+    // from transparent hides that snap so the popup settles smoothly, matching the
+    // clear/reset (ConfirmSheet) grammar. The static header rides the modal slide.
+    <Animated.View entering={FadeIn.duration(240)} style={styles.body}>
+      {/* Clean glass box (no flood fill) — just a hairline border framing the wheels, with
+          the accent centre band marking the selected row. Matches the subtle System-Sheet look. */}
       <View style={[styles.wheelArea, { borderColor: theme.borderStrong }]}>
         {/* centre selection band (behind the numbers) */}
         <View
@@ -236,7 +250,7 @@ function Wheels({
           <Text style={[styles.primaryLabel, { color: theme.background }]}>{t('settings.setTime')}</Text>
         </LinearGradient>
       </TouchableOpacity>
-    </>
+    </Animated.View>
   );
 }
 
@@ -245,7 +259,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'flex-end' },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(4,5,15,0.6)',
+    backgroundColor: 'rgba(4,5,15,0.66)',
   },
   sheet: {
     borderTopLeftRadius: rs(24),
@@ -257,7 +271,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
   },
-  bloom: { position: 'absolute', top: 0, left: 0, right: 0, height: rs(190) },
+  // Full-sheet so the cyan theme reaches every corner (was top-190 only, which left the
+  // lower half + far corner reading as pure black).
+  bloom: { ...StyleSheet.absoluteFillObject },
   grabber: {
     width: rs(40),
     height: rs(4.5),
@@ -288,12 +304,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  // Fade-in wrapper for the wheels + CTA — full width so the CTA keeps its 100%,
+  // centred so the wheel box stays centred (was a bare fragment before).
+  body: { width: '100%', alignItems: 'center' },
+
   wheelArea: {
     height: WHEEL_H,
     justifyContent: 'center',
     marginTop: rs(12),
     marginBottom: rs(10),
-    borderWidth: 0.3,
+    // Shrink-wrap the wheels: `alignSelf: 'center'` + horizontal padding means the bordered
+    // box hugs its content (the 3 wheels) instead of stretching to the full sheet width,
+    // which left a dead empty strip inside the box (right side in EN, left in AR). Because
+    // it now hugs content, the box + band auto-fit whichever language's wheel widths apply.
+    alignSelf: 'center',
+    paddingHorizontal: rs(10),
+    // Hairline (not 0.3) so every edge renders consistently on Android — a sub-pixel border
+    // drops out on whichever side lands on an unlucky fractional pixel.
+    borderWidth: StyleSheet.hairlineWidth,
     borderRadius: rs(20),
     overflow: 'hidden',
   },
@@ -305,8 +333,10 @@ const styles = StyleSheet.create({
   },
   band: {
     position: 'absolute',
-    left: rs(8),
-    right: rs(8),
+    // The box hugs its content now, so a fixed inset frames the wheels in every language —
+    // no per-language width math needed.
+    left: rs(6),
+    right: rs(6),
     top: PAD,
     height: ITEM_H,
     borderRadius: rs(11),

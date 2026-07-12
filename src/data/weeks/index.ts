@@ -31,22 +31,27 @@ export function getWeekById(id: string): WeeklyTheme | undefined {
   return WEEKS.find((w) => w.id === id);
 }
 
-// articleId → its parent week's position in WEEKS (first occurrence wins — day 1 of
-// week 1 reuses a legacy article id). Drives the Insights feed's no-spoiler gate.
-const WEEK_ORDINAL_BY_ARTICLE: Record<string, number> = {};
+// articleId → the absolute day-offset since the user's anchor at which the walker FIRST
+// serves it as the daily pick (weekOrdinal*7 + dayIndex). This is DAY-granular, unlike
+// the week ordinal above, so the Insights feed can reveal an article on the exact day it
+// becomes the daily — not the whole week at once (which would still leak later days).
+const REVEAL_DAY_BY_ARTICLE: Record<string, number> = {};
 WEEKS.forEach((week, ordinal) => {
-  for (const day of week.days) {
-    if (!(day.articleId in WEEK_ORDINAL_BY_ARTICLE)) WEEK_ORDINAL_BY_ARTICLE[day.articleId] = ordinal;
-  }
+  week.days.forEach((day, dayIndex) => {
+    if (!(day.articleId in REVEAL_DAY_BY_ARTICLE)) {
+      REVEAL_DAY_BY_ARTICLE[day.articleId] = ordinal * 7 + dayIndex;
+    }
+  });
 });
 
 /**
- * Position (0-based) in `WEEKS` of the week an article belongs to, or undefined
- * for editorial articles outside the curriculum (those are always feed-visible).
- * Compare against walker.getReachedWeekCount to gate future-week articles.
+ * The day-offset (from the user's anchor) at which a curriculum article first becomes
+ * the daily pick, or undefined for editorial articles (always feed-visible). Gate an
+ * article into the Insights feed with `getDaysSinceAnchor(anchor) >= getArticleRevealDay(id)`
+ * so an upcoming daily pick stays hidden until the exact day it is served.
  */
-export function getArticleWeekOrdinal(articleId: string): number | undefined {
-  return WEEK_ORDINAL_BY_ARTICLE[articleId];
+export function getArticleRevealDay(articleId: string): number | undefined {
+  return REVEAL_DAY_BY_ARTICLE[articleId];
 }
 
 /**

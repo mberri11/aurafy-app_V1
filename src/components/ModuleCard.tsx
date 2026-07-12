@@ -32,6 +32,11 @@ interface ModuleCardProps {
   comingSoon?: boolean;
   /** Shows the gold "Try free ✦" pill in the top-right (the free module). */
   freeTrial?: boolean;
+  /** Set to a module's `unlockCost` when it is LOCKED-BUT-BUYABLE (paid, not yet owned):
+   *  full-colour art + a lock glyph on the icon + a ★cost pill. Desirable, not disabled —
+   *  the card stays interactive and its press routes into the unlock gate. Omit when the
+   *  module is free or already unlocked. */
+  unlockCost?: number;
 }
 
 const ModuleCard = memo(function ModuleCard({
@@ -42,9 +47,14 @@ const ModuleCard = memo(function ModuleCard({
   locked = false,
   comingSoon = false,
   freeTrial = false,
+  unlockCost,
 }: ModuleCardProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  // Locked-but-buyable: full-colour card (below) + a lock glyph + a ★cost pill. The
+  // comingSoon placeholder above takes precedence (a paid module with no content yet stays
+  // "Coming soon" until its content ships and comingSoon is flipped off).
+  const buyable = unlockCost != null && !comingSoon;
   const scale = useSharedValue(1);
   // Prismatic identity (aura_color): the detail screen's palette as THREE separate
   // blooms, each hue owning its own region of the card — violet top-right, cyan
@@ -181,12 +191,29 @@ const ModuleCard = memo(function ModuleCard({
                 />
               ) : null}
               <ModuleIcon id={module.id} emoji={module.icon} size={rs(40)} />
+
+              {/* Locked-but-buyable: a small lock badge on the icon corner (same lock-over-art
+                  grammar as the unlock dialog's hero) — signals "unlock to play". */}
+              {buyable ? (
+                <View
+                  style={[styles.iconLockBadge, { backgroundColor: theme.bg2, borderColor: theme.surfaceBorder }]}
+                  pointerEvents="none"
+                >
+                  <MaterialCommunityIcons name="lock" size={rs(10)} color={theme.textMuted} />
+                </View>
+              ) : null}
             </View>
 
             {freeTrial ? (
               <View style={[styles.tryFreePill, { borderColor: `${theme.gold}66`, backgroundColor: `${theme.gold}14` }]}>
                 <Text style={[styles.tryFreeText, { color: theme.gold }]}>{t('home.tryFree')}</Text>
                 <MaterialCommunityIcons name="star-four-points" size={rs(10)} color={theme.gold} />
+              </View>
+            ) : buyable ? (
+              // ★cost pill — StarsBadge grammar (gold star + bold number, gold-tinted glass).
+              <View style={[styles.unlockPill, { borderColor: `${theme.gold}66`, backgroundColor: `${theme.gold}14` }]}>
+                <MaterialCommunityIcons name="star" size={rs(11)} color={theme.gold} />
+                <Text style={[styles.unlockPillText, { color: theme.gold }]}>{unlockCost}</Text>
               </View>
             ) : null}
           </View>
@@ -271,6 +298,29 @@ const styles = StyleSheet.create({
     paddingVertical: rs(3),
   },
   tryFreeText: { fontSize: rs(11), fontFamily: 'HankenGrotesk_600SemiBold' },
+  // ★cost pill for a locked-but-buyable module (mirrors tryFreePill's gold glass).
+  unlockPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(3),
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: rs(8),
+    paddingVertical: rs(3),
+  },
+  unlockPillText: { fontSize: rs(12), fontFamily: 'HankenGrotesk_700Bold' },
+  // Lock badge pinned to the icon tile's outer corner.
+  iconLockBadge: {
+    position: 'absolute',
+    top: -rs(4),
+    end: -rs(4),
+    width: rs(18),
+    height: rs(18),
+    borderRadius: 999,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   spacer: { flex: 1, minHeight: rs(14) },
   title: {
     fontSize: rs(16),

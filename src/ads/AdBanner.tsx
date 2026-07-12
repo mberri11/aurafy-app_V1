@@ -8,7 +8,7 @@
 // ADS_AVAILABLE guard. A top-level import would run TurboModuleRegistry.getEnforcing()
 // at module load and CRASH Expo Go (the native module isn't present there).
 //
-// This is the REAL replacement for the src/components/BannerAdSlot.tsx placeholder.
+// This is the REAL replacement for the old BannerAdSlot placeholder (deleted).
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { memo, useState } from 'react';

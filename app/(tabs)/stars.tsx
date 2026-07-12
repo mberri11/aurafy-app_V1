@@ -41,8 +41,6 @@ function useReasonLabel() {
       switch (reason) {
         case 'rewarded_ad':
           return t('stars.reasonWatch');
-        case 'share_app':
-          return t('stars.reasonShare');
         case 'daily_bonus':
         case 'Daily bonus':
           return t('stars.reasonDaily');
@@ -57,6 +55,8 @@ function useReasonLabel() {
           return t('stars.reasonUnlock');
         case 'theme_unlock':
           return t('stars.reasonTheme');
+        case 'module_unlock':
+          return t('stars.reasonModuleUnlock');
         case 'streak':
           return t('stars.reasonStreak');
         case 'refund':

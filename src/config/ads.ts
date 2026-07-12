@@ -74,14 +74,13 @@ export const AD_UNIT_IDS = {
   rewarded: source.rewarded,
 } as const;
 
-export type AdUnitKey = keyof typeof AD_UNIT_IDS;
-
 // ── Frequency-capped interstitial (Phase 4) ──────────────────────────────────
 // Tuning knobs for the "leaving the result screen" interstitial. Kept here (this
 // module is dependency-light) so production tuning happens in ONE file.
 export const INTERSTITIAL = {
-  /** Probability an eligible exit shows the ad. 0.15 = ~15% of exits. Tune freely. */
-  CHANCE: 0.20,
+  /** Probability an eligible exit shows the ad. 0.15 = launch value; a raise to
+   *  0.20+ is a v1.0.1 decision gated on retention data. */
+  CHANCE: 0.15,
   /** Never show before the user has this many completed readings (protect onboarding). */
   MIN_READINGS_BEFORE: 3,
   /** Hard floor between two interstitials, ms. */

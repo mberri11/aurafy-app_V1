@@ -58,8 +58,10 @@ const MODULE_CATEGORY: Record<string, Category> = {
   who_jealous: 'jealousy',
   who_hates_me: 'jealousy',
   who_cut_off: 'jealousy',
+  who_will_hurt_me: 'jealousy',
   am_i_problem: 'self',
   am_i_healing: 'self',
+  shadow_self: 'self',
   birth_chart: 'zodiac',
 };
 
@@ -89,10 +91,18 @@ const MODULE_THEMES: Record<string, CategoryTheme> = {
   // green wholesale after the venom-dark #046B50 kept reading black on device.
   who_jealous: { accent: '#34D399', accentSoft: '#6EE7BF', motif: { kind: 'icon', name: 'content-cut' } },
   who_cut_off: { accent: '#FB923C', accentSoft: '#FDBA74', motif: { kind: 'icon', name: 'link-variant-off' } },
+  // Warm scarlet warning (Simo 2026-07-12: pure red #EF4444 read cool/pink on the
+  // loader — warmed toward vermilion; the peach accentSoft is what the loading dots
+  // actually render). Protective shield motif (self-protection, not the attacker),
+  // distinct from hates' broken heart and cut_off's broken link.
+  who_will_hurt_me: { accent: '#F0563C', accentSoft: '#FBAB8C', motif: { kind: 'icon', name: 'shield-alert' } },
   attachment_style: { accent: '#22D3EE', accentSoft: '#67E8F9', motif: { kind: 'icon', name: 'orbit' } },
   // Gold — matches its Home card; the mirror motif (vs admires' eye) keeps them apart.
   am_i_problem: { accent: '#F5C542', accentSoft: '#F8DE7E', motif: { kind: 'icon', name: 'mirror' } },
   am_i_healing: { accent: '#2FEAAC', accentSoft: '#86EFCC', motif: { kind: 'icon', name: 'sprout' } },
+  // Twilight indigo + persona masks — Jungian shadow work. (birth_chart's placeholder
+  // shares the indigo family; re-tint it when zodiac ships in V1.4.)
+  shadow_self: { accent: '#6366F1', accentSoft: '#818CF8', motif: { kind: 'icon', name: 'drama-masks' } },
   birth_chart: { accent: '#818CF8', accentSoft: '#A5B4FC', motif: { kind: 'icon', name: 'star-shooting' } },
   aura_color: { accent: '#A78BFA', accentSoft: '#C4B5FD', motif: { kind: 'wheel' } },
 };

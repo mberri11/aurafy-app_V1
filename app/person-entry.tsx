@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
 import { useUserStore } from '@/src/store/userStore';
@@ -48,9 +48,18 @@ export default function PersonEntryScreen() {
   const { stars, spendStars } = useUserStore();
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
   const markFreeTrialUsed = useUserStore((s) => s.markFreeTrialUsed);
+  const unlockedModules = useUserStore((s) => s.unlockedModules);
   const { startReading } = useReadingStore();
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
+
+  // Gate deep links: a paid module that isn't unlocked must not start a reading here —
+  // bounce back to the module screen, which owns the unlock dialog.
+  useEffect(() => {
+    if (module?.unlockCost != null && !unlockedModules.includes(module.id)) {
+      router.replace({ pathname: '/module/[id]', params: { id: module.id } });
+    }
+  }, [module, unlockedModules]);
   const resolvedMode: ReadingMode = (mode as ReadingMode) ?? 'solo';
   const cost = module?.starsCost[resolvedMode] ?? 1;
   // The free-trial module's first reading costs nothing (any mode) until consumed.
@@ -321,12 +330,6 @@ export default function PersonEntryScreen() {
           glow
           trailingIcon={isFreeTrial ? undefined : 'star-four-points'}
         />
-        <View style={styles.balanceRow}>
-          <Text style={[styles.balanceAfter, { color: theme.textMuted }]}>
-            {t('personEntry.balanceAfter', { balance: Math.max(0, stars - effectiveCost) })}
-          </Text>
-          <MaterialCommunityIcons name="star-four-points" size={rs(12)} color={theme.textMuted} />
-        </View>
       </View>
     </View>
   );
@@ -420,13 +423,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: rs(10),
   },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: rs(4),
-    marginTop: rs(10),
-    opacity: 0.65,
-  },
-  balanceAfter: { fontSize: rs(11.5), fontFamily: 'HankenGrotesk_400Regular' },
 });

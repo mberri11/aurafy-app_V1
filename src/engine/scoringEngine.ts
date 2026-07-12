@@ -208,10 +208,12 @@ function scoreCount(
     }
   }
 
-  // Confidence = the honest share of signs present, floored low (35) so a weak read can
-  // genuinely read weak — no 60% floor on this path (item 23).
+  // Confidence = the honest share of signs present. NO floor BY DESIGN: a zero read must
+  // display as zero, and 0/20 vs 6/20 must be visibly different readings — this is the ONE
+  // number shown (title % + bar). Only the 95 cap is kept, matching every other path
+  // (nothing in this app ever claims 100%).
   const share = total > 0 ? present / total : 0;
-  const confidence = clamp(Math.round(share * 100), 35, 95);
+  const confidence = clamp(Math.round(share * 100), 0, 95);
 
   const scores: Record<string, number> = {};
   if (person) scores[person.id] = present;

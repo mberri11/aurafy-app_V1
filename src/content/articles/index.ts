@@ -297,8 +297,3 @@ export function getArticle(id: string): Article | undefined {
 export function getArticleContent(id: string, lang: Language): ArticleContent | undefined {
   return CONTENT_BY_LANG[lang]?.[id] ?? articlesEn[id];
 }
-
-/** True once an article has real (non-placeholder) body content in EN. */
-export function hasContent(id: string): boolean {
-  return Boolean(articlesEn[id]?.blocks?.length);
-}

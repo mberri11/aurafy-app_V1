@@ -49,6 +49,8 @@ import { energyReadingQuestions } from '@/src/data/questions/energyReading';
 import { attachmentStyleQuestions } from '@/src/data/questions/attachmentStyle';
 import { amITheProblemQuestions } from '@/src/data/questions/amITheProblem';
 import { whoCutOffQuestions } from '@/src/data/questions/whoCutOff';
+import { whoWillHurtMeQuestions } from '@/src/data/questions/whoWillHurtMe';
+import { shadowSelfQuestions } from '@/src/data/questions/shadowSelf';
 import { auraColorQuestions } from '@/src/data/questions/auraColor';
 
 const QUESTIONS_MAP: Record<string, Question[]> = {
@@ -61,6 +63,8 @@ const QUESTIONS_MAP: Record<string, Question[]> = {
   attachment_style: attachmentStyleQuestions,
   am_i_problem: amITheProblemQuestions,
   who_cut_off: whoCutOffQuestions,
+  who_will_hurt_me: whoWillHurtMeQuestions,
+  shadow_self: shadowSelfQuestions,
   aura_color: auraColorQuestions,
 };
 

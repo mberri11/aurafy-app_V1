@@ -9,19 +9,11 @@
     "begin": "Begin",
     "continue": "Continue",
     "back": "Back",
-    "share": "Share",
-    "save": "Save",
-    "retry": "Try Again",
     "cancel": "Cancel",
     "cannotBeUndone": "Cannot be undone",
-    "later": "Later",
-    "confirm": "Confirm",
-    "close": "Close",
     "skip": "Skip",
-    "tap": "Tap",
     "ok": "OK",
-    "done": "Done",
-    "adBadge": "Ad"
+    "done": "Done"
   },
   "splash": {
     "tagline": "Decode the energy around you",
@@ -52,16 +44,11 @@
     "earnDailyLabel": "Daily",
     "earnDailyAmount": "+1 daily",
     "earnWatchLabel": "Watch",
-    "earnWatchAmount": "+2 per ad",
-    "beginButton": "Begin my journey",
-    "earnStars": "Earn Stars",
-    "spendStars": "Spend Stars",
-    "dailyBonus": "Daily Bonus"
+    "earnWatchAmount": "+2 per ad"
   },
   "home": {
     "heroEyebrow": "Tonight's question",
     "heroTitle": "What do you want to discover?",
-    "dailyReady": "Today's free question is ready",
     "tryFree": "Try free",
     "comingSoon": "Coming soon",
     "sectionRelationships": "Relationships",
@@ -165,13 +152,23 @@
       "subtitle": "Coming soon"
     },
     "who_will_hurt_me": {
-      "title": "Who Will Hurt Me?"
+      "title": "Who Will Hurt Me?",
+      "subtitle": "Read the warning signs early",
+      "description": "Sociometric analysis of the trust-risk patterns in your circle — leaked confidences, kept score, tested boundaries — and who carries them.",
+      "poweredBy": "Sociometry",
+      "time": "5–7 min",
+      "cost": "From 1"
     },
     "red_green_flag": {
       "title": "Red Flag or Green Flag?"
     },
     "shadow_self": {
-      "title": "Shadow Self"
+      "title": "Shadow Self",
+      "subtitle": "Meet the side you hide",
+      "description": "Twenty questions built on Jungian shadow work reveal how much of your hidden side you own — and how much still speaks through you unnoticed.",
+      "poweredBy": "Jungian Psychology",
+      "time": "5–7 min",
+      "cost": "1"
     },
     "inner_child": {
       "title": "Inner Child"
@@ -206,7 +203,6 @@
   },
   "quiz": {
     "progressLabel": "{{current}} / {{total}}",
-    "tapToAnswer": "Tap to select",
     "noQuestions": "No questions available",
     "leaveTitle": "Leave this reading?",
     "leaveMessagePaid": "Your progress won't be saved. Your stars will be refunded ({{cost}} ✦).",
@@ -268,15 +264,12 @@
   },
   "result": {
     "notFound": "No result found.",
-    "confidenceLabel": "{{confidence}}% confidence",
     "confidenceHeadline": "We're {{confidence}}% confident in this reading.",
     "confidenceSub": "Higher than {{pct}}% of your readings.",
     "lockedEyebrow": "Still veiled",
     "lockedBody": "What this means, the full picture and your share card are one veil away.",
     "unlockWatch": "Watch to unlock",
     "unlockStar": "Lift it now",
-    "attachmentStyle": "Attachment dynamic",
-    "loveLanguage": "Love language signal",
     "shareButton": "Share this reading",
     "saveButton": "Save & exit",
     "retryButton": "Try another",
@@ -284,40 +277,30 @@
     "insightPrefix": "✦",
     "comparison": "The full picture",
     "theRead": "The read",
-    "whatThisMeans": "What this means"
+    "whatThisMeans": "What this means",
+    "count": {
+      "aboutEyebrow": "About {{name}}",
+      "signsRatio": "{{count}} of {{total}} signs present",
+      "signalStrength": "Signal strength: {{confidence}}%"
+    }
   },
   "stars": {
     "walletTitle": "Your Stars",
-    "balanceLabel": "{{balance}} Stars",
     "earnTitle": "Earn More",
     "watchVideo": "Watch a video",
-    "watchVideoAmount": "+1",
-    "dailyBonus": "Daily bonus",
-    "dailyBonusAmount": "+2",
     "streakBonus": "7-day streak",
     "streakBonusAmount": "+5",
-    "shareApp": "Share Aurafy",
-    "shareAppAmount": "+1",
-    "watchNow": "Watch Now",
-    "claim": "Claim",
-    "share": "Share",
-    "readyIn": "Ready in {{hours}}h {{minutes}}m",
     "dayProgress": "Day {{streak}} of 7",
     "activityTitle": "Recent activity",
-    "earnReason": "Earned",
-    "spendReason": "Spent",
     "watchVideoDesc": "A short ad, instant reward",
-    "dailyBonusDesc": "Once every day",
     "dailyQuestion": "Daily question",
     "dailyQuestionDesc": "Answer today's free question",
     "streakDesc": "Keep your daily ritual alive",
     "streakLabel": "{{streak}}-day streak",
-    "shareDesc": "Invite a friend to read",
     "comeBack": "Come back in 24h",
     "claimed": "Claimed",
     "earnedSuffix": "earned",
     "reasonWatch": "Watched a video",
-    "reasonShare": "Shared Aurafy",
     "reasonDaily": "Daily bonus",
     "reasonInsight": "Daily read",
     "reasonWelcome": "Welcome gift",
@@ -325,27 +308,25 @@
     "reasonRefund": "Refund",
     "reasonStreak": "7-day streak",
     "reasonUnlock": "Result unlock",
-    "reasonTheme": "Theme unlock"
+    "reasonTheme": "Theme unlock",
+    "reasonModuleUnlock": "Module unlocked"
   },
   "history": {
     "title": "Your Readings",
     "emptyTitle": "Your readings will live here",
     "emptyMessage": "Every name, color and pattern you uncover is kept here — a private map of what you've learned about yourself.",
     "ctaButton": "Start a reading",
-    "modeLabel": "{{mode}} reading",
-    "confidenceLine": "{{pct}}% confidence",
     "titleLine": "{{name}} — {{pct}}% confidence",
+    "titleLineSignal": "{{name}} — {{pct}}% signal",
     "weeklyEyebrow": "Weekly reading",
     "sevenDayBadge": "7-Day",
-    "nights": "{{count}} nights · completed {{date}}",
-    "sponsored": "Sponsored — appears when online"
+    "nights": "{{count}} nights · completed {{date}}"
   },
   "settings": {
     "title": "Settings",
     "appearance": "Appearance",
     "theme": "Theme",
     "haptics": "Haptic feedback",
-    "animations": "Background animations",
     "language": "Language",
     "restartTitle": "Restart to apply language?",
     "restartMessage": "Aurafy needs to restart to apply your new language.",
@@ -364,10 +345,7 @@
     "resetConfirmMessage": "A full factory reset. Your Stars, history, settings and onboarding will all be erased.",
     "resetConfirmAction": "Reset everything",
     "version": "Aurafy v1.0.0",
-    "soundAudio": "Sound & Audio",
     "soundEffectsDesc": "Chimes on tap, bell on reveal",
-    "ambientAudio": "Ambient audio",
-    "ambientAudioDesc": "A soft pad during readings",
     "volume": "Volume",
     "notifications": "Notifications",
     "dailyReminder": "Daily reminder",
@@ -382,8 +360,6 @@
     "autoCentering": "Auto-centering",
     "autoCenteringDesc": "The 2-second breathing moment",
     "howAurafyWorks": "How Aurafy works",
-    "howItWorksTitle": "How Aurafy works",
-    "howItWorksMessage": "Pick a module, answer a short set of intuitive questions, and Aurafy turns your taps into a reading. The questions map to real frameworks; the result is a reflection, not a diagnosis.",
     "termsOfUse": "Terms of use",
     "contactUs": "Contact us",
     "contactBody": "Hi Aurafy team,\n\nThank you for creating Aurafy! I wanted to reach out with a suggestion / question:\n\n[ write your message here ]\n\n— Sent from the Aurafy app",
@@ -391,35 +367,17 @@
     "clearHistoryConfirmTitle": "Clear reading history?",
     "clearHistoryConfirmMessage": "This removes all saved readings from this device. Your Stars and settings are kept.",
     "clearHistoryConfirmAction": "Clear history",
-    "exportReadings": "Export readings",
-    "exportEmpty": "No readings to export yet.",
     "madeWith": "Made with",
-    "selectMode": "Default mode",
     "selectTime": "Reminder time",
     "setTime": "Set time"
   },
   "daily": {
     "title": "Daily Question",
-    "dateFormat": "dddd, MMMM D",
-    "doneButton": "Done — see you tomorrow",
-    "alreadyAnsweredTitle": "You've already answered today",
-    "alreadyAnsweredMessage": "Come back tomorrow for a new question.",
-    "returnLabel": "Return tomorrow",
-    "streakBadge": "{{streak}} day streak",
-    "bonusClaimed": "+2 claimed!",
     "starEarned": "Star earned",
     "balanceNow": "Your balance is now {{balance}} ✦",
-    "weekProgress": "Day {{day}} of 7 — each answer adds to the picture. Complete the week to unlock your reading.",
     "comeBackTomorrow": "Come back tomorrow for the next piece.",
     "dayOf": "Day {{day}} of 7",
     "weekCaption": "Each answer adds to the picture. Complete the week to unlock your reading."
-  },
-  "errors": {
-    "notEnoughStars": "Not enough stars — visit Stars to earn more",
-    "adFailed": "Ad failed to load",
-    "adNotAvailable": "Ad not available right now",
-    "generic": "Something went wrong. Please try again.",
-    "notEnoughStarsTitle": "Not enough stars"
   },
   "personEntry": {
     "title": "Who are you reading?",
@@ -428,14 +386,18 @@
     "addPerson": "Add person",
     "startButton": "Start Reading — {{cost}}",
     "startFree": "Start Reading — Free",
-    "balanceAfter": "Balance after: {{balance}}",
-    "namePlaceholder": "Enter name...",
     "personPlaceholder": "Person {{n}}",
     "personNameA11y": "Name for person {{n}}",
     "you": "You",
     "soloTitle": "This reading is for you",
     "soloSubtitle": "Answer honestly — only you will see this.",
     "locked": "locked"
+  },
+  "moduleUnlock": {
+    "cost": "Cost",
+    "balance": "Balance",
+    "unlockForCost": "Unlock for {{cost}}",
+    "needMore": "Need {{count}} more"
   },
   "themeGallery": {
     "title": "Themes",
@@ -478,10 +440,6 @@
     "minRead": "{{n}} min read",
     "min": "{{n}} min",
     "takeReading": "Take the {{module}} reading",
-    "claimReward": "Claim +1 ✦",
-    "claimed": "Claimed",
-    "todaysReward": "Today's reading reward",
-    "open": "Open",
     "empty": "No articles here yet.",
     "sponsoredTitle": "Find your cosmic match tonight",
     "sponsoredBrand": "Astra · Dating",
@@ -495,7 +453,6 @@
       "jealousy": "Jealousy",
       "zodiac": "Zodiac"
     },
-    "ritualLead": "Read tonight's piece, answer the question inside, earn your ✦.",
     "beginRead": "Begin tonight's read",
     "stepRead": "Read",
     "stepAnswer": "Answer",
@@ -510,9 +467,10 @@
     "save": "Save to history",
     "empty": "No weekly result yet."
   },
+  "share": {
+    "getYours": "Get your reading"
+  },
   "shareCard": {
-    "ctaReading": "Discover yours →",
-    "ctaWeekly": "Start your week →",
     "weekEyebrow": "My week revealed",
     "watermark": "@aurafy.app",
     "dialogTitle": "Share your Aurafy reading",

@@ -134,6 +134,8 @@ export interface UserState extends ContentSlice {
   readingCount: number;
   /** True once the user has spent their one free-trial reading (FREE_TRIAL_MODULE_ID). */
   freeTrialUsed: boolean;
+  /** Ids of paid modules (Module.unlockCost) the user has permanently unlocked. Persisted. */
+  unlockedModules: string[];
   /** Rewarded videos already watched today + the local day they count for (daily cap). */
   rewardedToday: number;
   rewardedDate: string | null;
@@ -158,6 +160,9 @@ export interface UserState extends ContentSlice {
   markFreeTrialUsed: () => void;
   /** Un-burns the free trial after an abandoned reading (no result was delivered). */
   restoreFreeTrial: () => void;
+  /** Permanently unlock a paid module: spends `cost` under 'module_unlock' and records the id.
+   *  Returns false (no charge) when the balance is short; idempotent for an already-owned id. */
+  unlockModule: (id: string, cost: number) => boolean;
   earnStars: (amount: number, reason: string) => void;
   /** Credits +2 for a rewarded video, enforcing the 25/day cap. Returns false when capped. */
   earnRewardedVideo: () => boolean;
@@ -198,6 +203,7 @@ export const useUserStore = create<UserState>()(
       recentTransactions: [welcomeTransaction()],
       readingCount: 0,
       freeTrialUsed: false,
+      unlockedModules: [],
       rewardedToday: 0,
       rewardedDate: null,
       dailyAnswers: [],
@@ -395,6 +401,16 @@ export const useUserStore = create<UserState>()(
         set({ freeTrialUsed: false });
       },
 
+      unlockModule: (id: string, cost: number): boolean => {
+        const { stars, unlockedModules, spendStars } = get();
+        if (unlockedModules.includes(id)) return true; // already owned — never double-charge
+        if (stars < cost) return false;
+        // spendStars logs the 'module_unlock' wallet row and re-checks the balance.
+        if (!spendStars(cost, 'module_unlock')) return false;
+        set((s) => ({ unlockedModules: [...s.unlockedModules, id] }));
+        return true;
+      },
+
       resetAll: (): void => {
         set({
           stars: STARTING_STARS,
@@ -408,6 +424,7 @@ export const useUserStore = create<UserState>()(
           recentTransactions: [welcomeTransaction()],
           readingCount: 0,
           freeTrialUsed: false,
+          unlockedModules: [],
           rewardedToday: 0,
           rewardedDate: null,
           dailyAnswers: [],

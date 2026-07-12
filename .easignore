@@ -1,0 +1,59 @@
+# EAS Build project archive — overrides .gitignore for what gets uploaded to the
+# build server. .gitignore excludes assets/ (to keep local design-reference-style
+# clutter out of git), but assets/ contains the icon/splash/sounds the app actually
+# needs at build+runtime — so unlike .gitignore, we deliberately DO NOT ignore it here.
+
+# dependencies
+node_modules/
+design-reference/
+docs/
+Screenshots_new
+claude-code-AURA-module-prompt.md
+claude-code-C10-foundation-prompt.md
+aurafy-C10-architecture-brief.md
+aurafy-result-experience-DESIGN-SPEC.md
+.claude/
+.git/
+
+CLAUDE.md
+design-tokens.txt
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+build/
+*.log
+
+# Native
+ios/
+android/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+.vercel
+
+.env

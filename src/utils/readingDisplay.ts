@@ -9,11 +9,13 @@ import { Reading, Language, SoloResults, CategoricalResults } from '@/src/types'
 import { joinNames } from '@/src/engine/scoringEngine';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
+import { shadowSelfResults } from '@/src/data/results/shadowSelfResults';
 import { auraColorResults } from '@/src/data/results/auraColorResults';
 
 const SOLO_RESULTS: Record<string, SoloResults> = {
   attachment_style: attachmentStyleResults,
   am_i_problem: amITheProblemResults,
+  shadow_self: shadowSelfResults,
 };
 
 // Categorical modules resolve the dominant dimension to its localized label — the

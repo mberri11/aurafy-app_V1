@@ -26,24 +26,6 @@ export function lightTap(): void {
   }
 }
 
-export function mediumTap(): void {
-  try {
-    if (!isHapticsEnabled()) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  } catch {
-    // silent
-  }
-}
-
-export function heavyTap(): void {
-  try {
-    if (!isHapticsEnabled()) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-  } catch {
-    // silent
-  }
-}
-
 export function successNotification(): void {
   try {
     if (!isHapticsEnabled()) return;

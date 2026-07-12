@@ -48,9 +48,11 @@ export function initAds(): void {
         logger.error('UMP consent flow failed (continuing to init ads):', err);
       }
 
-      await mobileAds().initialize();
-      // 16+ content rating — matches the app's store listing.
+      // 16+ content rating — matches the app's store listing. Google requires the
+      // request configuration to be set BEFORE initialize() so the very first ad
+      // requests already honor it.
       mobileAds().setRequestConfiguration({ maxAdContentRating: 'T' });
+      await mobileAds().initialize();
       logger.log('AdMob initialized');
       // Preload the imperative rewarded/interstitial units now that the SDK is
       // ready. Lazy require avoids a static import cycle (AdMobManager imports

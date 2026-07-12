@@ -77,23 +77,28 @@ export const MODULES: Module[] = [
     comingSoon: true,
   },
   {
-    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    // Star-unlocked module (30★) — LIVE (content shipped 2026-07-12). Warm scarlet
+    // "warning" accent (warmed from pure red 2026-07-12 — read cool on the loader),
+    // distinct from who_hates_me's pink and who_cut_off's orange. Matches
+    // MODULE_THEMES.who_will_hurt_me.
     id: 'who_will_hurt_me',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '🔒',
-    color: '#6E7290',
-    framework: 'mixed',
-    comingSoon: true,
+    icon: '🥀',
+    color: '#F0563C',
+    framework: 'sociometry',
+    unlockCost: 30,
   },
   {
-    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    // Star-unlocked module (25★). See who_will_hurt_me above — flip `comingSoon` off when
+    // content is in and the buyable pill + unlock gate activate.
     id: 'red_green_flag',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
     icon: '🔒',
     color: '#6E7290',
     framework: 'mixed',
+    unlockCost: 25,
     comingSoon: true,
   },
   // SELF-DISCOVERY MODULES (solo)
@@ -135,14 +140,15 @@ export const MODULES: Module[] = [
     comingSoon: true,
   },
   {
-    // Placeholder — locked "Coming soon" card on Home (no reading content yet).
+    // Star-unlocked module (30★) — LIVE (content shipped 2026-07-12). Jungian shadow-work
+    // solo read; twilight indigo, persona-masks icon. Matches MODULE_THEMES.shadow_self.
     id: 'shadow_self',
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
-    icon: '🔒',
-    color: '#6E7290',
+    icon: '🎭',
+    color: '#6366F1',
     framework: 'mixed',
-    comingSoon: true,
+    unlockCost: 30,
   },
   {
     // Placeholder — locked "Coming soon" card on Home (no reading content yet).

@@ -1,4 +1,7 @@
-// TODO: expand to 365 questions before production
+// NOTE: the weekly curriculum walker (WEEKLY_CURRICULUM_ENABLED) is the PRIMARY daily
+// source — it loops back to week 1 after week 8. The legacy 10-question hash pool below
+// is the fallback only if WEEKS is ever emptied (or the flag is turned off). Expanding
+// that pool is a v1.1+ content task, NOT a production requirement.
 import { LocalizedString } from '../types';
 import { localDateKey } from '../content/articles/dailyInsight';
 // C-10 PILOT — curriculum walker + Week 1's 7 paired questions.
@@ -315,7 +318,8 @@ export const dailyQuestions: DailyQuestion[] = [
   ...w07Questions,
   // C-10 — Week 8's 7 daily-ritual questions (paired to its 7 articles via the walker).
   ...w08Questions,
-  // TODO: add 306 more daily questions before production
+  // Weeks 1–8 loop via the curriculum walker; more weeks land as v1.1+ content.
+  // No expansion needed for production — the legacy pool above is fallback-only.
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

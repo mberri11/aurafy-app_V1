@@ -36,11 +36,9 @@ const WEEKLY_CYAN = '#22D3EE'; // weekly entries use a constant brand-cyan treat
 // ── Reading card (category-themed) ───────────────────────────────────────────
 const ReadingHistoryCard = memo(function ReadingHistoryCard({
   reading,
-  gid,
   onPress,
 }: {
   reading: Reading;
-  gid: string;
   onPress: () => void;
 }) {
   const theme = useTheme();
@@ -59,7 +57,13 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
   // One localized line ("{name} — {pct}% confidence") so each locale controls the
   // separator and word order (Arabic: "… — ثقة ٪…"). Split on the interpolated name
   // to keep the name emphasized (serif/bright) without any hardcoded " — ".
-  const titleLine = t('history.titleLine', { name, pct: reading.result.confidence });
+  // Count readings (a relationship module read solo — signalTotal is set) never claimed
+  // confidence-in-a-verdict, so History matches the result screen's "signal" language.
+  const isCountReading = reading.result.signalTotal != null;
+  const titleLine = t(isCountReading ? 'history.titleLineSignal' : 'history.titleLine', {
+    name,
+    pct: reading.result.confidence,
+  });
   const nameAt = titleLine.indexOf(name);
   const beforeName = nameAt >= 0 ? titleLine.slice(0, nameAt) : '';
   const afterName = nameAt >= 0 ? titleLine.slice(nameAt + name.length) : '';
@@ -72,22 +76,27 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
       accessibilityRole="button"
       accessibilityLabel={`${name} — ${moduleLabel}, ${date}`}
     >
-      <View style={[styles.card, { borderColor: `${accent}33`, backgroundColor: theme.surface }]}>
-        {/* Soft category bloom rising from behind the icon. */}
+      <View style={[styles.card, { borderColor: `${accent}59`, backgroundColor: theme.surface }]}>
+        {/* ONE flat accent wash over the whole card — a uniform tint on every pixel, so the
+            right side and bottom read exactly as coloured as the icon side (no one-sided
+            bloom that leaves the far corners dark). */}
+        <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: `${accent}1F` }]} />
+        {/* Small soft accent glow hugging the icon side — the little colored halo near the
+            module icon (kept from the earlier design), layered gently over the even wash. */}
         <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
           <Defs>
-            <RadialGradient id={gid} cx={isRTL ? '87%' : '13%'} cy="50%" r="58%">
-              <Stop offset="0%" stopColor={accent} stopOpacity={0.2} />
+            <RadialGradient id={`hg-${reading.id}`} cx={isRTL ? '86%' : '14%'} cy="50%" r="30%">
+              <Stop offset="0%" stopColor={accent} stopOpacity={0.4} />
               <Stop offset="100%" stopColor={accent} stopOpacity={0} />
             </RadialGradient>
           </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gid})`} />
+          <Rect x="0" y="0" width="100%" height="100%" fill={`url(#hg-${reading.id})`} />
         </Svg>
         {/* Glowing left-edge accent bar. */}
         <View style={[styles.leftBar, { backgroundColor: accent }]} />
 
         <View style={styles.cardRow}>
-          <View style={[styles.tile, { backgroundColor: `${accent}1A`, borderColor: `${accent}40` }]}>
+          <View style={[styles.tile, { backgroundColor: `${accent}26`, borderColor: `${accent}55` }]}>
             <CategoryMotif moduleId={reading.moduleId} size={rs(26)} />
           </View>
           <View style={styles.cardContent}>
@@ -118,17 +127,14 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
 // ── Weekly card (distinct cyan/brand treatment) ──────────────────────────────
 const WeeklyHistoryCard = memo(function WeeklyHistoryCard({
   entry,
-  gid,
   onPress,
 }: {
   entry: WeeklyHistoryEntry;
-  gid: string;
   onPress: () => void;
 }) {
   const theme = useTheme();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as Language;
-  const isRTL = useIsRTL();
 
   const week = getWeekById(entry.weekId);
   const outcome = week?.outcomes.find((o) => o.key === entry.outcomeKey);
@@ -143,15 +149,8 @@ const WeeklyHistoryCard = memo(function WeeklyHistoryCard({
       accessibilityLabel={`${title} — ${t('history.weeklyEyebrow')}`}
     >
       <View style={[styles.card, { borderColor: `${WEEKLY_CYAN}40`, backgroundColor: theme.surface }]}>
-        <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
-          <Defs>
-            <RadialGradient id={gid} cx={isRTL ? '78%' : '22%'} cy="0%" r="75%">
-              <Stop offset="0%" stopColor={WEEKLY_CYAN} stopOpacity={0.18} />
-              <Stop offset="100%" stopColor={WEEKLY_CYAN} stopOpacity={0} />
-            </RadialGradient>
-          </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gid})`} />
-        </Svg>
+        {/* Flat weekly-cyan wash over the whole card — uniform, corner to corner. */}
+        <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: `${WEEKLY_CYAN}1F` }]} />
         <View style={[styles.leftBar, { backgroundColor: WEEKLY_CYAN }]} />
 
         {/* 7-DAY badge, pinned top-right. */}
@@ -244,15 +243,11 @@ export default function HistoryScreen() {
   }, []);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: Row; index: number }) =>
+    ({ item }: { item: Row }) =>
       item.kind === 'weekly' ? (
-        <WeeklyHistoryCard entry={item.entry} gid={`hw${index}`} onPress={() => handleWeeklyPress(item.entry)} />
+        <WeeklyHistoryCard entry={item.entry} onPress={() => handleWeeklyPress(item.entry)} />
       ) : (
-        <ReadingHistoryCard
-          reading={item.reading}
-          gid={`hr${index}`}
-          onPress={() => handleReadingPress(item.reading)}
-        />
+        <ReadingHistoryCard reading={item.reading} onPress={() => handleReadingPress(item.reading)} />
       ),
     [handleReadingPress, handleWeeklyPress],
   );
@@ -300,7 +295,7 @@ const styles = StyleSheet.create({
   },
   // `start` (not `left`) so the accent bar follows the icon side — physical left in
   // LTR, physical right in RTL — auto-mirrored by the native layout.
-  leftBar: { position: 'absolute', start: 0, top: 0, bottom: 0, width: rs(3) },
+  leftBar: { position: 'absolute', start: 0, top: 0, bottom: 0, width: rs(4) },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: rs(14) },
   tile: {
     width: rs(52),

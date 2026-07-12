@@ -31,6 +31,7 @@ import { MODULES } from '@/src/data/modules';
 import { scoreReading } from '@/src/engine/scoringEngine';
 import {
   generateCategoricalResult,
+  generateCountResult,
   generateMultiResult,
   generateSoloResult,
 } from '@/src/engine/resultGenerator';
@@ -44,6 +45,15 @@ import { playLoop, stopLoop } from '@/src/utils/sound';
 
 // Map moduleId → results
 import { whoLovesMeResults } from '@/src/data/results/whoLovesMeResults';
+import { whoLovesMeCountResults } from '@/src/data/results/whoLovesMeCount';
+import { whoHatesMeCountResults } from '@/src/data/results/whoHatesMeCount';
+import { whoJealousCountResults } from '@/src/data/results/whoJealousCount';
+import { whoSoulmateCountResults } from '@/src/data/results/whoSoulmateCount';
+import { whoAdmiresCountResults } from '@/src/data/results/whoAdmiresCount';
+import { energyReadingCountResults } from '@/src/data/results/energyReadingCount';
+import { whoCutOffCountResults } from '@/src/data/results/whoCutOffCount';
+import { whoWillHurtMeResults } from '@/src/data/results/whoWillHurtMeResults';
+import { whoWillHurtMeCountResults } from '@/src/data/results/whoWillHurtMeCount';
 import { whoHatesMeResults } from '@/src/data/results/whoHatesMeResults';
 import { whoJealousResults } from '@/src/data/results/whoJealousResults';
 import { whoSoulmateResults } from '@/src/data/results/whoSoulmateResults';
@@ -51,9 +61,10 @@ import { whoAdmiresResults } from '@/src/data/results/whoAdmiresResults';
 import { energyReadingResults } from '@/src/data/results/energyReadingResults';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
+import { shadowSelfResults } from '@/src/data/results/shadowSelfResults';
 import { whoCutOffResults } from '@/src/data/results/whoCutOffResults';
 import { auraColorResults } from '@/src/data/results/auraColorResults';
-import { CategoricalResults, MultiResults, SoloResults } from '@/src/types';
+import { CategoricalResults, CountResults, MultiResults, SoloResults } from '@/src/types';
 
 import { whoLovesMeQuestions } from '@/src/data/questions/whoLovesMe';
 import { whoHatesMeQuestions } from '@/src/data/questions/whoHatesMe';
@@ -64,6 +75,8 @@ import { energyReadingQuestions } from '@/src/data/questions/energyReading';
 import { attachmentStyleQuestions } from '@/src/data/questions/attachmentStyle';
 import { amITheProblemQuestions } from '@/src/data/questions/amITheProblem';
 import { whoCutOffQuestions } from '@/src/data/questions/whoCutOff';
+import { whoWillHurtMeQuestions } from '@/src/data/questions/whoWillHurtMe';
+import { shadowSelfQuestions } from '@/src/data/questions/shadowSelf';
 import { auraColorQuestions } from '@/src/data/questions/auraColor';
 import { Question } from '@/src/types';
 
@@ -77,6 +90,8 @@ const QUESTIONS_MAP: Record<string, Question[]> = {
   attachment_style: attachmentStyleQuestions,
   am_i_problem: amITheProblemQuestions,
   who_cut_off: whoCutOffQuestions,
+  who_will_hurt_me: whoWillHurtMeQuestions,
+  shadow_self: shadowSelfQuestions,
   aura_color: auraColorQuestions,
 };
 
@@ -88,11 +103,28 @@ const MULTI_RESULTS_MAP: Record<string, MultiResults> = {
   who_admires: whoAdmiresResults,
   energy_reading: energyReadingResults,
   who_cut_off: whoCutOffResults,
+  who_will_hurt_me: whoWillHurtMeResults,
 };
 
 const SOLO_RESULTS_MAP: Record<string, SoloResults> = {
   attachment_style: attachmentStyleResults,
   am_i_problem: amITheProblemResults,
+  shadow_self: shadowSelfResults,
+};
+
+// A `multi` module read in SOLO mode uses a COUNT result (signs-present tiers about the
+// one person) instead of the winner-race MultiResults. All 8 multi modules are migrated;
+// each file carries its own polarity (love/soulmate/admires/energy: high = good news;
+// hates/jealous/cut_off/will_hurt: high = the warning, none = the relief).
+const COUNT_RESULTS_MAP: Record<string, CountResults> = {
+  who_loves_me: whoLovesMeCountResults,
+  who_hates_me: whoHatesMeCountResults,
+  who_jealous: whoJealousCountResults,
+  who_soulmate: whoSoulmateCountResults,
+  who_admires: whoAdmiresCountResults,
+  energy_reading: energyReadingCountResults,
+  who_cut_off: whoCutOffCountResults,
+  who_will_hurt_me: whoWillHurtMeCountResults,
 };
 
 // Categorical modules keep their own map — CategoricalResults' shape (categories +
@@ -346,6 +378,18 @@ export default function LoadingScreen() {
     if (module?.resultKind === 'categorical') {
       const cr = CATEGORICAL_RESULTS_MAP[moduleId ?? ''];
       finalResult = cr ? generateCategoricalResult(rawResult, cr, seed) : rawResult;
+    } else if (moduleType === 'multi' && mode === 'solo') {
+      // Relationship module read solo → count (signs present), not a winner race. Only
+      // MIGRATED modules are in COUNT_RESULTS_MAP; a miss falls back to the OLD
+      // generateMultiResult path so untested modules keep their exact pre-fix behavior
+      // (NOT rawResult, which would strand them with empty insights).
+      const cr = COUNT_RESULTS_MAP[moduleId ?? ''];
+      if (cr) {
+        finalResult = generateCountResult(rawResult, cr, seed);
+      } else {
+        const mr = MULTI_RESULTS_MAP[moduleId ?? ''];
+        finalResult = mr ? generateMultiResult(rawResult, mr, seed) : rawResult;
+      }
     } else if (moduleType === 'multi') {
       const mr = MULTI_RESULTS_MAP[moduleId ?? ''];
       finalResult = mr ? generateMultiResult(rawResult, mr, seed) : rawResult;

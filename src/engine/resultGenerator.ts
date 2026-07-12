@@ -1,5 +1,5 @@
-import { ResultData, MultiResults, SoloResults, CategoricalResults, LocalizedString } from '../types';
-import { selectInsights } from './insightSelector';
+import { ResultData, MultiResults, SoloResults, CategoricalResults, CountResults, CountTier, LocalizedString } from '../types';
+import { selectInsights, selectInsightsFlat } from './insightSelector';
 import { joinNames, localizeTemplate, localizeTemplateLocalized } from './scoringEngine';
 
 /**
@@ -49,6 +49,38 @@ function stripNamePlaceholder(template: LocalizedString): LocalizedString {
     fr: strip(template.fr),
     ar: strip(template.ar),
     es: strip(template.es),
+  };
+}
+
+/**
+ * A `multi` module read in SOLO mode → tier the honest signal share (signalCount/
+ * signalTotal, already computed by scoreCount) into a DESCRIPTIVE headline about the one
+ * subject — never a "winner" statement. Returns the same shape as generateMultiResult
+ * (insights[0] = headline sentence, shareLine on the card), so the result screen renders
+ * it with no special-casing beyond the count branch there.
+ */
+export function generateCountResult(
+  result: ResultData,
+  moduleResults: CountResults,
+  seed: number,
+): ResultData {
+  const total = result.signalTotal ?? 0;
+  const share = total > 0 ? (result.signalCount ?? 0) / total : 0;
+  // 'none' (<= 0.1) catches 0/20, 1/20, 2/20 — the "rarely on basically everything" read
+  // that must stay unambiguous, not softened. Insights are TIER-keyed, so a low/zero read
+  // never draws affirming copy.
+  const tier: CountTier =
+    share <= 0.1 ? 'none' : share < 0.4 ? 'low' : share < 0.7 ? 'medium' : 'high';
+  // {name} = the single solo subject (ResultData.winner holds that one person on this
+  // path — only the TEMPLATE changes, from a contest statement to a descriptive one).
+  const headline = localizeTemplate(moduleResults.tiers[tier], result.winner?.name ?? '');
+  const insights = selectInsightsFlat(moduleResults.insights[tier], seed);
+
+  return {
+    ...result,
+    isCountResult: true,
+    insights: [headline, ...insights],
+    shareLine: moduleResults.shareLines[tier],
   };
 }
 

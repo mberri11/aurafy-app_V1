@@ -5,7 +5,6 @@ import type {
 
 import { AD_UNIT_IDS } from '@/src/config/ads';
 import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
-import { noteRewardedShown } from '@/src/ads/interstitialGate';
 import { logger } from '../utils/logger';
 
 /**
@@ -60,7 +59,11 @@ class AdMobManagerClass {
         this.rewardedLoaded = true;
       });
       ad.addAdEventListener(AdEventType.ERROR, (err: unknown) => {
-        logger.error('Rewarded load failed:', err);
+        // A failed LOAD (no fill / offline / network blip) is expected and already
+        // handled gracefully: `rewardedLoaded` stays false, showRewarded() returns false
+        // and callers fall back to the 1★ path. So it's a WARN, not an error — don't
+        // spam a red log / LogBox for a normal operational condition.
+        logger.warn('Rewarded load unavailable (will retry):', err);
         this.rewardedLoaded = false;
       });
       ad.load();
@@ -100,7 +103,11 @@ class AdMobManagerClass {
         subs.push(ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
           earned = true;
           // Suppress the frequency-capped interstitial so it never stacks with this
-          // rewarded ad in the same transition.
+          // rewarded ad in the same transition. Lazy require: interstitialGate imports
+          // AdMobManager (to show the ad), so a static import here closes a require
+          // cycle (Metro WARN, risk of uninitialized values) — same discipline as lib().
+          const { noteRewardedShown } =
+            require('@/src/ads/interstitialGate') as typeof import('@/src/ads/interstitialGate');
           noteRewardedShown();
         }));
         subs.push(ad.addAdEventListener(AdEventType.CLOSED, () => finish(earned)));
@@ -131,7 +138,10 @@ class AdMobManagerClass {
         this.interstitialLoaded = true;
       });
       ad.addAdEventListener(AdEventType.ERROR, (err: unknown) => {
-        logger.error('Interstitial load failed:', err);
+        // Same as rewarded: a failed load is expected/transient (no fill, offline). The
+        // interstitial simply won't show this cycle; showInterstitial() returns false and
+        // the flow continues. WARN, not error.
+        logger.warn('Interstitial load unavailable (will retry):', err);
         this.interstitialLoaded = false;
       });
       ad.load();

@@ -58,13 +58,3 @@ export function getDailyInsightId(
   const idx = hashString(localDateKey(date)) % pool.length;
   return pool[idx].id;
 }
-
-/** The full Article record for today's featured pick (convenience). */
-export function getDailyInsight(
-  anchor: number | null,
-  date: Date = new Date(),
-  articles: Article[] = ARTICLES,
-): Article | undefined {
-  const id = getDailyInsightId(anchor, date, articles);
-  return articles.find((a) => a.id === id);
-}

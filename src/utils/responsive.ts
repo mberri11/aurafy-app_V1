@@ -30,4 +30,3 @@ export function rs(size: number): number {
 }
 
 export const screenWidth = SCREEN_WIDTH;
-export const scaleFactor = FACTOR;

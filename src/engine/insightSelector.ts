@@ -22,6 +22,22 @@ export function selectInsights(
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
+/**
+ * Selects `count` non-repeating insights from a FLAT pool (already resolved to a single
+ * list — e.g. the count path's tier pool), with the same seeded shuffle as selectInsights
+ * so a reading is stable on replay. Kept separate so callers with a flat pool don't have
+ * to fake a dimension key.
+ */
+export function selectInsightsFlat(
+  pool: LocalizedString[],
+  seed: number,
+  count = 3,
+): LocalizedString[] {
+  if (pool.length === 0) return [];
+  const shuffled = seededShuffle(pool, seed);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
 /** Fisher-Yates shuffle with a simple linear congruential generator seed */
 function seededShuffle<T>(arr: T[], seed: number): T[] {
   const result = [...arr];

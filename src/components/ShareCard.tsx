@@ -130,16 +130,10 @@ export default function ShareCard(props: ShareCardProps) {
         style={[styles.sparkle, { bottom: 200, left: 40, opacity: 0.45 }]}
       />
 
-      {/* Header: atom mark + wordmark */}
-      <View style={styles.header}>
-        <AurafyLogo size={32} />
-        <Text latin style={styles.wordmark}>
-          Aurafy
-        </Text>
-      </View>
-
-      {/* Center block */}
-      <View style={[styles.center, { top: isReading ? 250 : 162 }]}>
+      {/* Center hero — eyebrow / name / verdict / quote, centered as ONE group in the
+          space between the top and the brand footer (even spacing above and below, so
+          nothing clusters high and no void opens up in the middle). */}
+      <View style={styles.center}>
         {!isReading && (
           <Svg width={150} height={92} style={styles.venn}>
             <Circle cx={56} cy={46} r={42} stroke={accent} strokeWidth={1.2} fill="none" opacity={0.85} />
@@ -169,24 +163,26 @@ export default function ShareCard(props: ShareCardProps) {
         {isReading && !!props.verdictLine && (
           <Text style={styles.verdict}>{props.verdictLine}</Text>
         )}
+        {/* Pull-quote (readings saved before shareLines shipped have none — hide) */}
+        {!!props.quote && (
+          <Text style={[styles.quote, { color: soft }]}>{`“${props.quote}”`}</Text>
+        )}
       </View>
 
-      {/* Pull-quote (readings saved before shareLines shipped have none — hide) */}
-      {!!props.quote && (
-        <Text style={[styles.quote, { color: soft }]}>{`“${props.quote}”`}</Text>
-      )}
-
-      {/* CTA pill + watermark */}
-      <View style={styles.ctaWrap}>
-        <View style={styles.cta}>
-          <Text style={styles.ctaText}>
-            {isReading ? t('shareCard.ctaReading') : t('shareCard.ctaWeekly')}
+      {/* Single brand footer — atom mark + wordmark, @aurafy.app beneath, then the
+          "Get your reading" tagline. The one piece of branding on the card. */}
+      <View style={styles.brandFooter}>
+        <View style={styles.brandRow}>
+          <AurafyLogo size={22} />
+          <Text latin style={styles.brandWordmark}>
+            Aurafy
           </Text>
         </View>
+        <Text latin style={styles.brandHandle}>
+          {t('shareCard.watermark')}
+        </Text>
+        <Text style={styles.brandTagline}>{t('share.getYours')}</Text>
       </View>
-      <Text latin style={styles.watermark}>
-        {t('shareCard.watermark')}
-      </Text>
     </View>
   );
 }
@@ -199,20 +195,23 @@ const styles = StyleSheet.create({
   },
   sparkle: { position: 'absolute' },
 
-  header: { position: 'absolute', top: 38, left: 0, right: 0, alignItems: 'center' },
-  wordmark: {
-    marginTop: 6,
-    fontSize: 17,
-    fontFamily: 'PlayfairDisplay_600SemiBold',
-    color: '#FFFFFF',
+  // Hero group occupies the whole band between the top and the footer, centered — its
+  // top/bottom insets leave even breathing room above and below so nothing clusters high.
+  center: {
+    position: 'absolute',
+    top: 96,
+    bottom: 168,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
-
-  center: { position: 'absolute', left: 0, right: 0, alignItems: 'center', paddingHorizontal: 24 },
   venn: { marginBottom: 16 },
   eyebrowRow: { flexDirection: 'row', alignItems: 'center' },
   eyebrowStar: { marginEnd: 6 },
   eyebrow: {
-    fontSize: 10,
+    fontSize: 11.5,
     fontFamily: 'HankenGrotesk_600SemiBold',
     letterSpacing: 2.4,
     textTransform: 'uppercase',
@@ -249,11 +248,11 @@ const styles = StyleSheet.create({
     maxWidth: SHARE_CARD_W - 64,
   },
 
+  // Flows under the verdict inside the centered group (was an absolute strip that left a
+  // void between it and the content above).
   quote: {
-    position: 'absolute',
-    top: 486,
-    left: 40,
-    right: 40,
+    marginTop: 20,
+    paddingHorizontal: 16,
     fontSize: 16,
     lineHeight: 23,
     fontFamily: 'PlayfairDisplay_400Regular_Italic',
@@ -261,24 +260,30 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
 
-  ctaWrap: { position: 'absolute', top: 554, left: 0, right: 0, alignItems: 'center' },
-  cta: {
-    paddingVertical: 9,
-    paddingHorizontal: 20,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.16)',
-    backgroundColor: 'rgba(255,255,255,0.07)',
-  },
-  ctaText: { fontSize: 13, fontFamily: 'HankenGrotesk_600SemiBold', color: '#FFFFFF' },
-  watermark: {
+  brandFooter: {
     position: 'absolute',
-    top: 601,
+    bottom: 46,
     left: 0,
     right: 0,
-    textAlign: 'center',
-    fontSize: 11,
+    alignItems: 'center',
+  },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5 },
+  brandWordmark: {
+    fontSize: 20,
+    fontFamily: 'PlayfairDisplay_600SemiBold',
+    color: '#FFFFFF',
+  },
+  brandHandle: {
+    fontSize: 12,
+    letterSpacing: 0.3,
     fontFamily: 'HankenGrotesk_500Medium',
-    color: 'rgba(255,255,255,0.45)',
+    color: 'rgba(255,255,255,0.5)',
+  },
+  brandTagline: {
+    marginTop: 6,
+    fontSize: 11.5,
+    letterSpacing: 0.4,
+    fontFamily: 'HankenGrotesk_500Medium',
+    color: 'rgba(255,255,255,0.5)',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -20,6 +20,7 @@ import GradientButton from '@/src/components/GradientButton';
 import GlassCard from '@/src/components/GlassCard';
 import StarsBadge from '@/src/components/StarsBadge';
 import ModuleIcon from '@/src/components/ModuleIcon';
+import ModuleUnlockDialog from '@/src/components/ModuleUnlockDialog';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
 
@@ -30,14 +31,24 @@ export default function ModuleDetailScreen() {
   const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const stars = useUserStore((s) => s.stars);
+  const unlockedModules = useUserStore((s) => s.unlockedModules);
+  const unlockModule = useUserStore((s) => s.unlockModule);
+  const [showUnlock, setShowUnlock] = useState(false);
 
   const module = useMemo(() => MODULES.find((m) => m.id === id), [id]);
+
+  // Locked-but-buyable gate: a paid module (unlockCost) not yet in unlockedModules. Begin
+  // opens the unlock dialog instead of the flow; a deep link straight to this screen still
+  // hits the gate (the two downstream flow screens bounce back here — see their guards).
+  const locked = module?.unlockCost != null && !unlockedModules.includes(module.id);
 
   const handleStarsPress = useCallback(() => {
     router.push('/(tabs)/stars');
   }, []);
 
-  const handleBeginReading = useCallback(() => {
+  // The actual entry into the reading flow, shared by Begin (when unlocked) and by a
+  // successful unlock (so the purchase flows straight into first use).
+  const enterFlow = useCallback(() => {
     if (!module) return;
     if (module.type === 'solo') {
       // Skip reading mode for solo modules — go directly to person entry
@@ -46,6 +57,22 @@ export default function ModuleDetailScreen() {
       router.push({ pathname: '/reading-mode', params: { moduleId: module.id } });
     }
   }, [module]);
+
+  const handleBeginReading = useCallback(() => {
+    if (!module) return;
+    if (module.unlockCost != null && !unlockedModules.includes(module.id)) {
+      setShowUnlock(true);
+      return;
+    }
+    enterFlow();
+  }, [module, unlockedModules, enterFlow]);
+
+  const handleConfirmUnlock = useCallback(() => {
+    if (!module || module.unlockCost == null) return;
+    const ok = unlockModule(module.id, module.unlockCost);
+    setShowUnlock(false);
+    if (ok) enterFlow(); // straight into first use
+  }, [module, unlockModule, enterFlow]);
 
   if (!module) {
     // Bad/stale module id (e.g. a deep link) — offer a way out instead of a dead end.
@@ -258,6 +285,23 @@ export default function ModuleDetailScreen() {
           bold
         />
       </View>
+
+      {/* Unlock gate for a paid module — spend → straight into the reading flow. */}
+      <ModuleUnlockDialog
+        visible={showUnlock && locked}
+        moduleId={module.id}
+        moduleName={t(`modules.${module.id}.title`)}
+        moduleIcon={module.icon}
+        color={module.color}
+        cost={module.unlockCost ?? 0}
+        balance={stars}
+        onConfirm={handleConfirmUnlock}
+        onNeedMore={() => {
+          setShowUnlock(false);
+          router.push('/(tabs)/stars');
+        }}
+        onClose={() => setShowUnlock(false)}
+      />
     </View>
   );
 }

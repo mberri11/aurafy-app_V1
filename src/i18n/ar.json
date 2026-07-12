@@ -9,19 +9,11 @@
     "begin": "ابدأ",
     "continue": "متابعة",
     "back": "رجوع",
-    "share": "مشاركة",
-    "save": "حفظ",
-    "retry": "حاول مجدداً",
     "cancel": "إلغاء",
     "cannotBeUndone": "لا يمكن التراجع",
-    "later": "لاحقًا",
-    "confirm": "تأكيد",
-    "close": "إغلاق",
     "skip": "تخطي",
-    "tap": "اضغط",
     "ok": "حسناً",
-    "done": "تم",
-    "adBadge": "إعلان"
+    "done": "تم"
   },
   "splash": {
     "tagline": "فك شفرة الطاقة من حولك",
@@ -52,16 +44,11 @@
     "earnDailyLabel": "يومي",
     "earnDailyAmount": "+1 يومياً",
     "earnWatchLabel": "شاهد",
-    "earnWatchAmount": "+2 لكل إعلان",
-    "beginButton": "ابدأ رحلتي",
-    "earnStars": "اكسب نجوماً",
-    "spendStars": "أنفق نجوماً",
-    "dailyBonus": "المكافأة اليومية"
+    "earnWatchAmount": "+2 لكل إعلان"
   },
   "home": {
     "heroEyebrow": "سؤال هذه الليلة",
     "heroTitle": "ماذا تريد أن تكتشف؟",
-    "dailyReady": "سؤالك المجاني لليوم جاهز",
     "tryFree": "جرّب مجاناً",
     "comingSoon": "قريباً",
     "sectionRelationships": "العلاقات",
@@ -165,13 +152,23 @@
       "subtitle": "قريباً"
     },
     "who_will_hurt_me": {
-      "title": "من سيجرحني؟"
+      "title": "من سيجرحني؟",
+      "subtitle": "اقرأ علامات التحذير مبكرًا",
+      "description": "تحليل سوسيومتري لأنماط الخطر على الثقة في محيطك — أسرار مسرّبة، ومعروف مُحصى، وحدود مُختبرة — ومن يحملها.",
+      "poweredBy": "السوسيومتري",
+      "time": "٥–٧ دقائق",
+      "cost": "من ١"
     },
     "red_green_flag": {
       "title": "علامة حمراء أم خضراء؟"
     },
     "shadow_self": {
-      "title": "الجانب الخفي"
+      "title": "الجانب الخفي",
+      "subtitle": "قابل الجانب الذي تخفيه",
+      "description": "عشرون سؤالًا مبنية على «عمل الظل» عند يونغ تكشف كم تملك من جانبك الخفي — وكم منه لا يزال يتكلم من خلالك دون أن تلاحظ.",
+      "poweredBy": "علم النفس اليونغي",
+      "time": "٥–٧ دقائق",
+      "cost": "١"
     },
     "inner_child": {
       "title": "الطفل الداخلي"
@@ -206,7 +203,6 @@
   },
   "quiz": {
     "progressLabel": "{{current}} / {{total}}",
-    "tapToAnswer": "اضغط للاختيار",
     "noQuestions": "لا توجد أسئلة متاحة",
     "leaveTitle": "مغادرة هذه القراءة؟",
     "leaveMessagePaid": "لن يُحفَظ تقدّمك. ستُعاد نجومك إلى رصيدك ({{cost}} ✦).",
@@ -268,15 +264,12 @@
   },
   "result": {
     "notFound": "لم يتم العثور على نتيجة.",
-    "confidenceLabel": "{{confidence}}% ثقة",
     "confidenceHeadline": "نحن واثقون من هذه القراءة بنسبة {{confidence}}%.",
     "confidenceSub": "أعلى من {{pct}}% من قراءاتك.",
     "lockedEyebrow": "ما زال محجوبًا",
     "lockedBody": "ما يعنيه هذا، والصورة الكاملة، وبطاقة المشاركة — على بُعد حجاب واحد.",
     "unlockWatch": "شاهد للفتح",
     "unlockStar": "ارفعه الآن",
-    "attachmentStyle": "ديناميكية التعلق",
-    "loveLanguage": "إشارة لغة الحب",
     "shareButton": "شارك هذه القراءة",
     "saveButton": "حفظ والخروج",
     "retryButton": "جرب قراءة أخرى",
@@ -284,40 +277,30 @@
     "insightPrefix": "✦",
     "comparison": "الصورة الكاملة",
     "theRead": "الخلاصة",
-    "whatThisMeans": "ماذا يعني هذا"
+    "whatThisMeans": "ماذا يعني هذا",
+    "count": {
+      "aboutEyebrow": "عن {{name}}",
+      "signsRatio": "{{count}} من {{total}} علامة ظاهرة",
+      "signalStrength": "قوة الإشارة: {{confidence}}%"
+    }
   },
   "stars": {
     "walletTitle": "نجومك",
-    "balanceLabel": "{{balance}} نجوم",
     "earnTitle": "اكسب المزيد",
     "watchVideo": "شاهد مقطعاً",
-    "watchVideoAmount": "+١",
-    "dailyBonus": "المكافأة اليومية",
-    "dailyBonusAmount": "+٢",
     "streakBonus": "سلسلة ٧ أيام",
     "streakBonusAmount": "+٥",
-    "shareApp": "شارك Aurafy",
-    "shareAppAmount": "+١",
-    "watchNow": "شاهد الآن",
-    "claim": "احصل",
-    "share": "شارك",
-    "readyIn": "جاهز في {{hours}}س {{minutes}}د",
     "dayProgress": "اليوم {{streak}} من ٧",
     "activityTitle": "النشاط الأخير",
-    "earnReason": "مكتسب",
-    "spendReason": "منفق",
     "watchVideoDesc": "إعلان قصير، مكافأة فورية",
-    "dailyBonusDesc": "مرة كل يوم",
     "dailyQuestion": "السؤال اليومي",
     "dailyQuestionDesc": "أجب عن سؤال اليوم المجاني",
     "streakDesc": "حافظ على طقسك اليومي",
     "streakLabel": "سلسلة {{streak}} يوم",
-    "shareDesc": "ادعُ صديقاً للقراءة",
     "comeBack": "عُد بعد ٢٤ ساعة",
     "claimed": "تم الحصول",
     "earnedSuffix": "مكتسب",
     "reasonWatch": "شاهدت مقطعاً",
-    "reasonShare": "تمت مشاركة Aurafy",
     "reasonDaily": "المكافأة اليومية",
     "reasonInsight": "قراءة اليوم",
     "reasonWelcome": "هدية ترحيبية",
@@ -325,27 +308,25 @@
     "reasonRefund": "استرداد",
     "reasonStreak": "سلسلة ٧ أيام",
     "reasonUnlock": "فتح النتيجة",
-    "reasonTheme": "فتح سمة"
+    "reasonTheme": "فتح سمة",
+    "reasonModuleUnlock": "فتح وحدة"
   },
   "history": {
     "title": "قراءاتك",
     "emptyTitle": "قراءاتك ستعيش هنا",
     "emptyMessage": "كل اسم ولون ونمط تكتشفه يُحفظ هنا — خريطة خاصة لِما تعلّمته عن نفسك.",
     "ctaButton": "ابدأ قراءة",
-    "modeLabel": "قراءة {{mode}}",
-    "confidenceLine": "{{pct}}% ثقة",
     "titleLine": "{{name}} — ثقة {{pct}}٪",
+    "titleLineSignal": "{{name}} — إشارة {{pct}}٪",
     "weeklyEyebrow": "قراءة أسبوعية",
     "sevenDayBadge": "7 أيام",
-    "nights": "{{count}} ليالٍ · اكتمل في {{date}}",
-    "sponsored": "برعاية — يظهر عند الاتصال بالإنترنت"
+    "nights": "{{count}} ليالٍ · اكتمل في {{date}}"
   },
   "settings": {
     "title": "الإعدادات",
     "appearance": "المظهر",
     "theme": "السمة",
     "haptics": "ردود الفعل اللمسية",
-    "animations": "رسوم الخلفية",
     "language": "اللغة",
     "restartTitle": "إعادة التشغيل لتطبيق اللغة؟",
     "restartMessage": "يجب أن يُعيد Aurafy التشغيل لتطبيق اللغة الجديدة.",
@@ -364,10 +345,7 @@
     "resetConfirmMessage": "إعادة ضبط كاملة — النجوم والسجل والإعدادات والمقدمة ستُمحى كلها.",
     "resetConfirmAction": "إعادة تعيين الكل",
     "version": "Aurafy v1.0.0",
-    "soundAudio": "الصوت والنغمات",
     "soundEffectsDesc": "رنين عند اللمس، جرس عند الكشف",
-    "ambientAudio": "صوت محيطي",
-    "ambientAudioDesc": "خلفية هادئة أثناء القراءات",
     "volume": "مستوى الصوت",
     "notifications": "الإشعارات",
     "dailyReminder": "تذكير يومي",
@@ -382,8 +360,6 @@
     "autoCentering": "التمركز التلقائي",
     "autoCenteringDesc": "لحظة التنفس لمدة ثانيتين",
     "howAurafyWorks": "كيف يعمل Aurafy",
-    "howItWorksTitle": "كيف يعمل Aurafy",
-    "howItWorksMessage": "اختر وحدة، وأجب عن مجموعة قصيرة من الأسئلة الحدسية، ويحوّل Aurafy اختياراتك إلى قراءة. ترتبط الأسئلة بأطر حقيقية؛ والنتيجة تأمل، وليست تشخيصًا.",
     "termsOfUse": "شروط الاستخدام",
     "contactUs": "تواصل معنا",
     "contactBody": "مرحباً فريق Aurafy،\n\nشكراً لإنشائكم Aurafy! أردت التواصل معكم لتقديم اقتراح / سؤال:\n\n[ اكتب رسالتك هنا ]\n\n— أُرسلت من تطبيق Aurafy",
@@ -391,35 +367,17 @@
     "clearHistoryConfirmTitle": "مسح سجل القراءات؟",
     "clearHistoryConfirmMessage": "سيؤدي هذا إلى إزالة جميع القراءات المحفوظة. تبقى نجومك وإعداداتك.",
     "clearHistoryConfirmAction": "مسح السجل",
-    "exportReadings": "تصدير القراءات",
-    "exportEmpty": "لا توجد قراءات للتصدير بعد.",
     "madeWith": "صُنع بـ",
-    "selectMode": "الوضع الافتراضي",
     "selectTime": "وقت التذكير",
     "setTime": "ضبط الوقت"
   },
   "daily": {
     "title": "السؤال اليومي",
-    "dateFormat": "dddd، D MMMM",
-    "doneButton": "تم — أراك غداً",
-    "alreadyAnsweredTitle": "لقد أجبت اليوم بالفعل",
-    "alreadyAnsweredMessage": "عد غداً لسؤال جديد.",
-    "returnLabel": "عد غداً",
-    "streakBadge": "{{streak}} يوم متتالي",
-    "bonusClaimed": "+٢ تم الحصول عليهم!",
     "starEarned": "تم كسب نجمة",
     "balanceNow": "رصيدك الآن {{balance}} ✦",
-    "weekProgress": "اليوم {{day}} من 7 — كل إجابة تضيف إلى الصورة. أكمل الأسبوع لفتح قراءتك.",
     "comeBackTomorrow": "عُد غداً للمقال التالي.",
     "dayOf": "اليوم {{day}} من 7",
     "weekCaption": "كل إجابة تضيف إلى الصورة. أكمل الأسبوع لفتح قراءتك."
-  },
-  "errors": {
-    "notEnoughStars": "نجوم غير كافية — زر قسم النجوم لكسب المزيد",
-    "adFailed": "فشل تحميل الإعلان",
-    "adNotAvailable": "الإعلان غير متاح الآن",
-    "generic": "حدث خطأ ما. يرجى المحاولة مجدداً.",
-    "notEnoughStarsTitle": "نجوم غير كافية"
   },
   "personEntry": {
     "title": "من تقرأ؟",
@@ -428,14 +386,18 @@
     "addPerson": "أضف شخصاً",
     "startButton": "ابدأ القراءة — {{cost}}",
     "startFree": "ابدأ القراءة — مجاني",
-    "balanceAfter": "الرصيد بعد: {{balance}}",
-    "namePlaceholder": "أدخل الاسم...",
     "personPlaceholder": "الشخص {{n}}",
     "personNameA11y": "اسم الشخص {{n}}",
     "you": "أنت",
     "soloTitle": "هذه القراءة لك",
     "soloSubtitle": "أجب بصدق — أنت وحدك من سيراها.",
     "locked": "مقفل"
+  },
+  "moduleUnlock": {
+    "cost": "التكلفة",
+    "balance": "الرصيد",
+    "unlockForCost": "افتح مقابل {{cost}}",
+    "needMore": "تحتاج {{count}} أكثر"
   },
   "themeGallery": {
     "title": "السمات",
@@ -478,10 +440,6 @@
     "minRead": "{{n}} دقائق قراءة",
     "min": "{{n}} دقائق",
     "takeReading": "ابدأ قراءة {{module}}",
-    "claimReward": "احصل على +1 ✦",
-    "claimed": "تم الحصول",
-    "todaysReward": "مكافأة قراءة اليوم",
-    "open": "افتح",
     "empty": "لا توجد مقالات هنا بعد.",
     "sponsoredTitle": "اعثر على توأم روحك الليلة",
     "sponsoredBrand": "Astra · مواعدة",
@@ -495,7 +453,6 @@
       "jealousy": "غيرة",
       "zodiac": "الأبراج"
     },
-    "ritualLead": "اقرأ مقال هذا المساء، أجب عن السؤال بداخله، واكسب ✦ خاصتك.",
     "beginRead": "ابدأ قراءة الليلة",
     "stepRead": "اقرأ",
     "stepAnswer": "أجب",
@@ -510,9 +467,10 @@
     "save": "حفظ في السجل",
     "empty": "لا توجد نتيجة أسبوعية بعد."
   },
+  "share": {
+    "getYours": "اكتشف قراءتك"
+  },
   "shareCard": {
-    "ctaReading": "اكتشف قراءتك ←",
-    "ctaWeekly": "ابدأ أسبوعك ←",
     "weekEyebrow": "أسبوعي يتجلّى",
     "watermark": "@aurafy.app",
     "dialogTitle": "شارك قراءتك من Aurafy",
