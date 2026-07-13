@@ -17,7 +17,7 @@ import ModuleCard from '@/src/components/ModuleCard';
 import StarsBadge from '@/src/components/StarsBadge';
 import AurafyLogo from '@/src/components/AurafyLogo';
 import CosmicBloom from '@/src/components/CosmicBloom';
-import AdBanner from '@/src/ads/AdBanner';
+import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
 import FeaturedInsightCard from '@/src/screens/insights/components/FeaturedInsightCard';
 import { getArticle, getArticleContent, type Language } from '@/src/content/articles';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
@@ -163,12 +163,13 @@ export default function HomeScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + rs(100) }]}
-        ListFooterComponent={
-          // Anchored adaptive banner below the self modules — self-collapses in Expo
-          // Go and on load failure, so it never reserves dead space. (Phase-4 ads.)
-          <AdBanner style={styles.footerBanner} />
-        }
+        // The banner is no longer in the list: it's the persistent one above the tab
+        // bar (app/(tabs)/_layout.tsx). We only reserve room so the last module row
+        // can scroll clear of it.
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingBottom: insets.bottom + rs(100) + PERSISTENT_BANNER_RESERVE },
+        ]}
         ListHeaderComponent={
           <>
             {/* Hero question */}
@@ -259,5 +260,4 @@ const styles = StyleSheet.create({
   rowItem: {
     flex: 1,
   },
-  footerBanner: { marginTop: rs(12) },
 });

@@ -26,6 +26,7 @@ import { useUserStore } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import StarsBadge from '@/src/components/StarsBadge';
 import CosmicBloom from '@/src/components/CosmicBloom';
+import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
 import AdBanner from '@/src/ads/AdBanner';
 import {
   ARTICLES,
@@ -135,7 +136,13 @@ export default function InsightsScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + rs(100) }]}
+        // The feed-footer banner is gone — the app's anchored banner is now persistent
+        // above the tab bar (app/(tabs)/_layout.tsx). Only the in-feed SPONSORED slot
+        // stays. Padding reserves room so the last article clears the strip.
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingBottom: insets.bottom + rs(100) + PERSISTENT_BANNER_RESERVE },
+        ]}
         ListHeaderComponent={
           <>
             {dailyArticle && dailyContent ? (
@@ -195,11 +202,6 @@ export default function InsightsScreen() {
         ListEmptyComponent={
           <Text style={[styles.empty, { color: theme.textDim }]}>{t('insights.empty')}</Text>
         }
-        ListFooterComponent={
-          // Anchored banner at the feed footer (design note: "banner may sit at the
-          // feed footer"). Only under real rows; self-collapses in Expo Go / on failure.
-          listData.length > 0 ? <AdBanner style={styles.banner} /> : null
-        }
       />
     </View>
   );
@@ -250,7 +252,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: rs(40),
   },
-  banner: { marginTop: rs(16) },
   // In-feed banner occupies the old SPONSORED slot; match the article-card rhythm.
   inlineBanner: { marginBottom: rs(12) },
 });

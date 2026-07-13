@@ -1,8 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// AdBanner — anchored adaptive banner. Drop it at the bottom of a lingering screen
-// (Insights / History / Stars). It sizes itself to the screen width and collapses to
-// nothing if the ad fails to load, so layout never reserves dead space. Renders
-// nothing in Expo Go (no native module).
+// AdBanner — anchored adaptive banner placed INSIDE a screen's content. It sizes itself
+// to the screen width and collapses to nothing if the ad fails to load, so layout never
+// reserves dead space. Renders nothing in Expo Go (no native module).
+//
+// Only two callers left: the in-feed SPONSORED slot on Insights and the dev panel. The
+// bottom-of-screen banners the tab screens used to carry were replaced by ONE persistent
+// banner above the tab bar — src/components/PersistentBanner.tsx. Do not add a new
+// bottom banner to a tab screen; it would double up with that one.
 //
 // IMPORTANT: react-native-google-mobile-ads is require()d lazily, ONLY after the
 // ADS_AVAILABLE guard. A top-level import would run TurboModuleRegistry.getEnforcing()

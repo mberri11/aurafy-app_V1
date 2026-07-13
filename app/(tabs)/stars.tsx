@@ -24,7 +24,7 @@ import { useUserStore } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import GlassCard from '@/src/components/GlassCard';
 import CosmicBloom from '@/src/components/CosmicBloom';
-import AdBanner from '@/src/ads/AdBanner';
+import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
 import { AdMobManager } from '@/src/ads/AdMobManager';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
 import { rs } from '@/src/utils/responsive';
@@ -230,9 +230,14 @@ export default function StarsWalletScreen() {
       <CosmicBloom cx="50%" cy="9%" r="62%" />
       <ScrollView
         style={styles.container}
+        // Bottom padding reserves room for the persistent banner above the tab bar
+        // (app/(tabs)/_layout.tsx) so the last transaction row can scroll clear of it.
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + rs(18), paddingBottom: insets.bottom + rs(100) },
+          {
+            paddingTop: insets.top + rs(18),
+            paddingBottom: insets.bottom + rs(100) + PERSISTENT_BANNER_RESERVE,
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -342,10 +347,6 @@ export default function StarsWalletScreen() {
             </GlassCard>
           </>
         )}
-
-        {/* Anchored banner at the feed footer (linger screen — allowed per the ad
-            strategy). Collapses to nothing in Expo Go or on load failure. */}
-        <AdBanner style={styles.banner} />
       </ScrollView>
 
       {/* "+N earned" toast overlay — light/neutral, not gold (per design) */}
@@ -366,7 +367,6 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { flex: 1 },
   content: { paddingHorizontal: rs(22), gap: rs(9) },
-  banner: { marginTop: rs(16) },
 
   // Hero
   heroBlock: { alignItems: 'center' },

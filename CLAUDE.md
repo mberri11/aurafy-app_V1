@@ -192,8 +192,10 @@ Adding a module: `src/data/modules.ts` + `src/data/questions/name.ts` +
 
 ### Theming (`src/themes/`)
 `useTheme()` exposes `ThemeColors`. All components use `useTheme()` — never hardcode
-colors. Two themes: `cosmic`, `desertOracle`. Splash bg `#07091A` is also hardcoded in
-`app.json` — keep in sync if changed.
+colors. Two themes: `cosmic`, `desertOracle`. Splash bg `#07091A` is also hardcoded in the
+`expo-splash-screen` plugin config in `app.json` (matches `android.backgroundColor` /
+`ios.backgroundColor`) — keep in sync if changed. Note: `android.adaptiveIcon.backgroundColor`
+(`#16102E`) is intentionally different — that's the launcher icon canvas, not the splash.
 
 ### Ads (`src/ads/`)
 `AdMobManager` is a **stub** that returns false everywhere. Do not touch during the UI

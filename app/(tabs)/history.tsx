@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // History ("Your Readings") — DESIGN-SPEC §7 + Screenshots_new/HIstory_*.png.
 // Category-themed reading cards (accent + motif from the category spine), a
-// distinct cyan "Weekly reading" entry, a real anchored ad banner in the reserved
-// slot, and an atom-mark empty state. Reading + weekly entries merge into one
-// date-sorted timeline.
+// distinct cyan "Weekly reading" entry, and an atom-mark empty state. Reading +
+// weekly entries merge into one date-sorted timeline. The screen carries NO banner
+// of its own — the app's one banner is persistent above the tab bar.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -27,7 +27,7 @@ import GradientButton from '@/src/components/GradientButton';
 import CategoryMotif from '@/src/components/CategoryMotif';
 import CosmicBloom from '@/src/components/CosmicBloom';
 import AurafyLogo from '@/src/components/AurafyLogo';
-import AdBanner from '@/src/ads/AdBanner';
+import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
 import { useIsRTL } from '@/src/utils/rtl';
 import { rs } from '@/src/utils/responsive';
 
@@ -261,19 +261,18 @@ export default function HistoryScreen() {
         data={rows}
         renderItem={renderItem}
         keyExtractor={(item) => (item.kind === 'weekly' ? item.entry.id : item.reading.id)}
+        // No in-list banner any more: the ad is the persistent one above the tab bar
+        // (app/(tabs)/_layout.tsx). We only reserve room so the last reading can
+        // scroll clear of it.
         contentContainerStyle={[
           styles.list,
-          { paddingTop: insets.top + rs(12), paddingBottom: insets.bottom + rs(100) },
+          {
+            paddingTop: insets.top + rs(12),
+            paddingBottom: insets.bottom + rs(100) + PERSISTENT_BANNER_RESERVE,
+          },
         ]}
         ListHeaderComponent={<Text style={[styles.screenTitle, { color: theme.text }]}>{t('history.title')}</Text>}
         ListEmptyComponent={<EmptyState />}
-        ListFooterComponent={
-          // The real anchored banner sits in the reserved ad area under the readings
-          // (linger screen — allowed per the ad strategy). The old "appears when
-          // online" placeholder card was dropped: the banner self-collapses in Expo Go
-          // / on load failure, so no dead space is ever reserved when there's no ad.
-          rows.length > 0 ? <AdBanner style={styles.banner} /> : null
-        }
         showsVerticalScrollIndicator={false}
         scrollEnabled={rows.length > 0}
       />
@@ -332,10 +331,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   badgeText: { fontSize: rs(9.5), fontFamily: 'HankenGrotesk_700Bold', letterSpacing: 1 },
-
-  // Real banner sits in the reserved ad area under the readings (a touch of breathing
-  // room above so it doesn't crowd the last card).
-  banner: { marginTop: rs(16) },
 
   // Empty state
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: rs(14), paddingBottom: rs(24) },

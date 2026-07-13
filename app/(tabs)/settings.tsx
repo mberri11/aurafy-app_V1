@@ -22,6 +22,7 @@ import Toggle from '@/src/components/Toggle';
 import Slider from '@/src/components/Slider';
 import TimeWheelSheet from '@/src/components/TimeWheelSheet';
 import ConfirmSheet, { type ConfirmSheetIcon } from '@/src/components/ConfirmSheet';
+import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
 import i18n from '@/src/i18n';
 import { clear as storageClear } from '@/src/utils/storage';
 import { reloadApp } from '@/src/utils/reloadApp';
@@ -288,9 +289,14 @@ export default function SettingsScreen() {
       <CosmicBloom cx="50%" cy="6%" r="60%" />
       <ScrollView
         style={styles.container}
+        // Bottom padding reserves room for the persistent banner above the tab bar
+        // (app/(tabs)/_layout.tsx) so the last row can scroll clear of it.
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + rs(18), paddingBottom: insets.bottom + rs(100) },
+          {
+            paddingTop: insets.top + rs(18),
+            paddingBottom: insets.bottom + rs(100) + PERSISTENT_BANNER_RESERVE,
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >

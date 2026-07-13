@@ -22,7 +22,7 @@ import { Platform } from 'react-native';
  * you've confirmed test ads render, or your AdMob account can be flagged for
  * clicking your own live ads.
  */
-export const USE_TEST_ADS = __DEV__;
+export const USE_TEST_ADS = true;
 
 // ── Google's official TEST unit IDs (identical to the ones in the AdMob docs) ──
 // Android values match exactly what you provided.
