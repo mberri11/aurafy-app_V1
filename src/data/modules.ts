@@ -90,16 +90,16 @@ export const MODULES: Module[] = [
     unlockCost: 30,
   },
   {
-    // Star-unlocked module (25★). See who_will_hurt_me above — flip `comingSoon` off when
-    // content is in and the buyable pill + unlock gate activate.
+    // Star-unlocked module (25★) — LIVE (content shipped 2026-07-19). Same warm
+    // scarlet as who_will_hurt_me per Simo's ship spec; flag motif keeps them
+    // apart. Matches MODULE_THEMES.red_green_flag.
     id: 'red_green_flag',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '🔒',
-    color: '#6E7290',
+    icon: '🚩',
+    color: '#F0563C',
     framework: 'mixed',
     unlockCost: 25,
-    comingSoon: true,
   },
   // SELF-DISCOVERY MODULES (solo)
   {
@@ -111,8 +111,9 @@ export const MODULES: Module[] = [
     framework: 'attachment',
   },
   {
-    // Categorical solo: answers vote for one of 6 aura colors; winner + "edge"
-    // runner-up (scoreCategorical). Violet — matches MODULE_THEMES.aura_color.
+    // Categorical solo: answers vote for one of 8 aura colors (black + white joined
+    // in the 2026-07-16 expansion); winner + "edge" runner-up (scoreCategorical).
+    // Violet — matches MODULE_THEMES.aura_color.
     id: 'aura_color',
     type: 'solo',
     resultKind: 'categorical',

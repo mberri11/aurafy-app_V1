@@ -192,6 +192,9 @@ export const articlesEn: ArticleContentMap = {
           { title: 'Blue — calm.', text: 'Steady, reflective, trustworthy under pressure.' },
           { title: 'Violet — depth.', text: 'Intuition and imagination; lives a little in the inner world.' },
           { title: 'Green — renewal.', text: 'Balance and care; the quiet stabilizer.' },
+          { title: 'Rose — devotion.', text: 'Tenderness and loyalty; loves close and gives warmth freely.' },
+          { title: 'Black — the keeper.', text: 'Depth held behind clear edges; a presence people feel and never cross uninvited.' },
+          { title: 'White — the clear light.', text: 'A cleared space; brings calm and honesty, and lets others start over.' },
         ],
       },
       {

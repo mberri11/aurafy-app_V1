@@ -27,6 +27,7 @@
     "settings": "Settings"
   },
   "onboarding": {
+    "chooseLanguage": "Choose your language",
     "slide1Title": "Decode the energy around you",
     "slide1Subtitle": "Choose a module. Enter the people in your life. Get a powerful reading in under 3 minutes.",
     "slide2Title": "Built on real psychology",
@@ -160,7 +161,15 @@
       "cost": "From 1"
     },
     "red_green_flag": {
-      "title": "Red Flag or Green Flag?"
+      "title": "Red Flag or Green Flag?",
+      "titleRed": "Red Flag",
+      "titleOr": "or",
+      "titleGreen": "Green Flag?",
+      "subtitle": "Read the pattern, not the promise",
+      "description": "Twenty behavioural questions across consistency, boundaries, honesty, repair and control. Read one person for a straight verdict — or read your whole circle to find the reddest flag in it.",
+      "poweredBy": "Attachment Theory + Repair Behaviour Research",
+      "time": "5–7 min",
+      "cost": "From 1"
     },
     "shadow_self": {
       "title": "Shadow Self",
@@ -193,7 +202,7 @@
     "circle": {
       "title": "Circle",
       "subtitle": "Read your whole orbit",
-      "persons": "4–10 people"
+      "persons": "4–8 people"
     },
     "heading": "How many people are you reading?",
     "earnStars": "Earn more",
@@ -205,9 +214,10 @@
     "progressLabel": "{{current}} / {{total}}",
     "noQuestions": "No questions available",
     "leaveTitle": "Leave this reading?",
-    "leaveMessagePaid": "Your progress won't be saved. Your stars will be refunded ({{cost}} ✦).",
+    "leaveMessagePaid": "Your progress won't be saved and your stars won't be refunded.",
     "leaveMessageTrial": "Your progress won't be saved. Your free reading will be restored.",
     "leaveConfirm": "Leave reading",
+    "noOne": "No one",
     "frameworks": {
       "attachment": "Attachment Theory",
       "loveLanguages": "Love Languages",
@@ -264,6 +274,10 @@
   },
   "result": {
     "notFound": "No result found.",
+    "aura": {
+      "rareKeeper": "RARE · THE KEEPER",
+      "rareClearLight": "RARE · THE CLEAR LIGHT"
+    },
     "confidenceHeadline": "We're {{confidence}}% confident in this reading.",
     "confidenceSub": "Higher than {{pct}}% of your readings.",
     "lockedEyebrow": "Still veiled",
@@ -276,6 +290,7 @@
     "disclaimer": "Aurafy is for self-reflection and entertainment — not a clinical diagnostic tool.",
     "insightPrefix": "✦",
     "comparison": "The full picture",
+    "compScore": "{{score}} / {{total}} · {{pct}}%",
     "theRead": "The read",
     "whatThisMeans": "What this means",
     "count": {
@@ -412,6 +427,10 @@
     "needMore": "Need {{count}} more",
     "cosmic": "Cosmic",
     "desertOracle": "Desert Oracle",
+    "elvenGrove": "Elven Grove",
+    "cosmicDesc": "Violet nebulae and starlight — the signature Aurafy night sky.",
+    "desertOracleDesc": "Dusk over warm dunes — terracotta, amber and drifting sand.",
+    "elvenGroveDesc": "A moonlit elven grove — deep emerald, teal light and old gold.",
     "midnightVeil": "Midnight Veil",
     "deepOcean": "Deep Ocean",
     "roseQuartz": "Rose Quartz",
@@ -437,6 +456,8 @@
     "latest": "LATEST",
     "sponsored": "SPONSORED",
     "rewardToday": "+1 ✦ today",
+    "dailyBadge": "Daily",
+    "comeBackTomorrow": "Come back tomorrow for a new insight",
     "minRead": "{{n}} min read",
     "min": "{{n}} min",
     "takeReading": "Take the {{module}} reading",

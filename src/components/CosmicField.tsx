@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../themes/ThemeProvider';
+import AmbientMotes from './AmbientMotes';
 
 /**
  * The shared ambient base field — the theme's vertical field gradient that sits
@@ -17,12 +18,19 @@ import { useTheme } from '../themes/ThemeProvider';
 const CosmicField = memo(function CosmicField() {
   const theme = useTheme();
   return (
-    <LinearGradient
-      colors={theme.fieldGradient}
-      locations={[0, 0.5, 1]}
-      style={StyleSheet.absoluteFill}
-      pointerEvents="none"
-    />
+    <>
+      <LinearGradient
+        colors={theme.fieldGradient}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+      {/* Theme ambient particles (Desert Oracle's sand motes). Keyed by theme id
+          so a theme switch re-rolls positions; null (cosmic) renders nothing. */}
+      {theme.ambientParticles ? (
+        <AmbientMotes key={theme.id} tokens={theme.ambientParticles} />
+      ) : null}
+    </>
   );
 });
 

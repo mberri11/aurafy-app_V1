@@ -19,7 +19,7 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useUserStore, WeeklyHistoryEntry } from '@/src/store/userStore';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { auraOutcomeTheme, moduleTheme } from '@/src/themes/categoryTheme';
+import { auraOutcomeTheme, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, moduleTheme } from '@/src/themes/categoryTheme';
 import { readingDisplayName } from '@/src/utils/readingDisplay';
 import { getWeekById } from '@/src/data/weeks';
 import { Language, Reading } from '@/src/types';
@@ -47,10 +47,13 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
   const isRTL = useIsRTL();
 
   // Per-MODULE theme — two modules in the same category still read distinct.
-  // Aura Color alone re-colors per past reading: the accent is the outcome color.
+  // Aura Color re-colors per past reading (outcome color); red_green_flag does
+  // too (green / amber / red from the persisted signal counts).
   const { accent } = reading.moduleId === 'aura_color'
     ? auraOutcomeTheme(reading.result.dominantDimension)
-    : moduleTheme(reading.moduleId);
+    : isDualFlagModule(reading.moduleId)
+      ? flagOutcomeTheme(flagOutcomeKey(reading.result))
+      : moduleTheme(reading.moduleId);
   const name = readingDisplayName(reading, lang);
   const moduleLabel = (t(`modules.${reading.moduleId}.title`) || reading.moduleId).toUpperCase();
   const modeLabel = t(`readingModes.${reading.mode}.title`);
@@ -97,7 +100,14 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
 
         <View style={styles.cardRow}>
           <View style={[styles.tile, { backgroundColor: `${accent}26`, borderColor: `${accent}55` }]}>
-            <CategoryMotif moduleId={reading.moduleId} size={rs(26)} />
+            <CategoryMotif
+              moduleId={reading.moduleId}
+              size={rs(26)}
+              // Outcome-tinted glyphs: the dual-flag module's flag renders IN the
+              // verdict color (green / amber / red — matching the bar + eyebrow).
+              color={isDualFlagModule(reading.moduleId) ? accent : undefined}
+              auraOutcome={reading.moduleId === 'aura_color' ? reading.result.dominantDimension : undefined}
+            />
           </View>
           <View style={styles.cardContent}>
             <View style={styles.eyebrowRow}>

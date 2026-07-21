@@ -10,6 +10,10 @@
 
 import type { ComponentProps } from 'react';
 import type { MaterialCommunityIcons } from '@expo/vector-icons';
+// Cycle-safe edge: countTier lives in its own leaf module (types-only imports).
+// NEVER import from resultGenerator/scoringEngine here — scoringEngine imports
+// THIS file (spectrumHex), so that path is a cycle.
+import { countTier } from '../engine/countTier';
 
 export type Category =
   | 'love'
@@ -59,6 +63,7 @@ const MODULE_CATEGORY: Record<string, Category> = {
   who_hates_me: 'jealousy',
   who_cut_off: 'jealousy',
   who_will_hurt_me: 'jealousy',
+  red_green_flag: 'jealousy',
   am_i_problem: 'self',
   am_i_healing: 'self',
   shadow_self: 'self',
@@ -96,6 +101,9 @@ const MODULE_THEMES: Record<string, CategoryTheme> = {
   // actually render). Protective shield motif (self-protection, not the attacker),
   // distinct from hates' broken heart and cut_off's broken link.
   who_will_hurt_me: { accent: '#F0563C', accentSoft: '#FBAB8C', motif: { kind: 'icon', name: 'shield-alert' } },
+  // Same warm scarlet as who_will_hurt_me (Simo's ship spec, 2026-07-19) — the flag
+  // motif is what keeps the two warning modules apart across loading/result/History.
+  red_green_flag: { accent: '#F0563C', accentSoft: '#FBAB8C', motif: { kind: 'icon', name: 'flag-variant' } },
   attachment_style: { accent: '#22D3EE', accentSoft: '#67E8F9', motif: { kind: 'icon', name: 'orbit' } },
   // Gold — matches its Home card; the mirror motif (vs admires' eye) keeps them apart.
   am_i_problem: { accent: '#F5C542', accentSoft: '#F8DE7E', motif: { kind: 'icon', name: 'mirror' } },
@@ -107,25 +115,164 @@ const MODULE_THEMES: Record<string, CategoryTheme> = {
   aura_color: { accent: '#A78BFA', accentSoft: '#C4B5FD', motif: { kind: 'wheel' } },
 };
 
-/**
- * AURA COLOR ONLY — the one deliberate exception to the "one accent per module"
- * rule above. The module's whole premise is that the OUTCOME is a color, so the
- * result / share card / History entry glow in the color the user actually got
- * (keyed by `result.dominantDimension`). The static `MODULE_THEMES.aura_color`
- * violet stays as the PRE-REVEAL identity (Home card, module detail). No other
- * module may resolve accents per-outcome.
- */
-export const AURA_OUTCOME_THEME: Record<string, CategoryTheme> = {
-  violet: { accent: '#A78BFA', accentSoft: '#C4B5FD', motif: { kind: 'wheel' } },
-  blue: { accent: '#38BDF8', accentSoft: '#7DD3FC', motif: { kind: 'wheel' } },
-  green: { accent: '#4ADE80', accentSoft: '#86EFAC', motif: { kind: 'wheel' } },
-  gold: { accent: '#FBBF24', accentSoft: '#FCD34D', motif: { kind: 'wheel' } },
-  red: { accent: '#EF4444', accentSoft: '#FCA5A5', motif: { kind: 'wheel' } },
-  rose: { accent: '#FB7185', accentSoft: '#FDA4AF', motif: { kind: 'wheel' } },
+// ─────────────────────────────────────────────────────────────────────────────
+// AURA_PRISM_V2 — the LOCKED Aura Color identity (Simo, 2026-07-19; design mockups
+// "Aura Color - Prism Identity" are canonical). Obsidian base + a six-stop spectrum
+// used ONLY as thin accents (the SpectrumHairline motif + the orb's refracted
+// crescent), never as a fill. Distinct from Attachment (teal) and Who-Loves-Me
+// (violet). These values are canonical — do not re-tint without a new mockup.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Achromatic base tokens. */
+export const AURA_V2 = {
+  obsidian: '#08070D',
+  graphite: '#15141C',
+  silver: '#9B99A8',
+  pearl: '#F1F0F6',
+} as const;
+
+/** The six chromatic outcomes → their locked spectrum hex. */
+export const AURA_SPECTRUM: Record<string, string> = {
+  violet: '#8E6FE0',
+  blue: '#5A8FD6',
+  green: '#4FB08C',
+  gold: '#D8B25C',
+  red: '#D06A5E',
+  rose: '#CE84AD',
 };
 
+/** The spectrum in CANONICAL ORDER (violet→rose) — the ONLY order the hairline, the
+ *  orb crescent and the loader dots ever use. */
+export const AURA_SPECTRUM_STOPS: [string, string, string, string, string, string] = [
+  AURA_SPECTRUM.violet,
+  AURA_SPECTRUM.blue,
+  AURA_SPECTRUM.green,
+  AURA_SPECTRUM.gold,
+  AURA_SPECTRUM.red,
+  AURA_SPECTRUM.rose,
+];
+
+/** Resolve an aura outcome key → its display hex: chromatics use the spectrum; the two
+ *  achromatic rares resolve to their pole (black→obsidian body, white→pearl body). */
+export function spectrumHex(categoryKey: string): string {
+  if (AURA_SPECTRUM[categoryKey]) return AURA_SPECTRUM[categoryKey];
+  if (categoryKey === 'black') return AURA_V2.obsidian;
+  if (categoryKey === 'white') return AURA_V2.pearl;
+  return AURA_SPECTRUM.violet;
+}
+
+/**
+ * AURA RESULT SKIN (Simo, 2026-07-19) — the FULL per-outcome identity, not just an
+ * accent. Before this, every colour reused one pale accent for the orb / reveal name /
+ * confidence bar / share button, so Black and White came out looking identical. Each
+ * skin now carries everything a result surface needs to read unmistakably as ITS colour:
+ *
+ *  • accent / accentSoft — eyebrow, sparkles, %number, blooms.
+ *  • orbSoft/orbBody/orbDeep/orbRim — the four sphere stops under a white glint
+ *    (BLACK = obsidian with a silver top-light; WHITE = bright pearl; chromatics = vivid).
+ *  • name / nameGlow — the big reveal name fill + its halo (BLACK = obsidian letters with
+ *    a silver backlight so the name itself reads "black"; everything else = white + glow).
+ *  • bar — the confidence-fill colour (BLACK = graphite, not pale).
+ *  • cta / ctaText — the Share/unlock button gradient + label ink (BLACK = obsidian pill
+ *    with WHITE text; light skins keep dark ink on their bright pill).
+ *
+ * The whole 8-colour result experience derives from this one table.
+ */
+export interface AuraSkin {
+  accent: string;
+  accentSoft: string;
+  orbSoft: string;
+  orbBody: string;
+  orbDeep: string;
+  orbRim: string;
+  name: string;
+  nameGlow: string;
+  bar: string;
+  cta: [string, string];
+  ctaText: string;
+  /** RARE handling (black/white) — the result card gets a silver-foil frame + a
+   *  "RARE · …" micro-label, and the orb uses its achromatic-pole rendering. Optional:
+   *  chromatics omit these. Consumed by the result screen + share card in S5. */
+  rare?: boolean;
+  /** Confidence-bar track (defaults to theme.surface at the call site when absent). */
+  barTrack?: string;
+  /** Silver hairline border on the CTA (obsidian rare button). */
+  ctaBorder?: string;
+}
+
+// V2 CTA: every chromatic shares one pearl pill with obsidian ink (the colour lives in
+// the name/orb/bar, not the button); rares invert per their pole.
+const PEARL_CTA: [string, string] = [AURA_V2.pearl, '#D6D5E0'];
+
+export const AURA_SKINS: Record<string, AuraSkin> = {
+  violet: {
+    accent: '#8E6FE0', accentSoft: '#B9A6F0',
+    orbSoft: '#B9A6F0', orbBody: '#8E6FE0', orbDeep: '#4A3A82', orbRim: AURA_V2.obsidian,
+    name: '#8E6FE0', nameGlow: '#8E6FE0', bar: '#8E6FE0',
+    cta: PEARL_CTA, ctaText: AURA_V2.obsidian,
+  },
+  blue: {
+    accent: '#5A8FD6', accentSoft: '#9EC0EC',
+    orbSoft: '#9EC0EC', orbBody: '#5A8FD6', orbDeep: '#2E5488', orbRim: AURA_V2.obsidian,
+    name: '#5A8FD6', nameGlow: '#5A8FD6', bar: '#5A8FD6',
+    cta: PEARL_CTA, ctaText: AURA_V2.obsidian,
+  },
+  green: {
+    accent: '#4FB08C', accentSoft: '#93D6BE',
+    orbSoft: '#93D6BE', orbBody: '#4FB08C', orbDeep: '#276B52', orbRim: AURA_V2.obsidian,
+    name: '#4FB08C', nameGlow: '#4FB08C', bar: '#4FB08C',
+    cta: PEARL_CTA, ctaText: AURA_V2.obsidian,
+  },
+  gold: {
+    accent: '#D8B25C', accentSoft: '#ECD59B',
+    orbSoft: '#ECD59B', orbBody: '#D8B25C', orbDeep: '#8A6A24', orbRim: AURA_V2.obsidian,
+    name: '#D8B25C', nameGlow: '#D8B25C', bar: '#D8B25C',
+    cta: PEARL_CTA, ctaText: AURA_V2.obsidian,
+  },
+  red: {
+    accent: '#D06A5E', accentSoft: '#E6A79E',
+    orbSoft: '#E6A79E', orbBody: '#D06A5E', orbDeep: '#7E3129', orbRim: AURA_V2.obsidian,
+    name: '#D06A5E', nameGlow: '#D06A5E', bar: '#D06A5E',
+    cta: PEARL_CTA, ctaText: AURA_V2.obsidian,
+  },
+  rose: {
+    accent: '#CE84AD', accentSoft: '#E4B4CE',
+    orbSoft: '#E4B4CE', orbBody: '#CE84AD', orbDeep: '#7E4863', orbRim: AURA_V2.obsidian,
+    name: '#CE84AD', nameGlow: '#CE84AD', bar: '#CE84AD',
+    cta: PEARL_CTA, ctaText: AURA_V2.obsidian,
+  },
+  // WHITE — "Clear Light" (RARE). Reveal name / % / bar render PURE WHITE (Simo 2026-07-19);
+  // white fill on a graphite track reads cleanly. Pearl/opal orb, pearl CTA.
+  white: {
+    accent: AURA_V2.pearl, accentSoft: '#FBFBFE',
+    orbSoft: '#FFFFFF', orbBody: AURA_V2.pearl, orbDeep: '#C9C7D4', orbRim: '#7C7A88',
+    name: '#FFFFFF', nameGlow: '#FBF8EE', bar: '#FFFFFF',
+    cta: PEARL_CTA, ctaText: AURA_V2.obsidian,
+    rare: true, barTrack: AURA_V2.graphite,
+  },
+  // BLACK — "Obsidian" (RARE). Deep obsidian pole. Silver name + silver bar; CTA obsidian
+  // fill / white ink / silver hairline border. Small accents use silver to stay visible.
+  black: {
+    accent: AURA_V2.silver, accentSoft: '#C4C2D0',
+    orbSoft: '#4A4856', orbBody: '#14131A', orbDeep: '#0C0B12', orbRim: AURA_V2.obsidian,
+    // Reveal name / % / bar render NEAR-BLACK with a bright silver backlight halo
+    // (legible via the glow, Simo 2026-07-19); bar = black fill on a SILVER track so it
+    // reads. Small accents (eyebrow/sparkles/blooms) stay silver.
+    name: '#0C0C12', nameGlow: '#C9C7D6', bar: '#0C0C12',
+    cta: [AURA_V2.obsidian, '#050509'], ctaText: '#FFFFFF',
+    rare: true, barTrack: '#6E6C7A', ctaBorder: AURA_V2.silver,
+  },
+};
+
+export function auraSkin(key: string): AuraSkin {
+  return AURA_SKINS[key] ?? AURA_SKINS.violet;
+}
+
+/** Legacy accent/soft view of a skin — kept for callers that only need the two colours
+ *  (History left-bar + tile tint). New surfaces should read the full `auraSkin`. */
 export function auraOutcomeTheme(category: string): CategoryTheme {
-  return AURA_OUTCOME_THEME[category] ?? MODULE_THEMES.aura_color;
+  const s = auraSkin(category);
+  return { accent: s.accent, accentSoft: s.accentSoft, motif: { kind: 'wheel' } };
 }
 
 /**
@@ -141,18 +288,69 @@ export function isPrismModule(moduleId: string): boolean {
   return moduleId === 'aura_color';
 }
 
-/** The aura colour-wheel hues (one walk around the spectrum) — drawn by
- *  CategoryMotif's wheel disc and reused by prism surfaces (Home card halo,
- *  loading hex dots) so the rainbow always matches the icon.
- *  Order: rose, coral, gold, emerald, cyan, violet. */
-export const AURA_WHEEL_HUES = [
-  '#F472B6',
-  '#FB7185',
-  '#FBBF24',
-  '#34D399',
-  '#22D3EE',
-  '#A78BFA',
-] as const;
+// ─────────────────────────────────────────────────────────────────────────────
+// RED/GREEN DUAL IDENTITY (Simo, 2026-07-19) — red_green_flag is the second
+// module with a non-single-hue identity (after aura's prism). PRE-REVEAL, every
+// surface shows BOTH poles: red stays the base accent (Module.color) and green
+// joins as the paired counter-accent — dual-flag glyph, green counter-bloom,
+// alternating loader dots, red→amber→green progress sweep. POST-COMPUTE, the
+// surfaces that follow the verdict (ad-gate orb, result, share, History) switch
+// wholesale to the OUTCOME color: green (none/low), amber (medium — "Mixed
+// Signals"), red (high, and every multi/circle read — the winner is by
+// definition the reddest flag).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function isDualFlagModule(moduleId: string): boolean {
+  return moduleId === 'red_green_flag';
+}
+
+/** The dual palette. Red = the who_will_hurt_me scarlet family (ship spec);
+ *  green is a distinct signal green (NOT who_jealous' #34D399 emerald or
+ *  am_i_healing's #2FEAAC mint); amber reuses the gold family for "Mixed". */
+export const FLAG_DUO = {
+  red: '#F0563C',
+  redSoft: '#FBAB8C',
+  green: '#22C55E',
+  greenSoft: '#86EFAC',
+  amber: '#F5C542',
+  amberSoft: '#F8DE7E',
+} as const;
+
+/** Red→green pair for alternating loader dots / dual sweeps. */
+export const FLAG_DUO_STOPS: [string, string] = [FLAG_DUO.red, FLAG_DUO.green];
+
+/** Red→amber→green traffic sweep for the quiz progress fill ("which will it be"). */
+export const FLAG_SWEEP: [string, string, string] = [FLAG_DUO.red, FLAG_DUO.amber, FLAG_DUO.green];
+
+export type FlagOutcome = 'green' | 'mixed' | 'red';
+
+/**
+ * Resolve a red_green_flag ResultData → its outcome pole. Count (solo) reads
+ * derive the tier from the SAME thresholds as the verdict copy
+ * (resultGenerator.countTier over the persisted signalCount/signalTotal);
+ * multi/circle reads are always red (the winner is the reddest flag).
+ */
+export function flagOutcomeKey(result: {
+  isCountResult?: boolean;
+  signalCount?: number;
+  signalTotal?: number;
+}): FlagOutcome {
+  if (result.isCountResult && result.signalTotal) {
+    const tier = countTier(result.signalCount ?? 0, result.signalTotal);
+    return tier === 'high' ? 'red' : tier === 'medium' ? 'mixed' : 'green';
+  }
+  return 'red';
+}
+
+/** Outcome pole → the accent pair the post-compute surfaces render in. */
+export function flagOutcomeTheme(key: FlagOutcome): CategoryTheme {
+  const accent =
+    key === 'green' ? FLAG_DUO.green : key === 'mixed' ? FLAG_DUO.amber : FLAG_DUO.red;
+  const accentSoft =
+    key === 'green' ? FLAG_DUO.greenSoft : key === 'mixed' ? FLAG_DUO.amberSoft : FLAG_DUO.redSoft;
+  return { accent, accentSoft, motif: { kind: 'icon', name: 'flag-variant' } };
+}
+
 
 export function categoryForModule(moduleId: string): Category {
   return MODULE_CATEGORY[moduleId] ?? 'attachment';

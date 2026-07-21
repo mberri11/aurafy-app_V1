@@ -32,6 +32,14 @@ type ShareCardProps =
       variant: 'reading';
       accent: string;
       accentSoft: string;
+      /** Reveal-name fill + halo. Aura passes its per-outcome skin (Black = obsidian
+       *  letters + silver backlight; White = white + pearl) so saved cards differ by
+       *  colour; other modules omit them → the historic white name + accent glow. */
+      nameColor?: string;
+      nameGlow?: string;
+      /** AURA rare (Black/White): draw a silver-foil frame so the saved image reads as
+       *  the RARE reveal (the eyebrow already carries the "RARE · …" micro-label). */
+      rare?: boolean;
       /** Module subtitle, uppercase (e.g. "WHO TRULY HAS YOUR BACK"). */
       eyebrow: string;
       /** Winner name (multi) or the verdict word (solo). */
@@ -75,6 +83,9 @@ export default function ShareCard(props: ShareCardProps) {
   const isReading = props.variant === 'reading';
   const accent = isReading ? props.accent : WEEKLY_ACCENT;
   const soft = isReading ? props.accentSoft : WEEKLY_SOFT;
+  // Reveal-name treatment — per-outcome for aura, else the default white + accent glow.
+  const nameColor = (isReading && props.nameColor) || '#FFFFFF';
+  const nameGlow = (isReading && props.nameGlow) || accent;
 
   return (
     <View style={[styles.card, { backgroundColor: theme.background }]}>
@@ -153,7 +164,7 @@ export default function ShareCard(props: ShareCardProps) {
         <Text
           style={[
             isReading ? styles.name : styles.weeklyTitle,
-            { textShadowColor: accent },
+            { color: nameColor, textShadowColor: nameGlow },
           ]}
           numberOfLines={isReading ? 1 : 2}
           adjustsFontSizeToFit
@@ -183,6 +194,10 @@ export default function ShareCard(props: ShareCardProps) {
         </Text>
         <Text style={styles.brandTagline}>{t('share.getYours')}</Text>
       </View>
+
+      {/* "Phone" frame on EVERY saved image (Simo 2026-07-19) — the app signature. Coloured
+          to the reading's accent (aura → the outcome colour; other modules → module accent). */}
+      <View pointerEvents="none" style={[styles.rareFrame, { borderColor: `${accent}88` }]} />
     </View>
   );
 }
@@ -192,6 +207,15 @@ const styles = StyleSheet.create({
     width: SHARE_CARD_W,
     height: SHARE_CARD_H,
     overflow: 'hidden',
+  },
+  rareFrame: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    right: 16,
+    bottom: 16,
+    borderWidth: 1,
+    borderRadius: 18,
   },
   sparkle: { position: 'absolute' },
 

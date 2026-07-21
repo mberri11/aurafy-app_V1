@@ -233,6 +233,19 @@ export default function FeaturedInsightCard({
             <OrbitArt size={rs(118)} accent={accent} />
           </View>
 
+          {/* Persistent "Daily ★" badge — identifies this hero as the day's featured pick. */}
+          <View
+            style={[
+              styles.heroDailyBadge,
+              { backgroundColor: `${theme.gold}1F`, borderColor: `${theme.gold}66` },
+            ]}
+          >
+            <MaterialCommunityIcons name="star" size={rs(11)} color={theme.gold} />
+            <Text style={[styles.heroDailyBadgeText, { color: theme.gold }]}>
+              {t('insights.dailyBadge')}
+            </Text>
+          </View>
+
           {rewardAvailable ? <View style={styles.heroReward}>{rewardPill}</View> : null}
 
           {content.subtitle ? (
@@ -247,6 +260,15 @@ export default function FeaturedInsightCard({
           <Text style={[styles.heroTitle, { color: theme.text }]} numberOfLines={2}>
             {content.title}
           </Text>
+          {/* Claimed state — today's daily reward is done; nudge back tomorrow. */}
+          {!rewardAvailable ? (
+            <View style={styles.heroClaimedRow}>
+              <Feather name="check" size={rs(13)} color={theme.textMuted} />
+              <Text style={[styles.heroClaimedText, { color: theme.textMuted }]}>
+                {t('insights.comeBackTomorrow')}
+              </Text>
+            </View>
+          ) : null}
         </View>
       </GlassCard>
     </TouchableOpacity>
@@ -279,6 +301,25 @@ const styles = StyleSheet.create({
   },
   heroArtCenter: { alignItems: 'center', justifyContent: 'center' },
   heroReward: { position: 'absolute', top: rs(12), end: rs(12) },
+  heroDailyBadge: {
+    position: 'absolute',
+    top: rs(12),
+    start: rs(12),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(4),
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: rs(9),
+    paddingVertical: rs(3),
+  },
+  heroDailyBadgeText: {
+    fontSize: rs(10.5),
+    fontFamily: 'HankenGrotesk_700Bold',
+    letterSpacing: 0.6,
+  },
+  heroClaimedRow: { flexDirection: 'row', alignItems: 'center', gap: rs(6) },
+  heroClaimedText: { fontSize: rs(12.5), fontFamily: 'HankenGrotesk_500Medium' },
   heroSubtitle: {
     position: 'absolute',
     start: rs(16),

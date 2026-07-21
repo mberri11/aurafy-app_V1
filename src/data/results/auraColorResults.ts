@@ -2,8 +2,9 @@ import { CategoricalResults } from '../../types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AURA COLOR — categorical results (`CategoricalResults`, src/types/index.ts —
-// the rendering contract lives on the interface). 6 categories × (label,
+// the rendering contract lives on the interface). 8 categories × (label,
 // verdict, whatThisMeans, shareLine) + edgeTemplate + 6 insights per category.
+// black + white joined in the 8-color expansion (2026-07-16).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const auraColorResults: CategoricalResults = {
@@ -141,6 +142,51 @@ export const auraColorResults: CategoricalResults = {
         es: 'Aura rosa: amo más fuerte de lo que admito.',
       },
     },
+    // 8-color expansion (2026-07-16): black = the keeper (grounded mystery, protection,
+    // boundaries, magnetism — premium register, never doom); white = the clear light
+    // (clarity, renewal, openness, luminous calm).
+    black: {
+      label: { en: 'Black', fr: 'Noir', ar: 'الأسود', es: 'Negro' },
+      verdict: {
+        en: 'Your aura glows black — the color of the keeper.',
+        fr: 'Ton aura rayonne noir — la couleur du gardien.',
+        ar: 'هالتك تتوهّج بالأسود — لون الحارس.',
+        es: 'Tu aura brilla negra: el color del guardián.',
+      },
+      whatThisMeans: {
+        en: 'Your energy doesn\'t chase — it holds. You move through the world with edges people can feel and never cross uninvited, and that quiet sovereignty is exactly what pulls them closer. Your depth is not a wall; it is a vault, and entry is earned. Just remember: a door only you can open should still open sometimes.',
+        fr: 'Ton énergie ne poursuit pas — elle tient. Tu traverses le monde avec des contours que les gens sentent et ne franchissent jamais sans y être invités, et c\'est précisément cette souveraineté tranquille qui les attire plus près. Ta profondeur n\'est pas un mur ; c\'est un coffre-fort, et l\'entrée se mérite. Souviens-toi seulement : une porte que toi seul peux ouvrir doit quand même s\'ouvrir parfois.',
+        ar: 'طاقتك لا تلاحق أحدًا — بل تُمسك بثبات. تمضي في العالم بحدود يشعر بها الناس ولا يتجاوزونها دون دعوة، وهذه السيادة الهادئة هي بالضبط ما يجذبهم إليك أكثر. عمقك ليس جدارًا؛ بل خزينة، ودخولها يُستحق. فقط تذكّر: الباب الذي لا يفتحه أحد سواك ينبغي أن يُفتح أحيانًا.',
+        es: 'Tu energía no persigue: sostiene. Te mueves por el mundo con bordes que la gente siente y nunca cruza sin invitación, y esa soberanía silenciosa es exactamente lo que los acerca más. Tu profundidad no es un muro; es una bóveda, y la entrada se gana. Solo recuerda: una puerta que solo tú puedes abrir también debería abrirse a veces.',
+      },
+      shareLine: {
+        en: 'Black aura. You don\'t get in — you get invited.',
+        fr: 'Aura noire. On n\'entre pas — on est invité.',
+        ar: 'هالة سوداء — لا أحد يدخل، بل يُدعى.',
+        es: 'Aura negra. No se entra: se es invitado.',
+      },
+    },
+    white: {
+      label: { en: 'White', fr: 'Blanc', ar: 'الأبيض', es: 'Blanco' },
+      verdict: {
+        en: 'Your aura glows white — the color of the clear light.',
+        fr: 'Ton aura rayonne blanc — la couleur de la lumière claire.',
+        ar: 'هالتك تتوهّج بالأبيض — لون النور الصافي.',
+        es: 'Tu aura brilla blanca: el color de la luz clara.',
+      },
+      whatThisMeans: {
+        en: 'You carry the rarest kind of energy: room to breathe. Where others bring noise, you bring a cleared table — no agenda, no residue, no yesterday dragged into today. People think clearly around you because you refuse to cloud things, and they start over around you because you genuinely believe they can. Guard that clarity: an open sky is a gift, not a vacancy.',
+        fr: 'Tu portes l\'énergie la plus rare qui soit : de l\'espace pour respirer. Là où d\'autres apportent du bruit, tu apportes une table dégagée — sans agenda, sans résidu, sans hier traîné dans aujourd\'hui. Les gens pensent clairement près de toi parce que tu refuses de troubler les choses, et ils repartent de zéro près de toi parce que tu crois sincèrement qu\'ils le peuvent. Protège cette clarté : un ciel ouvert est un don, pas un vide.',
+        ar: 'تحمل أندر أنواع الطاقة: مساحة للتنفّس. حيث يجلب الآخرون الضجيج، تجلب أنت مائدة نظيفة — بلا نوايا خفية، بلا رواسب، بلا أمسٍ يُجرّ إلى اليوم. يفكّر الناس بوضوح قربك لأنك ترفض تعكير الأشياء، ويبدأون من جديد قربك لأنك تؤمن حقًا بأنهم قادرون. احرس هذا الصفاء: السماء المفتوحة هبة، لا فراغ.',
+        es: 'Llevas la energía más rara que existe: espacio para respirar. Donde otros traen ruido, tú traes una mesa despejada: sin agenda, sin residuos, sin un ayer arrastrado al hoy. La gente piensa con claridad a tu lado porque te niegas a enturbiar las cosas, y empieza de nuevo a tu lado porque crees de verdad que puede. Cuida esa claridad: un cielo abierto es un don, no un vacío.',
+      },
+      shareLine: {
+        en: 'White aura — I don\'t carry yesterday into today.',
+        fr: 'Aura blanche — je ne traîne pas hier dans aujourd\'hui.',
+        ar: 'هالة بيضاء — لا أحمل الأمس إلى اليوم.',
+        es: 'Aura blanca: no cargo el ayer en el hoy.',
+      },
+    },
   },
 
   insights: {
@@ -191,6 +237,22 @@ export const auraColorResults: CategoricalResults = {
       { en: 'People confess things to you they\'ve never said out loud — your presence feels like somewhere safe to put a heart down.', fr: 'Les gens te confient des choses qu\'ils n\'ont jamais dites à voix haute — ta présence ressemble à un endroit sûr pour poser un cœur.', ar: 'يعترف لك الناس بأشياء لم يقولوها بصوت عالٍ قط — حضورك يشبه مكانًا آمنًا يضع فيه المرء قلبه.', es: 'La gente te confiesa cosas que nunca ha dicho en voz alta: tu presencia se siente como un lugar seguro donde apoyar un corazón.' },
       { en: 'Loving without keeping score is beautiful — but check the scoreboard once a year anyway. Some people have been taking for free.', fr: 'Aimer sans compter est magnifique — mais regarde quand même le tableau une fois par an. Certains se servent gratuitement.', ar: 'الحب دون حساب جميل — لكن انظر إلى الميزان مرة في السنة على الأقل. بعض الناس يأخذون مجانًا منذ زمن.', es: 'Amar sin llevar la cuenta es hermoso, pero revisa el marcador una vez al año. Algunos llevan tiempo tomando gratis.' },
       { en: 'The tenderness you give so freely is exactly what you\'re quietly hoping someone gives back — say that hope out loud sometime.', fr: 'La tendresse que tu donnes si librement est exactement ce que tu espères en silence recevoir — dis cet espoir à voix haute un jour.', ar: 'الحنان الذي تمنحه بسخاء هو بالضبط ما تتمنى في صمت أن يبادلك به أحد — قل هذه الأمنية بصوت عالٍ يومًا ما.', es: 'La ternura que das tan libremente es exactamente lo que en silencio esperas recibir: di esa esperanza en voz alta algún día.' },
+    ],
+    black: [
+      { en: 'People hand you their secrets and notice you never trade yours — that exchange rate is your magnetism, not an accident.', fr: 'Les gens te confient leurs secrets et remarquent que tu n\'échanges jamais les tiens — ce taux de change est ton magnétisme, pas un accident.', ar: 'يسلّمك الناس أسرارهم ويلاحظون أنك لا تقايض بأسرارك أبدًا — سعر الصرف هذا هو جاذبيتك، وليس صدفة.', es: 'La gente te entrega sus secretos y nota que tú nunca intercambias los tuyos: ese tipo de cambio es tu magnetismo, no un accidente.' },
+      { en: 'Your "no" needs no explanation — you learned that before most people learn to say the word at all.', fr: 'Ton « non » n\'a besoin d\'aucune explication — tu l\'as appris avant que la plupart des gens apprennent à dire le mot.', ar: 'كلمة «لا» عندك لا تحتاج إلى تبرير — تعلّمت ذلك قبل أن يتعلّم معظم الناس نطق الكلمة أصلًا.', es: 'Tu "no" no necesita explicación: lo aprendiste antes de que la mayoría aprenda siquiera a decir la palabra.' },
+      { en: 'You protect the people you love in ways they never see — the storms that never reached them were the ones you stood in front of.', fr: 'Tu protèges ceux que tu aimes d\'une manière qu\'ils ne voient jamais — les tempêtes qui ne les ont jamais atteints sont celles devant lesquelles tu t\'es tenu.', ar: 'تحمي من تحبهم بطرق لا يرونها أبدًا — العواصف التي لم تصلهم قط هي التي وقفت أنت في وجهها.', es: 'Proteges a quienes amas de maneras que nunca ven: las tormentas que jamás los alcanzaron fueron las que tú enfrentaste de pie.' },
+      { en: 'Your stillness in chaos isn\'t distance — it\'s ground. You go quiet the way mountains do.', fr: 'Ton immobilité dans le chaos n\'est pas de la distance — c\'est du socle. Tu deviens silencieux comme les montagnes.', ar: 'سكونك وسط الفوضى ليس ابتعادًا — بل ثباتًا. أنت تصمت كما تصمت الجبال.', es: 'Tu quietud en el caos no es distancia: es suelo firme. Guardas silencio como lo hacen las montañas.' },
+      { en: 'The less you announce yourself, the more the room turns toward you — you figured out early that presence outruns performance.', fr: 'Moins tu t\'annonces, plus la pièce se tourne vers toi — tu as compris tôt que la présence dépasse la mise en scène.', ar: 'كلّما قلّ إعلانك عن نفسك، ازداد التفات المكان نحوك — أدركت مبكرًا أن الحضور يسبق الاستعراض.', es: 'Cuanto menos te anuncias, más se gira la sala hacia ti: entendiste pronto que la presencia supera a la actuación.' },
+      { en: 'Guarding the gate is your gift — just remember you\'re allowed to step out from behind it and be held too.', fr: 'Garder la porte est ton don — souviens-toi seulement que tu as le droit d\'en sortir et d\'être tenu à ton tour.', ar: 'حراسة الباب موهبتك — لكن تذكّر أن من حقك أن تخرج من خلفه وأن يحتضنك أحد أيضًا.', es: 'Custodiar la puerta es tu don; solo recuerda que también tienes permiso de salir de detrás de ella y dejarte sostener.' },
+    ],
+    white: [
+      { en: 'You give people the thing they can\'t find anywhere else: a conversation with no residue. Nothing said to you today is used against them tomorrow.', fr: 'Tu offres aux gens ce qu\'ils ne trouvent nulle part ailleurs : une conversation sans résidu. Rien de ce qu\'on te dit aujourd\'hui n\'est utilisé contre eux demain.', ar: 'تمنح الناس ما لا يجدونه في أي مكان آخر: حديثًا بلا رواسب. لا شيء يُقال لك اليوم يُستخدم ضدهم غدًا.', es: 'Le das a la gente lo que no encuentra en ningún otro lugar: una conversación sin residuos. Nada de lo que te dicen hoy se usa en su contra mañana.' },
+      { en: 'Fresh starts follow you around — new notebooks, cleared shelves, forgiven people. Beginning again is your native language.', fr: 'Les nouveaux départs te suivent partout — cahiers neufs, étagères dégagées, personnes pardonnées. Recommencer est ta langue maternelle.', ar: 'البدايات الجديدة تتبعك أينما ذهبت — دفاتر جديدة ورفوف مرتّبة وأناس غُفر لهم. أن تبدأ من جديد هو لغتك الأم.', es: 'Los nuevos comienzos te siguen a todas partes: cuadernos nuevos, estantes despejados, gente perdonada. Volver a empezar es tu lengua materna.' },
+      { en: 'Your mind clears the way snow settles — not by force, but by letting things land and go quiet.', fr: 'Ton esprit s\'éclaircit comme la neige se pose — pas par la force, mais en laissant les choses atterrir et se taire.', ar: 'يصفو ذهنك كما يستقر الثلج — لا بالقوة، بل بترك الأشياء تهبط وتهدأ.', es: 'Tu mente se aclara como se asienta la nieve: no por la fuerza, sino dejando que las cosas aterricen y se aquieten.' },
+      { en: 'People mistake your openness for simplicity. There is nothing simple about keeping a heart uncluttered on purpose.', fr: 'Les gens confondent ton ouverture avec de la simplicité. Il n\'y a rien de simple à garder un cœur désencombré volontairement.', ar: 'يخلط الناس بين انفتاحك والبساطة. لا شيء بسيطًا في أن تُبقي قلبك خاليًا من الفوضى عن قصد.', es: 'La gente confunde tu apertura con simpleza. No hay nada simple en mantener un corazón despejado a propósito.' },
+      { en: 'You reset faster than people expect — not because you feel less, but because you refuse to redecorate your life around a wound.', fr: 'Tu te remets plus vite que les gens ne s\'y attendent — non parce que tu ressens moins, mais parce que tu refuses de redécorer ta vie autour d\'une blessure.', ar: 'تتعافى أسرع مما يتوقع الناس — ليس لأنك تشعر أقل، بل لأنك ترفض أن تعيد ترتيب حياتك حول جرح.', es: 'Te recuperas más rápido de lo que la gente espera: no porque sientas menos, sino porque te niegas a redecorar tu vida alrededor de una herida.' },
+      { en: 'Clarity is your gift — just don\'t let anyone treat your clean slate as a dumping ground. Space held open still belongs to you.', fr: 'La clarté est ton don — ne laisse simplement personne traiter ta page blanche comme une décharge. Un espace laissé ouvert t\'appartient encore.', ar: 'الصفاء موهبتك — فقط لا تدع أحدًا يعامل صفحتك البيضاء كمكبّ لهمومه. المساحة التي تُبقيها مفتوحة ما زالت ملكك.', es: 'La claridad es tu don; solo no dejes que nadie trate tu página en blanco como un vertedero. El espacio que mantienes abierto sigue siendo tuyo.' },
     ],
   },
 };

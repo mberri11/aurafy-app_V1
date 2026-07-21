@@ -1,4 +1,13 @@
 import { Question, Person, ReadingMode, ResultData, LocalizedString, Language, ResultKind } from '../types';
+import { spectrumHex } from '../themes/categoryTheme';
+
+/**
+ * AURA secondary-hue gate (AURA_PRISM_V2). When the runner-up colour scores at least
+ * this fraction of the winner, the aura is "two-tone" — the result orb paints a rim arc
+ * in the runner-up's hue ("blue, with a light of violet"). Below it, the aura is pure and
+ * the arc renders silver. Named constant, not a magic number.
+ */
+export const AURA_SECONDARY_THRESHOLD = 0.6;
 
 /**
  * Core scoring logic for all reading types.
@@ -263,12 +272,21 @@ function scoreCategorical(
   const share = total > 0 ? topVal / total : 0;
   const confidence = clamp(Math.round(55 + margin * 30 + share * 15), 60, 95);
 
+  // AURA only: the secondary hue. Runner-up scoring ≥ AURA_SECONDARY_THRESHOLD of the
+  // winner → persist its hex (the orb's rim arc); else null → silver arc. Persisted on
+  // the result so History + the share card render identically to the reveal.
+  let secondaryColor: string | null = null;
+  if (moduleId === 'aura_color' && secondCat && topVal > 0) {
+    if (secondVal / topVal >= AURA_SECONDARY_THRESHOLD) secondaryColor = spectrumHex(secondCat);
+  }
+
   return {
     moduleId,
     mode,
     scores: categoryTotals,
     dominantDimension: topCat,
     secondaryDimension: secondCat,
+    secondaryColor,
     confidence,
     insights: [], // filled in by resultGenerator (categorical path lands with Aura — C-4)
   };
@@ -283,7 +301,7 @@ function clamp(value: number, min: number, max: number): number {
 const NAME_CONJUNCTION: Record<Language, string> = { en: 'and', fr: 'et', ar: 'و', es: 'y' };
 
 /** Natural join of tied winners' names: 2 → "X and Y"; 3+ → "X, Y, and Z" (Oxford
- *  comma). One implementation for any N — circle mode allows up to 10 people. */
+ *  comma). One implementation for any N — circle mode allows up to 8 people. */
 export function joinNames(names: string[], lang: Language): string {
   if (names.length <= 1) return names[0] ?? '';
   const and = NAME_CONJUNCTION[lang];

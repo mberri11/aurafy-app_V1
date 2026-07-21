@@ -134,6 +134,10 @@ export interface UserState extends ContentSlice {
   readingCount: number;
   /** True once the user has spent their one free-trial reading (FREE_TRIAL_MODULE_ID). */
   freeTrialUsed: boolean;
+  /** Every module id the user has EVER completed a reading of — unlike `history`
+   *  (capped at MAX_HISTORY) this never forgets, so question pooling can tell a
+   *  genuine first reading (curated core set) from a repeat (varied set). */
+  completedModuleIds: string[];
   /** Ids of paid modules (Module.unlockCost) the user has permanently unlocked. Persisted. */
   unlockedModules: string[];
   /** Rewarded videos already watched today + the local day they count for (daily cap). */
@@ -203,6 +207,7 @@ export const useUserStore = create<UserState>()(
       recentTransactions: [welcomeTransaction()],
       readingCount: 0,
       freeTrialUsed: false,
+      completedModuleIds: [],
       unlockedModules: [],
       rewardedToday: 0,
       rewardedDate: null,
@@ -377,7 +382,12 @@ export const useUserStore = create<UserState>()(
       addReading: (reading: Reading): void => {
         set((s) => {
           const newHistory = [reading, ...s.history].slice(0, MAX_HISTORY);
-          return { history: newHistory };
+          return {
+            history: newHistory,
+            completedModuleIds: s.completedModuleIds.includes(reading.moduleId)
+              ? s.completedModuleIds
+              : [...s.completedModuleIds, reading.moduleId],
+          };
         });
       },
 
@@ -424,6 +434,7 @@ export const useUserStore = create<UserState>()(
           recentTransactions: [welcomeTransaction()],
           readingCount: 0,
           freeTrialUsed: false,
+          completedModuleIds: [],
           unlockedModules: [],
           rewardedToday: 0,
           rewardedDate: null,

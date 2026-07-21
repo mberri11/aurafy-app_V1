@@ -9,7 +9,8 @@
     "android": "EXPO_OFFLINE=true expo start --android",
     "ios": "EXPO_OFFLINE=true expo start --ios",
     "web": "EXPO_OFFLINE=true expo start --web",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "validate:pools": "node scripts/validate-question-pools.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

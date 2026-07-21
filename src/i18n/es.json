@@ -27,6 +27,7 @@
     "settings": "Ajustes"
   },
   "onboarding": {
+    "chooseLanguage": "Elige tu idioma",
     "slide1Title": "Descifra la energía a tu alrededor",
     "slide1Subtitle": "Elige un módulo. Ingresa las personas en tu vida. Obtén una lectura poderosa en menos de 3 minutos.",
     "slide2Title": "Basado en psicología real",
@@ -160,7 +161,15 @@
       "cost": "Desde 1"
     },
     "red_green_flag": {
-      "title": "¿Red flag o green flag?"
+      "title": "¿Bandera roja o bandera verde?",
+      "titleRed": "¿Bandera roja",
+      "titleOr": "o",
+      "titleGreen": "bandera verde?",
+      "subtitle": "Lee el patrón, no la promesa",
+      "description": "Veinte preguntas de conducta sobre constancia, límites, honestidad, reparación y control. Lee a una sola persona para un veredicto claro — o lee todo tu círculo para encontrar la bandera más roja.",
+      "poweredBy": "Teoría del apego + investigación sobre reparación",
+      "time": "5–7 min",
+      "cost": "Desde 1"
     },
     "shadow_self": {
       "title": "Tu lado sombra",
@@ -193,7 +202,7 @@
     "circle": {
       "title": "Círculo",
       "subtitle": "Lee todo tu entorno",
-      "persons": "4–10 personas"
+      "persons": "4–8 personas"
     },
     "heading": "¿A cuántas personas vas a leer?",
     "earnStars": "Gana más",
@@ -205,9 +214,10 @@
     "progressLabel": "{{current}} / {{total}}",
     "noQuestions": "No hay preguntas disponibles",
     "leaveTitle": "¿Salir de esta lectura?",
-    "leaveMessagePaid": "Tu progreso no se guardará. Tus estrellas serán reembolsadas ({{cost}} ✦).",
+    "leaveMessagePaid": "Tu progreso no se guardará y tus estrellas no serán reembolsadas.",
     "leaveMessageTrial": "Tu progreso no se guardará. Recuperarás tu lectura gratuita.",
     "leaveConfirm": "Salir de la lectura",
+    "noOne": "Nadie",
     "frameworks": {
       "attachment": "Teoría del apego",
       "loveLanguages": "Lenguajes del amor",
@@ -264,6 +274,10 @@
   },
   "result": {
     "notFound": "No se encontró ningún resultado.",
+    "aura": {
+      "rareKeeper": "RARO · EL GUARDIÁN",
+      "rareClearLight": "RARO · LA LUZ CLARA"
+    },
     "confidenceHeadline": "Tenemos un {{confidence}}% de confianza en esta lectura.",
     "confidenceSub": "Más alto que el {{pct}}% de tus lecturas.",
     "lockedEyebrow": "Aún velado",
@@ -276,6 +290,7 @@
     "disclaimer": "Aurafy es para la autorreflexión y el entretenimiento — no una herramienta de diagnóstico clínico.",
     "insightPrefix": "✦",
     "comparison": "El panorama completo",
+    "compScore": "{{score}} / {{total}} · {{pct}} %",
     "theRead": "La lectura",
     "whatThisMeans": "Qué significa esto",
     "count": {
@@ -412,6 +427,10 @@
     "needMore": "Faltan {{count}}",
     "cosmic": "Cósmico",
     "desertOracle": "Oráculo del desierto",
+    "elvenGrove": "Arboleda élfica",
+    "cosmicDesc": "Nebulosas violetas y luz de estrellas — el cielo nocturno insignia de Aurafy.",
+    "desertOracleDesc": "Crepúsculo sobre dunas cálidas — terracota, ámbar y arena a la deriva.",
+    "elvenGroveDesc": "Una arboleda élfica a la luz de la luna — esmeralda profundo, luz turquesa y oro antiguo.",
     "midnightVeil": "Velo de medianoche",
     "deepOcean": "Océano profundo",
     "roseQuartz": "Cuarzo rosa",
@@ -437,6 +456,8 @@
     "latest": "RECIENTES",
     "sponsored": "PATROCINADO",
     "rewardToday": "+1 ✦ hoy",
+    "dailyBadge": "Diario",
+    "comeBackTomorrow": "Vuelve mañana para una nueva reflexión",
     "minRead": "{{n}} min de lectura",
     "min": "{{n}} min",
     "takeReading": "Hacer la lectura {{module}}",

@@ -24,11 +24,11 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { accentInk, isPrismModule } from '@/src/themes/categoryTheme';
+import { accentInk, AURA_V2, AURA_SPECTRUM_STOPS, FLAG_DUO, FLAG_SWEEP, isDualFlagModule, isPrismModule } from '@/src/themes/categoryTheme';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
 import { useUserStore } from '@/src/store/userStore';
-import { Question, ReadingMode, Language } from '@/src/types';
+import { ReadingMode, Language } from '@/src/types';
 import { MODULES } from '@/src/data/modules';
 import { localizeTemplate } from '@/src/engine/scoringEngine';
 import AurafyLogo from '@/src/components/AurafyLogo';
@@ -38,35 +38,7 @@ import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
 import { lightTap } from '@/src/utils/haptics';
 import { playEffect, playLoop, stopLoop, type LoopKey } from '@/src/utils/sound';
-
-// Map moduleId → questions
-import { whoLovesMeQuestions } from '@/src/data/questions/whoLovesMe';
-import { whoHatesMeQuestions } from '@/src/data/questions/whoHatesMe';
-import { whoJealousQuestions } from '@/src/data/questions/whoJealous';
-import { whoSoulmateQuestions } from '@/src/data/questions/whoSoulmate';
-import { whoAdmiresQuestions } from '@/src/data/questions/whoAdmires';
-import { energyReadingQuestions } from '@/src/data/questions/energyReading';
-import { attachmentStyleQuestions } from '@/src/data/questions/attachmentStyle';
-import { amITheProblemQuestions } from '@/src/data/questions/amITheProblem';
-import { whoCutOffQuestions } from '@/src/data/questions/whoCutOff';
-import { whoWillHurtMeQuestions } from '@/src/data/questions/whoWillHurtMe';
-import { shadowSelfQuestions } from '@/src/data/questions/shadowSelf';
-import { auraColorQuestions } from '@/src/data/questions/auraColor';
-
-const QUESTIONS_MAP: Record<string, Question[]> = {
-  who_loves_me: whoLovesMeQuestions,
-  who_hates_me: whoHatesMeQuestions,
-  who_jealous: whoJealousQuestions,
-  who_soulmate: whoSoulmateQuestions,
-  who_admires: whoAdmiresQuestions,
-  energy_reading: energyReadingQuestions,
-  attachment_style: attachmentStyleQuestions,
-  am_i_problem: amITheProblemQuestions,
-  who_cut_off: whoCutOffQuestions,
-  who_will_hurt_me: whoWillHurtMeQuestions,
-  shadow_self: shadowSelfQuestions,
-  aura_color: auraColorQuestions,
-};
+import { selectQuestions } from '@/src/engine/questionPool';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -96,12 +68,33 @@ export default function QuizScreen() {
   // the answered one exits toward the trailing (right) side.
   const enterX = isRTL ? -SCREEN_WIDTH : SCREEN_WIDTH;
   const exitX = isRTL ? SCREEN_WIDTH : -SCREEN_WIDTH;
-  const { currentPersons, recordAnswer, resetReading } = useReadingStore();
+  const { currentPersons, recordAnswer, resetReading, currentSeed, setServedQuestions } =
+    useReadingStore();
   const showFrameworkTags = useSettingsStore((s) => s.showFrameworkTags);
   const autoCentering = useSettingsStore((s) => s.autoCentering);
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
-  const questions = useMemo(() => QUESTIONS_MAP[moduleId ?? ''] ?? [], [moduleId]);
+  // First-ever reading of a module = the curated core set in authored order; repeats
+  // draw a seeded, stratified 20 from the module's pool (pooled modules only — see
+  // questionPool.ts). Read once per mount: history/completedModuleIds can't change
+  // until the result saves, and by then this screen is unmounted.
+  const isFirstReading = useMemo(() => {
+    const s = useUserStore.getState();
+    return (
+      !s.completedModuleIds.includes(moduleId ?? '') &&
+      !s.history.some((r) => r.moduleId === moduleId)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moduleId]);
+  const questions = useMemo(
+    () => selectQuestions(moduleId ?? '', isFirstReading, currentSeed),
+    [moduleId, isFirstReading, currentSeed],
+  );
+  // Publish the served set so loading.tsx scores the SAME questions and result.tsx
+  // persists them onto the saved Reading.
+  useEffect(() => {
+    setServedQuestions(questions.map((q) => q.id));
+  }, [questions, setServedQuestions]);
 
   // Ambient quiz pad: the mood follows the MODULE's subject matter, not the person
   // count — a relationship module read in solo mode still gets the relationship pad.
@@ -112,12 +105,10 @@ export default function QuizScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [leaveSheetVisible, setLeaveSheetVisible] = useState(false);
-  const earnStars = useUserStore((s) => s.earnStars);
   const restoreFreeTrial = useUserStore((s) => s.restoreFreeTrial);
   // What Start charged for THIS attempt: person-entry passes trial='1' when it consumed
   // the free trial instead of spending stars. Abandoning gives back exactly that.
   const wasFreeTrial = trial === '1';
-  const abandonRefund = module?.starsCost[mode ?? 'solo'] ?? 1;
 
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
@@ -129,11 +120,13 @@ export default function QuizScreen() {
   const breathDone = useRef(false);
 
   const accent = module?.color ?? theme.primary;
-  // Prismatic identity (aura_color): gradient blooms / progress fill / tag; the
-  // low-alpha answer washes keep a single tint (the gradient's violet anchor).
+  // AURA_PRISM_V2: obsidian field, graphite answer cards, spectrum progress fill,
+  // silver-hairline framework tag — no coloured gradient identity.
   const prism = isPrismModule(module?.id ?? '');
-  const g = theme.gradient;
-  const washTint = prism ? g[1] : accent;
+  // RED/GREEN dual identity: the progress fill sweeps red→amber→green ("which
+  // will it be"); everything else keeps the red base accent.
+  const dual = isDualFlagModule(module?.id ?? '');
+  const washTint = prism ? AURA_V2.silver : accent;
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
@@ -225,14 +218,15 @@ export default function QuizScreen() {
 
   const handleAbandonConfirm = useCallback(() => {
     setLeaveSheetVisible(false);
-    // Honest abandon: no result will be delivered, so give back what Start charged.
+    // NO STARS REFUND (Simo, 2026-07-19): abandoning a paid reading forfeits the
+    // stars Start charged — the sheet says so before the user confirms. Only the
+    // free-trial flag is restored (that's the free module's one trial, not stars).
     if (wasFreeTrial) restoreFreeTrial();
-    else earnStars(abandonRefund, 'refund');
     resetReading();
     // Pop the whole attempt (quiz → person-entry → reading-mode) back to module
     // detail, so restarting is one tap away.
     router.dismissTo({ pathname: '/module/[id]', params: { id: moduleId ?? '' } });
-  }, [wasFreeTrial, restoreFreeTrial, earnStars, abandonRefund, resetReading, moduleId]);
+  }, [wasFreeTrial, restoreFreeTrial, resetReading, moduleId]);
 
   const handleAnswer = useCallback(
     (answerValue: string) => {
@@ -291,7 +285,7 @@ export default function QuizScreen() {
       message={
         wasFreeTrial
           ? t('quiz.leaveMessageTrial')
-          : t('quiz.leaveMessagePaid', { cost: abandonRefund })
+          : t('quiz.leaveMessagePaid')
       }
       confirmLabel={t('quiz.leaveConfirm')}
       tone="rose"
@@ -334,23 +328,26 @@ export default function QuizScreen() {
         : t('quiz.breath.multi');
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Ambient depth base (mirrors module detail / reading mode) */}
-      <LinearGradient
-        colors={theme.fieldGradient}
-        locations={[0, 0.5, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-      {/* Violet bloom behind the question (upper-left) + faint teal corner (lower-right) */}
+    <View style={[styles.container, { backgroundColor: prism ? AURA_V2.obsidian : theme.background }]}>
+      {/* Ambient depth base (mirrors module detail / reading mode) — aura = obsidian. */}
+      {prism ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: AURA_V2.obsidian }]} />
+      ) : (
+        <LinearGradient
+          colors={theme.fieldGradient}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      {/* Question bloom (upper-left) + faint corner (lower-right). Aura = a pearl haze. */}
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="quiz_bloom" cx="28%" cy="16%" r="62%">
             {prism
               ? [
-                  <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.24} />,
-                  <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.1} />,
-                  <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.04} />,
-                  <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                  <Stop key="p0" offset="0%" stopColor={AURA_V2.pearl} stopOpacity={0.1} />,
+                  <Stop key="p1" offset="55%" stopColor={AURA_V2.pearl} stopOpacity={0.035} />,
+                  <Stop key="p2" offset="100%" stopColor={AURA_V2.obsidian} stopOpacity={0} />,
                 ]
               : [
                   <Stop key="s0" offset="0%" stopColor={accent} stopOpacity={0.24} />,
@@ -384,19 +381,46 @@ export default function QuizScreen() {
                       <RadialGradient id="breath_halo" cx="50%" cy="50%" r="50%">
                         {prism
                           ? [
-                              <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.45} />,
-                              <Stop key="p1" offset="50%" stopColor={g[0]} stopOpacity={0.2} />,
-                              <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.08} />,
-                              <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                              <Stop key="p0" offset="0%" stopColor={AURA_V2.pearl} stopOpacity={0.4} />,
+                              <Stop key="p1" offset="55%" stopColor={AURA_V2.silver} stopOpacity={0.14} />,
+                              <Stop key="p2" offset="100%" stopColor={AURA_V2.obsidian} stopOpacity={0} />,
                             ]
                           : [
-                              <Stop key="s0" offset="0%" stopColor={accent} stopOpacity={0.45} />,
-                              <Stop key="s1" offset="60%" stopColor={accent} stopOpacity={0.16} />,
+                              <Stop
+                                key="s0"
+                                offset="0%"
+                                stopColor={dual ? FLAG_DUO.red : accent}
+                                stopOpacity={dual ? 0.38 : 0.45}
+                              />,
+                              <Stop
+                                key="s1"
+                                offset="60%"
+                                stopColor={dual ? FLAG_DUO.red : accent}
+                                stopOpacity={dual ? 0.13 : 0.16}
+                              />,
                               <Stop key="s2" offset="100%" stopColor={theme.background} stopOpacity={0} />,
                             ]}
                       </RadialGradient>
+                      {/* Dual identity: a matching GREEN lobe (gradient is per-element,
+                          so each circle below gets its own centered radial). */}
+                      {dual ? (
+                        <RadialGradient id="breath_halo_green" cx="50%" cy="50%" r="50%">
+                          <Stop offset="0%" stopColor={FLAG_DUO.green} stopOpacity={0.38} />
+                          <Stop offset="60%" stopColor={FLAG_DUO.green} stopOpacity={0.13} />
+                          <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+                        </RadialGradient>
+                      ) : null}
                     </Defs>
-                    <Circle cx="50%" cy="50%" r="50%" fill="url(#breath_halo)" />
+                    {dual ? (
+                      // Two overlapping lobes — red left, green right — so the halo
+                      // reads as the module's dual aura instead of full red.
+                      <>
+                        <Circle cx="38%" cy="50%" r="44%" fill="url(#breath_halo)" />
+                        <Circle cx="62%" cy="50%" r="44%" fill="url(#breath_halo_green)" />
+                      </>
+                    ) : (
+                      <Circle cx="50%" cy="50%" r="50%" fill="url(#breath_halo)" />
+                    )}
                   </Svg>
                 </Animated.View>
                 <AurafyLogo size={rs(60)} />
@@ -425,35 +449,33 @@ export default function QuizScreen() {
               current={currentIndex + 1}
               total={questions.length}
               accentColor={accent}
-              gradientColors={prism ? g : undefined}
+              gradientColors={prism ? AURA_SPECTRUM_STOPS : dual ? FLAG_SWEEP : undefined}
             />
           </View>
 
           <Animated.View style={[styles.quizBody, cardStyle]}>
             {showFrameworkTags &&
               (prism ? (
-                <LinearGradient
-                  colors={g}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.frameworkTagRingPrism}
-                >
-                  <View style={[styles.frameworkTagInnerPrism, { backgroundColor: theme.bg2 }]}>
-                    <View style={[styles.frameworkDot, { backgroundColor: theme.text }]} />
-                    <Text style={[styles.frameworkText, { color: theme.text }]}>
-                      {t(`quiz.frameworks.${frameworkKey}`).toUpperCase()}
-                    </Text>
-                  </View>
-                </LinearGradient>
+                <View style={[styles.frameworkTag, { backgroundColor: 'transparent', borderColor: `${AURA_V2.silver}80` }]}>
+                  <View style={[styles.frameworkDot, { backgroundColor: AURA_V2.silver }]} />
+                  <Text style={[styles.frameworkText, { color: AURA_V2.silver }]}>
+                    {t(`quiz.frameworks.${frameworkKey}`).toUpperCase()}
+                  </Text>
+                </View>
               ) : (
+                // Dual identity: the framework pill takes the GREEN pole (the red
+                // pole lives in the name highlight + sweep start) so the quiz
+                // reads both colors.
                 <View
                   style={[
                     styles.frameworkTag,
-                    { backgroundColor: `${accent}14`, borderColor: `${accent}66` },
+                    dual
+                      ? { backgroundColor: `${FLAG_DUO.green}14`, borderColor: `${FLAG_DUO.green}66` }
+                      : { backgroundColor: `${accent}14`, borderColor: `${accent}66` },
                   ]}
                 >
-                  <View style={[styles.frameworkDot, { backgroundColor: accent }]} />
-                  <Text style={[styles.frameworkText, { color: accent }]}>
+                  <View style={[styles.frameworkDot, { backgroundColor: dual ? FLAG_DUO.green : accent }]} />
+                  <Text style={[styles.frameworkText, { color: dual ? FLAG_DUO.green : accent }]}>
                     {t(`quiz.frameworks.${frameworkKey}`).toUpperCase()}
                   </Text>
                 </View>
@@ -469,9 +491,21 @@ export default function QuizScreen() {
                 ? soloRawTemplate.split('{name}').map((part, i, arr) => (
                     <React.Fragment key={i}>
                       {part}
-                      {i < arr.length - 1 && (
-                        <Text style={{ color: accentInk(accent) }}>{soloPerson.name}</Text>
-                      )}
+                      {i < arr.length - 1 &&
+                        (dual ? (
+                          // Dual identity: the name itself wears both poles —
+                          // first half red, second half green.
+                          <>
+                            <Text style={{ color: FLAG_DUO.red }}>
+                              {soloPerson.name.slice(0, Math.ceil(soloPerson.name.length / 2))}
+                            </Text>
+                            <Text style={{ color: FLAG_DUO.green }}>
+                              {soloPerson.name.slice(Math.ceil(soloPerson.name.length / 2))}
+                            </Text>
+                          </>
+                        ) : (
+                          <Text style={{ color: accentInk(accent) }}>{soloPerson.name}</Text>
+                        ))}
                     </React.Fragment>
                   ))
                 : questionText}
@@ -496,7 +530,9 @@ export default function QuizScreen() {
                     activeOpacity={0.8}
                     style={[
                       styles.answerCard,
-                      { backgroundColor: theme.surface, borderColor: theme.borderStrong },
+                      prism
+                        ? { backgroundColor: AURA_V2.graphite, borderColor: 'transparent' }
+                        : { backgroundColor: theme.surface, borderColor: theme.borderStrong },
                     ]}
                   >
                     <LinearGradient
@@ -523,7 +559,9 @@ export default function QuizScreen() {
                     activeOpacity={0.8}
                     style={[
                       styles.answerCard,
-                      { backgroundColor: theme.surface, borderColor: theme.borderStrong },
+                      prism
+                        ? { backgroundColor: AURA_V2.graphite, borderColor: 'transparent' }
+                        : { backgroundColor: theme.surface, borderColor: theme.borderStrong },
                     ]}
                   >
                     <LinearGradient
@@ -578,6 +616,32 @@ export default function QuizScreen() {
                   </TouchableOpacity>
                 ))
               )}
+
+              {/* "No one" — multi mode only. Without it every question FORCED the user to
+                  blame somebody, awarding phantom points even when the behaviour fits
+                  nobody: scores inflated and ties (a 10–10 compare read) became common.
+                  Recording 'none' matches no person id, so scoreMulti simply skips the
+                  question — no engine change needed. Deliberately styled as a plain
+                  answer card (no avatar/colour) so it reads as an opt-out, not a person. */}
+              {!currentQuestion.soloAnswers && !isSoloRelationship && currentPersons.length > 0 ? (
+                <TouchableOpacity
+                  onPress={() => handleAnswer('none')}
+                  accessibilityLabel={t('quiz.noOne')}
+                  accessibilityRole="button"
+                  activeOpacity={0.8}
+                  style={[
+                    styles.answerCard,
+                    styles.noOneCard,
+                    prism
+                      ? { backgroundColor: AURA_V2.graphite, borderColor: 'transparent' }
+                      : { backgroundColor: 'transparent', borderColor: theme.surfaceBorder },
+                  ]}
+                >
+                  <Text style={[styles.noOneText, { color: theme.textMuted }]}>
+                    {t('quiz.noOne')}
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
             </ScrollView>
           </Animated.View>
         </>
@@ -670,6 +734,10 @@ const styles = StyleSheet.create({
   answerText: { fontSize: rs(15), lineHeight: rs(21), fontFamily: 'HankenGrotesk_500Medium' },
 
   // Multi person cards
+  // "No one" opt-out — shorter and quieter than a person card (transparent fill,
+  // centred muted label) so it never competes with the real choices.
+  noOneCard: { minHeight: rs(46), paddingVertical: rs(11), alignItems: 'center' },
+  noOneText: { fontSize: rs(14), fontFamily: 'HankenGrotesk_500Medium' },
   personCard: {
     minHeight: rs(60),
     borderRadius: rs(16),

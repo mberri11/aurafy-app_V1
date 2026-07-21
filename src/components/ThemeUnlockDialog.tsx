@@ -25,6 +25,8 @@ const HERO_W = CARD_W - rs(40);
 interface ThemeUnlockDialogProps {
   visible: boolean;
   themeName: string;
+  /** Short mood line rendered under the name (Simo, 2026-07-19). Optional. */
+  description?: string;
   gradient: [string, string, string];
   cost: number;
   balance: number;
@@ -44,6 +46,7 @@ interface ThemeUnlockDialogProps {
 export default function ThemeUnlockDialog({
   visible,
   themeName,
+  description,
   gradient,
   cost,
   balance,
@@ -100,6 +103,12 @@ export default function ThemeUnlockDialog({
             </View>
 
             <Text style={[styles.name, { color: theme.text }]}>{themeName}</Text>
+
+            {description ? (
+              <Text style={[styles.desc, { color: theme.textMuted }]} numberOfLines={2}>
+                {description}
+              </Text>
+            ) : null}
 
             <View style={styles.statsRow}>
               <View style={styles.stat}>
@@ -207,6 +216,14 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_600SemiBold',
     textAlign: 'center',
     marginTop: rs(16),
+  },
+  desc: {
+    fontSize: rs(12.5),
+    lineHeight: rs(18),
+    fontFamily: 'HankenGrotesk_400Regular',
+    textAlign: 'center',
+    marginTop: rs(6),
+    paddingHorizontal: rs(6),
   },
   statsRow: {
     flexDirection: 'row',

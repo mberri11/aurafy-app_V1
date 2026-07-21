@@ -816,6 +816,9 @@ export const articlesFr: ArticleContentMap = {
           { title: 'Bleu — le calme.', text: 'Stable, réfléchi, digne de confiance sous pression.' },
           { title: 'Violet — la profondeur.', text: 'Intuition et imagination ; vit un peu dans son monde intérieur.' },
           { title: 'Vert — le renouveau.', text: 'Équilibre et attention ; le stabilisateur discret.' },
+          { title: 'Rose — la dévotion.', text: 'Tendresse et loyauté ; aime de près et offre sa chaleur sans compter.' },
+          { title: 'Noir — le gardien.', text: "Une profondeur tenue derrière des contours nets ; une présence qu'on sent et qu'on ne franchit jamais sans y être invité." },
+          { title: 'Blanc — la lumière claire.', text: 'Un espace dégagé ; apporte calme et honnêteté, et permet aux autres de repartir de zéro.' },
         ],
       },
       {

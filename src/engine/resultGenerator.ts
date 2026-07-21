@@ -1,6 +1,7 @@
 import { ResultData, MultiResults, SoloResults, CategoricalResults, CountResults, CountTier, LocalizedString } from '../types';
 import { selectInsights, selectInsightsFlat } from './insightSelector';
 import { joinNames, localizeTemplate, localizeTemplateLocalized } from './scoringEngine';
+import { countTier } from './countTier';
 
 /**
  * Takes ResultData + module results file → returns full result with
@@ -64,13 +65,8 @@ export function generateCountResult(
   moduleResults: CountResults,
   seed: number,
 ): ResultData {
-  const total = result.signalTotal ?? 0;
-  const share = total > 0 ? (result.signalCount ?? 0) / total : 0;
-  // 'none' (<= 0.1) catches 0/20, 1/20, 2/20 — the "rarely on basically everything" read
-  // that must stay unambiguous, not softened. Insights are TIER-keyed, so a low/zero read
-  // never draws affirming copy.
-  const tier: CountTier =
-    share <= 0.1 ? 'none' : share < 0.4 ? 'low' : share < 0.7 ? 'medium' : 'high';
+  // Insights are TIER-keyed, so a low/zero read never draws affirming copy.
+  const tier: CountTier = countTier(result.signalCount ?? 0, result.signalTotal ?? 0);
   // {name} = the single solo subject (ResultData.winner holds that one person on this
   // path — only the TEMPLATE changes, from a contest statement to a descriptive one).
   const headline = localizeTemplate(moduleResults.tiers[tier], result.winner?.name ?? '');

@@ -23,7 +23,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { AURA_WHEEL_HUES, categoryForModule, isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
+import { AURA_V2, AURA_SPECTRUM_STOPS, FLAG_DUO, FLAG_DUO_STOPS, categoryForModule, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
+import CategoryMotif from '@/src/components/CategoryMotif';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
@@ -54,6 +55,8 @@ import { energyReadingCountResults } from '@/src/data/results/energyReadingCount
 import { whoCutOffCountResults } from '@/src/data/results/whoCutOffCount';
 import { whoWillHurtMeResults } from '@/src/data/results/whoWillHurtMeResults';
 import { whoWillHurtMeCountResults } from '@/src/data/results/whoWillHurtMeCount';
+import { redGreenFlagResults } from '@/src/data/results/redGreenFlagResults';
+import { redGreenFlagCountResults } from '@/src/data/results/redGreenFlagCount';
 import { whoHatesMeResults } from '@/src/data/results/whoHatesMeResults';
 import { whoJealousResults } from '@/src/data/results/whoJealousResults';
 import { whoSoulmateResults } from '@/src/data/results/whoSoulmateResults';
@@ -66,34 +69,7 @@ import { whoCutOffResults } from '@/src/data/results/whoCutOffResults';
 import { auraColorResults } from '@/src/data/results/auraColorResults';
 import { CategoricalResults, CountResults, MultiResults, SoloResults } from '@/src/types';
 
-import { whoLovesMeQuestions } from '@/src/data/questions/whoLovesMe';
-import { whoHatesMeQuestions } from '@/src/data/questions/whoHatesMe';
-import { whoJealousQuestions } from '@/src/data/questions/whoJealous';
-import { whoSoulmateQuestions } from '@/src/data/questions/whoSoulmate';
-import { whoAdmiresQuestions } from '@/src/data/questions/whoAdmires';
-import { energyReadingQuestions } from '@/src/data/questions/energyReading';
-import { attachmentStyleQuestions } from '@/src/data/questions/attachmentStyle';
-import { amITheProblemQuestions } from '@/src/data/questions/amITheProblem';
-import { whoCutOffQuestions } from '@/src/data/questions/whoCutOff';
-import { whoWillHurtMeQuestions } from '@/src/data/questions/whoWillHurtMe';
-import { shadowSelfQuestions } from '@/src/data/questions/shadowSelf';
-import { auraColorQuestions } from '@/src/data/questions/auraColor';
-import { Question } from '@/src/types';
-
-const QUESTIONS_MAP: Record<string, Question[]> = {
-  who_loves_me: whoLovesMeQuestions,
-  who_hates_me: whoHatesMeQuestions,
-  who_jealous: whoJealousQuestions,
-  who_soulmate: whoSoulmateQuestions,
-  who_admires: whoAdmiresQuestions,
-  energy_reading: energyReadingQuestions,
-  attachment_style: attachmentStyleQuestions,
-  am_i_problem: amITheProblemQuestions,
-  who_cut_off: whoCutOffQuestions,
-  who_will_hurt_me: whoWillHurtMeQuestions,
-  shadow_self: shadowSelfQuestions,
-  aura_color: auraColorQuestions,
-};
+import { getModuleQuestions } from '@/src/engine/questionPool';
 
 const MULTI_RESULTS_MAP: Record<string, MultiResults> = {
   who_loves_me: whoLovesMeResults,
@@ -104,6 +80,7 @@ const MULTI_RESULTS_MAP: Record<string, MultiResults> = {
   energy_reading: energyReadingResults,
   who_cut_off: whoCutOffResults,
   who_will_hurt_me: whoWillHurtMeResults,
+  red_green_flag: redGreenFlagResults,
 };
 
 const SOLO_RESULTS_MAP: Record<string, SoloResults> = {
@@ -125,6 +102,8 @@ const COUNT_RESULTS_MAP: Record<string, CountResults> = {
   energy_reading: energyReadingCountResults,
   who_cut_off: whoCutOffCountResults,
   who_will_hurt_me: whoWillHurtMeCountResults,
+  // Inverted polarity like will_hurt/hates: none = green flag (relief), high = red.
+  red_green_flag: redGreenFlagCountResults,
 };
 
 // Categorical modules keep their own map — CategoricalResults' shape (categories +
@@ -214,11 +193,15 @@ const HexDot = memo(function HexDot({
 const HexLoader = memo(function HexLoader({
   accent,
   dotColors,
+  glowDuo,
 }: {
   accent: string;
-  /** Per-dot hue override — the aura prism passes the 6 wheel hues so the chase
-   *  reads as a spinning rainbow. Default: all dots in the module accent. */
+  /** Per-dot hue override — the aura prism passes the 6 canonical spectrum stops
+   *  (AURA_SPECTRUM_STOPS) so the chase reads as a spinning spectrum. Default: accent. */
   dotColors?: readonly string[];
+  /** Dual identity (red_green_flag): [red, green] — the breathing halo behind the
+   *  atom renders as TWO lobes (left/right) instead of one full-accent bloom. */
+  glowDuo?: readonly [string, string];
 }) {
   const animationsEnabled = useSettingsStore((s) => s.animationsEnabled);
   const phase = useSharedValue(0);
@@ -287,12 +270,27 @@ const HexLoader = memo(function HexLoader({
         <Svg width={ATOM_GLOW} height={ATOM_GLOW}>
           <Defs>
             <RadialGradient id="atom_glow" cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={accent} stopOpacity={0.45} />
-              <Stop offset="60%" stopColor={accent} stopOpacity={0.12} />
-              <Stop offset="100%" stopColor={accent} stopOpacity={0} />
+              <Stop offset="0%" stopColor={glowDuo ? glowDuo[0] : accent} stopOpacity={glowDuo ? 0.4 : 0.45} />
+              <Stop offset="60%" stopColor={glowDuo ? glowDuo[0] : accent} stopOpacity={0.12} />
+              <Stop offset="100%" stopColor={glowDuo ? glowDuo[0] : accent} stopOpacity={0} />
             </RadialGradient>
+            {glowDuo ? (
+              <RadialGradient id="atom_glow_b" cx="50%" cy="50%" r="50%">
+                <Stop offset="0%" stopColor={glowDuo[1]} stopOpacity={0.4} />
+                <Stop offset="60%" stopColor={glowDuo[1]} stopOpacity={0.12} />
+                <Stop offset="100%" stopColor={glowDuo[1]} stopOpacity={0} />
+              </RadialGradient>
+            ) : null}
           </Defs>
-          <Circle cx={ATOM_GLOW / 2} cy={ATOM_GLOW / 2} r={ATOM_GLOW / 2} fill="url(#atom_glow)" />
+          {glowDuo ? (
+            // Two overlapping lobes — red left, green right — the dual aura.
+            <>
+              <Circle cx={ATOM_GLOW * 0.38} cy={ATOM_GLOW / 2} r={ATOM_GLOW * 0.44} fill="url(#atom_glow)" />
+              <Circle cx={ATOM_GLOW * 0.62} cy={ATOM_GLOW / 2} r={ATOM_GLOW * 0.44} fill="url(#atom_glow_b)" />
+            </>
+          ) : (
+            <Circle cx={ATOM_GLOW / 2} cy={ATOM_GLOW / 2} r={ATOM_GLOW / 2} fill="url(#atom_glow)" />
+          )}
         </Svg>
       </Animated.View>
       <Animated.View style={atomStyle}>
@@ -307,7 +305,8 @@ export default function LoadingScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { currentPersons, currentAnswers, setResult, setResultUnlocked } = useReadingStore();
+  const { currentPersons, currentAnswers, currentQuestionIds, setResult, setResultUnlocked } =
+    useReadingStore();
   const { spendStars, stars } = useUserStore();
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
@@ -316,10 +315,11 @@ export default function LoadingScreen() {
   // by CATEGORY (the poetic lines suit the whole family).
   const category = categoryForModule(moduleId ?? '');
   const { accent, accentSoft } = moduleTheme(moduleId ?? '');
-  // Prismatic identity (aura_color, Simo 2026-07-04): rainbow hex dots, gradient
-  // blooms, iridescent orb + white ink — the violet fallback read as Who Loves Me.
+  // AURA_PRISM_V2: obsidian field, spectrum chase dots, pearl text, base Prism Orb.
   const prism = isPrismModule(moduleId ?? '');
-  const g = theme.gradient;
+  // RED/GREEN dual identity: the loader chase dots alternate red/green (verdict
+  // unknown); the AD-GATE below switches to the OUTCOME color (see gateAccent).
+  const dual = isDualFlagModule(moduleId ?? '');
 
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const [showAdGate, setShowAdGate] = useState(false);
@@ -359,7 +359,16 @@ export default function LoadingScreen() {
 
   // Compute result immediately on mount
   useEffect(() => {
-    const questions = QUESTIONS_MAP[moduleId ?? ''] ?? [];
+    // Score the exact set the quiz served (pooled modules vary it per reading).
+    // Empty ids = impossible in the normal flow; fall back to the full static
+    // array, which scores identically since unanswered questions are skipped.
+    const allQuestions = getModuleQuestions(moduleId ?? '');
+    const questions =
+      currentQuestionIds.length > 0
+        ? currentQuestionIds
+            .map((id) => allQuestions.find((q) => q.id === id))
+            .filter((q): q is NonNullable<typeof q> => q !== undefined)
+        : allQuestions;
     const moduleType = module?.type ?? 'multi';
 
     const rawResult = scoreReading(
@@ -400,7 +409,7 @@ export default function LoadingScreen() {
 
     resultRef.current = finalResult;
     setResult(finalResult);
-  }, [moduleId, mode, module, currentAnswers, currentPersons, setResult]);
+  }, [moduleId, mode, module, currentAnswers, currentPersons, currentQuestionIds, setResult]);
 
   // Cycle the category copy pool with a fade (out → swap → in), per spec §5.
   useEffect(() => {
@@ -419,6 +428,16 @@ export default function LoadingScreen() {
     const timer = setTimeout(() => setShowAdGate(true), READY_DELAY);
     return () => clearTimeout(timer);
   }, []);
+
+  // RED/GREEN outcome gate: the result is computed (resultRef set) BEFORE showAdGate
+  // flips, so by the gate's first render the verdict is known — the dual module's
+  // gate bloom/ring/orb/eyebrow render in the OUTCOME color (green / amber / red)
+  // instead of the pre-reveal module accent. Other modules keep their accent.
+  const gateOutcome = dual && showAdGate && resultRef.current
+    ? flagOutcomeTheme(flagOutcomeKey(resultRef.current))
+    : null;
+  const gateAccent = gateOutcome?.accent ?? accent;
+  const gateSoft = gateOutcome?.accentSoft ?? accentSoft;
 
   // Slide the sheet up, fade the scrim in, and ghost the loader back once the gate
   // is shown — the hexagon keeps chasing, just faint behind the sheet (per design).
@@ -474,24 +493,28 @@ export default function LoadingScreen() {
   }, [setResultUnlocked, navigateToResult]);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Ambient depth base (mirrors quiz / reading-mode) */}
-      <LinearGradient
-        colors={theme.fieldGradient}
-        locations={[0, 0.5, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+    <View style={[styles.container, { backgroundColor: prism ? AURA_V2.obsidian : theme.background }]}>
+      {/* Ambient depth base (mirrors quiz / reading-mode) — aura = flat obsidian. */}
+      {prism ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: AURA_V2.obsidian }]} />
+      ) : (
+        <LinearGradient
+          colors={theme.fieldGradient}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       {/* Module-tinted upper-left bloom — SOFT tone so dark-accent modules (jealous)
-          still get a visible wash instead of a black screen. */}
+          still get a visible wash instead of a black screen. Aura = a faint pearl haze. */}
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="load_bloom" cx="26%" cy="20%" r="65%">
             {prism
               ? [
-                  <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.18} />,
-                  <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.07} />,
-                  <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.03} />,
-                  <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                  // Near-zero: aura's loader field stays FLAT black (the white atom glow
+                  // is the only light).
+                  <Stop key="p0" offset="0%" stopColor={AURA_V2.pearl} stopOpacity={0.03} />,
+                  <Stop key="p1" offset="100%" stopColor={AURA_V2.obsidian} stopOpacity={0} />,
                 ]
               : [
                   <Stop key="s0" offset="0%" stopColor={accentSoft} stopOpacity={0.18} />,
@@ -503,14 +526,37 @@ export default function LoadingScreen() {
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#load_bloom)" />
       </Svg>
 
+      {/* Dual identity: green counter-bloom lower-right (red soft wash upper-left). */}
+      {dual ? (
+        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+          <Defs>
+            <RadialGradient id="load_bloom_dual" cx="78%" cy="82%" r="60%">
+              <Stop offset="0%" stopColor={FLAG_DUO.greenSoft} stopOpacity={0.14} />
+              <Stop offset="60%" stopColor={FLAG_DUO.greenSoft} stopOpacity={0.04} />
+              <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100%" height="100%" fill="url(#load_bloom_dual)" />
+        </Svg>
+      ) : null}
+
       {/* Loader + cycling text (ghosts back behind the ad-gate sheet) */}
       <Animated.View
         style={[styles.center, { paddingTop: insets.top, paddingBottom: insets.bottom }, loaderStyle]}
       >
-        {/* Soft tone for the whole loader — dark accents render near-invisible dots. */}
-        <HexLoader accent={accentSoft} dotColors={prism ? AURA_WHEEL_HUES : undefined} />
+        {/* Soft tone for the whole loader; aura's 6 chase dots take the canonical spectrum,
+            while the atom glow + hex outline read WHITE-silver (so the loader shows black bg
+            + spectrum dots + a white halo). */}
+        <HexLoader
+          accent={prism ? '#E9E8F0' : accentSoft}
+          // Dual identity: the 6 chase dots alternate red/green while the verdict
+          // is still unknown ("red flag or green flag?" — literally spinning), and
+          // the atom's breathing halo splits into red/green lobes.
+          dotColors={prism ? AURA_SPECTRUM_STOPS : dual ? FLAG_DUO_STOPS : undefined}
+          glowDuo={dual ? FLAG_DUO_STOPS : undefined}
+        />
         <Animated.View style={textStyle}>
-          <Text style={[styles.loadingText, { color: theme.textMuted }]}>
+          <Text style={[styles.loadingText, { color: prism ? AURA_V2.pearl : theme.textMuted }]}>
             {t(`loading.pool.${category}${loadingTextIdx + 1}`)}
           </Text>
         </Animated.View>
@@ -540,15 +586,14 @@ export default function LoadingScreen() {
                 <RadialGradient id="gate_bloom" cx="50%" cy="0%" r="65%">
                   {prism
                     ? [
-                        <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.26} />,
-                        <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.1} />,
-                        <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.04} />,
-                        <Stop key="p3" offset="100%" stopColor={g[2]} stopOpacity={0} />,
+                        <Stop key="p0" offset="0%" stopColor={AURA_V2.pearl} stopOpacity={0.16} />,
+                        <Stop key="p1" offset="55%" stopColor={AURA_V2.pearl} stopOpacity={0.05} />,
+                        <Stop key="p2" offset="100%" stopColor={AURA_V2.pearl} stopOpacity={0} />,
                       ]
                     : [
-                        <Stop key="s0" offset="0%" stopColor={accentSoft} stopOpacity={0.26} />,
-                        <Stop key="s1" offset="55%" stopColor={accentSoft} stopOpacity={0.07} />,
-                        <Stop key="s2" offset="100%" stopColor={accentSoft} stopOpacity={0} />,
+                        <Stop key="s0" offset="0%" stopColor={gateSoft} stopOpacity={0.26} />,
+                        <Stop key="s1" offset="55%" stopColor={gateSoft} stopOpacity={0.07} />,
+                        <Stop key="s2" offset="100%" stopColor={gateSoft} stopOpacity={0} />,
                       ]}
                 </RadialGradient>
               </Defs>
@@ -557,36 +602,30 @@ export default function LoadingScreen() {
 
             <View style={[styles.handle, { backgroundColor: theme.borderStrong }]} />
 
-            {/* Glowing category orb + expanding pulse ring (ad_gate_animation frames). */}
+            {/* Glowing category orb + expanding pulse ring (ad_gate_animation frames).
+                Aura uses the base Prism Orb here (per AURA_PRISM_V2). */}
             <View style={styles.orbWrap}>
               <Animated.View
-                style={[styles.orbRing, { borderColor: prism ? theme.text : accent }, ringStyle]}
+                style={[styles.orbRing, { borderColor: prism ? AURA_V2.silver : gateAccent }, ringStyle]}
               />
-              <Svg width={ORB_SIZE} height={ORB_SIZE}>
-                <Defs>
-                  <RadialGradient id="gate_orb" cx="38%" cy="32%" r="78%">
-                    {prism
-                      ? [
-                          // Iridescent sphere: white-hot core → violet body →
-                          // cyan sheen → the same dark rim as every module orb.
-                          <Stop key="p0" offset="0%" stopColor={theme.text} stopOpacity={1} />,
-                          <Stop key="p1" offset="40%" stopColor={g[1]} stopOpacity={0.95} />,
-                          <Stop key="p2" offset="75%" stopColor={g[0]} stopOpacity={0.85} />,
-                          <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0.92} />,
-                        ]
-                      : [
-                          <Stop key="s0" offset="0%" stopColor={accentSoft} stopOpacity={1} />,
-                          <Stop key="s1" offset="55%" stopColor={accent} stopOpacity={0.9} />,
-                          <Stop key="s2" offset="100%" stopColor={theme.background} stopOpacity={0.92} />,
-                        ]}
-                  </RadialGradient>
-                </Defs>
-                <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={ORB_SIZE / 2} fill="url(#gate_orb)" />
-                <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={rs(2.6)} fill="#FFFFFF" />
-              </Svg>
+              {prism ? (
+                <CategoryMotif moduleId={moduleId ?? ''} size={ORB_SIZE} />
+              ) : (
+                <Svg width={ORB_SIZE} height={ORB_SIZE}>
+                  <Defs>
+                    <RadialGradient id="gate_orb" cx="38%" cy="32%" r="78%">
+                      <Stop offset="0%" stopColor={gateSoft} stopOpacity={1} />
+                      <Stop offset="55%" stopColor={gateAccent} stopOpacity={0.9} />
+                      <Stop offset="100%" stopColor={theme.background} stopOpacity={0.92} />
+                    </RadialGradient>
+                  </Defs>
+                  <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={ORB_SIZE / 2} fill="url(#gate_orb)" />
+                  <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={rs(2.6)} fill="#FFFFFF" />
+                </Svg>
+              )}
             </View>
 
-            <Text style={[styles.gateEyebrow, { color: prism ? theme.text : accent }]}>
+            <Text style={[styles.gateEyebrow, { color: prism ? AURA_V2.pearl : gateAccent }]}>
               {t('loading.ready').toUpperCase()}
             </Text>
             <Text style={[styles.veilTitle, { color: theme.text }]}>{t('loading.veil')}</Text>

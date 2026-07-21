@@ -37,9 +37,6 @@ import {
   type Language,
 } from '@/src/content/articles';
 import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
-import { WEEKLY_CURRICULUM_ENABLED } from '@/src/config/flags';
-import { getArticleRevealDay } from '@/src/data/weeks';
-import { getDaysSinceAnchor } from '@/src/data/weeks/walker';
 import { rs } from '@/src/utils/responsive';
 import FeaturedInsightCard from './components/FeaturedInsightCard';
 import ArticleCard from './components/ArticleCard';
@@ -72,18 +69,15 @@ export default function InsightsScreen() {
 
   const handleStarsPress = useCallback(() => router.push('/(tabs)/stars'), []);
 
-  // Reveal gate (2026-07-12): a curriculum article appears in the feed only once its
-  // day has ARRIVED — i.e. the day the walker actually serves it as the daily pick,
-  // day-granular off the user's anchor. So an UPCOMING daily pick (tomorrow's, etc.)
-  // stays hidden until its day; past dailies fall back into the feed; today's daily is
-  // in "Tonight's Read". Editorial (non-curriculum) articles are always browsable. With
-  // the curriculum flag off there is no pacing, so everything shows.
-  const daysSinceAnchor = getDaysSinceAnchor(weekAnchorDate);
-  const isRevealed = (a: Article) => {
-    const revealDay = getArticleRevealDay(a.id);
-    if (revealDay === undefined || !WEEKLY_CURRICULUM_ENABLED) return true;
-    return daysSinceAnchor >= revealDay;
-  };
+  // ALL ARTICLES BROWSABLE (Simo, 2026-07-18): the Insights feed shows the full
+  // library any time — nothing is drip-gated. This intentionally relaxes the old
+  // curriculum reveal gate (2026-07-12) that hid a curriculum article until its
+  // anchor-day arrived, which left the feed looking near-empty on a fresh install.
+  // The star economy is untouched: only TODAY's daily pick (getDailyInsightId) can
+  // earn the once-per-day bonus, so browsing a future daily early grants nothing.
+  // The reveal-day plumbing (getArticleRevealDay / days-since-anchor) stays in the
+  // codebase for a possible future opt-in, just no longer filters the feed.
+  const isRevealed = (_a: Article) => true;
 
   // Build the LATEST list: non-sponsored, revealed, newest-first, filtered by the active
   // chip; the sponsored card is spliced in only in the "all" view.

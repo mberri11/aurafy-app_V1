@@ -2,11 +2,13 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { ThemeColors } from '../types';
 import { cosmicTheme } from './cosmic';
 import { desertOracleTheme } from './desertOracle';
+import { elvenGroveTheme } from './elvenGrove';
 import { useSettingsStore } from '../store/settingsStore';
 
 const themeMap: Record<string, ThemeColors> = {
   cosmic: cosmicTheme,
   desertOracle: desertOracleTheme,
+  elvenGrove: elvenGroveTheme,
 };
 
 const ThemeContext = createContext<ThemeColors>(cosmicTheme);

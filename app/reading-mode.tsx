@@ -17,6 +17,7 @@ import { useUserStore } from '@/src/store/userStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
 import { MODULES, FREE_TRIAL_MODULE_ID } from '@/src/data/modules';
 import { ReadingMode } from '@/src/types';
+import { FLAG_DUO, isDualFlagModule } from '@/src/themes/categoryTheme';
 import GlassCard from '@/src/components/GlassCard';
 import GradientButton from '@/src/components/GradientButton';
 import StarsBadge from '@/src/components/StarsBadge';
@@ -33,6 +34,29 @@ const MODES: { mode: ReadingMode; icon: IconName; tone: 'person' | 'shape' }[] =
   { mode: 'triangle', icon: 'triangle-outline', tone: 'shape' },
   { mode: 'circle', icon: 'circle-outline', tone: 'shape' },
 ];
+
+/** RED/GREEN dual identity: the SELECTED mode card sits on a red→green gradient
+ *  ring (a plain border can't hold two colours), mirroring ModuleCard's
+ *  PrismBorder pattern — the gradient shows through 2px of padding. */
+function DualSelectedBorder({
+  enabled,
+  children,
+}: {
+  enabled: boolean;
+  children: React.ReactNode;
+}) {
+  if (!enabled) return <>{children}</>;
+  return (
+    <LinearGradient
+      colors={[FLAG_DUO.red, FLAG_DUO.green]}
+      start={{ x: 0, y: 0.5 }}
+      end={{ x: 1, y: 0.5 }}
+      style={styles.dualSelectedBorder}
+    >
+      {children}
+    </LinearGradient>
+  );
+}
 
 export default function ReadingModeScreen() {
   const { moduleId } = useLocalSearchParams<{ moduleId: string }>();
@@ -80,6 +104,9 @@ export default function ReadingModeScreen() {
   // Per-module accent — drives the background bloom, icon tiles and selected glow so
   // each reading-mode reads in its own colour (design 06-mode-select_1/_2.png).
   const accent = module.color;
+  // RED/GREEN dual identity: the selected card wears BOTH poles — green border
+  // over the red glow (border alone can't gradient; the glow supplies the red).
+  const dual = isDualFlagModule(module.id);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -145,12 +172,15 @@ export default function ReadingModeScreen() {
                 accessibilityRole="button"
                 activeOpacity={0.85}
               >
+                <DualSelectedBorder enabled={dual && isSelected}>
                 <GlassCard
                   glowColor={isSelected ? accent : undefined}
                   style={[
                     styles.modeCard,
                     isSelected && {
-                      borderColor: accent,
+                      // Dual: the card's own border goes transparent so the
+                      // red→green gradient ring behind it is what shows.
+                      borderColor: dual ? 'transparent' : accent,
                       borderWidth: 2,
                       shadowOpacity: 0.9,
                       shadowRadius: rs(20),
@@ -209,6 +239,7 @@ export default function ReadingModeScreen() {
                     </TouchableOpacity>
                   )}
                 </GlassCard>
+                </DualSelectedBorder>
               </TouchableOpacity>
             );
           })}
@@ -272,6 +303,8 @@ const styles = StyleSheet.create({
   // Fixed minHeight so every card is the same height regardless of whether its
   // subtitle wraps to 2 lines (Compare/Circle) — content is vertically centered.
   modeCard: { padding: rs(13), minHeight: rs(82), justifyContent: 'center' },
+  // Radius = GlassCard's rs(20) + the 2px ring, so the corners stay concentric.
+  dualSelectedBorder: { borderRadius: rs(20) + 2, padding: 2 },
   modeRow: { flexDirection: 'row', alignItems: 'center', gap: rs(12) },
   iconTile: {
     width: rs(40),

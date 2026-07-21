@@ -27,6 +27,7 @@
     "settings": "Paramètres"
   },
   "onboarding": {
+    "chooseLanguage": "Choisis ta langue",
     "slide1Title": "Décrypte l'énergie autour de toi",
     "slide1Subtitle": "Choisis un module. Entre les personnes de ta vie. Obtiens une lecture puissante en moins de 3 minutes.",
     "slide2Title": "Fondé sur la vraie psychologie",
@@ -160,7 +161,15 @@
       "cost": "Dès 1"
     },
     "red_green_flag": {
-      "title": "Red flag ou green flag ?"
+      "title": "Drapeau rouge ou drapeau vert ?",
+      "titleRed": "Drapeau rouge",
+      "titleOr": "ou",
+      "titleGreen": "drapeau vert ?",
+      "subtitle": "Lis le schéma, pas la promesse",
+      "description": "Vingt questions comportementales sur la constance, les limites, l'honnêteté, la réparation et le contrôle. Lis une seule personne pour un verdict net — ou lis tout ton cercle pour trouver le drapeau le plus rouge.",
+      "poweredBy": "Théorie de l'attachement + recherche sur la réparation",
+      "time": "5–7 min",
+      "cost": "À partir de 1"
     },
     "shadow_self": {
       "title": "Ton côté ombre",
@@ -193,7 +202,7 @@
     "circle": {
       "title": "Cercle",
       "subtitle": "Lisez tout votre entourage",
-      "persons": "4–10 personnes"
+      "persons": "4–8 personnes"
     },
     "heading": "Combien de personnes lisez-vous ?",
     "earnStars": "Gagner plus",
@@ -205,9 +214,10 @@
     "progressLabel": "{{current}} / {{total}}",
     "noQuestions": "Aucune question disponible",
     "leaveTitle": "Quitter cette lecture ?",
-    "leaveMessagePaid": "Ta progression ne sera pas enregistrée. Tes étoiles te seront remboursées ({{cost}} ✦).",
+    "leaveMessagePaid": "Ta progression ne sera pas enregistrée et tes étoiles ne seront pas remboursées.",
     "leaveMessageTrial": "Ta progression ne sera pas enregistrée. Ta lecture gratuite sera restaurée.",
     "leaveConfirm": "Quitter la lecture",
+    "noOne": "Personne",
     "frameworks": {
       "attachment": "Théorie de l'attachement",
       "loveLanguages": "Langages de l'amour",
@@ -264,6 +274,10 @@
   },
   "result": {
     "notFound": "Aucun résultat trouvé.",
+    "aura": {
+      "rareKeeper": "RARE · LE GARDIEN",
+      "rareClearLight": "RARE · LA LUMIÈRE CLAIRE"
+    },
     "confidenceHeadline": "Nous sommes sûrs de cette lecture à {{confidence}}%.",
     "confidenceSub": "Plus élevé que {{pct}}% de tes lectures.",
     "lockedEyebrow": "Encore voilé",
@@ -276,6 +290,7 @@
     "disclaimer": "Aurafy est destiné à l'introspection et au divertissement — pas un outil de diagnostic clinique.",
     "insightPrefix": "✦",
     "comparison": "Le tableau complet",
+    "compScore": "{{score}} / {{total}} · {{pct}} %",
     "theRead": "La lecture",
     "whatThisMeans": "Ce que cela signifie",
     "count": {
@@ -412,6 +427,10 @@
     "needMore": "Encore {{count}}",
     "cosmic": "Cosmique",
     "desertOracle": "Oracle du désert",
+    "elvenGrove": "Bosquet elfique",
+    "cosmicDesc": "Nébuleuses violettes et lumière d'étoiles — le ciel nocturne signature d'Aurafy.",
+    "desertOracleDesc": "Crépuscule sur les dunes chaudes — terracotta, ambre et sable en dérive.",
+    "elvenGroveDesc": "Un bosquet elfique au clair de lune — émeraude profond, lueur turquoise et or ancien.",
     "midnightVeil": "Voile de minuit",
     "deepOcean": "Océan profond",
     "roseQuartz": "Quartz rose",
@@ -437,6 +456,8 @@
     "latest": "RÉCENTS",
     "sponsored": "SPONSORISÉ",
     "rewardToday": "+1 ✦ aujourd'hui",
+    "dailyBadge": "Du jour",
+    "comeBackTomorrow": "Revenez demain pour une nouvelle idée",
     "minRead": "{{n}} min de lecture",
     "min": "{{n}} min",
     "takeReading": "Faire la lecture {{module}}",

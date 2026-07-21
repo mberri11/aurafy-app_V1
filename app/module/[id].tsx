@@ -13,13 +13,15 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { isPrismModule } from '@/src/themes/categoryTheme';
+import { AURA_V2, FLAG_DUO, isDualFlagModule, isPrismModule } from '@/src/themes/categoryTheme';
 import { useUserStore } from '@/src/store/userStore';
 import { MODULES } from '@/src/data/modules';
 import GradientButton from '@/src/components/GradientButton';
 import GlassCard from '@/src/components/GlassCard';
 import StarsBadge from '@/src/components/StarsBadge';
 import ModuleIcon from '@/src/components/ModuleIcon';
+import CategoryMotif from '@/src/components/CategoryMotif';
+import SpectrumHairline from '@/src/components/SpectrumHairline';
 import ModuleUnlockDialog from '@/src/components/ModuleUnlockDialog';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
@@ -99,8 +101,12 @@ export default function ModuleDetailScreen() {
   // module's detail reads in its own colour (design 05-module-detail_1/_2.png).
   // Aura Color is prismatic instead: brand-gradient bloom/ring/tag, white ink.
   const accent = module.color;
+  // AURA_PRISM_V2: obsidian field, bare Prism Orb, silver-hairline pill + spectrum
+  // hairline, graphite stats card, pearl CTA — no coloured gradient anywhere.
   const prism = isPrismModule(module.id);
-  const g = theme.gradient;
+  // RED/GREEN dual identity: red stays the base accent; a green counter-bloom
+  // joins from the lower field (see below).
+  const dual = isDualFlagModule(module.id);
 
   const costs = Object.values(module.starsCost);
   const cheapestCost = Math.min(...costs);
@@ -113,24 +119,28 @@ export default function ModuleDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Ambient depth field (mirrors Home) */}
-      <LinearGradient
-        colors={theme.fieldGradient}
-        locations={[0, 0.5, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+      {/* Ambient depth field (mirrors Home) — aura sits on a flat obsidian field. */}
+      {prism ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: AURA_V2.obsidian }]} />
+      ) : (
+        <LinearGradient
+          colors={theme.fieldGradient}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
 
       {/* Per-module accent bloom centered behind the icon/title. Full-screen Rect
-          so the radial bleeds (rn-svg clips a radial to its own box). */}
+          so the radial bleeds (rn-svg clips a radial to its own box). Aura = a faint
+          pearl glow behind the orb. */}
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="module_glow" cx="50%" cy="20%" r="60%">
             {prism
               ? [
-                  <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.22} />,
-                  <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.09} />,
-                  <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.04} />,
-                  <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                  <Stop key="p0" offset="0%" stopColor={AURA_V2.pearl} stopOpacity={0.14} />,
+                  <Stop key="p1" offset="45%" stopColor={AURA_V2.pearl} stopOpacity={0.05} />,
+                  <Stop key="p2" offset="100%" stopColor={AURA_V2.obsidian} stopOpacity={0} />,
                 ]
               : [
                   <Stop key="s0" offset="0%" stopColor={accent} stopOpacity={0.22} />,
@@ -141,6 +151,21 @@ export default function ModuleDetailScreen() {
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#module_glow)" />
       </Svg>
+
+      {/* RED/GREEN dual identity: a green counter-bloom rising from the lower field so
+          the detail screen reads both poles (red base bloom above + green below). */}
+      {dual ? (
+        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+          <Defs>
+            <RadialGradient id="module_glow_dual" cx="50%" cy="82%" r="62%">
+              <Stop offset="0%" stopColor={FLAG_DUO.green} stopOpacity={0.22} />
+              <Stop offset="55%" stopColor={FLAG_DUO.green} stopOpacity={0.07} />
+              <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100%" height="100%" fill="url(#module_glow_dual)" />
+        </Svg>
+      ) : null}
 
       {/* Header: back button (left) + stars badge (right) */}
       <View style={[styles.header, { paddingTop: insets.top + rs(12) }]}>
@@ -159,18 +184,11 @@ export default function ModuleDetailScreen() {
 
       {/* Content block (upper portion) */}
       <View style={styles.content}>
-        {/* Module icon — prism gets a gradient ring around a dark disc */}
+        {/* Module icon — aura shows the bare Prism Orb (base), large + centred. */}
         {prism ? (
-          <LinearGradient
-            colors={g}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.iconRingPrism}
-          >
-            <View style={[styles.iconCircleInner, { backgroundColor: theme.bg2 }]}>
-              <ModuleIcon id={module.id} emoji={module.icon} size={rs(90)} />
-            </View>
-          </LinearGradient>
+          <View style={styles.iconOrbPrism}>
+            <CategoryMotif moduleId={module.id} size={rs(150)} />
+          </View>
         ) : (
           <View
             style={[
@@ -192,40 +210,57 @@ export default function ModuleDetailScreen() {
             prism
               ? {
                   color: theme.text,
-                  textShadowColor: `${g[1]}B3`,
+                  textShadowColor: `${AURA_V2.silver}80`,
                   textShadowOffset: { width: 0, height: 0 },
                   textShadowRadius: 16,
                 }
               : { color: accent },
           ]}
         >
-          {t(`modules.${module.id}.title`)}
+          {dual ? (
+            // Dual identity: the title wears the module's three poles — "Red Flag"
+            // red, the connector in the MIXED colour (amber — what red+green light
+            // actually blends to, and this module's own "Mixed Signals" tier
+            // colour), "Green Flag?" green. Parts are separate i18n keys so every
+            // locale controls its own word order/punctuation.
+            <>
+              <Text style={{ color: FLAG_DUO.red }}>{t(`modules.${module.id}.titleRed`)}</Text>
+              {' '}
+              <Text style={{ color: FLAG_DUO.amber }}>{t(`modules.${module.id}.titleOr`)}</Text>
+              {' '}
+              <Text style={{ color: FLAG_DUO.green }}>{t(`modules.${module.id}.titleGreen`)}</Text>
+            </>
+          ) : (
+            t(`modules.${module.id}.title`)
+          )}
         </Text>
 
-        {/* Framework tag — per-module accent; prism gets a gradient border */}
+        {/* Framework tag — aura: silver-hairline pill + a spectrum hairline beneath. */}
         {prism ? (
-          <LinearGradient
-            colors={g}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.tagRingPrism}
-          >
-            <View style={[styles.tagInnerPrism, { backgroundColor: theme.bg2 }]}>
-              <View style={[styles.tagDot, { backgroundColor: theme.text }]} />
-              <Text style={[styles.tagText, { color: theme.text }]}>
+          <>
+            <View style={[styles.tag, { backgroundColor: 'transparent', borderColor: `${AURA_V2.silver}80` }]}>
+              <View style={[styles.tagDot, { backgroundColor: AURA_V2.silver }]} />
+              <Text style={[styles.tagText, { color: AURA_V2.silver }]}>
                 {t(`quiz.frameworks.${module.framework}`)}
               </Text>
             </View>
-          </LinearGradient>
+            <View style={styles.pillHairline}>
+              <SpectrumHairline height={2} radius={1} />
+            </View>
+          </>
         ) : (
+          // Dual identity: the framework pill takes the GREEN pole so the screen
+          // reads both colors (red title/bloom above, green pill + under-bloom).
           <View
             style={[
               styles.tag,
-              { backgroundColor: `${accent}1F`, borderColor: `${accent}59` },
+              dual
+                ? { backgroundColor: `${FLAG_DUO.green}1F`, borderColor: `${FLAG_DUO.green}59` }
+                : { backgroundColor: `${accent}1F`, borderColor: `${accent}59` },
             ]}
           >
-            <View style={[styles.tagDot, { backgroundColor: accent }]} />
-            <Text style={[styles.tagText, { color: accent }]}>
+            <View style={[styles.tagDot, { backgroundColor: dual ? FLAG_DUO.green : accent }]} />
+            <Text style={[styles.tagText, { color: dual ? FLAG_DUO.green : accent }]}>
               {t(`quiz.frameworks.${module.framework}`)}
             </Text>
           </View>
@@ -236,8 +271,8 @@ export default function ModuleDetailScreen() {
           {t(`modules.${module.id}.description`)}
         </Text>
 
-        {/* Info card: questions / minutes / cost */}
-        <GlassCard style={styles.infoCard}>
+        {/* Info card: questions / minutes / cost — aura uses a graphite surface. */}
+        <GlassCard style={prism ? [styles.infoCard, { backgroundColor: AURA_V2.graphite }] : styles.infoCard}>
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
               <Text style={[styles.infoValue, { color: theme.text }]} numberOfLines={1}>
@@ -276,12 +311,15 @@ export default function ModuleDetailScreen() {
         </GlassCard>
       </View>
 
-      {/* Begin button pinned to the bottom */}
+      {/* Begin button pinned to the bottom — aura: pearl fill + obsidian ink (footer
+          matches every other module: button + safe-area margin, no line beneath). */}
       <View style={[styles.footer, { paddingBottom: insets.bottom + rs(16) }]}>
         <GradientButton
           label={t('moduleDetail.beginReading')}
           onPress={handleBeginReading}
-          labelColor={theme.background}
+          labelColor={prism ? AURA_V2.obsidian : theme.background}
+          colors={prism ? [AURA_V2.pearl, '#D6D5E0'] : undefined}
+          glowColor={prism ? 'rgba(0,0,0,0)' : undefined}
           bold
         />
       </View>
@@ -356,6 +394,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // AURA_PRISM_V2: the bare large orb (its SVG box carries its own glow margin).
+  iconOrbPrism: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: rs(6),
+  },
+  // Short centred spectrum rules under the category pill / CTA.
+  pillHairline: { width: rs(120), alignSelf: 'center', marginTop: rs(10) },
+  ctaHairline: { width: rs(180), alignSelf: 'center', marginTop: rs(12) },
 
   title: {
     fontSize: rs(29),

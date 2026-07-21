@@ -815,6 +815,9 @@ export const articlesEs: ArticleContentMap = {
           { title: 'Azul — la calma.', text: 'Estable, reflexivo, confiable bajo presión.' },
           { title: 'Violeta — la profundidad.', text: 'Intuición e imaginación; vive un poco en su mundo interior.' },
           { title: 'Verde — la renovación.', text: 'Equilibrio y cuidado; el estabilizador silencioso.' },
+          { title: 'Rosa — la devoción.', text: 'Ternura y lealtad; ama de cerca y da su calidez sin reservas.' },
+          { title: 'Negro — el guardián.', text: 'Profundidad guardada tras bordes claros; una presencia que se siente y que nadie cruza sin invitación.' },
+          { title: 'Blanco — la luz clara.', text: 'Un espacio despejado; aporta calma y honestidad, y deja que otros vuelvan a empezar.' },
         ],
       },
       {

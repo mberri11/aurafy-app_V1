@@ -9,6 +9,8 @@ import {
 import { AppText as Text } from '@/src/components/AppText';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import { FLAG_DUO, isDualFlagModule } from '../themes/categoryTheme';
 import { useTranslation } from 'react-i18next';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../themes/ThemeProvider';
@@ -92,8 +94,25 @@ export default function ModuleUnlockDialog({
               style={[StyleSheet.absoluteFill, { backgroundColor: theme.surface }]}
             />
             {/* Module-tinted hero with the module's own art + a lock badge — signals the
-                locked-but-buyable module being unlocked (mirrors ModuleCard's colour). */}
-            <View style={[styles.heroWrap, { backgroundColor: `${color}2E`, borderColor: `${color}59` }]}>
+                locked-but-buyable module being unlocked (mirrors ModuleCard's colour).
+                Dual identity (red_green_flag): the hero washes red→green instead of one hue. */}
+            <View
+              style={[
+                styles.heroWrap,
+                isDualFlagModule(moduleId)
+                  ? { borderColor: `${FLAG_DUO.green}59`, overflow: 'hidden' }
+                  : { backgroundColor: `${color}2E`, borderColor: `${color}59` },
+              ]}
+            >
+              {isDualFlagModule(moduleId) ? (
+                <LinearGradient
+                  colors={[`${FLAG_DUO.red}2E`, `${FLAG_DUO.green}2E`]}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={StyleSheet.absoluteFill}
+                  pointerEvents="none"
+                />
+              ) : null}
               <ModuleIcon id={moduleId} emoji={moduleIcon} size={rs(52)} />
               <View style={styles.heroLock} pointerEvents="none">
                 <Feather name="lock" size={rs(14)} color="#FFFFFF" />

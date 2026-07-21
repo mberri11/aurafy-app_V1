@@ -21,4 +21,24 @@ export const cosmicTheme: ThemeColors = {
   rose: '#E84393',
   emerald: '#34D399',
   glow: 'rgba(167,139,250,0.35)',
+  // Module-card skin — the pre-token ModuleCard look, verbatim: everything
+  // derives from the module's own accent (null), GlassCard keeps its default
+  // fill/border, locked/coming-soon reuse background/textMuted/surfaceBorder/
+  // textDim exactly as the old inline values did. Zero visual change.
+  moduleCard: {
+    background: null,
+    gradient: null,
+    border: null,
+    glow: null, // → `${module.color}66`
+    bloom: null, // → module.color
+    bloomOpacity: [0.32, 0.09],
+    iconTint: null, // → module.color ('33' bg / '66' border)
+    lockedOverlay: '#07091ACC', // background + 'CC'
+    lockedTint: '#A0A4B8', // textMuted
+    comingSoonBorder: 'rgba(255,255,255,0.10)', // surfaceBorder
+    comingSoonTint: '#6E7290', // textDim
+  },
+  // No ambient particle layer — the cosmic field is the plain gradient it has
+  // always been.
+  ambientParticles: null,
 };

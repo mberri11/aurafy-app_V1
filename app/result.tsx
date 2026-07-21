@@ -21,7 +21,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { auraOutcomeTheme, darkenHex, moduleTheme } from '@/src/themes/categoryTheme';
+import { auraSkin, AURA_V2, darkenHex, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, moduleTheme } from '@/src/themes/categoryTheme';
 import CategoryMotif from '@/src/components/CategoryMotif';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
@@ -67,8 +67,15 @@ export default function ResultScreen() {
   const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const language = i18n.language as Language;
-  const { currentResult, currentPersons, currentAnswers, currentModuleId, currentMode, viewOnlyResult } =
-    useReadingStore();
+  const {
+    currentResult,
+    currentPersons,
+    currentAnswers,
+    currentModuleId,
+    currentMode,
+    currentQuestionIds,
+    viewOnlyResult,
+  } = useReadingStore();
   const resultUnlocked = useReadingStore((s) => s.resultUnlocked);
   const setResultUnlocked = useReadingStore((s) => s.setResultUnlocked);
   const { addReading, incrementReadingCount, spendStars, stars } = useUserStore();
@@ -103,6 +110,9 @@ export default function ResultScreen() {
       answers: currentAnswers,
       result,
       createdAt: Date.now(),
+      // The exact served set (pooled modules vary it) — lets History reopens show
+      // what was actually asked.
+      questionIds: currentQuestionIds,
     };
     addReading(reading);
     // readingCount keeps ticking for the Phase-4 frequency-capped interstitial; the old
@@ -284,9 +294,39 @@ export default function ResultScreen() {
   // Share pill — not the winner's avatar colour. Two modules sharing a category
   // (Who Loves Me / Who Admires) still read as two different experiences.
   // Aura Color is the sole exception: it glows in the OUTCOME color the user got.
-  const { accent, accentSoft } = result.moduleId === 'aura_color'
-    ? auraOutcomeTheme(result.dominantDimension)
-    : moduleTheme(result.moduleId);
+  // Aura resolves the FULL per-outcome skin (name/bar/CTA all differ by colour so Black
+  // and White read as opposites); other modules keep their single module accent, with
+  // name/bar/CTA falling back to the historic white-name + accent-pill treatment.
+  const isAura = result.moduleId === 'aura_color';
+  const skin = isAura ? auraSkin(result.dominantDimension) : null;
+  const isRare = !!skin?.rare;
+  // A chromatic aura outcome (violet/blue/green/gold/red/rose) — its Share pill takes the
+  // outcome colour itself (violet button for Violet, gold for Gold…); rares keep their
+  // obsidian/pearl pill.
+  const chromaticAura = isAura && !!skin && !isRare;
+  // RED/GREEN dual identity: red_green_flag re-colors per OUTCOME like aura does —
+  // green (none/low), amber (medium "Mixed Signals"), red (high + every circle read).
+  // Accent-pair only; name/bar/CTA keep the standard white-name + accent treatment.
+  const dualOutcome = isDualFlagModule(result.moduleId)
+    ? flagOutcomeTheme(flagOutcomeKey(result))
+    : null;
+  const { accent, accentSoft } = skin ?? dualOutcome ?? moduleTheme(result.moduleId);
+  const nameColor = skin?.name ?? theme.text;
+  const nameGlow = skin?.nameGlow ?? accent;
+  const barFill = skin?.bar ?? accent;
+  const barTrack = skin?.barTrack ?? theme.surface;
+  const ctaColors: [string, string] = chromaticAura
+    ? [skin!.bar, darkenHex(skin!.bar, 0.24)]
+    : skin?.cta ?? [accent, darkenHex(accent, 0.22)];
+  const ctaText = chromaticAura ? AURA_V2.obsidian : skin?.ctaText ?? theme.background;
+  const ctaBorder = skin?.ctaBorder;
+  const rareLabelKey =
+    result.dominantDimension === 'black'
+      ? 'result.aura.rareKeeper'
+      : result.dominantDimension === 'white'
+        ? 'result.aura.rareClearLight'
+        : null;
+  const auraSecondary = isAura ? result.secondaryColor ?? null : null;
   // Count path frames the reveal as being ABOUT the person ("ABOUT SIMO"), not a module
   // subtitle — the person's name lives in the eyebrow, the ratio is the reveal itself.
   const eyebrow = isCount
@@ -337,15 +377,20 @@ export default function ResultScreen() {
     : 0;
   const bullets = result.insights.slice(1);
   const maxScore = Math.max(...Object.values(result.scores), 1);
+  // Total signal actually recorded (with the "No one" option, this can be less than
+  // the question count — questions that pointed at nobody award nothing). Drives the
+  // comparison LABEL; the bar itself stays leader-relative so a clear winner in a
+  // 5-person circle still reads strong instead of a weak-looking 40%.
+  const totalSignal = Object.values(result.scores).reduce((sum, v) => sum + v, 0);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isAura ? AURA_V2.obsidian : theme.background }]}>
       {/* iOS swipe-dismiss must not fall into the flow beneath a fresh result;
           view-only reopens keep the gesture (their way back to History). */}
       <Stack.Screen options={{ gestureEnabled: isViewOnly }} />
-      {/* Ambient base + module-tinted top bloom */}
+      {/* Ambient base + module-tinted top bloom (aura sits on flat obsidian). */}
       <LinearGradient
-        colors={theme.fieldGradient}
+        colors={isAura ? [AURA_V2.obsidian, AURA_V2.obsidian, AURA_V2.obsidian] : theme.fieldGradient}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -376,6 +421,7 @@ export default function ResultScreen() {
         {!unlocked && <Rect x="0" y="0" width="100%" height="100%" fill="url(#result_floor)" />}
       </Svg>
 
+
       <ScrollView
         style={styles.flex}
         contentContainerStyle={[
@@ -391,7 +437,13 @@ export default function ResultScreen() {
         <Animated.View style={[styles.header, titleStyle]}>
           {/* Oversized category motif ghosted behind the name (spec §0 secondary accent). */}
           <View pointerEvents="none" style={styles.motifWrap}>
-            <CategoryMotif moduleId={result.moduleId} size={rs(150)} color={accent} />
+            <CategoryMotif
+              moduleId={result.moduleId}
+              size={rs(150)}
+              color={accent}
+              auraOutcome={result.moduleId === 'aura_color' ? result.dominantDimension : undefined}
+              auraSecondary={auraSecondary}
+            />
           </View>
           {/* Accent sparkles scattered around the reveal (per the Result PNGs). */}
           <MaterialCommunityIcons
@@ -413,13 +465,17 @@ export default function ResultScreen() {
             style={[styles.sparkle, { bottom: rs(6), start: rs(64), opacity: 0.4 }]}
           />
 
-          {!!eyebrow && (
+          {/* RARE micro-label above the reveal (Black/White only). */}
+          {isRare && rareLabelKey && (
+            <Text style={[styles.rareLabel, { color: AURA_V2.silver }]}>{t(rareLabelKey)}</Text>
+          )}
+          {!!eyebrow && !isRare && (
             <Text style={[styles.eyebrow, { color: accent }]}>{eyebrow}</Text>
           )}
           {/* Crisp white reveal name with a single soft accent glow — the stacked
               multi-layer glow read as a blurry doubled name on device. */}
           <Text
-            style={[styles.bigTitle, { color: theme.text, textShadowColor: accent }]}
+            style={[styles.bigTitle, { color: nameColor, textShadowColor: nameGlow }]}
             // Tied reveals join 2+ names — let them wrap before auto-shrinking.
             numberOfLines={isTie ? 3 : 1}
             adjustsFontSizeToFit
@@ -453,7 +509,19 @@ export default function ResultScreen() {
             return (
               <Text style={[styles.confHead, { color: theme.text }]}>
                 {parts[0]}
-                <Text style={{ color: accent, fontFamily: 'HankenGrotesk_700Bold' }}>{token}</Text>
+                <Text
+                  style={{
+                    // Aura: the % takes the literal outcome ink (Black = near-black lit by a
+                    // silver halo so it stays legible; White = white; chromatics = their hue).
+                    color: isAura ? nameColor : accent,
+                    fontFamily: 'HankenGrotesk_700Bold',
+                    ...(isRare
+                      ? { textShadowColor: nameGlow, textShadowRadius: rs(7), textShadowOffset: { width: 0, height: 0 } }
+                      : null),
+                  }}
+                >
+                  {token}
+                </Text>
                 {parts.slice(1).join(token)}
               </Text>
             );
@@ -463,8 +531,8 @@ export default function ResultScreen() {
               {t('result.confidenceSub', { pct: percentile })}
             </Text>
           )}
-          <View style={[styles.bar, { backgroundColor: theme.surface }]}>
-            <View style={[styles.barFill, { width: `${confidence}%`, backgroundColor: accent }]} />
+          <View style={[styles.bar, { backgroundColor: barTrack }]}>
+            <View style={[styles.barFill, { width: `${confidence}%`, backgroundColor: barFill }]} />
           </View>
         </GlassCard>
 
@@ -479,8 +547,8 @@ export default function ResultScreen() {
               label={t('result.unlockWatch')}
               onPress={handleUnlockWatch}
               leadingIcon="play"
-              labelColor={theme.background}
-              colors={[accent, darkenHex(accent, 0.22)]}
+              labelColor={ctaText}
+              colors={ctaColors}
               glowColor={accent}
               bold
             />
@@ -521,7 +589,12 @@ export default function ResultScreen() {
           <GlassCard style={styles.card}>
             <Text style={[styles.cardTitle, { color: theme.textDim }]}>{t('result.comparison')}</Text>
             {currentPersons.map((p) => {
-              const pct = Math.round(((result.scores[p.id] ?? 0) / maxScore) * 100);
+              const score = result.scores[p.id] ?? 0;
+              // Bar width = share OF THE LEADER (winner always fills). Label = the raw
+              // tally + share of total, so a 10–10 tie reads "10 / 20 · 50%" for both
+              // instead of the old "100%" each, which implied "100% a red flag".
+              const pct = Math.round((score / maxScore) * 100);
+              const sharePct = totalSignal > 0 ? Math.round((score / totalSignal) * 100) : 0;
               // Bars fill in the CATEGORY accent (winner full-strength, the rest softened)
               // so the card reads in the reading's palette; avatars keep person colours.
               // On a tie EVERY max-scorer gets the winner treatment — equal scores
@@ -554,7 +627,12 @@ export default function ResultScreen() {
                       ]}
                     />
                   </View>
-                  <Text style={[styles.compPct, { color: theme.textMuted, textAlign: isRTL ? 'left' : 'right' }]}>{pct}%</Text>
+                  <Text
+                    style={[styles.compPct, { color: theme.textMuted, textAlign: isRTL ? 'left' : 'right' }]}
+                    numberOfLines={1}
+                  >
+                    {t('result.compScore', { score, total: totalSignal, pct: sharePct })}
+                  </Text>
                 </View>
               );
             })}
@@ -625,12 +703,16 @@ export default function ResultScreen() {
               label={t('result.shareButton')}
               onPress={handleShare}
               leadingIcon="share-variant"
-              labelColor={theme.background}
-              colors={[accent, darkenHex(accent, 0.22)]}
+              labelColor={ctaText}
+              colors={ctaColors}
               glowColor={accent}
               bold
               glow
-              style={styles.shareFlex}
+              style={
+                ctaBorder
+                  ? { flex: 1, borderWidth: 1, borderColor: ctaBorder, borderRadius: 999 }
+                  : styles.shareFlex
+              }
             />
             <TouchableOpacity
               onPress={handleSave}
@@ -681,7 +763,10 @@ export default function ResultScreen() {
             variant="reading"
             accent={accent}
             accentSoft={accentSoft}
-            eyebrow={eyebrow}
+            nameColor={nameColor}
+            nameGlow={nameGlow}
+            eyebrow={isRare && rareLabelKey ? t(rareLabelKey) : eyebrow}
+            rare={isRare}
             name={bigTitle}
             verdictLine={winnerSubtitle ?? winnerSentence}
             quote={result.shareLine?.[language] ?? result.shareLine?.en ?? ''}
@@ -736,6 +821,23 @@ const styles = StyleSheet.create({
     fontFamily: 'HankenGrotesk_700Bold',
     letterSpacing: rs(1.6),
     textAlign: 'center',
+  },
+  // RARE micro-label ("RARE · THE KEEPER") above the reveal name.
+  rareLabel: {
+    fontSize: rs(10),
+    fontFamily: 'HankenGrotesk_700Bold',
+    letterSpacing: rs(2.2),
+    textAlign: 'center',
+  },
+  // Short centred spectrum rule beneath the chromatic CTA.
+  ctaHairline: { width: rs(150), alignSelf: 'center', marginTop: rs(10) },
+  // Silver-foil frame around a rare reveal.
+  rareFrame: {
+    position: 'absolute',
+    left: rs(8),
+    right: rs(8),
+    borderWidth: 1,
+    borderRadius: rs(24),
   },
   bigTitle: {
     fontSize: rs(38),
@@ -795,7 +897,8 @@ const styles = StyleSheet.create({
   compName: { width: rs(64), fontSize: rs(14), fontFamily: 'HankenGrotesk_500Medium' },
   compTrack: { flex: 1, height: rs(8), borderRadius: rs(4), overflow: 'hidden' },
   compFill: { height: rs(8), borderRadius: rs(4) },
-  compPct: { width: rs(40), fontSize: rs(13), fontFamily: 'HankenGrotesk_500Medium' },
+  // Wider than the old bare "100%" — now holds "10 / 20 · 50%".
+  compPct: { width: rs(86), fontSize: rs(11.5), fontFamily: 'HankenGrotesk_500Medium' },
 
   // Unlock card (minimal tier) — explicit margins (GlassCard gap is a no-op).
   lockedBody: {

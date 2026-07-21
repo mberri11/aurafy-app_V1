@@ -13,8 +13,16 @@ interface ReadingState {
    *  true = full (insights, full picture, share). Set by the ad-gate (watch ad or
    *  1★ → true, free skip → false) or by the unlock card on the result itself. */
   resultUnlocked: boolean;
+  /** Deterministic seed for this reading session's question selection (see
+   *  src/engine/questionPool.ts). Minted once per startReading so re-renders and
+   *  quiz-resume keep the same served set; a fresh reading gets a fresh seed. */
+  currentSeed: number;
+  /** The exact question ids the quiz served, in served order — loading.tsx scores
+   *  against these and result.tsx persists them onto the saved Reading. */
+  currentQuestionIds: string[];
   // Actions
   startReading: (moduleId: string, mode: ReadingMode, persons: Person[]) => void;
+  setServedQuestions: (questionIds: string[]) => void;
   recordAnswer: (questionId: string, value: string) => void;
   setResult: (result: ResultData) => void;
   setViewOnlyResult: (result: ResultData | null) => void;
@@ -30,6 +38,8 @@ export const useReadingStore = create<ReadingState>()((set) => ({
   currentResult: null,
   viewOnlyResult: null,
   resultUnlocked: false,
+  currentSeed: 0,
+  currentQuestionIds: [],
 
   startReading: (moduleId: string, mode: ReadingMode, persons: Person[]): void => {
     set({
@@ -39,7 +49,13 @@ export const useReadingStore = create<ReadingState>()((set) => ({
       currentAnswers: {},
       currentResult: null,
       resultUnlocked: false,
+      currentSeed: Date.now(),
+      currentQuestionIds: [],
     });
+  },
+
+  setServedQuestions: (questionIds: string[]): void => {
+    set({ currentQuestionIds: questionIds });
   },
 
   recordAnswer: (questionId: string, value: string): void => {
@@ -66,6 +82,8 @@ export const useReadingStore = create<ReadingState>()((set) => ({
       currentAnswers: {},
       currentResult: null,
       resultUnlocked: false,
+      currentSeed: 0,
+      currentQuestionIds: [],
     });
   },
 }));

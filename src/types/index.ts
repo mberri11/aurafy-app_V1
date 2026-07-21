@@ -12,7 +12,7 @@ export type ModuleType = 'multi' | 'solo';
  *                   "edge" (attachment_style, aura_reading).
  */
 export type ResultKind = 'valence' | 'count' | 'categorical' | 'multi';
-export type ThemeId = 'cosmic' | 'desertOracle';
+export type ThemeId = 'cosmic' | 'desertOracle' | 'elvenGrove';
 
 export interface LocalizedString {
   en: string;
@@ -44,6 +44,11 @@ export interface Question {
   dimension: string;
   personWeight?: number; // for multi-person questions, default 1
   soloAnswers?: SoloAnswer[]; // for solo questions, always exactly 4 options
+  /** Pool-expanded modules only (see src/engine/questionPool.ts): `true` marks the
+   *  curated original 20 served in authored order on a module's FIRST reading;
+   *  `false` marks a pool counterpart eligible for repeat readings. Absent on
+   *  modules that don't use pooling (their full array is always served as-is). */
+  core?: boolean;
 }
 
 export interface Person {
@@ -69,6 +74,10 @@ export interface ResultData {
   dominantDimension: string;
   /** For `categorical` results: the runner-up category ("…with an Anxious edge"). */
   secondaryDimension?: string;
+  /** AURA only (AURA_PRISM_V2): the runner-up colour's hex when it scores ≥
+   *  AURA_SECONDARY_THRESHOLD of the winner — drives the result orb's secondary rim arc.
+   *  null/absent → pure aura (silver arc). Persisted so History + share match the reveal. */
+  secondaryColor?: string | null;
   /** For `count` results (a relationship module read solo): how many of the total
    *  questions registered a "sign present", surfaced as "N of {signalTotal} signs present". */
   signalCount?: number;
@@ -103,6 +112,10 @@ export interface Reading {
   answers: Record<string, string>; // questionId -> personId or answer index
   result: ResultData;
   createdAt: number; // unix timestamp
+  /** The exact question ids served for THIS reading, in served order — lets History
+   *  reopen show what was actually asked once pooled modules vary the set. Absent on
+   *  readings persisted before question pooling shipped. */
+  questionIds?: string[];
 }
 
 export interface Module {
@@ -125,6 +138,60 @@ export interface Module {
   unlockCost?: number;
 }
 
+/**
+ * Module-card skin under the active theme (Home cards + any surface mirroring
+ * them). Tokens typed `string | null` follow one rule: **`null` = "derive from
+ * the module's own accent"** (`Module.color` — today's per-module look), a
+ * non-null value = the theme overrides that derivation so cards visually belong
+ * to the theme. Resolution happens in ONE place —
+ * `resolveModuleCardStyle()` (src/themes/moduleCardStyle.ts) — components never
+ * read these tokens directly.
+ *
+ * NOTE: tokens that get an alpha suffix appended at resolve time (`iconTint`,
+ * and `module.color` itself) must be 6-digit hex (`#RRGGBB`), never rgba().
+ */
+export interface ModuleCardTokens {
+  /** Card fill behind the glass. null → GlassCard's platform default
+   *  (bg2 + surface tint / iOS blur). */
+  background: string | null;
+  /** Optional top→bottom wash gradient over the fill. null → no gradient. */
+  gradient: [string, string] | null;
+  /** Card border. null → GlassCard's default (theme.surfaceBorder). */
+  border: string | null;
+  /** Shadow/glow color behind the card. null → `${accent}66` per module. */
+  glow: string | null;
+  /** Corner-bloom tint. null → the module accent. */
+  bloom: string | null;
+  /** Bloom radial opacity stops [peak @0%, mid @50%] (outer stop is always 0). */
+  bloomOpacity: [number, number];
+  /** Icon-tile tint — bg renders at `${tint}33`, border at `${tint}66`.
+   *  null → the module accent. */
+  iconTint: string | null;
+  /** Locked-card treatment: overlay wash + lock-glyph color. */
+  lockedOverlay: string;
+  lockedTint: string;
+  /** Coming-soon placeholder: dashed border + dimmed text/lock tint. */
+  comingSoonBorder: string;
+  comingSoonTint: string;
+}
+
+/**
+ * Ambient particle layer painted over the shared field gradient (CosmicField) —
+ * e.g. Desert Oracle's sand dusting. STATIC by design (Simo, 2026-07-19): the
+ * motes are plain Views with no animation, so the layer costs nothing at
+ * runtime — pure atmosphere, zero smoothness impact. `null` on ThemeColors = no
+ * ambient particles (cosmic — zero visual change).
+ */
+export interface AmbientParticleTokens {
+  /** Particle tints, cycled across the field. */
+  colors: string[];
+  count: number;
+  /** Particle diameter range [min, max] dp. */
+  size: [number, number];
+  /** Per-mote opacity range [min, max] — each mote gets a fixed value inside it. */
+  opacity: [number, number];
+}
+
 export interface ThemeColors {
   id: ThemeId;
   background: string;
@@ -144,6 +211,10 @@ export interface ThemeColors {
   rose: string;
   emerald: string;
   glow: string;
+  /** How this theme skins module cards — see ModuleCardTokens. */
+  moduleCard: ModuleCardTokens;
+  /** Ambient particle layer over the field gradient. null = none. */
+  ambientParticles: AmbientParticleTokens | null;
 }
 
 export interface MultiResults {

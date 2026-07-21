@@ -11,10 +11,10 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
+import { AURA_V2, AURA_SPECTRUM_STOPS, FLAG_DUO, isDualFlagModule, isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
 import { useUserStore } from '@/src/store/userStore';
 import { useReadingStore } from '@/src/store/readingStore';
 import { MODULES, FREE_TRIAL_MODULE_ID } from '@/src/data/modules';
@@ -37,6 +37,36 @@ const SLOT_COUNTS: Record<ReadingMode, number> = {
 
 function generateId(): string {
   return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+}
+
+/** A thin full spectrum RING (6 canonical stops, 60° each) around the aura "You" avatar
+ *  (AURA_PRISM_V2). Full circumference — not a crescent — per the person-entry mockup. */
+function SpectrumRing({ size, stroke = 2 }: { size: number; stroke?: number }) {
+  const c = size / 2;
+  const rr = c - stroke / 2 - 0.5;
+  const polar = (deg: number) => {
+    const a = (deg * Math.PI) / 180;
+    return { x: c + rr * Math.cos(a), y: c + rr * Math.sin(a) };
+  };
+  return (
+    <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
+      {AURA_SPECTRUM_STOPS.map((color, i) => {
+        const a0 = -90 + i * 60;
+        const s = polar(a0);
+        const e = polar(a0 + 60 + 2);
+        return (
+          <Path
+            key={i}
+            d={`M ${s.x} ${s.y} A ${rr} ${rr} 0 0 1 ${e.x} ${e.y}`}
+            stroke={color}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            fill="none"
+          />
+        );
+      })}
+    </Svg>
+  );
 }
 
 export default function PersonEntryScreen() {
@@ -107,7 +137,7 @@ export default function PersonEntryScreen() {
   }, []);
 
   const addPerson = useCallback(() => {
-    if (persons.length >= 10) return;
+    if (persons.length >= 8) return;
     setPersons((prev) => [
       ...prev,
       {
@@ -131,8 +161,8 @@ export default function PersonEntryScreen() {
       spendStars(cost, 'reading');
     }
     startReading(moduleId ?? '', resolvedMode, persons);
-    // trial flag tells the quiz what THIS attempt charged, so a mid-quiz abandon can
-    // give it back (stars refund vs. trial restore).
+    // trial flag tells the quiz what THIS attempt charged: a mid-quiz abandon
+    // restores the free trial, but spent stars are NOT refunded (Simo, 2026-07-19).
     router.push({
       pathname: '/quiz',
       params: { moduleId, mode: resolvedMode, trial: isFreeTrial ? '1' : '0' },
@@ -147,27 +177,32 @@ export default function PersonEntryScreen() {
   // Blooms use the spine's SOFT tone — dark module colors (jealous) wash out to
   // near-black at low opacity and made this screen read unlit.
   const bloomTint = moduleTheme(module.id).accentSoft;
-  // Prismatic identity (aura_color): gradient bloom / card ring / avatar.
+  // AURA_PRISM_V2: obsidian field, graphite "You" card w/ silver hairline, obsidian
+  // avatar + full spectrum ring, pearl CTA — no coloured gradient.
   const prism = isPrismModule(module.id);
-  const g = theme.gradient;
+  // RED/GREEN dual identity: green counter-bloom in the lower field (red base above).
+  const dual = isDualFlagModule(module.id);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Ambient depth base + per-module accent bloom (mirrors module detail / reading mode) */}
-      <LinearGradient
-        colors={theme.fieldGradient}
-        locations={[0, 0.5, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+      {/* Ambient depth base — aura sits on a flat obsidian field. */}
+      {prism ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: AURA_V2.obsidian }]} />
+      ) : (
+        <LinearGradient
+          colors={theme.fieldGradient}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
         <Defs>
           <RadialGradient id="entry_glow" cx="50%" cy="18%" r="60%">
             {prism
               ? [
-                  <Stop key="p0" offset="0%" stopColor={g[1]} stopOpacity={0.22} />,
-                  <Stop key="p1" offset="45%" stopColor={g[0]} stopOpacity={0.09} />,
-                  <Stop key="p2" offset="80%" stopColor={g[2]} stopOpacity={0.04} />,
-                  <Stop key="p3" offset="100%" stopColor={theme.background} stopOpacity={0} />,
+                  <Stop key="p0" offset="0%" stopColor={AURA_V2.pearl} stopOpacity={0.12} />,
+                  <Stop key="p1" offset="45%" stopColor={AURA_V2.pearl} stopOpacity={0.04} />,
+                  <Stop key="p2" offset="100%" stopColor={AURA_V2.obsidian} stopOpacity={0} />,
                 ]
               : [
                   <Stop key="s0" offset="0%" stopColor={bloomTint} stopOpacity={0.22} />,
@@ -178,6 +213,20 @@ export default function PersonEntryScreen() {
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#entry_glow)" />
       </Svg>
+
+      {/* RED/GREEN dual identity: green counter-bloom rising from the lower field. */}
+      {dual ? (
+        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+          <Defs>
+            <RadialGradient id="entry_glow_dual" cx="50%" cy="90%" r="55%">
+              <Stop offset="0%" stopColor={FLAG_DUO.green} stopOpacity={0.12} />
+              <Stop offset="55%" stopColor={FLAG_DUO.green} stopOpacity={0.04} />
+              <Stop offset="100%" stopColor={theme.background} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100%" height="100%" fill="url(#entry_glow_dual)" />
+        </Svg>
+      ) : null}
 
       {/* Header: back button (left) + stars badge (right) */}
       <View style={[styles.header, { paddingTop: insets.top + rs(12) }]}>
@@ -231,11 +280,11 @@ export default function PersonEntryScreen() {
             const card = (
               <View style={styles.soloCardWrap}>
                 <GlassCard
-                  glowColor={prism ? g[1] : accent}
+                  glowColor={prism ? 'rgba(0,0,0,0)' : accent}
                   style={[
                     styles.soloCard,
                     prism
-                      ? { borderWidth: 0 }
+                      ? { backgroundColor: AURA_V2.graphite, borderColor: `${AURA_V2.silver}59`, borderWidth: 1 }
                       : { borderColor: accent, borderWidth: 2 },
                     {
                       shadowOpacity: 0.9,
@@ -246,16 +295,12 @@ export default function PersonEntryScreen() {
                 >
                   <View style={styles.soloRow}>
                     {prism ? (
-                      <LinearGradient
-                        colors={g}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.soloAvatar}
-                      >
-                        <Text style={[styles.soloAvatarText, { color: theme.background }]}>
+                      <View style={[styles.soloAvatar, { backgroundColor: AURA_V2.obsidian }]}>
+                        <SpectrumRing size={rs(46)} stroke={2} />
+                        <Text style={[styles.soloAvatarText, { color: AURA_V2.pearl }]}>
                           {person.name.charAt(0).toUpperCase() || 'Y'}
                         </Text>
-                      </LinearGradient>
+                      </View>
                     ) : (
                       <View style={[styles.soloAvatar, { backgroundColor: accent }]}>
                         <Text style={[styles.soloAvatarText, { color: theme.background }]}>
@@ -284,23 +329,11 @@ export default function PersonEntryScreen() {
                 )}
               </View>
             );
-            return prism ? (
-              <LinearGradient
-                key={person.id}
-                colors={g}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.soloRingPrism}
-              >
-                {card}
-              </LinearGradient>
-            ) : (
-              <React.Fragment key={person.id}>{card}</React.Fragment>
-            );
+            return <React.Fragment key={person.id}>{card}</React.Fragment>;
           })}
 
           {/* Add person button (circle mode only) */}
-          {resolvedMode === 'circle' && persons.length < 10 && (
+          {resolvedMode === 'circle' && persons.length < 8 && (
             <TouchableOpacity
               onPress={addPerson}
               style={[styles.addBtn, { borderColor: theme.surfaceBorder }]}
@@ -325,7 +358,9 @@ export default function PersonEntryScreen() {
           label={isFreeTrial ? t('personEntry.startFree') : t('personEntry.startButton', { cost })}
           onPress={handleStart}
           disabled={!canStart}
-          labelColor={theme.background}
+          labelColor={prism ? AURA_V2.obsidian : theme.background}
+          colors={prism ? [AURA_V2.pearl, '#D6D5E0'] : undefined}
+          glowColor={prism ? 'rgba(0,0,0,0)' : undefined}
           bold
           glow
           trailingIcon={isFreeTrial ? undefined : 'star-four-points'}
@@ -382,6 +417,7 @@ const styles = StyleSheet.create({
   /* Solo "You · locked" card — selected-state treatment (accent border + glow) applied inline. */
   soloCardWrap: { position: 'relative' },
   soloCard: { padding: rs(16) },
+  ctaHairlinePrism: { width: rs(180), alignSelf: 'center', marginTop: rs(12) },
   // Locked (insufficient-stars) veil over the "You" card — matches GlassCard's rs(20) radius.
   lockOverlay: {
     ...StyleSheet.absoluteFillObject,

@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
+  I18nManager,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -22,16 +23,33 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 
+import i18n from '@/src/i18n';
 import { useUserStore } from '@/src/store/userStore';
+import { useSettingsStore } from '@/src/store/settingsStore';
 import { useTransitionStore } from '@/src/store/transitionStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import GradientButton from '@/src/components/GradientButton';
+import { Language } from '@/src/types';
 import { rs } from '@/src/utils/responsive';
 import { useIsRTL } from '@/src/utils/rtl';
+import { reloadApp } from '@/src/utils/reloadApp';
+import { syncDayjsLocale } from '@/src/utils/dateLocale';
 
 /** Design cyan used for the sample-card eyebrow labels — no exact theme token. */
 const CARD_CYAN = '#22D3EE';
 const TOTAL_SLIDES = 3;
+
+/** Slide-1 language chips. Endonyms are locale-invariant by definition (same constant
+ *  pattern as the Settings switcher); flags per the onboarding design reference. The
+ *  default language is always English (settingsStore default) — the user picks another
+ *  here if they want. No device-locale auto-detection (kept fully offline + JS-only, so
+ *  there is NO native localization module in the build). */
+const LANGUAGES: { code: Language; flag: string; name: string }[] = [
+  { code: 'en', flag: '🇬🇧', name: 'English' },
+  { code: 'fr', flag: '🇫🇷', name: 'Français' },
+  { code: 'ar', flag: '🇸🇦', name: 'العربية' },
+  { code: 'es', flag: '🇪🇸', name: 'Español' },
+];
 
 /* -------------------------------------------------------------------------- */
 /*        Slide 1 hero — three glowing person glyphs (teal/violet/emerald)    */
@@ -294,7 +312,33 @@ export default function OnboardingScreen() {
   const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
   const setOnboarded = useUserStore((s) => s.setOnboarded);
+  const language = useSettingsStore((s) => s.language);
+  const setLanguage = useSettingsStore((s) => s.setLanguage);
   const [slide, setSlide] = useState(0);
+
+  // Language selection — the EXACT mechanism of the Settings switcher (store +
+  // i18n + dayjs + unconditional native RTL flags; see settings.tsx). LTR↔LTR
+  // switches apply live (strings re-render in place); crossing the Arabic RTL
+  // boundary additionally reuses the same reloadApp() relaunch path, because the
+  // native direction flag only re-lays-out on a fresh launch. After the reload
+  // the app re-enters onboarding (hasOnboarded is still false) in the chosen
+  // language. No manual row-reverse anywhere — RTL stays native-level only.
+  const applyLanguage = useCallback(
+    (lang: Language) => {
+      if (lang === language) return;
+      const willBeRTL = lang === 'ar';
+      const directionFlips = willBeRTL !== (language === 'ar');
+      setLanguage(lang);
+      void i18n.changeLanguage(lang);
+      syncDayjsLocale(lang);
+      // Native flag set unconditionally for the target language (stale
+      // `I18nManager.isRTL` under Expo Go + New Arch); applies on the relaunch.
+      I18nManager.allowRTL(willBeRTL);
+      I18nManager.forceRTL(willBeRTL);
+      if (directionFlips) reloadApp();
+    },
+    [language, setLanguage],
+  );
 
   // Skip — same as Begin: flag Home to play the cosmic intro overlay, then enter the app.
   const finish = useCallback(() => {
@@ -407,6 +451,56 @@ export default function OnboardingScreen() {
             </>
           )}
         </View>
+
+        {/* ── Language selector — first slide only (design reference: 4 flag
+            chips above the dots; selected = theme accent). Plain `row`: it
+            auto-mirrors under native RTL, per the no-manual-row-reverse rule. */}
+        {slide === 0 && (
+          <View style={styles.langBlock}>
+            <Text style={[styles.langHeading, { color: theme.textDim }]}>
+              {t('onboarding.chooseLanguage')}
+            </Text>
+            <View
+              style={styles.langRow}
+              accessibilityRole="radiogroup"
+              accessibilityLabel={t('onboarding.chooseLanguage')}
+            >
+              {LANGUAGES.map((l) => {
+              const selected = l.code === language;
+              return (
+                <Pressable
+                  key={l.code}
+                  onPress={() => applyLanguage(l.code)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={l.name}
+                  style={({ pressed }) => [
+                    styles.langChip,
+                    {
+                      backgroundColor: selected ? `${theme.primary}14` : theme.surface,
+                      borderColor: selected ? theme.primary : theme.surfaceBorder,
+                    },
+                    pressed && { opacity: 0.75 },
+                  ]}
+                >
+                  {/* Flag glyph is an emoji — keep the Latin/display face (no Naskh swap). */}
+                  <Text latin style={styles.langFlag}>
+                    {l.flag}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.langName,
+                      { color: selected ? theme.text : theme.textMuted },
+                    ]}
+                  >
+                    {l.name}
+                  </Text>
+                </Pressable>
+              );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* ── Pagination dots ───────────────────────────────────────────── */}
         <View style={styles.dotsRow}>
@@ -599,6 +693,39 @@ const styles = StyleSheet.create({
     lineHeight: rs(20),
     fontFamily: 'HankenGrotesk_400Regular',
     textAlign: 'center',
+  },
+
+  langBlock: {
+    marginTop: rs(4),
+    gap: rs(10),
+  },
+  langHeading: {
+    fontSize: rs(12.5),
+    fontFamily: 'HankenGrotesk_600SemiBold',
+    letterSpacing: 0.3,
+    textAlign: 'center',
+  },
+  langRow: {
+    flexDirection: 'row',
+    gap: rs(8),
+  },
+  langChip: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: rs(3),
+    borderRadius: rs(14),
+    borderWidth: 1.5,
+    paddingVertical: rs(7),
+    paddingHorizontal: rs(4),
+  },
+  langFlag: {
+    fontSize: rs(16),
+    lineHeight: rs(20),
+  },
+  langName: {
+    fontSize: rs(11.5),
+    fontFamily: 'HankenGrotesk_600SemiBold',
   },
 
   dotsRow: {

@@ -19,6 +19,7 @@ import { useUserStore } from '@/src/store/userStore';
 import { ThemeId } from '@/src/types';
 import { cosmicTheme } from '@/src/themes/cosmic';
 import { desertOracleTheme } from '@/src/themes/desertOracle';
+import { elvenGroveTheme } from '@/src/themes/elvenGrove';
 import StarsBadge from '@/src/components/StarsBadge';
 import ThemeUnlockDialog from '@/src/components/ThemeUnlockDialog';
 import { rs, screenWidth } from '@/src/utils/responsive';
@@ -37,6 +38,7 @@ interface ThemeEntry {
 const THEMES: ThemeEntry[] = [
   { id: 'cosmic', gradient: cosmicTheme.gradient, cost: 0 },
   { id: 'desertOracle', gradient: desertOracleTheme.gradient, cost: 30 },
+  { id: 'elvenGrove', gradient: elvenGroveTheme.gradient, cost: 25 },
 ];
 
 // Placeholder themes — locked, "Soon". Subtle 2-stops sampled around the design's
@@ -188,6 +190,7 @@ export default function ThemeGalleryScreen() {
       <ThemeUnlockDialog
         visible={unlock !== null}
         themeName={unlock ? t(`themeGallery.${unlock.id}`) : ''}
+        description={unlock ? t(`themeGallery.${unlock.id}Desc`) : undefined}
         gradient={unlock?.gradient ?? theme.gradient}
         cost={unlock?.cost ?? 0}
         balance={stars}

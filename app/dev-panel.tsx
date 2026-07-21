@@ -22,6 +22,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 
 import { useUserStore } from '@/src/store/userStore';
+import { useReadingStore } from '@/src/store/readingStore';
+import { generateCategoricalResult } from '@/src/engine/resultGenerator';
+import { auraColorResults } from '@/src/data/results/auraColorResults';
+import { auraOutcomeTheme, spectrumHex } from '@/src/themes/categoryTheme';
+import type { ResultData } from '@/src/types';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { localDateKey } from '@/src/content/articles/dailyInsight';
 import {
@@ -137,6 +142,33 @@ export default function DevPanelScreen() {
   };
 
   const setStars = (n: number) => useUserStore.setState({ stars: n });
+
+  // Aura result preview — build a real categorical ResultData for one colour and open
+  // it view-only, so every colour's reveal (copy, orb, accent) can be eyeballed without
+  // grinding the quiz toward that outcome. Fixed seed → stable insight selection.
+  const openAura = (key: string, secondary?: string) => {
+    const base: ResultData = {
+      moduleId: 'aura_color',
+      mode: 'solo',
+      scores: secondary ? { [key]: 12, [secondary]: 9 } : { [key]: 12 },
+      dominantDimension: key,
+      secondaryDimension: secondary,
+      // Two-tone preview: force the secondary hex so the orb's secondary arc shows.
+      secondaryColor: secondary ? spectrumHex(secondary) : null,
+      confidence: 88,
+      insights: [],
+    };
+    const full = generateCategoricalResult(base, auraColorResults, 12345);
+    useReadingStore.getState().setViewOnlyResult(full);
+    router.push('/result?viewOnly=1');
+  };
+
+  // Two-tone combos to verify the secondary rim arc (primary + secondary hue).
+  const AURA_COMBOS: [string, string][] = [
+    ['blue', 'violet'],
+    ['gold', 'red'],
+    ['green', 'blue'],
+  ];
 
   // Show the reveal on demand: if no result is pending (e.g. you didn't walk a full week),
   // seed one from the active week's first outcome so the screen is viewable immediately.
@@ -288,6 +320,43 @@ export default function DevPanelScreen() {
           <Btn label="Reset ritual state" onPress={resetRitual} tone="rose" />
         </View>
 
+        {/* ── Aura colour results (preview every outcome) ───────────────── */}
+        <Text style={[styles.section, { color: theme.textDim }]}>AURA COLOUR RESULTS (view)</Text>
+        <View style={styles.row}>
+          {Object.keys(auraColorResults.categories).map((key) => (
+            <TouchableOpacity
+              key={key}
+              onPress={() => openAura(key)}
+              activeOpacity={0.8}
+              style={[styles.auraBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+            >
+              <View style={[styles.auraDot, { backgroundColor: auraOutcomeTheme(key).accent }]} />
+              <Text style={[styles.btnText, { color: theme.text }]}>
+                {key.charAt(0).toUpperCase() + key.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Two-tone combos — verify the orb's secondary rim arc. */}
+        <Text style={[styles.section, { color: theme.textDim }]}>AURA TWO-TONE (secondary arc)</Text>
+        <View style={styles.row}>
+          {AURA_COMBOS.map(([primary, secondary]) => (
+            <TouchableOpacity
+              key={`${primary}_${secondary}`}
+              onPress={() => openAura(primary, secondary)}
+              activeOpacity={0.8}
+              style={[styles.auraBtn, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+            >
+              <View style={[styles.auraDot, { backgroundColor: spectrumHex(primary) }]} />
+              <View style={[styles.auraDot, { backgroundColor: spectrumHex(secondary), marginStart: -rs(6) }]} />
+              <Text style={[styles.btnText, { color: theme.text }]}>
+                {primary.charAt(0).toUpperCase() + primary.slice(1)}+{secondary}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {/* ── Recorded answers (feed the tally) ─────────────────────────── */}
         <Text style={[styles.section, { color: theme.textDim }]}>RECORDED ANSWERS ({dailyAnswers.length})</Text>
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
@@ -348,4 +417,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   btnText: { fontSize: rs(13), fontFamily: 'HankenGrotesk_600SemiBold' },
+  auraBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: rs(7),
+    paddingHorizontal: rs(12),
+    paddingVertical: rs(9),
+    borderRadius: rs(10),
+    borderWidth: 1,
+  },
+  auraDot: { width: rs(12), height: rs(12), borderRadius: 999 },
 });
