@@ -9,6 +9,11 @@ interface ReadingState {
   currentAnswers: Record<string, string>;
   currentResult: ResultData | null;
   viewOnlyResult: ResultData | null; // for reading history view
+  /** The persisted persons for a History reopen — the result's comparison card
+   *  ("THE FULL PICTURE") needs names/colours, which live on the saved Reading,
+   *  not in this transient session state. Without it, reopening a multi reading
+   *  showed an EMPTY full-picture card. */
+  viewOnlyPersons: Person[];
   /** Option C two-tier result: false = minimal (name + verdict + confidence only);
    *  true = full (insights, full picture, share). Set by the ad-gate (watch ad or
    *  1★ → true, free skip → false) or by the unlock card on the result itself. */
@@ -25,7 +30,7 @@ interface ReadingState {
   setServedQuestions: (questionIds: string[]) => void;
   recordAnswer: (questionId: string, value: string) => void;
   setResult: (result: ResultData) => void;
-  setViewOnlyResult: (result: ResultData | null) => void;
+  setViewOnlyResult: (result: ResultData | null, persons?: Person[]) => void;
   setResultUnlocked: (unlocked: boolean) => void;
   resetReading: () => void;
 }
@@ -37,6 +42,7 @@ export const useReadingStore = create<ReadingState>()((set) => ({
   currentAnswers: {},
   currentResult: null,
   viewOnlyResult: null,
+  viewOnlyPersons: [],
   resultUnlocked: false,
   currentSeed: 0,
   currentQuestionIds: [],
@@ -66,8 +72,8 @@ export const useReadingStore = create<ReadingState>()((set) => ({
     set({ currentResult: result });
   },
 
-  setViewOnlyResult: (result: ResultData | null): void => {
-    set({ viewOnlyResult: result });
+  setViewOnlyResult: (result: ResultData | null, persons: Person[] = []): void => {
+    set({ viewOnlyResult: result, viewOnlyPersons: persons });
   },
 
   setResultUnlocked: (unlocked: boolean): void => {

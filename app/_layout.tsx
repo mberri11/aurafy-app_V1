@@ -193,6 +193,14 @@ function RootLayoutNav() {
           animation: "slide_from_right",
         }}
       />
+      {/* Daily quote — the daily ritual. Own glass back button, no native header. */}
+      <Stack.Screen
+        name="quote"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
       {/* No native header — the screen draws its own glass back button. */}
       <Stack.Screen
         name="theme-gallery"

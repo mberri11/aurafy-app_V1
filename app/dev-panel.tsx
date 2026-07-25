@@ -21,14 +21,15 @@ import { Redirect, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 
-import { useUserStore } from '@/src/store/userStore';
+import { useUserStore, isRitualDoneToday } from '@/src/store/userStore';
 import { useReadingStore } from '@/src/store/readingStore';
 import { generateCategoricalResult } from '@/src/engine/resultGenerator';
 import { auraColorResults } from '@/src/data/results/auraColorResults';
 import { auraOutcomeTheme, spectrumHex } from '@/src/themes/categoryTheme';
 import type { ResultData } from '@/src/types';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { localDateKey } from '@/src/content/articles/dailyInsight';
+import { localDateKey } from '@/src/utils/date';
+import { getTodayQuote, getQuoteContent, getDailyAccentIndex } from '@/src/content/quotes';
 import {
   getDayIndex,
   getDaysSinceAnchor,
@@ -37,7 +38,13 @@ import {
   getTodayPairing,
   getTodayOutcomeKey,
 } from '@/src/data/weeks/walker';
-import { sendTestNotification } from '@/src/utils/notifications';
+import {
+  sendTestNotification,
+  previewNotification,
+  listScheduled,
+  syncReminders,
+  type NotifyKind,
+} from '@/src/utils/notifications';
 import { rs } from '@/src/utils/responsive';
 import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
 import { useInterstitialAd } from '@/src/ads/useInterstitialAd';
@@ -65,6 +72,7 @@ export default function DevPanelScreen() {
   const readingCount = useUserStore((s) => s.readingCount);
   const weeklyResult = useUserStore((s) => s.weeklyResult);
   const dailyAnswers = useUserStore((s) => s.dailyAnswers);
+  const lastDailyClaim = useUserStore((s) => s.lastDailyClaim);
   const completeDailyRitual = useUserStore((s) => s.completeDailyRitual);
   const claimWeeklyResult = useUserStore((s) => s.claimWeeklyResult);
 
@@ -107,13 +115,38 @@ export default function DevPanelScreen() {
   const weekIdx = getActiveWeekIndex(weekAnchorDate, simDate);
   const pairing = getTodayPairing(weekAnchorDate, simDate);
   const todayKey = localDateKey(simDate);
-  const doneToday = dailyAnswers.some((a) => a.date === todayKey);
+  // Done-today now reads lastDailyClaim (the quote ritual stopped writing dailyAnswers).
+  const doneToday = isRitualDoneToday(lastDailyClaim, simDate);
+  const quote = getTodayQuote(weekAnchorDate, simDate);
 
   const onComplete = () => {
-    if (!pairing) return;
-    const dim = getTodayOutcomeKey(pairing.questionId, 0, weekAnchorDate, simDate) ?? pairing.questionId;
-    completeDailyRitual({ questionId: pairing.questionId, answerIndex: 0, dimension: dim }, simDate);
+    completeDailyRitual(simDate);
   };
+
+  // ── Quote stepper (TEST ONLY) ────────────────────────────────────────────────
+  // The quote screen reads the REAL clock, so the sim offset above can't move it. What
+  // it actually keys off is `daysSinceAnchor = floor((now - weekAnchorDate) / DAY)`, so
+  // shifting the anchor BACK one day advances the quote (and its colour) by one, live.
+  //
+  // NOTE: the anchor also paces the article curriculum, so stepping the quote steps the
+  // daily article with it. That's fine for testing; it is not a user-facing control.
+  const stepQuote = (delta: number) => {
+    const anchor = weekAnchorDate ?? new Date(new Date().setHours(0, 0, 0, 0)).getTime();
+    // −delta on the anchor = +delta on daysSinceAnchor. Never let it drift into the
+    // future: a negative day count clamps to 0 in the walker and the stepper would jam.
+    const next = Math.min(anchor - delta * DAY_MS, new Date().setHours(0, 0, 0, 0));
+    useUserStore.setState({
+      weekAnchorDate: next,
+      // Clear the done-today marker too. Stepping the anchor moves the QUOTE but leaves
+      // lastDailyClaim on today's date, so the screen would open in the "already read"
+      // state — you'd never see a stepped quote fresh, or be able to tap Done on it.
+      // Nulling it presents each stepped quote as unread, and (because the backwards-
+      // clock guard only trips on a non-null claim) Done still pays +1 and advances the
+      // streak — so you can walk 7 steps and reach the streak bonus in one sitting.
+      lastDailyClaim: null,
+    });
+  };
+  const accentIdx = getDailyAccentIndex(weekAnchorDate);
 
   const resetRitual = () => {
     useUserStore.setState({
@@ -127,8 +160,17 @@ export default function DevPanelScreen() {
     setOffsetDays(0);
   };
 
-  const onTestNotification = async () => {
-    const res = await sendTestNotification();
+  // Pending-schedule readout — refreshed on demand so the panel can prove the 7-day
+  // window actually got laid down (and at which hours).
+  const [scheduled, setScheduled] = useState<{ when: string; title: string }[]>([]);
+  const refreshScheduled = async () => setScheduled(await listScheduled());
+  const onResync = async () => {
+    await syncReminders();
+    await refreshScheduled();
+  };
+
+  const onTestNotification = async (kind: NotifyKind = 'quote') => {
+    const res = await sendTestNotification(kind);
     if (res.ok) {
       Alert.alert('Notification scheduled', 'A test notification fires in ~3s. Background the app to see the banner.');
     } else if (res.reason === 'permission-denied') {
@@ -253,11 +295,30 @@ export default function DevPanelScreen() {
           <Stat k="streak" v={`${streak} / 7`} accent />
           <Stat k="stars" v={String(stars)} accent />
           <Stat k="weeklyResult" v={weeklyStr} accent={!!weeklyResult && weeklyResult.claimedAt === 0} />
-          <Stat k="pairing" v={pairing ? `${pairing.articleId} · ${pairing.questionId}` : '—'} />
+          <Stat k="quote" v={`${quote.id} · ${quote.tone}`} />
           <Stat k="done today?" v={doneToday ? 'yes ✓' : 'no'} />
         </View>
 
         {/* ── Time travel ───────────────────────────────────────────────── */}
+        {/* ── Quote stepper — walks the REAL quote screen, not the sim clock ── */}
+        <Text style={[styles.section, { color: theme.textDim }]}>DAILY QUOTE</Text>
+        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+          <Stat k="quote" v={`${quote.id} · ${quote.tone}`} accent />
+          <Stat k="text" v={getQuoteContent(quote.id, 'en').text.slice(0, 46) + '…'} />
+          <Stat k="author" v={quote.authorKey ?? 'Aurafy (original)'} />
+          <Stat k="day colour" v={`#${accentIdx + 1} of 7 · ${theme.dailyAccents[accentIdx]}`} />
+        </View>
+        <View style={styles.row}>
+          <Btn label="← Prev quote" onPress={() => stepQuote(-1)} />
+          <Btn label="Next quote →" onPress={() => stepQuote(1)} tone="gold" />
+          <Btn label="+7 (next colour cycle)" onPress={() => stepQuote(7)} tone="cyan" />
+        </View>
+        <Text style={[styles.note, { color: theme.textDim }]}>
+          Shifts weekAnchorDate, so the real quote screen moves too — and clears the
+          done-today marker, so each stepped quote opens UNREAD and Done still pays. Also
+          steps the article curriculum by the same day — expected, test-only.
+        </Text>
+
         <Text style={[styles.section, { color: theme.textDim }]}>ADVANCE / SKIP DAYS</Text>
         <View style={styles.row}>
           <Btn label="+1 day" onPress={() => setOffsetDays((d) => d + 1)} tone="cyan" />
@@ -281,9 +342,36 @@ export default function DevPanelScreen() {
 
         {/* ── Notifications (local, offline) ────────────────────────────── */}
         <Text style={[styles.section, { color: theme.textDim }]}>NOTIFICATIONS (local · test)</Text>
-        <View style={styles.row}>
-          <Btn label="Send test notification" onPress={onTestNotification} tone="cyan" />
+        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+          <Stat k="quote · reminderTime" v={previewNotification('quote').body.slice(0, 44) + '…'} />
+          <Stat k="streak · 22:00" v={previewNotification('streak').body.slice(0, 44) + '…'} />
+          <Stat k="noon · 12:00" v={previewNotification('noon').title} accent />
+          <Stat k="night · 23:00" v={previewNotification('night').title} accent />
         </View>
+        <Text style={[styles.note, { color: theme.textDim }]}>
+          Each fires in ~3s — background the app to see the banner. Noon/night copy rotates
+          by date: step the quote above (or the sim day) and these change too.
+        </Text>
+        <View style={styles.row}>
+          <Btn label="Test quote" onPress={() => onTestNotification('quote')} tone="gold" />
+          <Btn label="Test streak" onPress={() => onTestNotification('streak')} tone="rose" />
+        </View>
+        <View style={styles.row}>
+          <Btn label="Test noon teaser" onPress={() => onTestNotification('noon')} tone="cyan" />
+          <Btn label="Test night teaser" onPress={() => onTestNotification('night')} tone="cyan" />
+        </View>
+        <View style={styles.row}>
+          <Btn label="Re-sync schedule" onPress={onResync} />
+          <Btn label="Show pending" onPress={refreshScheduled} />
+        </View>
+        {scheduled.length > 0 && (
+          <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+            <Stat k="pending" v={`${scheduled.length} scheduled`} accent />
+            {scheduled.slice(0, 12).map((s, i) => (
+              <Stat key={i} k={s.when} v={s.title} />
+            ))}
+          </View>
+        )}
 
         {/* ── Ads (test units — verify each format renders) ─────────────── */}
         <Text style={[styles.section, { color: theme.textDim }]}>ADS (Google TEST units)</Text>

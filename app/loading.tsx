@@ -24,7 +24,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { AURA_V2, AURA_SPECTRUM_STOPS, FLAG_DUO, FLAG_DUO_STOPS, categoryForModule, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
-import CategoryMotif from '@/src/components/CategoryMotif';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
@@ -33,6 +32,7 @@ import { scoreReading } from '@/src/engine/scoringEngine';
 import {
   generateCategoricalResult,
   generateCountResult,
+  generateFlagMultiResult,
   generateMultiResult,
   generateSoloResult,
 } from '@/src/engine/resultGenerator';
@@ -67,7 +67,7 @@ import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
 import { shadowSelfResults } from '@/src/data/results/shadowSelfResults';
 import { whoCutOffResults } from '@/src/data/results/whoCutOffResults';
 import { auraColorResults } from '@/src/data/results/auraColorResults';
-import { CategoricalResults, CountResults, MultiResults, SoloResults } from '@/src/types';
+import { CategoricalResults, CountResults, FlagMultiResults, MultiResults, SoloResults } from '@/src/types';
 
 import { getModuleQuestions } from '@/src/engine/questionPool';
 
@@ -80,6 +80,11 @@ const MULTI_RESULTS_MAP: Record<string, MultiResults> = {
   energy_reading: energyReadingResults,
   who_cut_off: whoCutOffResults,
   who_will_hurt_me: whoWillHurtMeResults,
+};
+
+// Polarity modules keep their own map — FlagMultiResults carries group verdicts +
+// .red/.green insight pools, which a plain MultiResults cannot express.
+const FLAG_MULTI_RESULTS_MAP: Record<string, FlagMultiResults> = {
   red_green_flag: redGreenFlagResults,
 };
 
@@ -400,8 +405,15 @@ export default function LoadingScreen() {
         finalResult = mr ? generateMultiResult(rawResult, mr, seed) : rawResult;
       }
     } else if (moduleType === 'multi') {
-      const mr = MULTI_RESULTS_MAP[moduleId ?? ''];
-      finalResult = mr ? generateMultiResult(rawResult, mr, seed) : rawResult;
+      // Polarity modules (red_green_flag) resolve to a GROUP verdict built from the
+      // band distribution, not a winner crowning — separate map + generator.
+      const fr = FLAG_MULTI_RESULTS_MAP[moduleId ?? ''];
+      if (fr) {
+        finalResult = generateFlagMultiResult(rawResult, fr, currentPersons, seed);
+      } else {
+        const mr = MULTI_RESULTS_MAP[moduleId ?? ''];
+        finalResult = mr ? generateMultiResult(rawResult, mr, seed) : rawResult;
+      }
     } else {
       const sr = SOLO_RESULTS_MAP[moduleId ?? ''];
       finalResult = sr ? generateSoloResult(rawResult, sr, seed) : rawResult;
@@ -603,26 +615,23 @@ export default function LoadingScreen() {
             <View style={[styles.handle, { backgroundColor: theme.borderStrong }]} />
 
             {/* Glowing category orb + expanding pulse ring (ad_gate_animation frames).
-                Aura uses the base Prism Orb here (per AURA_PRISM_V2). */}
+                Aura used to swap in the Prism Orb here; with the orb retired
+                (2026-07-25) it takes the same glowing sphere as every other module. */}
             <View style={styles.orbWrap}>
               <Animated.View
                 style={[styles.orbRing, { borderColor: prism ? AURA_V2.silver : gateAccent }, ringStyle]}
               />
-              {prism ? (
-                <CategoryMotif moduleId={moduleId ?? ''} size={ORB_SIZE} />
-              ) : (
-                <Svg width={ORB_SIZE} height={ORB_SIZE}>
-                  <Defs>
-                    <RadialGradient id="gate_orb" cx="38%" cy="32%" r="78%">
-                      <Stop offset="0%" stopColor={gateSoft} stopOpacity={1} />
-                      <Stop offset="55%" stopColor={gateAccent} stopOpacity={0.9} />
-                      <Stop offset="100%" stopColor={theme.background} stopOpacity={0.92} />
-                    </RadialGradient>
-                  </Defs>
-                  <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={ORB_SIZE / 2} fill="url(#gate_orb)" />
-                  <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={rs(2.6)} fill="#FFFFFF" />
-                </Svg>
-              )}
+              <Svg width={ORB_SIZE} height={ORB_SIZE}>
+                <Defs>
+                  <RadialGradient id="gate_orb" cx="38%" cy="32%" r="78%">
+                    <Stop offset="0%" stopColor={gateSoft} stopOpacity={1} />
+                    <Stop offset="55%" stopColor={gateAccent} stopOpacity={0.9} />
+                    <Stop offset="100%" stopColor={theme.background} stopOpacity={0.92} />
+                  </RadialGradient>
+                </Defs>
+                <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={ORB_SIZE / 2} fill="url(#gate_orb)" />
+                <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={rs(2.6)} fill="#FFFFFF" />
+              </Svg>
             </View>
 
             <Text style={[styles.gateEyebrow, { color: prism ? AURA_V2.pearl : gateAccent }]}>

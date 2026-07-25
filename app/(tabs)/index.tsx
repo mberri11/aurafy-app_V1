@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useUserStore } from '@/src/store/userStore';
+import { useUserStore, isRitualDoneToday } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { MODULES, FREE_TRIAL_MODULE_ID } from '@/src/data/modules';
 import ModuleCard from '@/src/components/ModuleCard';
@@ -19,8 +19,7 @@ import AurafyLogo from '@/src/components/AurafyLogo';
 import CosmicBloom from '@/src/components/CosmicBloom';
 import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
 import FeaturedInsightCard from '@/src/screens/insights/components/FeaturedInsightCard';
-import { getArticle, getArticleContent, type Language } from '@/src/content/articles';
-import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
+import { getDailyAccentIndex } from '@/src/content/quotes';
 import { rs } from '@/src/utils/responsive';
 
 const RELATIONSHIP_MODULES = MODULES.filter((m) => m.type === 'multi');
@@ -39,13 +38,13 @@ const makeRows = (modules: typeof MODULES) => {
 };
 
 export default function HomeScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const stars = useUserStore((s) => s.stars);
   const freeTrialUsed = useUserStore((s) => s.freeTrialUsed);
   const unlockedModules = useUserStore((s) => s.unlockedModules);
-  const dailyAnswers = useUserStore((s) => s.dailyAnswers);
+  const lastDailyClaim = useUserStore((s) => s.lastDailyClaim);
   const weekAnchorDate = useUserStore((s) => s.weekAnchorDate);
 
   // Home ordering: live (playable) → unlockable (paid, not yet owned) → coming-soon.
@@ -64,13 +63,13 @@ export default function HomeScreen() {
     };
   }, [unlockedModules]);
 
-  // "Tonight's Read" hook — today's deterministic daily insight (see 10-Insight-1).
-  const lang = i18n.language as Language;
-  const dailyInsightId = getDailyInsightId(weekAnchorDate);
-  const dailyInsight = getArticle(dailyInsightId);
-  const dailyInsightContent = getArticleContent(dailyInsightId, lang);
-  // Reward pill shows until today's daily ritual (article + question) is completed.
-  const insightRewardAvailable = !dailyAnswers.some((a) => a.date === localDateKey());
+  // Daily ritual entry — the QUOTE. The card deliberately carries no article and no quote
+  // text (previewing the line would spoil the reveal): it shows quotes.dailyTitle + the
+  // 2-step read→earn stepper and opens /quote. Articles live in the Insights tab.
+  const ritualRewardAvailable = !isRitualDoneToday(lastDailyClaim);
+  // Today's colour from the theme's 7-day cycle — the card wears the same accent the
+  // quote screen will open in, so the hand-off reads as one moment.
+  const ritualAccent = theme.dailyAccents[getDailyAccentIndex(weekAnchorDate)];
 
   const handleModulePress = useCallback((moduleId: string) => {
     router.push({ pathname: '/module/[id]', params: { id: moduleId } });
@@ -80,8 +79,8 @@ export default function HomeScreen() {
     router.push('/(tabs)/stars');
   }, []);
 
-  const handleInsightPress = useCallback((id: string) => {
-    router.push({ pathname: '/article/[id]', params: { id } });
+  const handleRitualPress = useCallback(() => {
+    router.push('/quote');
   }, []);
 
   const listData: HomeListItem[] = [
@@ -180,19 +179,15 @@ export default function HomeScreen() {
               <Text style={[styles.heroTitle, { color: theme.text }]}>{t('home.heroTitle')}</Text>
             </View>
 
-            {/* Tonight's Read — the single daily-ritual entry point (10-Insight.png).
-                Opens the daily article; the daily question lives at its foot. */}
-            {dailyInsight && dailyInsightContent ? (
-              <View style={styles.insightCard}>
-                <FeaturedInsightCard
-                  ritual
-                  article={dailyInsight}
-                  content={dailyInsightContent}
-                  rewardAvailable={insightRewardAvailable}
-                  onPress={() => handleInsightPress(dailyInsight.id)}
-                />
-              </View>
-            ) : null}
+            {/* The single daily-ritual entry point — opens today's QUOTE. */}
+            <View style={styles.insightCard}>
+              <FeaturedInsightCard
+                ritual
+                rewardAvailable={ritualRewardAvailable}
+                accent={ritualAccent}
+                onPress={handleRitualPress}
+              />
+            </View>
           </>
         }
       />

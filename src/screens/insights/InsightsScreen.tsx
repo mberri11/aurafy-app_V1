@@ -36,7 +36,7 @@ import {
   type ArticleCategory,
   type Language,
 } from '@/src/content/articles';
-import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
+import { getDailyInsightId } from '@/src/content/articles/dailyInsight';
 import { rs } from '@/src/utils/responsive';
 import FeaturedInsightCard from './components/FeaturedInsightCard';
 import ArticleCard from './components/ArticleCard';
@@ -52,16 +52,15 @@ export default function InsightsScreen() {
 
   const stars = useUserStore((s) => s.stars);
   const readArticleIds = useUserStore((s) => s.readArticleIds);
-  const dailyAnswers = useUserStore((s) => s.dailyAnswers);
   const weekAnchorDate = useUserStore((s) => s.weekAnchorDate);
 
   const [activeChip, setActiveChip] = useState<ChipKey>('all');
 
+  // Today's featured pick — still rotates every day off the user's anchor, it just no
+  // longer earns anything (the +1 moved to the daily QUOTE), so no reward flag is passed.
   const dailyId = getDailyInsightId(weekAnchorDate);
   const dailyArticle = ARTICLES.find((a) => a.id === dailyId);
   const dailyContent = getArticleContent(dailyId, lang);
-  // Reward pill shows until today's daily ritual (article + question) is completed.
-  const rewardAvailable = !dailyAnswers.some((a) => a.date === localDateKey());
 
   const openArticle = useCallback((id: string) => {
     router.push({ pathname: '/article/[id]', params: { id } });
@@ -147,7 +146,6 @@ export default function InsightsScreen() {
                 <FeaturedInsightCard
                   article={dailyArticle}
                   content={dailyContent}
-                  rewardAvailable={rewardAvailable}
                   onPress={() => openArticle(dailyArticle.id)}
                 />
               </>

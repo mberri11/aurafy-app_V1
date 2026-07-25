@@ -3,10 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Reading } from '../types';
 import { ContentSlice, createContentSlice } from './contentSlice';
-// C-10 anchor-day-status machine: the daily ritual is paced off the curriculum anchor
-// (NOT a wall clock). The store may import the walker — the walker never imports the
-// store, so there is no require cycle.
-import { getActiveWeek } from '@/src/data/weeks/walker';
+import { localDateKey } from '@/src/utils/date';
 
 const MAX_STARS = 100;
 const STARTING_STARS = 5;
@@ -23,17 +20,6 @@ const REWARDED_VIDEO_DAILY_CAP = 25; // max 25 videos/day → +50★/day ceiling
 // Keep enough recent answers that a full anchor week (≤7) is always intact for the day-7
 // tally even with a stale tail from the previous week (week-filtered before tallying).
 const MAX_DAILY_ANSWERS = 14;
-
-/** Local calendar-day key (YYYY-MM-DD, zero-padded). MUST stay byte-identical to
- *  `localDateKey` in src/content/articles/dailyInsight.ts — the reader and Home compare
- *  the ritual answer's stored date against THAT one, so a mismatched format silently
- *  breaks the daily-ritual lock (the answer never resolves as "done today"). */
-function localDateKey(d: Date = new Date()): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
 
 /** Epoch ms at the START of the given local calendar day (local midnight). The C-10
  *  curriculum anchor (`weekAnchorDate`) is pinned here, not at the raw ritual moment,
@@ -96,27 +82,16 @@ export interface WeeklyHistoryEntry {
 }
 
 /**
- * PURE (C-10): tally outcome keys over the last ≤7 ritual answers — highest count
- * wins, tiebroken by order in `outcomes` (earliest-defined outcome wins a tie).
- * Exported for the day-7 weekly reveal; NOT wired into the live ritual flow in this
- * pass. In the C-10 model `answers[].dimension` holds the week-local outcome key.
+ * THE single "has today's ritual already been completed" signal (local day).
+ *
+ * Derived from `lastDailyClaim` — NOT from `dailyAnswers`, which the quote ritual no
+ * longer writes to (2026-07-25). Every surface that shows a done/undone daily state
+ * MUST read this, so the Home card, the Stars card, the quote screen and the streak
+ * notification can never disagree about which day it is.
  */
-export function tallyWeeklyOutcome(
-  answers: { dimension: string }[],
-  outcomes: { key: string }[],
-): string {
-  const counts = new Map<string, number>();
-  for (const a of answers) counts.set(a.dimension, (counts.get(a.dimension) ?? 0) + 1);
-  let winner = outcomes[0]?.key ?? '';
-  let best = -1;
-  for (const o of outcomes) {
-    const c = counts.get(o.key) ?? 0;
-    if (c > best) {
-      best = c;
-      winner = o.key;
-    }
-  }
-  return winner;
+export function isRitualDoneToday(lastDailyClaim: number | null, at: Date = new Date()): boolean {
+  if (lastDailyClaim === null) return false;
+  return localDateKey(new Date(lastDailyClaim)) === localDateKey(at);
 }
 
 // Includes the Insights content slice (readArticleIds, savedArticleIds,
@@ -170,12 +145,14 @@ export interface UserState extends ContentSlice {
   earnStars: (amount: number, reason: string) => void;
   /** Credits +2 for a rewarded video, enforcing the 25/day cap. Returns false when capped. */
   earnRewardedVideo: () => boolean;
-  /** C-10 daily ritual (FORGIVING streak): records the answer, advances the streak by +1 (a
-   *  missed day holds it, never resets — no insurance, no cost), pays the +1 daily, and on the
-   *  7th ritual stages a PENDING weekly result (claimWeeklyResult pays the +5 after the reveal).
-   *  `at` defaults to now; the dev panel injects a simulated date. Returns the +1 (0 if already
-   *  done today). */
-  completeDailyRitual: (answer: Omit<DailyRitualAnswer, 'date'>, at?: Date) => number;
+  /** DAILY QUOTE ritual (FORGIVING streak): advances the streak by +1 (a missed day holds it,
+   *  never resets — no insurance, no cost) and pays the +1 daily. Completing the 7th ritual of a
+   *  cycle ALSO pays the +5 streak bonus and rolls the streak back to 0.
+   *  Takes no answer — the ritual is read-the-quote-and-tap-Done (2026-07-25); there is no daily
+   *  question, no weekly outcome, and `dailyAnswers` is no longer written.
+   *  `at` defaults to now; the dev panel injects a simulated date. Returns the TOTAL stars earned
+   *  (1 normally, 6 on the 7th day, 0 if already done today or the clock ran backwards). */
+  completeDailyRitual: (at?: Date) => number;
   /** Claims the staged day-7 weekly result: pays the +5 streak bonus, rolls the streak back to
    *  0, and marks the result claimed (clearing any forced-week override). Must run AFTER the
    *  reveal is shown — the +5 is never paid before it. Returns the +5 (0 if none pending). */
@@ -273,16 +250,21 @@ export const useUserStore = create<UserState>()(
         return true;
       },
 
-      // ── C-10 DAILY RITUAL · FORGIVING STREAK ────────────────────────────────────────
-      // Streak is a simple "rituals completed this cycle" counter (0..STREAK_LENGTH): each
-      // completed ritual is +1, and a MISSED day never resets it — the streak just HOLDS until
-      // the next answer, then resumes climbing. No insurance, no Stars cost, no punishment
-      // (Simo, 2026-06-28). Reaching the 7th ritual STAGES a pending weekly result; per the
-      // STRICT ORDER the +5 streak bonus AND the streak reset are deferred to claimWeeklyResult
-      // (run AFTER the reveal is on screen), so completing the 7th day only stages — it never
-      // pays here. The curriculum anchor still paces the daily article/question pairing.
-      completeDailyRitual: (answer: Omit<DailyRitualAnswer, 'date'>, at: Date = new Date()): number => {
-        // `at` is the completion moment — real `new Date()` in production; the C-10 dev panel
+      // ── DAILY QUOTE RITUAL · FORGIVING STREAK ───────────────────────────────────────
+      // The ritual is now: open the daily quote → read → tap Done. No question, no answer,
+      // no weekly outcome (2026-07-25).
+      //
+      // Streak is a "rituals completed this cycle" counter (0..STREAK_LENGTH): each completed
+      // ritual is +1, and a MISSED day never resets it — the streak just HOLDS until the next
+      // Done, then resumes climbing. No insurance, no Stars cost, no punishment (Simo,
+      // 2026-06-28). Completing the 7th pays the +5 streak bonus HERE and rolls the cycle back
+      // to 0 — the weekly-result reveal no longer exists to pay it, so the bonus moved onto the
+      // 7th day itself at the SAME amount (STREAK_BONUS_REWARD, unchanged).
+      //
+      // The curriculum anchor is still pinned on the first-ever ritual: it paces the daily
+      // quote (getTodayQuote) exactly as it paced the article/question pairing.
+      completeDailyRitual: (at: Date = new Date()): number => {
+        // `at` is the completion moment — real `new Date()` in production; the dev panel
         // injects a simulated date to fast-forward days. Both the localDateKey gate AND the
         // anchor pinning read from `at`, so a simulated day is internally consistent.
         const s = get();
@@ -290,58 +272,40 @@ export const useUserStore = create<UserState>()(
         // Anti-exploit: a backwards clock (now earlier than the last recorded ritual) earns
         // nothing and never advances the streak.
         if (s.lastDailyClaim !== null && nowMs < s.lastDailyClaim) return 0;
-        const todayKey = localDateKey(at);
-        // Idempotent once per local day (the "done today" signal Home/the reader read).
-        if (s.dailyAnswers.some((a) => a.date === todayKey)) return 0;
+        // Idempotent once per local day. Derived from lastDailyClaim via isRitualDoneToday —
+        // `dailyAnswers` can no longer serve as the day marker because the ritual stopped
+        // writing to it.
+        if (isRitualDoneToday(s.lastDailyClaim, at)) return 0;
 
         // Pin the curriculum anchor on the FIRST-EVER ritual (local midnight); never overwrite.
         const anchor = s.weekAnchorDate ?? startOfLocalDay(at);
 
-        // Resolve the active curriculum week up front — every answer records ITS week so
-        // the day-7 tally below can filter to the claimed week only.
-        const week = getActiveWeek(anchor, at);
+        // Forgiving streak: +1 per ritual. Completing the 7th closes the cycle (back to 0).
+        const nextStreak = s.streak + 1;
+        const cycleComplete = nextStreak >= STREAK_LENGTH;
+        const streak = cycleComplete ? 0 : nextStreak;
 
-        // Record today's answer (carries the week-local outcome key for the day-7 tally).
-        const record: DailyRitualAnswer = { ...answer, date: todayKey, weekId: week?.id };
-        const dailyAnswers = [...s.dailyAnswers, record].slice(-MAX_DAILY_ANSWERS);
+        // +1 daily, plus the +5 streak bonus on the 7th (same amount the weekly reveal paid).
+        const bonus = cycleComplete ? STREAK_BONUS_REWARD : 0;
+        const earned = DAILY_RITUAL_REWARD + bonus;
 
-        // Forgiving streak: +1 per ritual, capped at the cycle length. Holds across misses.
-        const streak = Math.min(s.streak + 1, STREAK_LENGTH);
-
-        // +1 daily ritual reward.
-        const tx: StarTransaction = { type: 'earn', amount: DAILY_RITUAL_REWARD, reason: 'daily_bonus', timestamp: nowMs };
-        const stars = Math.min(MAX_STARS, s.stars + DAILY_RITUAL_REWARD);
-
-        // Day-7 payoff (STRICT ORDER): reaching the 7th ritual with no result already pending
-        // tallies this cycle's last 7 answers against the active week's outcomes and STAGES a
-        // pending result (claimedAt 0). The +5 + streak reset land in claimWeeklyResult, after
-        // the reveal — never here.
-        let weeklyResult = s.weeklyResult;
-        const noPending = !s.weeklyResult || s.weeklyResult.claimedAt !== 0;
-        if (streak >= STREAK_LENGTH && noPending) {
-          if (week) {
-            // Tally ONLY this week's answers — a forgiving (slow) cycle can span a walker
-            // week boundary, and answers from the previous week must not vote in this one.
-            // Untagged answers (persisted pre-week-tagging) are excluded too.
-            const cycleAnswers = dailyAnswers
-              .filter((a) => a.weekId === week.id)
-              .slice(-STREAK_LENGTH);
-            const outcomeKey = tallyWeeklyOutcome(cycleAnswers, week.outcomes);
-            weeklyResult = { weekId: week.id, outcomeKey, claimedAt: 0 }; // 0 = pending reveal
-          }
+        // Newest-first: the bonus row sits above the daily row when both land together.
+        const txs: StarTransaction[] = [
+          { type: 'earn', amount: DAILY_RITUAL_REWARD, reason: 'daily_bonus', timestamp: nowMs },
+        ];
+        if (bonus > 0) {
+          txs.unshift({ type: 'earn', amount: bonus, reason: 'streak', timestamp: nowMs });
         }
 
         set({
-          stars,
+          stars: Math.min(MAX_STARS, s.stars + earned),
           streak,
-          dailyAnswers,
           weekAnchorDate: anchor,
-          weeklyResult,
-          lastDailyClaim: nowMs, // display/telemetry + backwards-clock guard
+          lastDailyClaim: nowMs, // the day marker + backwards-clock guard
           lastDailyQuestion: nowMs,
-          recentTransactions: [tx, ...s.recentTransactions].slice(0, MAX_TRANSACTIONS),
+          recentTransactions: [...txs, ...s.recentTransactions].slice(0, MAX_TRANSACTIONS),
         });
-        return DAILY_RITUAL_REWARD;
+        return earned;
       },
 
       claimWeeklyResult: (): number => {
@@ -450,7 +414,15 @@ export const useUserStore = create<UserState>()(
       },
     }),
     {
-      name: 'aurafy-user',
+      // RENAMED from 'aurafy-user' (2026-07-25, daily-quote migration). A NEW key, not a
+      // version bump on the old one: adding `version` to the pre-existing key would have made
+      // zustand read every existing blob as version `undefined` and — with no migrate fn —
+      // discard it, silently wiping stars, streak, history and unlocks (audit Risk 7).
+      // A fresh key means existing installs simply start clean, which is the approved
+      // behaviour here (testers only). The old 'aurafy-user' blob is left untouched on disk.
+      // NO migrate function by design — do not add one without a matching version bump.
+      name: 'aurafy-user-v2',
+      version: 1,
       storage: createJSONStorage(() => AsyncStorage),
     },
   ),

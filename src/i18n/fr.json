@@ -1,9 +1,9 @@
 {
   "notify": {
     "dailyTitle": "Aurafy ✦",
-    "dailyBody": "Ta lecture du soir est prête — réponds à ta question du jour pour garder ta série.",
+    "dailyBody": "La citation du soir t'attend — lis-la pour garder ta série.",
     "streakTitle": "Ne perds pas ta série 🔥",
-    "streakBody": "Tu n'as pas encore répondu à la question d'aujourd'hui. Réponds avant minuit pour garder ta série."
+    "streakBody": "Tu n'as pas encore lu la citation du jour. Lis-la avant minuit pour garder ta série."
   },
   "common": {
     "begin": "Commencer",
@@ -166,7 +166,7 @@
       "titleOr": "ou",
       "titleGreen": "drapeau vert ?",
       "subtitle": "Lis le schéma, pas la promesse",
-      "description": "Vingt questions comportementales sur la constance, les limites, l'honnêteté, la réparation et le contrôle. Lis une seule personne pour un verdict net — ou lis tout ton cercle pour trouver le drapeau le plus rouge.",
+      "description": "Vingt questions comportementales sur la constance, les limites, l'honnêteté, la réparation et le contrôle — pesant les drapeaux rouges comme les verts. Lis une personne pour un verdict net, ou deux en face-à-face pour voir qui penche de quel côté.",
       "poweredBy": "Théorie de l'attachement + recherche sur la réparation",
       "time": "5–7 min",
       "cost": "À partir de 1"
@@ -297,6 +297,21 @@
       "aboutEyebrow": "À propos de {{name}}",
       "signsRatio": "{{count}} signes présents sur {{total}}",
       "signalStrength": "Force du signal : {{confidence}}%"
+    },
+    "bands": {
+      "GREEN": "DRAPEAU VERT",
+      "LEAN_GREEN": "PLUTÔT VERT",
+      "NEUTRAL": "MITIGÉ",
+      "LEAN_RED": "PLUTÔT ROUGE",
+      "RED": "DRAPEAU ROUGE"
+    },
+    "compNet": "{{net}}",
+    "flagTitles": {
+      "GREEN": "Drapeau vert",
+      "LEAN_GREEN": "Penche au vert",
+      "NEUTRAL": "Signaux mitigés",
+      "LEAN_RED": "Penche au rouge",
+      "RED": "Drapeau rouge"
     }
   },
   "stars": {
@@ -308,8 +323,8 @@
     "dayProgress": "Jour {{streak}} sur 7",
     "activityTitle": "Activité récente",
     "watchVideoDesc": "Une courte pub, récompense immédiate",
-    "dailyQuestion": "Question du jour",
-    "dailyQuestionDesc": "Réponds à la question du jour",
+    "dailyQuestion": "Citation du jour",
+    "dailyQuestionDesc": "Lis la citation du jour",
     "streakDesc": "Maintiens ton rituel quotidien",
     "streakLabel": "Série de {{streak}} jours",
     "comeBack": "Reviens dans 24h",
@@ -364,7 +379,7 @@
     "volume": "Volume",
     "notifications": "Notifications",
     "dailyReminder": "Rappel quotidien",
-    "dailyReminderDesc": "« Ta question du jour est prête 🌙 »",
+    "dailyReminderDesc": "« Ta citation du jour est prête 🌙 »",
     "reminderTime": "Heure du rappel",
     "streakReminder": "Rappel de série",
     "streakReminderDesc": "Si ta série est sur le point de se rompre",
@@ -387,12 +402,9 @@
     "setTime": "Définir l'heure"
   },
   "daily": {
-    "title": "Question du jour",
     "starEarned": "Étoile gagnée",
     "balanceNow": "Ton solde est maintenant de {{balance}} ✦",
-    "comeBackTomorrow": "Reviens demain pour le prochain texte.",
-    "dayOf": "Jour {{day}} sur 7",
-    "weekCaption": "Chaque réponse complète le tableau. Termine la semaine pour débloquer ta lecture."
+    "comeBackTomorrow": "Reviens demain pour le prochain texte."
   },
   "personEntry": {
     "title": "Qui lis-tu ?",
@@ -456,8 +468,6 @@
     "latest": "RÉCENTS",
     "sponsored": "SPONSORISÉ",
     "rewardToday": "+1 ✦ aujourd'hui",
-    "dailyBadge": "Du jour",
-    "comeBackTomorrow": "Revenez demain pour une nouvelle idée",
     "minRead": "{{n}} min de lecture",
     "min": "{{n}} min",
     "takeReading": "Faire la lecture {{module}}",
@@ -474,9 +484,7 @@
       "jealousy": "Jalousie",
       "zodiac": "Zodiaque"
     },
-    "beginRead": "Commencer la lecture de ce soir",
     "stepRead": "Lire",
-    "stepAnswer": "Répondre",
     "stepEarn": "Gagner",
     "ritualDone": "Reviens demain"
   },
@@ -498,5 +506,27 @@
     "save": "Enregistrer l'image",
     "saved": "Enregistrée dans ta galerie ✓",
     "saveDenied": "Impossible d'enregistrer — autorise l'accès aux photos et réessaie."
+  },
+  "quotes": {
+    "dailyTitle": "La citation du jour",
+    "tapToReflect": "Appuie pour réfléchir",
+    "originalAuthor": "Aurafy",
+    "shareCta": "Partager",
+    "done": "Terminé",
+    "shareQuote": "Partager cette citation",
+    "authors": {
+      "laoTzu": "Lao Tseu",
+      "socrates": "Socrate",
+      "lamott": "Anne Lamott",
+      "angelou": "Maya Angelou",
+      "aurelius": "Marc Aurèle",
+      "rumi": "Rûmî",
+      "weil": "Simone Weil",
+      "aristotle": "Aristote",
+      "jung": "Carl Jung",
+      "roosevelt": "Eleanor Roosevelt"
+    },
+    "shareUnavailable": "Le partage n'est pas disponible sur cet appareil.",
+    "readCta": "Lire la citation"
   }
 }

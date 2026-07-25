@@ -20,13 +20,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useUserStore } from '@/src/store/userStore';
+import { useUserStore, isRitualDoneToday } from '@/src/store/userStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import GlassCard from '@/src/components/GlassCard';
 import CosmicBloom from '@/src/components/CosmicBloom';
 import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
 import { AdMobManager } from '@/src/ads/AdMobManager';
-import { getDailyInsightId, localDateKey } from '@/src/content/articles/dailyInsight';
 import { rs } from '@/src/utils/responsive';
 
 dayjs.extend(relativeTime);
@@ -164,15 +163,15 @@ export default function StarsWalletScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const reasonLabel = useReasonLabel();
-  const { stars, streak, recentTransactions, earnRewardedVideo, dailyAnswers, weekAnchorDate } =
+  const { stars, streak, recentTransactions, earnRewardedVideo, lastDailyClaim } =
     useUserStore();
 
-  // Today's ritual is "done" once an answer is recorded for the local day — the SAME
-  // calendar-day signal Home uses to dim the "Tonight's Read" card. (Deliberately not the
-  // 24h lastDailyClaim window, which can disagree with the calendar day across midnight.)
+  // Today's ritual is "done" once the quote has been completed for the local day — the SAME
+  // calendar-day signal Home uses to dim its daily card. isRitualDoneToday compares local
+  // DAY keys (not a rolling 24h window, which can disagree with the calendar day at midnight).
   const ritualDoneToday = useMemo(
-    () => dailyAnswers.some((a) => a.date === localDateKey()),
-    [dailyAnswers],
+    () => isRitualDoneToday(lastDailyClaim),
+    [lastDailyClaim],
   );
 
   // ── Balance pulse on change ──────────────────────────────────────────────
@@ -215,12 +214,12 @@ export default function StarsWalletScreen() {
     if (watched && earnRewardedVideo()) showEarnedToast(2);
   }, [earnRewardedVideo, showEarnedToast]);
 
-  // Daily ritual: the +1 is NOT granted here anymore — the ritual is the article + question
-  // flow. Tapping this card (done or not) opens today's daily article, where answering the
-  // question claims the +1 (and +5 on the 7th day) via completeDailyRitual.
+  // Daily ritual: the +1 is NOT granted here — the ritual is the daily QUOTE. Tapping this
+  // card (done or not) opens today's quote, where tapping Done claims the +1 (and the +5 on
+  // the 7th day) via completeDailyRitual.
   const handleOpenDaily = useCallback(() => {
-    router.push({ pathname: '/article/[id]', params: { id: getDailyInsightId(weekAnchorDate) } });
-  }, [weekAnchorDate]);
+    router.push('/quote');
+  }, []);
 
   return (
     // Transparent so the root CosmicField (indigo→navy) shows through, matching the

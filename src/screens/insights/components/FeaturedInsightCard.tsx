@@ -2,8 +2,18 @@
 // FeaturedInsightCard — the big "TONIGHT'S READ" card.
 //   • default  → tall hero used at the top of the Insights feed (10-Insight-1.png)
 //   • compact  → horizontal card used as the Home "Tonight's Read" hook (10-Insight.png)
-// Shows orbit art, category tag, "N min read", title, the subtitle hook, and the
-// gold "+1 ✦ today" reward pill when this is today's unclaimed daily insight.
+//   • ritual   → Home's DAILY QUOTE entry point (see below)
+// Feed variants show orbit art, category tag, "N min read", title and the subtitle
+// hook. They carry NO "Daily ★" badge and NO "+1 ✦ today" pill (2026-07-25): reading
+// an article earns nothing now, so an earn pill there was a false promise. The
+// featured hero still rotates daily — it is simply editorial.
+//
+// RITUAL VARIANT (2026-07-25): no longer article-backed. It opens the daily QUOTE,
+// so it deliberately shows only `quotes.dailyTitle` — never the quote text, which
+// would spoil the reveal on the quote screen itself. `article`/`content` are unused
+// in this variant (and optional for it); the accent falls back to theme.primary.
+// The stepper is 2 steps — read, earn — because there is no question to answer.
+// The default + compact feed variants are unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect } from 'react';
@@ -26,6 +36,7 @@ import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/themes/ThemeProvider';
+import { darkenHex, lightenHex } from '@/src/themes/categoryTheme';
 import GlassCard from '@/src/components/GlassCard';
 import { type Article, type ArticleContent, CATEGORY_COLORS } from '@/src/content/articles';
 import { rs } from '@/src/utils/responsive';
@@ -33,22 +44,33 @@ import { useIsRTL } from '@/src/utils/rtl';
 import OrbitArt from './OrbitArt';
 
 export interface FeaturedInsightCardProps {
-  article: Article;
-  content: ArticleContent;
-  /** Show the "+1 ✦ today" reward pill (today's featured + not yet claimed). */
+  /** Required for the feed variants; UNUSED by `ritual` (which is quote-backed). */
+  article?: Article;
+  /** Required for the feed variants; UNUSED by `ritual` (which is quote-backed). */
+  content?: ArticleContent;
+  /** RITUAL variant only: show the "+1 ✦ today" pill (today's quote not yet done). */
   rewardAvailable?: boolean;
   /** Horizontal Home-hook layout instead of the tall feed hero. */
   compact?: boolean;
-  /** Home ritual hero: compact atom banner + 1-line lead + slim gold "Begin tonight's read" CTA. */
+  /** Home ritual hero: atom banner + 2-step stepper + slim gold "Read the quote" CTA. */
   ritual?: boolean;
+  /**
+   * RITUAL variant only — today's colour from the active theme's 7-day cycle
+   * (`theme.dailyAccents[getDailyAccentIndex(anchor)]`). Falls back to `theme.primary`.
+   */
+  accent?: string;
   onPress: () => void;
 }
 
 const HERO_ART_BG = '#241733';
-// Premium soft-gold gradient (lighter sheen on top) for the ritual CTA.
-const GOLD_GRADIENT = ['#FBE08F', '#F5C542', '#E7AE2C'] as const;
 
-/** Gold "Begin tonight's read" button with a gentle breathing sheen (UI-thread opacity). */
+/** Soft-gold CTA gradient derived from the ACTIVE theme's gold, so Desert Oracle and
+ *  Elven Grove get their own metal instead of the cosmic triple. */
+function goldGradient(gold: string): [string, string, string] {
+  return [lightenHex(gold, 0.42), gold, darkenHex(gold, 0.14)];
+}
+
+/** Gold ritual CTA (quotes.readCta) with a gentle breathing sheen (UI-thread opacity). */
 function RitualGoldCTA({ label, isRTL, gold }: { label: string; isRTL: boolean; gold: string }) {
   const theme = useTheme();
   const glow = useSharedValue(0);
@@ -58,7 +80,7 @@ function RitualGoldCTA({ label, isRTL, gold }: { label: string; isRTL: boolean; 
   const sheenStyle = useAnimatedStyle(() => ({ opacity: 0.16 + glow.value * 0.34 }));
   return (
     <View style={[styles.ctaWrap, { shadowColor: gold }]}>
-      <LinearGradient colors={GOLD_GRADIENT} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.ctaGradient}>
+      <LinearGradient colors={goldGradient(gold)} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.ctaGradient}>
         <Animated.View style={[styles.ctaSheen, sheenStyle]} pointerEvents="none">
           <LinearGradient
             colors={['rgba(255,255,255,0.85)', 'rgba(255,255,255,0)']}
@@ -80,14 +102,17 @@ export default function FeaturedInsightCard({
   rewardAvailable = false,
   compact = false,
   ritual = false,
+  accent: dailyAccent,
   onPress,
 }: FeaturedInsightCardProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const isRTL = useIsRTL();
-  const accent = CATEGORY_COLORS[article.category];
-  const catLabel = t(`insights.categories.${article.category}`).toUpperCase();
-  const readLabel = t('insights.minRead', { n: article.readMinutes });
+  // Feed variants take the article's category colour. The ritual variant is quote-backed:
+  // it wears TODAY'S colour from the theme's 7-day cycle, falling back to the app accent.
+  const accent = article ? CATEGORY_COLORS[article.category] : (dailyAccent ?? theme.primary);
+  const catLabel = article ? t(`insights.categories.${article.category}`).toUpperCase() : '';
+  const readLabel = article ? t('insights.minRead', { n: article.readMinutes }) : '';
 
   const tag = (
     <View style={styles.metaRow}>
@@ -110,23 +135,21 @@ export default function FeaturedInsightCard({
     const done = !rewardAvailable;
     const card = (
       <GlassCard glowColor={done ? 'transparent' : `${accent}59`} style={done ? [styles.heroCard, styles.heroCardDone] : styles.heroCard}>
-        <View style={[styles.ritualArt, { backgroundColor: HERO_ART_BG }]}>
+        <View style={[styles.ritualArt, { backgroundColor: theme.bg2 }]}>
           <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
             <Defs>
               <RadialGradient id="fic_ritual_bloom" cx="50%" cy="50%" r="62%">
                 <Stop offset="0%" stopColor={accent} stopOpacity={0.5} />
                 <Stop offset="55%" stopColor={accent} stopOpacity={0.12} />
-                <Stop offset="100%" stopColor={HERO_ART_BG} stopOpacity={0} />
+                <Stop offset="100%" stopColor={theme.bg2} stopOpacity={0} />
               </RadialGradient>
             </Defs>
             <Rect x="0" y="0" width="100%" height="100%" fill="url(#fic_ritual_bloom)" />
           </Svg>
 
           <View style={styles.ritualArtTop}>
-            <View style={styles.catTag}>
-              <View style={[styles.dot, { backgroundColor: accent }]} />
-              <Text style={[styles.tagText, { color: accent }]}>{catLabel}</Text>
-            </View>
+            {/* No category tag — the ritual is quote-backed, not article-backed. */}
+            <View />
             {rewardPill}
           </View>
 
@@ -134,20 +157,13 @@ export default function FeaturedInsightCard({
         </View>
 
         <View style={styles.ritualPanel}>
-          {/* 1 Read · 2 Answer · ✦ Earn */}
+          {/* 1 Read · ✦ Earn — two steps: there is no question to answer any more. */}
           <View style={styles.stepper}>
             <View style={styles.stepItem}>
               <View style={[styles.stepBadge, { borderColor: theme.borderStrong }]}>
                 <Text style={[styles.stepBadgeText, { color: theme.textDim }]}>1</Text>
               </View>
               <Text style={[styles.stepLabel, { color: theme.textDim }]}>{t('insights.stepRead')}</Text>
-            </View>
-            <View style={[styles.stepSep, { backgroundColor: theme.borderStrong }]} />
-            <View style={styles.stepItem}>
-              <View style={[styles.stepBadge, { borderColor: theme.borderStrong }]}>
-                <Text style={[styles.stepBadgeText, { color: theme.textDim }]}>2</Text>
-              </View>
-              <Text style={[styles.stepLabel, { color: theme.textDim }]}>{t('insights.stepAnswer')}</Text>
             </View>
             <View style={[styles.stepSep, { backgroundColor: theme.borderStrong }]} />
             <View style={styles.stepItem}>
@@ -158,8 +174,10 @@ export default function FeaturedInsightCard({
             </View>
           </View>
 
+          {/* Deliberately the SCREEN title, never the quote text — previewing the line
+              here would spoil the reveal on the quote screen. */}
           <Text style={[styles.ritualTitle, { color: theme.text }]} numberOfLines={2}>
-            {content.title}
+            {t('quotes.dailyTitle')}
           </Text>
 
           {done ? (
@@ -168,25 +186,29 @@ export default function FeaturedInsightCard({
               <Text style={[styles.doneCtaText, { color: theme.textMuted }]}>{t('insights.ritualDone')}</Text>
             </View>
           ) : (
-            <RitualGoldCTA label={t('insights.beginRead')} isRTL={isRTL} gold={theme.gold} />
+            <RitualGoldCTA label={t('quotes.readCta')} isRTL={isRTL} gold={theme.gold} />
           )}
         </View>
       </GlassCard>
     );
 
-    // Always tappable — even once done, so the user can re-open the article to review
-    // their locked answer. The done card just reads as muted (heroCardDone opacity).
+    // Always tappable — even once done, so the user can re-open today's quote to re-read
+    // it. The done card just reads as muted (heroCardDone opacity).
     return (
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={done ? 0.7 : 0.9}
         accessibilityRole="button"
-        accessibilityLabel={content.title}
+        accessibilityLabel={t('quotes.dailyTitle')}
       >
         {card}
       </TouchableOpacity>
     );
   }
+
+  // Past this point we are in a FEED variant, which is article-backed by definition.
+  // (Only `ritual` — handled and returned above — is quote-backed and article-free.)
+  if (!article || !content) return null;
 
   // ── Compact (Home hook) ──────────────────────────────────────────────────
   if (compact) {
@@ -233,20 +255,10 @@ export default function FeaturedInsightCard({
             <OrbitArt size={rs(118)} accent={accent} />
           </View>
 
-          {/* Persistent "Daily ★" badge — identifies this hero as the day's featured pick. */}
-          <View
-            style={[
-              styles.heroDailyBadge,
-              { backgroundColor: `${theme.gold}1F`, borderColor: `${theme.gold}66` },
-            ]}
-          >
-            <MaterialCommunityIcons name="star" size={rs(11)} color={theme.gold} />
-            <Text style={[styles.heroDailyBadgeText, { color: theme.gold }]}>
-              {t('insights.dailyBadge')}
-            </Text>
-          </View>
-
-          {rewardAvailable ? <View style={styles.heroReward}>{rewardPill}</View> : null}
+          {/* No "Daily ★" badge and no "+1 ✦ today" pill here (2026-07-25): reading an
+              article no longer earns anything — the +1 belongs to the daily QUOTE, and
+              showing an earn pill on an article that pays nothing was a false promise.
+              The featured hero still rotates daily; it is just editorial now. */}
 
           {content.subtitle ? (
             <Text style={[styles.heroSubtitle, { color: theme.text }]} numberOfLines={1}>
@@ -260,15 +272,6 @@ export default function FeaturedInsightCard({
           <Text style={[styles.heroTitle, { color: theme.text }]} numberOfLines={2}>
             {content.title}
           </Text>
-          {/* Claimed state — today's daily reward is done; nudge back tomorrow. */}
-          {!rewardAvailable ? (
-            <View style={styles.heroClaimedRow}>
-              <Feather name="check" size={rs(13)} color={theme.textMuted} />
-              <Text style={[styles.heroClaimedText, { color: theme.textMuted }]}>
-                {t('insights.comeBackTomorrow')}
-              </Text>
-            </View>
-          ) : null}
         </View>
       </GlassCard>
     </TouchableOpacity>
@@ -300,26 +303,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heroArtCenter: { alignItems: 'center', justifyContent: 'center' },
-  heroReward: { position: 'absolute', top: rs(12), end: rs(12) },
-  heroDailyBadge: {
-    position: 'absolute',
-    top: rs(12),
-    start: rs(12),
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: rs(4),
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: rs(9),
-    paddingVertical: rs(3),
-  },
-  heroDailyBadgeText: {
-    fontSize: rs(10.5),
-    fontFamily: 'HankenGrotesk_700Bold',
-    letterSpacing: 0.6,
-  },
-  heroClaimedRow: { flexDirection: 'row', alignItems: 'center', gap: rs(6) },
-  heroClaimedText: { fontSize: rs(12.5), fontFamily: 'HankenGrotesk_500Medium' },
   heroSubtitle: {
     position: 'absolute',
     start: rs(16),
@@ -353,7 +336,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   catTag: { flexDirection: 'row', alignItems: 'center', gap: rs(5) },
-  ritualPanel: { paddingHorizontal: rs(16), paddingTop: rs(11), paddingBottom: rs(13), gap: rs(8) },
+  // Compact by design (Simo 2026-07-25): the art band stays, the TEXT+CTA block below it
+  // was eating too much of Home. Padding, gap, title and CTA all stepped down together —
+  // shrinking only one of them just made the block look unbalanced.
+  ritualPanel: { paddingHorizontal: rs(16), paddingTop: rs(9), paddingBottom: rs(10), gap: rs(6) },
 
   /* stepper (1 Read · 2 Answer · ✦ Earn) */
   stepper: { flexDirection: 'row', alignItems: 'center', gap: rs(7) },
@@ -371,15 +357,16 @@ const styles = StyleSheet.create({
   stepSep: { width: rs(8), height: 1 },
 
   ritualTitle: {
-    fontSize: rs(19),
-    lineHeight: rs(24),
+    fontSize: rs(16.5),
+    lineHeight: rs(21),
     fontFamily: 'PlayfairDisplay_700Bold',
     letterSpacing: -0.3,
   },
 
   /* gold CTA */
   ctaWrap: {
-    marginTop: rs(4),
+    alignSelf: 'center',
+    marginTop: rs(2),
     borderRadius: 999,
     shadowOpacity: 0.5,
     shadowRadius: rs(12),
@@ -391,12 +378,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: rs(8),
-    height: rs(46),
+    height: rs(38),
+    paddingHorizontal: rs(26),
     borderRadius: 999,
     overflow: 'hidden',
   },
   ctaSheen: { position: 'absolute', top: 0, left: 0, right: 0, height: '55%' },
-  ctaText: { fontSize: rs(14.5), fontFamily: 'HankenGrotesk_700Bold' },
+  ctaText: { fontSize: rs(13.5), fontFamily: 'HankenGrotesk_700Bold' },
 
   /* done state */
   doneCta: {
@@ -404,10 +392,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: rs(6),
-    height: rs(42),
+    height: rs(38),
     borderRadius: 999,
     borderWidth: 1,
-    marginTop: rs(4),
+    marginTop: rs(2),
   },
   doneCtaText: { fontSize: rs(13.5), fontFamily: 'HankenGrotesk_600SemiBold' },
 

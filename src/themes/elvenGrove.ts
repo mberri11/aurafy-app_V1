@@ -48,5 +48,8 @@ export const elvenGroveTheme: ThemeColors = {
     comingSoonTint: '#6B9483', // textDim
   },
   // No ambient particles — the grove reads through palette alone.
+  /** Daily-quote colour cycle — elvenGrove — SEVEN DISTINCT HUES over the deep grove base, not seven greens.
+   *  jade · mint · leaf gold · ember · rose quartz · sky · moon pearl */
+  dailyAccents: ['#2EC4A0', '#8FD9BC', '#E9C46A', '#E08A50', '#E2879F', '#6AA9E0', '#E8F6EF'],
   ambientParticles: null,
 };

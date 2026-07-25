@@ -1,4 +1,15 @@
-import { Question, Person, ReadingMode, ResultData, LocalizedString, Language, ResultKind } from '../types';
+import {
+  Question,
+  Person,
+  ReadingMode,
+  ResultData,
+  LocalizedString,
+  Language,
+  ResultKind,
+  FlagBand,
+  FlagPersonStat,
+  FlagGroupVerdict,
+} from '../types';
 import { spectrumHex } from '../themes/categoryTheme';
 
 /**
@@ -36,6 +47,180 @@ export function scoreReading(
   return scoreSolo(questions, answers, persons, mode, moduleId);
 }
 
+/**
+ * Classify a signed net into one of the five bands. FIXED absolute cutoffs on the
+ * −10..+10 scale — the module is solo + compare (2 people) only now, and in BOTH
+ * a person's net spans the full −10..+10, so no participant-count scaling is
+ * needed (the old unit scaling made +8 read "LEAN_GREEN", which was clearly
+ * wrong — Simo, 2026-07-23):
+ *   GREEN  net ≥ +4  ·  LEAN_GREEN +2..+3  ·  NEUTRAL −1..+1  ·
+ *   LEAN_RED −3..−2  ·  RED net ≤ −4
+ */
+export function flagBandFor(net: number): FlagBand {
+  if (net >= 4) return 'GREEN';
+  if (net >= 2) return 'LEAN_GREEN';
+  if (net >= -1) return 'NEUTRAL';
+  if (net >= -3) return 'LEAN_RED';
+  return 'RED';
+}
+
+/**
+ * The group verdict — derived from the DISTRIBUTION of bands across every
+ * participant, NEVER from a single extreme. A read where A=−6 and B=−4 leaves
+ * both on the red side (ALL_RED); it must never "clear" B by comparison with A.
+ *
+ * CLUSTERED is checked FIRST and overrides everything: with 3+ people inside a
+ * scaled spread we describe the group rather than crown anyone. Its threshold
+ * scales with expected picks, because spread shrinks ~1/N as picks divide across
+ * more people — a flat threshold would make CLUSTERED fire on nearly every
+ * circle read.
+ */
+export function classifyFlagGroup(
+  bands: Record<string, FlagBand>,
+  personIds: string[],
+  spread: number,
+  expectedPicks: number,
+): FlagGroupVerdict {
+  const redSide = personIds.filter((id) => bands[id] === 'RED' || bands[id] === 'LEAN_RED');
+  const greenSide = personIds.filter((id) => bands[id] === 'GREEN' || bands[id] === 'LEAN_GREEN');
+  const neutrals = personIds.filter((id) => bands[id] === 'NEUTRAL');
+  const clusterThreshold = Math.max(2, Math.round(expectedPicks * 0.5));
+
+  if (personIds.length >= 3 && spread <= clusterThreshold) return 'CLUSTERED';
+  if (redSide.length === personIds.length) return 'ALL_RED';
+  if (greenSide.length === personIds.length) return 'ALL_GREEN';
+  if (redSide.length > 0 && greenSide.length > 0) return 'SPLIT';
+  if (neutrals.length === personIds.length) return 'FLAT';
+  return greenSide.length > 0 ? 'SINGLE_POLE_GREEN' : 'SINGLE_POLE_RED';
+}
+
+/**
+ * red_green_flag ONLY — SIGNED multi scoring. Every other multi module keeps the
+ * unsigned winner-race in scoreMulti below.
+ *
+ * Each question carries a polarity: picking someone on a GREEN question credits
+ * them +1, on a RED question −1. "No one" (and any unanswered question) skips
+ * entirely — nobody's net moves. Every participant is then banded INDEPENDENTLY,
+ * so a read where A=−8 and B=−4 leaves B in a red band rather than "clearing" B
+ * by comparison with A.
+ *
+ * `scores` deliberately stays the UNSIGNED pick count (how many questions pointed
+ * at each person) so existing bar/percentage rendering keeps working; the signed
+ * values live in `netScores`.
+ */
+function scoreMultiPolarity(
+  questions: Question[],
+  answers: Record<string, string>,
+  persons: Person[],
+  mode: ReadingMode,
+  moduleId: string,
+): ResultData {
+  const netScores: Record<string, number> = {};
+  const scores: Record<string, number> = {};
+  const greenCounts: Record<string, number> = {};
+  const redCounts: Record<string, number> = {};
+  const dimensionTotals: Record<string, Record<string, number>> = {};
+  for (const p of persons) {
+    netScores[p.id] = 0;
+    scores[p.id] = 0;
+    greenCounts[p.id] = 0;
+    redCounts[p.id] = 0;
+    dimensionTotals[p.id] = {};
+  }
+
+  for (const q of questions) {
+    const pid = answers[q.id];
+    // 'none' (the "No one" card) and unanswered both land here — no score change.
+    if (!pid || netScores[pid] === undefined) continue;
+    const delta = q.polarity === 'green' ? 1 : -1;
+    netScores[pid] += delta;
+    scores[pid] += 1;
+    if (delta > 0) greenCounts[pid] += 1;
+    else redCounts[pid] += 1;
+    dimensionTotals[pid][q.dimension] = (dimensionTotals[pid][q.dimension] ?? 0) + delta;
+  }
+
+  const bands: Record<string, FlagBand> = {};
+  const flagStats: Record<string, FlagPersonStat> = {};
+  for (const p of persons) {
+    bands[p.id] = flagBandFor(netScores[p.id]);
+    // This person's loudest dimension, by ABSOLUTE signed value, plus its sign —
+    // the sign selects the .red/.green insight pool when describing them.
+    let dominantDimension = 'general';
+    let best = -1;
+    let signed = 0;
+    for (const [dim, value] of Object.entries(dimensionTotals[p.id])) {
+      if (Math.abs(value) > best) {
+        best = Math.abs(value);
+        dominantDimension = dim;
+        signed = value;
+      }
+    }
+    flagStats[p.id] = {
+      greenCount: greenCounts[p.id],
+      redCount: redCounts[p.id],
+      dimensions: dimensionTotals[p.id],
+      dominantDimension,
+      dominantSign: signed > 0 ? 'green' : signed < 0 ? 'red' : 'neutral',
+    };
+  }
+
+  // greenest / reddest / spread — the inputs the group verdict is built from.
+  const sortedByNet = [...persons].sort((a, b) => netScores[b.id] - netScores[a.id]);
+  const greenest = sortedByNet[0];
+  const reddest = sortedByNet[sortedByNet.length - 1];
+  const spread = greenest && reddest ? netScores[greenest.id] - netScores[reddest.id] : 0;
+
+  // Confidence: margin between the top two nets, DAMPED by expected picks so a
+  // circle read isn't punished for splitting its signal across more people.
+  const expectedPicks = persons.length > 0 ? questions.length / persons.length : questions.length;
+  const nets = sortedByNet.map((p) => netScores[p.id]);
+  const margin = expectedPicks > 0 ? ((nets[0] ?? 0) - (nets[1] ?? nets[0] ?? 0)) / expectedPicks : 0;
+  const confidence = clamp(Math.round(60 + clamp(margin, 0, 1) * 35), 60, 95);
+
+  // The reading's headline dimension = the LOUDEST signal in the group (largest
+  // |signed| of any person), so the insights speak to what actually stood out.
+  let dominantDimension = 'general';
+  let loudest = -1;
+  for (const p of persons) {
+    const stat = flagStats[p.id];
+    const value = Math.abs(stat.dimensions[stat.dominantDimension] ?? 0);
+    if (value > loudest) {
+      loudest = value;
+      dominantDimension = stat.dominantDimension;
+    }
+  }
+
+  return {
+    moduleId,
+    mode,
+    // INTERIM: `winner` stays the reddest person so the existing winner-template
+    // render still resolves. Section 3 replaces the headline with the group
+    // verdict derived from the band DISTRIBUTION, at which point this is only a
+    // fallback for older persisted readings.
+    winner: reddest,
+    tiedWinnerIds: [],
+    scores,
+    netScores,
+    bands,
+    flagStats,
+    greenest: greenest?.id,
+    reddest: reddest?.id,
+    spread,
+    groupVerdict: classifyFlagGroup(
+      bands,
+      persons.map((p) => p.id),
+      spread,
+      expectedPicks,
+    ),
+    dominantDimension,
+    confidence,
+    insights: [],
+  };
+}
+
+// (band thresholds are fixed absolute cutoffs — see flagBandFor)
+
 function scoreMulti(
   questions: Question[],
   answers: Record<string, string>,
@@ -43,6 +228,11 @@ function scoreMulti(
   mode: ReadingMode,
   moduleId: string,
 ): ResultData {
+  // Polarity-carrying modules (red_green_flag) score SIGNED — see above. Gating on
+  // the data, not the module id, so a second polarity module needs no change here.
+  if (questions.some((q) => q.polarity)) {
+    return scoreMultiPolarity(questions, answers, persons, mode, moduleId);
+  }
   // Sum scores per person across all questions
   const scores: Record<string, number> = {};
   for (const p of persons) scores[p.id] = 0;
@@ -197,6 +387,12 @@ function scoreCount(
   let present = 0;
   let total = 0;
   const dimensionPresent: Record<string, number> = {};
+  // ── red_green_flag ONLY — signed tracking alongside the unsigned count ──
+  const isPolarity = questions.some((q) => q.polarity);
+  let net = 0;
+  let greenCount = 0;
+  let redCount = 0;
+  const dimensionSigned: Record<string, number> = {};
 
   for (const q of questions) {
     total += 1;
@@ -205,15 +401,28 @@ function scoreCount(
     if (!isPresent) continue;
     present += 1;
     dimensionPresent[q.dimension] = (dimensionPresent[q.dimension] ?? 0) + 1;
+    if (isPolarity) {
+      const delta = q.polarity === 'green' ? 1 : -1;
+      net += delta;
+      if (delta > 0) greenCount += 1;
+      else redCount += 1;
+      dimensionSigned[q.dimension] = (dimensionSigned[q.dimension] ?? 0) + delta;
+    }
   }
 
-  // dominantDimension = where the most signs landed (drives the insight pool).
+  // dominantDimension = where the most signs landed (drives the insight pool). For
+  // polarity reads it's the LOUDEST signed dimension, so the sign can select the
+  // matching .red/.green pool.
   let dominantDimension = 'general';
   let maxDim = -1;
-  for (const [dim, c] of Object.entries(dimensionPresent)) {
-    if (c > maxDim) {
-      maxDim = c;
+  let dominantSigned = 0;
+  const dimensionSource = isPolarity ? dimensionSigned : dimensionPresent;
+  for (const [dim, c] of Object.entries(dimensionSource)) {
+    const magnitude = Math.abs(c);
+    if (magnitude > maxDim) {
+      maxDim = magnitude;
       dominantDimension = dim;
+      dominantSigned = c;
     }
   }
 
@@ -221,13 +430,19 @@ function scoreCount(
   // display as zero, and 0/20 vs 6/20 must be visibly different readings — this is the ONE
   // number shown (title % + bar). Only the 95 cap is kept, matching every other path
   // (nothing in this app ever claims 100%).
+  // POLARITY reads instead show the STRENGTH OF THE LEAN — |net| over the maximum
+  // reachable lean (half the questions, since only one polarity can pull each way).
+  // A raw "signs present" share would be meaningless once green and red both count.
   const share = total > 0 ? present / total : 0;
-  const confidence = clamp(Math.round(share * 100), 0, 95);
+  const maxLean = total / 2;
+  const confidence = isPolarity
+    ? clamp(Math.round((maxLean > 0 ? Math.abs(net) / maxLean : 0) * 100), 0, 95)
+    : clamp(Math.round(share * 100), 0, 95);
 
   const scores: Record<string, number> = {};
   if (person) scores[person.id] = present;
 
-  return {
+  const base: ResultData = {
     moduleId,
     mode,
     winner: person, // kept so the current multi result render still resolves a subject
@@ -237,6 +452,27 @@ function scoreCount(
     signalCount: present,
     signalTotal: total,
     insights: [], // filled in by resultGenerator
+  };
+  if (!isPolarity || !person) return base;
+
+  // One person answers every question → net spans the full −10..+10 (same as
+  // each person in a 2-way compare), so the same fixed band cutoffs apply.
+  return {
+    ...base,
+    netScores: { [person.id]: net },
+    bands: { [person.id]: flagBandFor(net) },
+    flagStats: {
+      [person.id]: {
+        greenCount,
+        redCount,
+        dimensions: dimensionSigned,
+        dominantDimension,
+        dominantSign: dominantSigned > 0 ? 'green' : dominantSigned < 0 ? 'red' : 'neutral',
+      },
+    },
+    greenest: person.id,
+    reddest: person.id,
+    spread: 0,
   };
 }
 

@@ -13,7 +13,7 @@
 
 import type { StateCreator } from 'zustand';
 import type { UserState } from './userStore';
-import { localDateKey } from '../content/articles/dailyInsight';
+import { localDateKey } from '../utils/date';
 
 /** Stable transaction reason key for the wallet's recent-activity list. */
 export const INSIGHT_BONUS_REASON = 'insight_read';

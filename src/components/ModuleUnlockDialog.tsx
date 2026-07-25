@@ -27,7 +27,6 @@ interface ModuleUnlockDialogProps {
   visible: boolean;
   moduleId: string;
   moduleName: string;
-  moduleIcon: string;
   /** Module accent hex — tints the hero + icon tile (mirrors ModuleCard's colour). */
   color: string;
   cost: number;
@@ -50,7 +49,6 @@ export default function ModuleUnlockDialog({
   visible,
   moduleId,
   moduleName,
-  moduleIcon,
   color,
   cost,
   balance,
@@ -113,7 +111,8 @@ export default function ModuleUnlockDialog({
                   pointerEvents="none"
                 />
               ) : null}
-              <ModuleIcon id={moduleId} emoji={moduleIcon} size={rs(52)} />
+              {/* 52dp hero tile → 32dp glyph (the inset the emoji rendered at). */}
+              <ModuleIcon id={moduleId} size={rs(32)} />
               <View style={styles.heroLock} pointerEvents="none">
                 <Feather name="lock" size={rs(14)} color="#FFFFFF" />
               </View>

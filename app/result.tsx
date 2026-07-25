@@ -21,8 +21,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { auraSkin, AURA_V2, darkenHex, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, moduleTheme } from '@/src/themes/categoryTheme';
-import CategoryMotif from '@/src/components/CategoryMotif';
+import { auraSkin, AURA_V2, darkenHex, FLAG_BAND_THEME, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, moduleTheme } from '@/src/themes/categoryTheme';
+import ModuleIcon from '@/src/components/ModuleIcon';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
 import { AdMobManager } from '@/src/ads/AdMobManager';
@@ -34,7 +34,7 @@ import ShareCard, { SHARE_CARD_H, SHARE_CARD_W } from '@/src/components/ShareCar
 import { saveImageToGallery, shareImage, shareResult } from '@/src/utils/share';
 import { successNotification, lightTap } from '@/src/utils/haptics';
 import { MODULES } from '@/src/data/modules';
-import { Reading, Language, SoloResults, CategoricalResults } from '@/src/types';
+import { Reading, Language, SoloResults, CategoricalResults, FlagBand } from '@/src/types';
 import { joinNames } from '@/src/engine/scoringEngine';
 import { attachmentStyleResults } from '@/src/data/results/attachmentStyleResults';
 import { amITheProblemResults } from '@/src/data/results/amITheProblemResults';
@@ -46,6 +46,13 @@ import { playEffect } from '@/src/utils/sound';
 // Delay before the reveal-name entrance begins — shared by the animation and the
 // reveal chime so the sound lands exactly when the name starts animating in.
 const REVEAL_DELAY_MS = 250;
+
+// red_green_flag COMPARE/CIRCLE big title — TODO(Prompt 1C): replace this fixed
+// placeholder with the distribution-based group-verdict → title selector. Kept a
+// plain constant on purpose so this display-layer change ships standalone without
+// pre-empting 1C's selector (the engine already stores result.groupVerdict). SOLO
+// mode does NOT use this — it reads the single person's real band.
+const FLAG_COMPARE_TITLE_BAND: FlagBand = 'NEUTRAL';
 
 const SOLO_RESULTS: Record<string, SoloResults> = {
   attachment_style: attachmentStyleResults,
@@ -75,6 +82,7 @@ export default function ResultScreen() {
     currentMode,
     currentQuestionIds,
     viewOnlyResult,
+    viewOnlyPersons,
   } = useReadingStore();
   const resultUnlocked = useReadingStore((s) => s.resultUnlocked);
   const setResultUnlocked = useReadingStore((s) => s.setResultUnlocked);
@@ -326,7 +334,6 @@ export default function ResultScreen() {
       : result.dominantDimension === 'white'
         ? 'result.aura.rareClearLight'
         : null;
-  const auraSecondary = isAura ? result.secondaryColor ?? null : null;
   // Count path frames the reveal as being ABOUT the person ("ABOUT SIMO"), not a module
   // subtitle — the person's name lives in the eyebrow, the ratio is the reveal itself.
   const eyebrow = isCount
@@ -347,26 +354,49 @@ export default function ResultScreen() {
   // is derived per-locale from the RAW template at generation time; readings persisted
   // before it shipped fall back to the legacy name-strip of the populated sentence.
   const winnerSentence = result.insights[0]?.[language] ?? result.insights[0]?.en ?? '';
+  // red_green_flag: the big title shows the VERDICT (band name / group-verdict
+  // title), never a person's name — the name lives in the subtitle + share card.
+  const isFlag = isDualFlagModule(result.moduleId);
   const winnerSubtitle = isTie
     ? winnerSentence
     : isCount
       ? winnerSentence // the tiered template already reads as a full descriptive sentence
-      : isMulti && result.winner
-        ? result.verdictLine?.[language] ??
-          result.verdictLine?.en ??
-          winnerSentence.replace(`${result.winner.name} `, '')
-        : null;
+      : isFlag
+        ? winnerSentence // the group-verdict sentence already reads whole and names people
+        : isMulti && result.winner
+          ? result.verdictLine?.[language] ??
+            result.verdictLine?.en ??
+            winnerSentence.replace(`${result.winner.name} `, '')
+          : null;
+
+  // red_green_flag big title = the VERDICT, never a name:
+  //   • SOLO    → the single person's real band title (result.bands[thePerson])
+  //   • COMPARE → the standout verdict title, selected + localized at generation
+  //     time (result.verdictTitle). Older readings without it fall back to the
+  //     NEUTRAL placeholder.
+  const flagSoloBand: FlagBand | undefined =
+    isFlag && isCount ? result.bands?.[result.winner?.id ?? ''] : undefined;
+  const flagCompareTitle =
+    isFlag && !isCount
+      ? result.verdictTitle?.[language] ??
+        result.verdictTitle?.en ??
+        t(`result.flagTitles.${FLAG_COMPARE_TITLE_BAND}`)
+      : undefined;
 
   // Count path: the reveal is the honest signal PERCENTAGE (confidence now IS the share,
   // post floor-removal), NOT a name-as-verdict — same big typography as a winner name.
   // The ratio demotes to the sub-line below; the percentage is the one hero number.
-  const bigTitle = isCount
-    ? `${result.confidence}%`
-    : isMulti
-      ? isTie
-        ? joinNames(tiedWinners.map((p) => p.name), language)
-        : result.winner?.name ?? ''
-      : (verdictWord?.[language] ?? verdictWord?.en ?? '');
+  const bigTitle = flagSoloBand
+    ? t(`result.flagTitles.${flagSoloBand}`)
+    : flagCompareTitle
+      ? flagCompareTitle
+      : isCount
+        ? `${result.confidence}%`
+        : isMulti
+          ? isTie
+            ? joinNames(tiedWinners.map((p) => p.name), language)
+            : result.winner?.name ?? ''
+          : (verdictWord?.[language] ?? verdictWord?.en ?? '');
 
   const confidence = result.confidence;
   // §3: percentile of this confidence against the user's own past readings (strictly
@@ -382,6 +412,16 @@ export default function ResultScreen() {
   // comparison LABEL; the bar itself stays leader-relative so a clear winner in a
   // 5-person circle still reads strong instead of a weak-looking 40%.
   const totalSignal = Object.values(result.scores).reduce((sum, v) => sum + v, 0);
+  // Persons for the comparison card: live session persons for a fresh reading,
+  // the persisted persons for a History reopen (session state is empty there —
+  // this is what fixed the empty "THE FULL PICTURE" card).
+  const cardPersons = isViewOnly ? viewOnlyPersons : currentPersons;
+  // red_green_flag: the card lists EVERY participant by signed net, greenest first,
+  // each with their own band chip — so nobody is implied clear while banded red.
+  const flagNets = result.netScores;
+  const comparisonPersons = flagNets
+    ? [...cardPersons].sort((a, b) => (flagNets[b.id] ?? 0) - (flagNets[a.id] ?? 0))
+    : cardPersons;
 
   return (
     <View style={[styles.container, { backgroundColor: isAura ? AURA_V2.obsidian : theme.background }]}>
@@ -437,12 +477,11 @@ export default function ResultScreen() {
         <Animated.View style={[styles.header, titleStyle]}>
           {/* Oversized category motif ghosted behind the name (spec §0 secondary accent). */}
           <View pointerEvents="none" style={styles.motifWrap}>
-            <CategoryMotif
-              moduleId={result.moduleId}
+            <ModuleIcon
+              id={result.moduleId}
               size={rs(150)}
               color={accent}
               auraOutcome={result.moduleId === 'aura_color' ? result.dominantDimension : undefined}
-              auraSecondary={auraSecondary}
             />
           </View>
           {/* Accent sparkles scattered around the reveal (per the Result PNGs). */}
@@ -588,13 +627,18 @@ export default function ResultScreen() {
         {unlocked && showComparison && (
           <GlassCard style={styles.card}>
             <Text style={[styles.cardTitle, { color: theme.textDim }]}>{t('result.comparison')}</Text>
-            {currentPersons.map((p) => {
+            {comparisonPersons.map((p) => {
               const score = result.scores[p.id] ?? 0;
               // Bar width = share OF THE LEADER (winner always fills). Label = the raw
               // tally + share of total, so a 10–10 tie reads "10 / 20 · 50%" for both
               // instead of the old "100%" each, which implied "100% a red flag".
               const pct = Math.round((score / maxScore) * 100);
               const sharePct = totalSignal > 0 ? Math.round((score / totalSignal) * 100) : 0;
+              // Polarity read → signed net + this person's OWN band, never a
+              // leader-relative bar (that implied "cleared" for anyone behind).
+              const net = flagNets?.[p.id] ?? 0;
+              const flagBand = result.bands?.[p.id];
+              const bandAccent = flagBand ? FLAG_BAND_THEME[flagBand].accent : accent;
               // Bars fill in the CATEGORY accent (winner full-strength, the rest softened)
               // so the card reads in the reading's palette; avatars keep person colours.
               // On a tie EVERY max-scorer gets the winner treatment — equal scores
@@ -619,19 +663,43 @@ export default function ResultScreen() {
                   >
                     {p.name}
                   </Text>
-                  <View style={[styles.compTrack, { backgroundColor: theme.surface }]}>
+                  {flagBand ? (
+                    // Band chip in that band's OWN accent — LEAN_GREEN never renders
+                    // as GREEN, LEAN_RED never as RED (FLAG_BAND_THEME ramp).
                     <View
                       style={[
-                        styles.compFill,
-                        { width: `${pct}%`, backgroundColor: accent, opacity: isWinner ? 1 : 0.45 },
+                        styles.bandChip,
+                        {
+                          borderColor: `${bandAccent}66`,
+                          backgroundColor: `${bandAccent}1F`,
+                        },
                       ]}
-                    />
-                  </View>
+                    >
+                      <Text style={[styles.bandChipText, { color: bandAccent }]} numberOfLines={1}>
+                        {t(`result.bands.${flagBand}`)}
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={[styles.compTrack, { backgroundColor: theme.surface }]}>
+                      <View
+                        style={[
+                          styles.compFill,
+                          { width: `${pct}%`, backgroundColor: accent, opacity: isWinner ? 1 : 0.45 },
+                        ]}
+                      />
+                    </View>
+                  )}
                   <Text
-                    style={[styles.compPct, { color: theme.textMuted, textAlign: isRTL ? 'left' : 'right' }]}
+                    style={[
+                      styles.compPct,
+                      { color: flagBand ? bandAccent : theme.textMuted, textAlign: isRTL ? 'left' : 'right' },
+                      flagBand != null && styles.compNet,
+                    ]}
                     numberOfLines={1}
                   >
-                    {t('result.compScore', { score, total: totalSignal, pct: sharePct })}
+                    {flagBand
+                      ? t('result.compNet', { net: net > 0 ? `+${net}` : `${net}` })
+                      : t('result.compScore', { score, total: totalSignal, pct: sharePct })}
                   </Text>
                 </View>
               );
@@ -899,6 +967,21 @@ const styles = StyleSheet.create({
   compFill: { height: rs(8), borderRadius: rs(4) },
   // Wider than the old bare "100%" — now holds "10 / 20 · 50%".
   compPct: { width: rs(86), fontSize: rs(11.5), fontFamily: 'HankenGrotesk_500Medium' },
+  // Signed net (+6 / −4 / 0) — narrower and bolder than the ratio label.
+  compNet: { width: rs(34), fontSize: rs(14), fontFamily: 'HankenGrotesk_700Bold' },
+  bandChip: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: rs(8),
+    paddingVertical: rs(3),
+    alignItems: 'center',
+  },
+  bandChipText: {
+    fontSize: rs(10),
+    fontFamily: 'HankenGrotesk_700Bold',
+    letterSpacing: 0.5,
+  },
 
   // Unlock card (minimal tier) — explicit margins (GlassCard gap is a no-op).
   lockedBody: {

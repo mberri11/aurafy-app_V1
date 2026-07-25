@@ -40,8 +40,25 @@ import { redGreenFlagQuestions } from '../data/questions/redGreenFlag';
 // (scripts/validate-question-pools.mjs) — the guard that asserts the pairing
 // rules above. A module whose id is NOT in the registry always gets its full
 // static array in authored order, untouched.
-// New modules (e.g. red_green_flag) should be born pooled: authored directly
-// at 40 following the same layout.
+//
+// ── EXCEPTION: POLARITY-BALANCED MODULES (red_green_flag) ───────────────────
+// red_green_flag does NOT use the core/counterpart axis above. Its 40 are 20
+// RED + 20 GREEN questions (4 per dimension × polarity), ALL `core: true`, with
+// no q(N+20) pairing. `selectPolarityBalanced` samples 2 from each of the 10
+// (dimension × polarity) buckets, so EVERY read serves exactly 10 red + 10
+// green, 2 per dimension per polarity — balance is guaranteed by construction,
+// never by a coin flip (a coin flip could serve 20 red and make every person
+// score negative). Variance comes from which 2 of each 4 are drawn plus the
+// seeded order.
+//
+// TWO FURTHER DEPARTURES for these modules:
+//   * The served order is a deterministic seeded INTERLEAVE — green, red,
+//     green, red … — so no two same-polarity questions are ever adjacent and
+//     the reading always OPENS on a green question (never accuse first).
+//   * The first-ever reading is NOT "the core 20 in authored order" (that set
+//     would be all-red here). It runs the SAME balanced sampler under a fixed
+//     seed, so it is still 10 red / 10 green, still identical for every user on
+//     their first read, just not in authored order.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const QUESTIONS_MAP: Record<string, Question[]> = {
@@ -80,7 +97,24 @@ const POOLED_MODULES = new Set<string>([
   'who_jealous',
   'who_admires',
   'who_cut_off',
+  'red_green_flag',
 ]);
+
+/** Pooled modules that use POLARITY BALANCE instead of core/counterpart pairing
+ *  (see the EXCEPTION block in the header). Membership here is checked BEFORE
+ *  the pairing sampler, and `validate:pools` skips the q(N+20) assertions for
+ *  these ids while enforcing its own polarity rules. */
+const POLARITY_BALANCED_MODULES = new Set<string>(['red_green_flag']);
+
+/** Questions served per reading — the module's designed count, for every path. */
+const SERVED_COUNT = 20;
+
+/** Fixed seed for the FIRST-EVER reading of a polarity-balanced module. The
+ *  authored order can't be used there (it would serve 20 red), so first reads
+ *  run the same balanced sampler under this constant: still 10 red / 10 green,
+ *  still identical for every user on their first read. Changing this value
+ *  changes what every new user sees first — treat it as content. */
+const FIRST_READING_SEED = 20260722;
 
 /** The full static question array for a module (all 40 for pooled modules). */
 export function getModuleQuestions(moduleId: string): Question[] {
@@ -93,6 +127,70 @@ function nextSeed(s: number): number {
   return ((s % 4294967296) * 1664525 + 1013904223) % 4294967296;
 }
 
+/** Seeded Fisher–Yates over a COPY, continuing the caller's seed stream.
+ *  Returns the next seed so successive shuffles stay deterministic. */
+function seededShuffle<T>(items: T[], seed: number): { items: T[]; seed: number } {
+  const out = [...items];
+  let s = seed;
+  for (let i = out.length - 1; i > 0; i--) {
+    s = nextSeed(s);
+    const j = s % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return { items: out, seed: s };
+}
+
+/**
+ * POLARITY-BALANCED sampler (red_green_flag). Guarantees, by construction:
+ *   * exactly 10 red + 10 green,
+ *   * exactly 2 per (dimension × polarity),
+ *   * no two same-polarity questions adjacent,
+ *   * the reading always OPENS on a green question.
+ *
+ * Order is a deterministic seeded INTERLEAVE of the two shuffled halves starting
+ * from green (green, red, green, red …) — not reject-sampling, so it always
+ * terminates and always satisfies the adjacency rule.
+ *
+ * Returns null when the pool is malformed (wrong bucket count / a bucket with
+ * fewer than 2), so the caller can fall back to the static array rather than
+ * serving a short or unbalanced reading.
+ */
+function selectPolarityBalanced(all: Question[], seed: number): Question[] | null {
+  const buckets = new Map<string, Question[]>();
+  for (const q of all) {
+    if (q.polarity !== 'red' && q.polarity !== 'green') return null;
+    const key = `${q.dimension}|${q.polarity}`;
+    const bucket = buckets.get(key);
+    if (bucket) bucket.push(q);
+    else buckets.set(key, [q]);
+  }
+
+  let s = seed;
+  const red: Question[] = [];
+  const green: Question[] = [];
+  // Sorted keys → iteration order never depends on authored order or Map insertion.
+  for (const key of [...buckets.keys()].sort()) {
+    const bucket = buckets.get(key)!;
+    if (bucket.length < 2) return null;
+    const shuffled = seededShuffle(bucket, s);
+    s = shuffled.seed;
+    const taken = shuffled.items.slice(0, 2);
+    (key.endsWith('|green') ? green : red).push(...taken);
+  }
+
+  // Halves must be equal for a clean alternating interleave.
+  if (red.length !== green.length || red.length * 2 !== SERVED_COUNT) return null;
+
+  const shuffledGreen = seededShuffle(green, s);
+  const shuffledRed = seededShuffle(red, shuffledGreen.seed);
+
+  const served: Question[] = [];
+  for (let i = 0; i < shuffledGreen.items.length; i++) {
+    served.push(shuffledGreen.items[i], shuffledRed.items[i]);
+  }
+  return served;
+}
+
 /**
  * The questions to serve for a reading — always exactly the module's designed
  * count (20), never re-randomized within a session (pass the reading session's
@@ -101,6 +199,13 @@ function nextSeed(s: number): number {
 export function selectQuestions(moduleId: string, isFirstReading: boolean, seed: number): Question[] {
   const all = getModuleQuestions(moduleId);
   if (!POOLED_MODULES.has(moduleId)) return all;
+
+  // Polarity-balanced modules take their own sampler for BOTH the first reading
+  // (fixed seed) and repeats — never the authored-order core set, which would be
+  // all-red here. A malformed pool falls back to the static array.
+  if (POLARITY_BALANCED_MODULES.has(moduleId)) {
+    return selectPolarityBalanced(all, isFirstReading ? FIRST_READING_SEED : seed) ?? all;
+  }
 
   const core = all.filter((q) => q.core);
   if (isFirstReading) return core;

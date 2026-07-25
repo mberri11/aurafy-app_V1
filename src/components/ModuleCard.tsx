@@ -40,6 +40,23 @@ interface ModuleCardProps {
   unlockCost?: number;
 }
 
+/**
+ * EVERY Home card is EXACTLY this tall (Simo, 2026-07-25). It used to be a `minHeight`,
+ * so a module whose title or subtitle wrapped to two lines ("Who's My Soulmate") grew
+ * taller than its neighbours and the grid rows came out ragged.
+ *
+ * The value is the tallest content a card can hold, so nothing ever clips:
+ *   icon tile 40 + spacer 14 + title 2×20 + gap 3 + subtitle 2×15 = 127
+ *   + vertical padding 14×2 = 28  →  155
+ * Change any of those type/spacing values and this must move with them.
+ */
+const CARD_H = rs(155);
+
+/** PrismBorder wraps the aura card in this much gradient on every side, so the aura
+ *  card itself is shorter by twice this — otherwise aura's OUTER box (the thing that
+ *  actually sits in the grid) ends up 3dp taller than every other card. */
+const PRISM_BORDER = 1.5;
+
 /** AURA_PRISM_V2: wraps the obsidian home card in a thin full-perimeter spectrum border
  *  (a diagonal 6-stop gradient behind the card, showing through ~1.5px of padding). */
 function PrismBorder({ enabled, children }: { enabled: boolean; children: React.ReactNode }) {
@@ -159,7 +176,7 @@ const ModuleCard = memo(function ModuleCard({
                 ]
           }
         >
-          <View style={prism ? styles.inner : undefined}>
+          <View>
           {/* Theme wash — optional top→bottom gradient over the glass fill. */}
           {!prism && mc.gradient != null ? (
             <LinearGradient
@@ -207,7 +224,8 @@ const ModuleCard = memo(function ModuleCard({
                   : { backgroundColor: mc.iconBg, borderColor: mc.iconBorder },
               ]}
             >
-              <ModuleIcon id={module.id} emoji={module.icon} size={rs(40)} />
+              {/* 40dp icon tile → 25dp glyph (the inset the emoji rendered at). */}
+              <ModuleIcon id={module.id} size={rs(25)} />
 
               {/* Locked-but-buyable: a small lock badge on the icon corner (same lock-over-art
                   grammar as the unlock dialog's hero) — signals "unlock to play". */}
@@ -265,12 +283,14 @@ export default ModuleCard;
 const styles = StyleSheet.create({
   card: {
     padding: rs(14),
-    minHeight: rs(148),
+    height: CARD_H,
   },
-  // Keep in sync with card: minHeight minus vertical padding.
-  inner: { minHeight: rs(120) },
   // AURA_PRISM_V2: flat obsidian card surface (opaque → the glass blur reads as solid).
-  prismCard: { backgroundColor: AURA_V2.obsidian },
+  // Shorter by the border it sits inside, so its outer box matches every other card.
+  prismCard: {
+    backgroundColor: AURA_V2.obsidian,
+    height: CARD_H - PRISM_BORDER * 2,
+  },
   comingSoonCard: {
     borderRadius: rs(20),
     borderWidth: 1,
@@ -292,7 +312,7 @@ const styles = StyleSheet.create({
   // rule around the whole obsidian card. Radius = card radius + padding.
   prismBorder: {
     borderRadius: rs(21.5),
-    padding: 1.5,
+    padding: PRISM_BORDER,
   },
   topRow: {
     flexDirection: 'row',

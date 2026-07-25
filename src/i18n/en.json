@@ -1,9 +1,9 @@
 {
   "notify": {
     "dailyTitle": "Aurafy ✦",
-    "dailyBody": "Tonight's reading is ready — answer your daily question to keep your streak alive.",
+    "dailyBody": "Tonight's quote is waiting — read it to keep your streak alive.",
     "streakTitle": "Don't lose your streak 🔥",
-    "streakBody": "You haven't answered today's question yet. Answer before midnight to keep your streak."
+    "streakBody": "You haven't read today's quote yet. Read it before midnight to keep your streak."
   },
   "common": {
     "begin": "Begin",
@@ -166,7 +166,7 @@
       "titleOr": "or",
       "titleGreen": "Green Flag?",
       "subtitle": "Read the pattern, not the promise",
-      "description": "Twenty behavioural questions across consistency, boundaries, honesty, repair and control. Read one person for a straight verdict — or read your whole circle to find the reddest flag in it.",
+      "description": "Twenty behavioural questions across consistency, boundaries, honesty, repair and control — weighing red flags and green ones alike. Read one person for a straight verdict, or two head-to-head to see who leans which way.",
       "poweredBy": "Attachment Theory + Repair Behaviour Research",
       "time": "5–7 min",
       "cost": "From 1"
@@ -297,6 +297,21 @@
       "aboutEyebrow": "About {{name}}",
       "signsRatio": "{{count}} of {{total}} signs present",
       "signalStrength": "Signal strength: {{confidence}}%"
+    },
+    "bands": {
+      "GREEN": "GREEN FLAG",
+      "LEAN_GREEN": "LEANS GREEN",
+      "NEUTRAL": "MIXED",
+      "LEAN_RED": "LEANS RED",
+      "RED": "RED FLAG"
+    },
+    "compNet": "{{net}}",
+    "flagTitles": {
+      "GREEN": "Green Flag",
+      "LEAN_GREEN": "Leaning Green",
+      "NEUTRAL": "Mixed Signals",
+      "LEAN_RED": "Leaning Red",
+      "RED": "Red Flag"
     }
   },
   "stars": {
@@ -308,8 +323,8 @@
     "dayProgress": "Day {{streak}} of 7",
     "activityTitle": "Recent activity",
     "watchVideoDesc": "A short ad, instant reward",
-    "dailyQuestion": "Daily question",
-    "dailyQuestionDesc": "Answer today's free question",
+    "dailyQuestion": "Daily quote",
+    "dailyQuestionDesc": "Read today's quote",
     "streakDesc": "Keep your daily ritual alive",
     "streakLabel": "{{streak}}-day streak",
     "comeBack": "Come back in 24h",
@@ -364,7 +379,7 @@
     "volume": "Volume",
     "notifications": "Notifications",
     "dailyReminder": "Daily reminder",
-    "dailyReminderDesc": "“Your daily question is ready 🌙”",
+    "dailyReminderDesc": "“Your daily quote is ready 🌙”",
     "reminderTime": "Reminder time",
     "streakReminder": "Streak reminder",
     "streakReminderDesc": "If your streak is about to break",
@@ -387,12 +402,9 @@
     "setTime": "Set time"
   },
   "daily": {
-    "title": "Daily Question",
     "starEarned": "Star earned",
     "balanceNow": "Your balance is now {{balance}} ✦",
-    "comeBackTomorrow": "Come back tomorrow for the next piece.",
-    "dayOf": "Day {{day}} of 7",
-    "weekCaption": "Each answer adds to the picture. Complete the week to unlock your reading."
+    "comeBackTomorrow": "Come back tomorrow for the next piece."
   },
   "personEntry": {
     "title": "Who are you reading?",
@@ -456,8 +468,6 @@
     "latest": "LATEST",
     "sponsored": "SPONSORED",
     "rewardToday": "+1 ✦ today",
-    "dailyBadge": "Daily",
-    "comeBackTomorrow": "Come back tomorrow for a new insight",
     "minRead": "{{n}} min read",
     "min": "{{n}} min",
     "takeReading": "Take the {{module}} reading",
@@ -474,9 +484,7 @@
       "jealousy": "Jealousy",
       "zodiac": "Zodiac"
     },
-    "beginRead": "Begin tonight's read",
     "stepRead": "Read",
-    "stepAnswer": "Answer",
     "stepEarn": "Earn",
     "ritualDone": "Come back tomorrow"
   },
@@ -498,5 +506,27 @@
     "save": "Save image",
     "saved": "Saved to your gallery ✓",
     "saveDenied": "Couldn't save — allow photo access and try again."
+  },
+  "quotes": {
+    "dailyTitle": "Today's Quote",
+    "tapToReflect": "Tap to reflect",
+    "originalAuthor": "Aurafy",
+    "shareCta": "Share",
+    "done": "Done",
+    "shareQuote": "Share this quote",
+    "authors": {
+      "laoTzu": "Lao Tzu",
+      "socrates": "Socrates",
+      "lamott": "Anne Lamott",
+      "angelou": "Maya Angelou",
+      "aurelius": "Marcus Aurelius",
+      "rumi": "Rumi",
+      "weil": "Simone Weil",
+      "aristotle": "Aristotle",
+      "jung": "Carl Jung",
+      "roosevelt": "Eleanor Roosevelt"
+    },
+    "shareUnavailable": "Sharing isn't available on this device.",
+    "readCta": "Read the quote"
   }
 }

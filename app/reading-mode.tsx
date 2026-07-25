@@ -86,8 +86,20 @@ export default function ReadingModeScreen() {
   // relationship module opens with their preferred mode already highlighted — but
   // only when they can actually afford it (else leave the choice open). Lazy init
   // runs once on mount, so it never overrides a later manual selection.
+  // Modes this module offers — `availableModes` caps it (red_green_flag = solo +
+  // compare); absent → all four. Filtering the picker here is the single
+  // chokepoint, so an omitted mode is never selectable and person-entry only ever
+  // receives an offered mode.
+  const modes = useMemo(
+    () => MODES.filter((m) => !module?.availableModes || module.availableModes.includes(m.mode)),
+    [module],
+  );
+
   const [selectedMode, setSelectedMode] = useState<ReadingMode | null>(() => {
     if (!module) return null;
+    // Never pre-select a mode this module doesn't offer (e.g. a default of
+    // 'circle' on red_green_flag) — leave the choice open instead.
+    if (module.availableModes && !module.availableModes.includes(defaultMode)) return null;
     const cost = module.starsCost[defaultMode];
     return isFreeTrial || stars >= cost ? defaultMode : null;
   });
@@ -154,7 +166,7 @@ export default function ReadingModeScreen() {
         <Text style={[styles.title, { color: theme.text }]}>{t('readingModes.heading')}</Text>
 
         <View style={styles.cards}>
-          {MODES.map(({ mode, icon, tone }) => {
+          {modes.map(({ mode, icon, tone }) => {
             const cost = module.starsCost[mode];
             const canAfford = isFreeTrial || stars >= cost;
             const isSelected = selectedMode === mode;

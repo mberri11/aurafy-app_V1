@@ -10,7 +10,7 @@ export const MODULES: Module[] = [
     id: 'who_loves_me',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '🔮',
+    iconName: 'Heart',
     color: '#8B5CF6',
     framework: 'attachment',
   },
@@ -18,7 +18,7 @@ export const MODULES: Module[] = [
     id: 'energy_reading',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '✨',
+    iconName: 'Lightning',
     // Radiant white — pure light/aura (Simo 2026-07-03). Its old green moved to
     // who_jealous. Matches MODULE_THEMES.
     color: '#FFFFFF',
@@ -28,7 +28,7 @@ export const MODULES: Module[] = [
     id: 'who_hates_me',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '🖤',
+    iconName: 'HeartBreak',
     color: '#E84393',
     framework: 'sociometry',
   },
@@ -36,7 +36,7 @@ export const MODULES: Module[] = [
     id: 'who_jealous',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '✂',
+    iconName: 'Eye',
     // Emerald "green with envy" (Simo 2026-07-03) — took over energy_reading's original
     // green; the venom-dark #046B50 read black on device. Matches MODULE_THEMES.
     color: '#34D399',
@@ -46,7 +46,7 @@ export const MODULES: Module[] = [
     id: 'who_soulmate',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '💕',
+    iconName: 'Infinity',
     color: '#FB7185',
     framework: 'loveLanguages',
   },
@@ -54,7 +54,7 @@ export const MODULES: Module[] = [
     id: 'who_admires',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '👁',
+    iconName: 'Sparkle',
     color: '#F5C542',
     framework: 'intuition',
   },
@@ -62,7 +62,7 @@ export const MODULES: Module[] = [
     id: 'who_cut_off',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '😮',
+    iconName: 'SmileySad',
     color: '#FB923C',
     framework: 'sociometry',
   },
@@ -71,7 +71,7 @@ export const MODULES: Module[] = [
     id: 'birth_chart',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '🔒',
+    iconName: 'MoonStars',
     color: '#6E7290',
     framework: 'mixed',
     comingSoon: true,
@@ -84,7 +84,7 @@ export const MODULES: Module[] = [
     id: 'who_will_hurt_me',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '🥀',
+    iconName: 'ShieldWarning',
     color: '#F0563C',
     framework: 'sociometry',
     unlockCost: 30,
@@ -96,17 +96,22 @@ export const MODULES: Module[] = [
     id: 'red_green_flag',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    icon: '🚩',
+    iconName: 'FlagPennant',
     color: '#F0563C',
     framework: 'mixed',
     unlockCost: 25,
+    // SOLO + COMPARE only: at 3+ people the signed 20 picks spread too thin and
+    // every read collapses to "no clear signal" (see availableModes doc).
+    availableModes: ['solo', 'compare'],
   },
   // SELF-DISCOVERY MODULES (solo)
   {
     id: 'attachment_style',
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
-    icon: '🧠',
+    // A single human figure (Simo, 2026-07-25) — chosen over PersonSimple, whose
+    // stick-figure line goes weak at the rs(26) History size.
+    iconName: 'Person',
     color: '#22D3EE',
     framework: 'attachment',
   },
@@ -118,7 +123,13 @@ export const MODULES: Module[] = [
     type: 'solo',
     resultKind: 'categorical',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
-    icon: '🌈',
+    // Flame (Simo, 2026-07-25) — REPLACES the Prism Orb as this module's glyph.
+    // Tinted per-outcome at render time (ModuleIcon reads auraSkin(outcome).accent),
+    // so a reading's saved colour still shows: the two rares resolve to their SMALL-
+    // ACCENT tones (black → silver, white → pearl), never to the near-black orb body,
+    // which would vanish on the #07091A field. See AURA_PRISM_V2 in categoryTheme —
+    // the obsidian CARD treatment (spectrum border/hairline) is unchanged.
+    iconName: 'Flame',
     color: '#A78BFA',
     framework: 'colorWheel',
   },
@@ -126,7 +137,10 @@ export const MODULES: Module[] = [
     id: 'am_i_problem',
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
-    icon: '🪞',
+    // A question mark struck into a wax seal (Simo, 2026-07-25) — "Am I The Problem?"
+    // as a verdict stamp. Also the ONLY thing separating this module from who_admires,
+    // which shares its gold accent.
+    iconName: 'SealQuestion',
     color: '#F5C542',
     framework: 'mixed',
   },
@@ -135,18 +149,21 @@ export const MODULES: Module[] = [
     id: 'am_i_healing',
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
-    icon: '🔒',
+    iconName: 'Plant',
     color: '#6E7290',
     framework: 'mixed',
     comingSoon: true,
   },
   {
     // Star-unlocked module (30★) — LIVE (content shipped 2026-07-12). Jungian shadow-work
-    // solo read; twilight indigo, persona-masks icon. Matches MODULE_THEMES.shadow_self.
+    // solo read; twilight indigo. Matches MODULE_THEMES.shadow_self.
+    // The glyph is a PAIR (Simo, 2026-07-25): MaskSad tilted behind + MaskHappy in
+    // front — the face you show over the side you hide. `iconName` names the front
+    // mask; ModuleIcon composes the pair.
     id: 'shadow_self',
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
-    icon: '🎭',
+    iconName: 'MaskHappy',
     color: '#6366F1',
     framework: 'mixed',
     unlockCost: 30,
@@ -156,7 +173,7 @@ export const MODULES: Module[] = [
     id: 'inner_child',
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
-    icon: '🔒',
+    iconName: 'Baby',
     color: '#6E7290',
     framework: 'mixed',
     comingSoon: true,

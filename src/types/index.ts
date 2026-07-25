@@ -49,12 +49,58 @@ export interface Question {
    *  `false` marks a pool counterpart eligible for repeat readings. Absent on
    *  modules that don't use pooling (their full array is always served as-is). */
   core?: boolean;
+  /**
+   * Which pole the question samples — `red` asks about a harmful behaviour,
+   * `green` about a present, positive one. OPTIONAL and currently carried ONLY
+   * by red_green_flag, whose pool is polarity-balanced instead of
+   * variance-paired (see questionPool.ts → selectPolarityBalanced). The other
+   * 12 pooled modules omit it entirely and are unaffected.
+   *
+   * Drives signed scoring in scoreMulti (`green` → +1, `red` → −1).
+   */
+  polarity?: 'red' | 'green';
 }
 
 export interface Person {
   id: string;
   name: string;
   color: string; // hex
+}
+
+/**
+ * red_green_flag ONLY — where a person lands on the signed scale. Five bands,
+ * because "leaning green" and "green" are genuinely different findings and must
+ * never render identically (see FLAG_BAND_THEME in themes/categoryTheme.ts).
+ * Fixed absolute cutoffs on the −10..+10 net scale — see flagBandFor.
+ */
+export type FlagBand = 'GREEN' | 'LEAN_GREEN' | 'NEUTRAL' | 'LEAN_RED' | 'RED';
+
+/**
+ * red_green_flag ONLY — the group verdict, derived from the DISTRIBUTION of
+ * bands across ALL participants, never from a single extreme (a read where
+ * A=−8 and B=−4 must not "clear" B). See classifyFlagGroup in scoringEngine.
+ */
+export type FlagGroupVerdict =
+  | 'ALL_GREEN'
+  | 'ALL_RED'
+  | 'SPLIT'
+  | 'SINGLE_POLE_GREEN'
+  | 'SINGLE_POLE_RED'
+  | 'CLUSTERED'
+  | 'FLAT';
+
+/** red_green_flag ONLY — the per-person breakdown behind their band. */
+export interface FlagPersonStat {
+  /** Questions where this person was picked on a GREEN question. */
+  greenCount: number;
+  /** …and on a RED question. */
+  redCount: number;
+  /** dimension → signed total for this person (green +1 / red −1). */
+  dimensions: Record<string, number>;
+  /** The dimension carrying this person's largest |signed| value. */
+  dominantDimension: string;
+  /** Sign of that dominant dimension — selects the .red/.green insight pool. */
+  dominantSign: 'green' | 'red' | 'neutral';
 }
 
 export interface ResultData {
@@ -87,6 +133,28 @@ export interface ResultData {
    *  module read solo — including ones that still fall back to the winner-race
    *  generateMultiResult — so they alone can't tell the two apart at render time. */
   isCountResult?: boolean;
+  // ── red_green_flag ONLY (signed scoring — see scoreMulti's polarity branch) ──
+  /** Signed total per person: green +1, red −1, "No one" contributes nothing.
+   *  Distinct from `scores`, which stays the UNSIGNED pick count so existing
+   *  bar/percentage rendering keeps working. */
+  netScores?: Record<string, number>;
+  /** Every participant's band — classified INDEPENDENTLY, never relative to a
+   *  single extreme, so one very red person can't clear anyone else. */
+  bands?: Record<string, FlagBand>;
+  /** Per-person greenCount / redCount / signed dimension breakdown. */
+  flagStats?: Record<string, FlagPersonStat>;
+  /** personId with the highest net / lowest net. */
+  greenest?: string;
+  reddest?: string;
+  /** max(net) − min(net) across participants. */
+  spread?: number;
+  /** Multi only — the distribution-derived group verdict (still computed by the
+   *  engine; red_green_flag now uses the compare selector instead — kept for any
+   *  older persisted reading + future 3+ modes). */
+  groupVerdict?: FlagGroupVerdict;
+  /** red_green_flag compare ONLY — the standout verdict's big title, selected +
+   *  localized at generation time so History reopens render identically. */
+  verdictTitle?: LocalizedString;
   confidence: number; // clamped per scoring path (see scoringEngine)
   insights: LocalizedString[];
   /** Multi only: the winner template minus the name ("loves you the most.") — the
@@ -118,6 +186,38 @@ export interface Reading {
   questionIds?: string[];
 }
 
+/**
+ * The Phosphor icons the app bundles, by component name (2026-07-24 — replaces the
+ * old emoji `Module.icon`). Emoji rendered from the device's system font, so module
+ * glyphs looked different on every phone and could fall back to tofu; these are
+ * bundled SVG, identical everywhere.
+ *
+ * This union is the CONTRACT: `ModuleIcon`'s registry is typed
+ * `Record<PhosphorIconName, Icon>`, so adding a name here without registering its
+ * component is a compile error (and vice-versa). Deep-import the component in
+ * `src/components/ModuleIcon.tsx` — never barrel-import `phosphor-react-native`,
+ * which would pull all ~1500 icons into the bundle (Metro does not tree-shake).
+ */
+export type PhosphorIconName =
+  | 'Baby'
+  | 'Eye'
+  | 'Flame'
+  | 'FlagPennant'
+  | 'Heart'
+  | 'HeartBreak'
+  | 'Infinity'
+  | 'Lightning'
+  | 'MaskHappy'
+  | 'MoonStars'
+  | 'PawPrint'
+  | 'Person'
+  | 'Plant'
+  | 'Scan'
+  | 'SealQuestion'
+  | 'ShieldWarning'
+  | 'SmileySad'
+  | 'Sparkle';
+
 export interface Module {
   id: string;
   type: ModuleType;
@@ -125,9 +225,20 @@ export interface Module {
    *  unset; set explicitly to 'categorical' / 'count' for the non-valence solo modules. */
   resultKind?: ResultKind;
   starsCost: Record<ReadingMode, number>;
-  icon: string; // emoji
+  /** The module's identity glyph — THE single source of truth for every surface
+   *  (Home card, detail hero, unlock dialog, loading orb, result, History), all of
+   *  which render it through `src/components/ModuleIcon.tsx`. */
+  iconName: PhosphorIconName;
   color: string; // accent hex for glow
   framework: Framework;
+  /** Reading modes this module offers, in the reading-mode picker. Absent = all
+   *  four (solo/compare/triangle/circle) — the default for every module. Set it
+   *  to cap a module whose scoring degrades past a point: red_green_flag lists
+   *  only ['solo','compare'] because with 3+ people its 20 picks spread too thin
+   *  (~20/N each) and every read collapses to "no clear signal". A `multi` module
+   *  MUST keep 'solo' + at least one multi mode; a mode omitted here is never
+   *  reachable, so person-entry only ever sees an offered mode. */
+  availableModes?: ReadingMode[];
   /** Placeholder module shown on Home as a dimmed "Coming soon" card (not playable). */
   comingSoon?: boolean;
   /** Star cost to permanently unlock a paid, buyable module. When set AND the id is not in
@@ -213,8 +324,65 @@ export interface ThemeColors {
   glow: string;
   /** How this theme skins module cards — see ModuleCardTokens. */
   moduleCard: ModuleCardTokens;
+  /**
+   * The daily-quote colour cycle: EXACTLY 7 accents, one per day of the ritual week,
+   * in the aura-spectrum spirit. Indexed by `daysSinceAnchor % 7`, so it advances with
+   * the quote itself.
+   *
+   * ⚠️ THE SEVEN MUST BE PERCEPTUALLY DISTINCT — seven shades of the theme's own hue
+   * does NOT work. That was the first attempt: Desert Oracle got seven ambers and Elven
+   * Grove seven greens, closest pairs only ΔE 8.9 and 12.6 apart, and on device the
+   * daily colour simply vanished under the theme — every day looked identical. Aim for
+   * ΔE ≥ 15 between the closest pair (CIE76) while keeping each one tonally at home on
+   * this theme's `background`, and ΔE ≥ 40 against that background so blooms read.
+   *
+   * The THEME owns the base (background / surfaces / type); the DAY owns the light.
+   * Per-theme by design — an unlocked theme recolours the whole cycle.
+   */
+  dailyAccents: [string, string, string, string, string, string, string];
   /** Ambient particle layer over the field gradient. null = none. */
   ambientParticles: AmbientParticleTokens | null;
+}
+
+/**
+ * red_green_flag COMPARE (exactly 2 people) — the standout-based verdict.
+ * Replaced the old distribution-based 6-way group verdicts (2026-07-22): now
+ * that the module is solo + compare only, every multi read is a head-to-head,
+ * and a standout selector reads better than a group classifier. `{a}` = the
+ * standout (larger |net|), `{b}` = the other person.
+ */
+export type FlagCompareVerdictKey =
+  | 'OPPOSITE'
+  | 'BOTH_GREEN'
+  | 'BOTH_RED'
+  | 'ONE_POLE'
+  | 'TOO_CLOSE';
+
+export interface FlagCompareVerdict {
+  /** The big result title (no placeholders). */
+  title: LocalizedString;
+  /** The subtitle line, with {a}/{b} filled at generation time. */
+  line: LocalizedString;
+}
+
+export type FlagCompareVerdicts = Record<FlagCompareVerdictKey, FlagCompareVerdict>;
+
+/**
+ * red_green_flag ONLY — MultiResults with polarity-split insight pools and the
+ * 2-person standout verdicts. Kept as its OWN type so the other 8 multi modules'
+ * `MultiResults` shape (flat insight arrays) is untouched.
+ *
+ * `winnerTemplate` / `tieTemplate` are retained purely so readings persisted
+ * before the signed rework still render through the legacy path.
+ */
+export interface FlagMultiResults {
+  winnerTemplate: LocalizedString;
+  tieTemplate: LocalizedString;
+  compareVerdicts: FlagCompareVerdicts;
+  /** dimension → { red, green }; the pool is chosen by the described person's
+   *  `dominantSign`, so a green-leaning person never draws red-flag copy. */
+  insights: Record<string, { red: LocalizedString[]; green: LocalizedString[] }>;
+  shareLines: Record<string, LocalizedString>;
 }
 
 export interface MultiResults {

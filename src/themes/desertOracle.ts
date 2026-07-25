@@ -48,6 +48,9 @@ export const desertOracleTheme: ThemeColors = {
   },
   // Static sand dusting — warm gold/sand motes scattered over the dusk field.
   // No animation (Simo, 2026-07-19): pure atmosphere, zero runtime cost.
+  /** Daily-quote colour cycle — desertOracle — SEVEN DISTINCT HUES tuned warm for the clay base, not seven ambers.
+   *  amber · terracotta · dusty rose · sage · desert turquoise · dusk violet · bone */
+  dailyAccents: ['#E8B04B', '#DD7A45', '#D98299', '#A9B45E', '#4FB3A5', '#A98AC9', '#F3E3CE'],
   ambientParticles: {
     colors: ['#E8B04B', '#F3E3CE', '#C97B4F'],
     count: 14,

@@ -14,14 +14,10 @@ import { ARTICLES, type Article } from './index';
 // C-10 PILOT — when the weekly curriculum is active, the daily article comes from
 // the walker's pairing so it's the SAME day's pair as the daily question.
 import { getTodayPairing } from '../../data/weeks/walker';
-
-/** Local-calendar date key, e.g. "2026-06-06" (NOT UTC — matches the user's day). */
-export function localDateKey(date: Date = new Date()): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+// The local-day key moved to the utils layer (2026-07-25) — the ritual date gate must
+// not depend on the article content layer. Import it from '@/src/utils/date', never
+// re-implement it here.
+import { localDateKey } from '../../utils/date';
 
 /** Deterministic, well-distributed string hash (djb2). */
 function hashString(input: string): number {

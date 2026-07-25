@@ -40,5 +40,7 @@ export const cosmicTheme: ThemeColors = {
   },
   // No ambient particle layer — the cosmic field is the plain gradient it has
   // always been.
+  /** Daily-quote colour cycle — cosmic — the aura spectrum: violet, blue, cyan, mint, gold, rose, pearl-white. */
+  dailyAccents: ['#A78BFA', '#5A8FD6', '#22D3EE', '#2FEAAC', '#F5C542', '#E8709F', '#EEF2FF'],
   ambientParticles: null,
 };

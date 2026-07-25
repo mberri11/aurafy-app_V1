@@ -30,6 +30,11 @@ export interface ModuleCardStyle {
   /** Icon tile. */
   iconBg: string;
   iconBorder: string;
+  /** The module GLYPH's own colour — the same resolved tint the tile uses, at full
+   *  opacity. `ModuleIcon` reads this so a theme that overrides `iconTint` recolours
+   *  the Phosphor glyph along with its tile, instead of the glyph staying on the
+   *  module's raw accent. */
+  iconGlyph: string;
   /** Locked-card treatment. */
   lockedOverlay: string;
   lockedTint: string;
@@ -56,6 +61,7 @@ export function resolveModuleCardStyle(theme: ThemeColors, accent: string): Modu
     bloomOpacity: mc.bloomOpacity,
     iconBg: `${iconTint}33`,
     iconBorder: `${iconTint}66`,
+    iconGlyph: iconTint,
     lockedOverlay: mc.lockedOverlay,
     lockedTint: mc.lockedTint,
     comingSoonBorder: mc.comingSoonBorder,

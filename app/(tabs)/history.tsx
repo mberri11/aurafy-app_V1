@@ -24,7 +24,7 @@ import { readingDisplayName } from '@/src/utils/readingDisplay';
 import { getWeekById } from '@/src/data/weeks';
 import { Language, Reading } from '@/src/types';
 import GradientButton from '@/src/components/GradientButton';
-import CategoryMotif from '@/src/components/CategoryMotif';
+import ModuleIcon from '@/src/components/ModuleIcon';
 import CosmicBloom from '@/src/components/CosmicBloom';
 import AurafyLogo from '@/src/components/AurafyLogo';
 import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
@@ -32,6 +32,15 @@ import { useIsRTL } from '@/src/utils/rtl';
 import { rs } from '@/src/utils/responsive';
 
 const WEEKLY_CYAN = '#22D3EE'; // weekly entries use a constant brand-cyan treatment (spec §7)
+
+/**
+ * Weekly-result entries in the History timeline. OFF since the daily-quote migration
+ * (2026-07-25): the ritual is now read-a-quote → Done, which produces no weekly outcome,
+ * so this section would always render empty. Kept as a flag rather than a deletion —
+ * WeeklyHistoryCard, the merge, the read-only reopen and app/weekly-result.tsx are all
+ * still here and still work; set this back to `true` to restore the section intact.
+ */
+const WEEKLY_HISTORY_VISIBLE = false;
 
 // ── Reading card (category-themed) ───────────────────────────────────────────
 const ReadingHistoryCard = memo(function ReadingHistoryCard({
@@ -100,8 +109,8 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
 
         <View style={styles.cardRow}>
           <View style={[styles.tile, { backgroundColor: `${accent}26`, borderColor: `${accent}55` }]}>
-            <CategoryMotif
-              moduleId={reading.moduleId}
+            <ModuleIcon
+              id={reading.moduleId}
               size={rs(26)}
               // Outcome-tinted glyphs: the dual-flag module's flag renders IN the
               // verdict color (green / amber / red — matching the bar + eyebrow).
@@ -230,13 +239,23 @@ export default function HistoryScreen() {
 
   const rows = useMemo<Row[]>(() => {
     const readings: Row[] = history.map((reading) => ({ kind: 'reading', createdAt: reading.createdAt, reading }));
-    const weeks: Row[] = weeklyHistory.map((entry) => ({ kind: 'weekly', createdAt: entry.createdAt, entry }));
+    // WEEKLY ENTRIES HIDDEN (2026-07-25, daily-quote migration). The quote ritual no longer
+    // produces a weekly result, so `weeklyHistory` can never gain a new entry — and on the
+    // renamed 'aurafy-user-v2' key it starts empty, so this list is always []. The merge,
+    // WeeklyHistoryCard, the reopen handler and the weekly-result screen are all left INTACT
+    // behind this flag: flip WEEKLY_HISTORY_VISIBLE back to true to restore the section whole
+    // if a weekly payoff returns. Nothing was deleted.
+    const weeks: Row[] = WEEKLY_HISTORY_VISIBLE
+      ? weeklyHistory.map((entry) => ({ kind: 'weekly', createdAt: entry.createdAt, entry }))
+      : [];
     return [...readings, ...weeks].sort((a, b) => b.createdAt - a.createdAt);
   }, [history, weeklyHistory]);
 
   const handleReadingPress = useCallback(
     (reading: Reading) => {
-      setViewOnlyResult(reading.result);
+      // Pass the persisted persons so the result's "THE FULL PICTURE" card can
+      // render names/colours on a History reopen (they aren't in session state).
+      setViewOnlyResult(reading.result, reading.persons);
       router.push({ pathname: '/result', params: { viewOnly: '1' } });
     },
     [setViewOnlyResult],

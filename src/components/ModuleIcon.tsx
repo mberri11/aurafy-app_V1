@@ -1,61 +1,229 @@
-import React, { memo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+// ─────────────────────────────────────────────────────────────────────────────
+// MODULE ICON — the ONE component that draws a module's glyph, on every surface:
+// Home card, module detail hero, unlock dialog, ad-gate orb, result reveal and the
+// History rows. It replaced BOTH of the old icon paths (2026-07-24):
+//
+//   • the emoji `Module.icon`, which rendered from the DEVICE's system font — so a
+//     module looked different on every phone and could fall back to a tofu box; and
+//   • `CategoryMotif`'s MaterialCommunityIcons glyph, a second, independent table
+//     that had already drifted (Home showed a crystal ball where History showed an
+//     eye for the same module).
+//
+// Now there is exactly one source of truth — `Module.iconName` in src/data/modules.ts
+// — and one renderer, this file. Screens NEVER import phosphor-react-native directly.
+//
+// BUNDLE RULE: every icon below is DEEP-imported (`phosphor-react-native/src/icons/X`).
+// Metro does not tree-shake, so a barrel import (`from 'phosphor-react-native'`) would
+// pull all ~1500 icons — roughly 14 MB of source — into the bundle. Adding an icon =
+// add its name to `PhosphorIconName` (src/types) + a deep import + a registry row;
+// the `Record<PhosphorIconName, Icon>` type makes a half-done addition a build error.
+// ─────────────────────────────────────────────────────────────────────────────
 
-import CategoryMotif from '@/src/components/CategoryMotif';
-import { FLAG_DUO, isDualFlagModule, moduleTheme } from '@/src/themes/categoryTheme';
+import React, { memo } from 'react';
+import { StyleSheet, View } from 'react-native';
+import type { Icon, IconWeight } from 'phosphor-react-native';
+
+import { BabyIcon } from 'phosphor-react-native/src/icons/Baby';
+import { EyeIcon } from 'phosphor-react-native/src/icons/Eye';
+import { FlagPennantIcon } from 'phosphor-react-native/src/icons/FlagPennant';
+import { FlameIcon } from 'phosphor-react-native/src/icons/Flame';
+import { HeartIcon } from 'phosphor-react-native/src/icons/Heart';
+import { HeartBreakIcon } from 'phosphor-react-native/src/icons/HeartBreak';
+import { InfinityIcon } from 'phosphor-react-native/src/icons/Infinity';
+import { LightningIcon } from 'phosphor-react-native/src/icons/Lightning';
+import { MaskHappyIcon } from 'phosphor-react-native/src/icons/MaskHappy';
+import { MaskSadIcon } from 'phosphor-react-native/src/icons/MaskSad';
+import { MoonStarsIcon } from 'phosphor-react-native/src/icons/MoonStars';
+import { PawPrintIcon } from 'phosphor-react-native/src/icons/PawPrint';
+import { PersonIcon } from 'phosphor-react-native/src/icons/Person';
+import { PlantIcon } from 'phosphor-react-native/src/icons/Plant';
+import { ScanIcon } from 'phosphor-react-native/src/icons/Scan';
+import { SealQuestionIcon } from 'phosphor-react-native/src/icons/SealQuestion';
+import { ShieldWarningIcon } from 'phosphor-react-native/src/icons/ShieldWarning';
+import { SmileySadIcon } from 'phosphor-react-native/src/icons/SmileySad';
+import { SparkleIcon } from 'phosphor-react-native/src/icons/Sparkle';
+
+import { MODULES } from '../data/modules';
+import {
+  auraSkin,
+  AURA_V2,
+  FLAG_DUO,
+  isDualFlagModule,
+  isPrismModule,
+  moduleTheme,
+} from '../themes/categoryTheme';
+import { resolveModuleCardStyle } from '../themes/moduleCardStyle';
+import { useTheme } from '../themes/ThemeProvider';
+import type { PhosphorIconName } from '../types';
+
+/** name → component. Typed against the union, so the two can never drift.
+ *  NOTE: `MaskSadIcon` is deliberately absent — it is not a module's own glyph, only
+ *  the back half of shadow_self's composed pair (see ShadowMaskGlyph). */
+const PHOSPHOR: Record<PhosphorIconName, Icon> = {
+  Baby: BabyIcon,
+  Eye: EyeIcon,
+  Flame: FlameIcon,
+  FlagPennant: FlagPennantIcon,
+  Heart: HeartIcon,
+  HeartBreak: HeartBreakIcon,
+  Infinity: InfinityIcon,
+  Lightning: LightningIcon,
+  MaskHappy: MaskHappyIcon,
+  MoonStars: MoonStarsIcon,
+  // PawPrint + Scan are registered AHEAD of their modules (energy_animal /
+  // new_person_scanner, approved 2026-07-24 but not yet in modules.ts). Wire them by
+  // adding the module row with `iconName: 'PawPrint' | 'Scan'` — nothing else changes.
+  PawPrint: PawPrintIcon,
+  Person: PersonIcon,
+  Plant: PlantIcon,
+  Scan: ScanIcon,
+  SealQuestion: SealQuestionIcon,
+  ShieldWarning: ShieldWarningIcon,
+  SmileySad: SmileySadIcon,
+  Sparkle: SparkleIcon,
+};
 
 /**
- * Module glyph. The design reference uses the platform's glossy 3D emoji art
- * (e.g. 🔮 for who_loves_me), which matches the reference 1:1 on device, so we
- * render the emoji directly. The earlier hand-authored crystal-ball SVG read as
- * a flat violet sphere and did NOT match — see git history if a bespoke,
- * per-module SVG glyph is ever needed for a device that renders an emoji poorly.
- * Exceptions:
- *  • modules whose spine motif is the colour wheel (aura_color) render the
- *    CategoryMotif disc so Home / detail / History all show the same glyph;
- *  • red_green_flag renders a bespoke DUAL-FLAG SVG (red + green pennants) —
- *    no green-flag emoji exists, and the module's identity is both poles.
+ * Aurafy's icon weight (Simo, 2026-07-24). Duotone = a low-opacity filled body under
+ * the regular stroke, both in the accent — structurally the same two-tone treatment the
+ * module tiles already use (accent-tinted plate + brighter ink). It keeps interior
+ * detail at rs(90)/rs(150) where `fill` would flatten MoonStars / ShieldWarning into a
+ * silhouette, and still carries enough body to read at rs(26) in a History row.
  */
+const WEIGHT: IconWeight = 'duotone';
+
+/** Phosphor's default (0.2) is tuned for light backgrounds and all but vanishes on
+ *  the #07091A field — raised so the duotone body actually reads as an inner bloom. */
+const DUOTONE_OPACITY = 0.35;
+
+/** Fallback glyph for an id that is not a real module (defensive — every MODULES row
+ *  declares an `iconName`, so this only fires on a bad/legacy id). */
+const FALLBACK: PhosphorIconName = 'Sparkle';
+
+const MODULE_ICON_NAME: Record<string, PhosphorIconName> = Object.fromEntries(
+  MODULES.map((m) => [m.id, m.iconName]),
+);
+
 interface ModuleIconProps {
+  /** Module id — resolves the glyph, and (unless `color` is given) its tint. */
   id: string;
-  emoji: string;
+  /** The glyph's RENDERED size in px. Tiles pass the inset glyph size, not the tile
+   *  box (e.g. a 40dp Home tile passes rs(25)). */
   size?: number;
+  /** Override the tint. Post-compute surfaces pass their OUTCOME colour here (the
+   *  aura skin accent, a red/green flag band) so the glyph follows the verdict rather
+   *  than the module's resting accent. */
+  color?: string;
+  /** AURA ONLY — an outcome category key (e.g. 'white'). Tints the Flame with that
+   *  outcome's SMALL-ACCENT tone, so a saved reading keeps its colour. Absent → the
+   *  module's resting violet. */
+  auraOutcome?: string;
 }
 
-/** The module's classic waving-flag glyph (MCI `flag-variant` — the same mark the
- *  History motif uses) twice at IDENTICAL size: red left, green right, the green
- *  one mirrored so the two flags FACE EACH OTHER (Simo, 2026-07-19). */
+/** red_green_flag's identity is BOTH poles, so it draws its pennant twice, the two
+ *  pointing in OPPOSITE directions (Simo, 2026-07-25).
+ *
+ *  The RED one is the mirrored one and comes FIRST. That ordering matters: FlagPennant
+ *  has no pole, so mirroring the SECOND flag instead makes the two triangles meet
+ *  tip-to-tip and read as a single bowtie. Mirroring the first puts both staffs
+ *  together in the middle with the pennants flying outward — two flags planted back to
+ *  back, red still on the start side. The pair spans ≈1.1× one glyph, because two small
+ *  marks read lighter than one large one. */
 function DualFlagGlyph({ size }: { size: number }) {
-  const s = Math.round(size * 0.56);
+  const s = size * 0.58;
   return (
-    <View style={styles.dualRow}>
-      <MaterialCommunityIcons name="flag-variant" size={s} color={FLAG_DUO.red} />
-      <MaterialCommunityIcons
-        name="flag-variant"
+    <View style={styles.row}>
+      <FlagPennantIcon
+        size={s}
+        color={FLAG_DUO.red}
+        weight={WEIGHT}
+        duotoneOpacity={DUOTONE_OPACITY}
+        mirrored
+      />
+      <FlagPennantIcon
         size={s}
         color={FLAG_DUO.green}
-        style={[styles.dualMirror, { marginStart: -s * 0.22 }]}
+        weight={WEIGHT}
+        duotoneOpacity={DUOTONE_OPACITY}
+        style={{ marginStart: -s * 0.11 }}
       />
     </View>
   );
 }
 
-const ModuleIcon = memo(function ModuleIcon({ id, emoji, size = 64 }: ModuleIconProps) {
+/** shadow_self is a PAIR (Simo, 2026-07-25): the tragedy mask tilted away behind, the
+ *  comedy mask in front — "the face you show over the side you hide". The front mask is
+ *  drawn second so it overlaps, and the outward tilt gives the classic theatre pairing. */
+function ShadowMaskGlyph({ size, color }: { size: number; color: string }) {
+  const s = size * 0.68; // pair spans ≈1.15× one glyph after the overlap
+  return (
+    <View style={styles.row}>
+      <View style={styles.tiltBack}>
+        <MaskSadIcon size={s} color={color} weight={WEIGHT} duotoneOpacity={DUOTONE_OPACITY} />
+      </View>
+      <View style={[styles.tiltFront, { marginStart: -s * 0.31 }]}>
+        <MaskHappyIcon size={s} color={color} weight={WEIGHT} duotoneOpacity={DUOTONE_OPACITY} />
+      </View>
+    </View>
+  );
+}
+
+const ModuleIcon = memo(function ModuleIcon({
+  id,
+  size = 24,
+  color,
+  auraOutcome,
+}: ModuleIconProps) {
+  const theme = useTheme();
+
   if (isDualFlagModule(id)) {
     return <DualFlagGlyph size={size} />;
   }
-  if (moduleTheme(id).motif.kind === 'wheel') {
-    return <CategoryMotif moduleId={id} size={size * 0.62} />;
+
+  const isAura = isPrismModule(id);
+  // AURA is ACHROMATIC at rest (Simo, 2026-07-25): a PEARL flame over a SILVER body —
+  // the AURA_V2 white/black pair, never a hue. That is the module's real pre-reveal
+  // identity (every single colour already belongs to another module), and it keeps the
+  // glyph consistent with the obsidian card + spectrum hairline around it.
+  const auraResting = isAura && !auraOutcome && !color;
+
+  // Tint: an explicit outcome colour wins; then AURA's per-outcome tone (the skin's
+  // SMALL-ACCENT, so rare Black resolves to silver and White to pearl rather than to
+  // the near-invisible orb body); then aura's resting pearl; otherwise the ACTIVE
+  // THEME's module-card skin resolves it exactly as the surrounding tile does —
+  // `moduleCard.iconTint` when the theme overrides it (Desert Oracle / Elven Grove can
+  // tint every module into their palette), else the module's own accent. Never a
+  // hardcoded hex outside the locked AURA_V2 pair.
+  const tint =
+    color ??
+    (isAura && auraOutcome
+      ? auraSkin(auraOutcome).accent
+      : isAura
+        ? AURA_V2.pearl
+        : resolveModuleCardStyle(theme, moduleTheme(id).accent).iconGlyph);
+  // undefined → Phosphor falls back to the stroke colour, i.e. a single-tone glyph.
+  const duotoneColor = auraResting ? AURA_V2.silver : undefined;
+
+  if (id === 'shadow_self') {
+    return <ShadowMaskGlyph size={size} color={tint} />;
   }
-  return <Text style={[styles.emoji, { fontSize: size * 0.62 }]}>{emoji}</Text>;
+
+  const Glyph = PHOSPHOR[MODULE_ICON_NAME[id] ?? FALLBACK];
+  return (
+    <Glyph
+      size={size}
+      color={tint}
+      weight={WEIGHT}
+      duotoneColor={duotoneColor}
+      duotoneOpacity={DUOTONE_OPACITY}
+    />
+  );
 });
 
 export default ModuleIcon;
 
 const styles = StyleSheet.create({
-  emoji: { textAlign: 'center' },
-  dualRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  // Mirror the green flag so its pennant points back at the red one.
-  dualMirror: { transform: [{ scaleX: -1 }] },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  tiltBack: { transform: [{ rotate: '-9deg' }] },
+  tiltFront: { transform: [{ rotate: '9deg' }] },
 });

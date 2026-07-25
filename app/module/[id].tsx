@@ -20,7 +20,6 @@ import GradientButton from '@/src/components/GradientButton';
 import GlassCard from '@/src/components/GlassCard';
 import StarsBadge from '@/src/components/StarsBadge';
 import ModuleIcon from '@/src/components/ModuleIcon';
-import CategoryMotif from '@/src/components/CategoryMotif';
 import SpectrumHairline from '@/src/components/SpectrumHairline';
 import ModuleUnlockDialog from '@/src/components/ModuleUnlockDialog';
 import { rs } from '@/src/utils/responsive';
@@ -184,24 +183,20 @@ export default function ModuleDetailScreen() {
 
       {/* Content block (upper portion) */}
       <View style={styles.content}>
-        {/* Module icon — aura shows the bare Prism Orb (base), large + centred. */}
-        {prism ? (
-          <View style={styles.iconOrbPrism}>
-            <CategoryMotif moduleId={module.id} size={rs(150)} />
-          </View>
-        ) : (
-          <View
-            style={[
-              styles.iconCircle,
-              {
-                backgroundColor: `${accent}2E`,
-                borderColor: `${accent}66`,
-              },
-            ]}
-          >
-            <ModuleIcon id={module.id} emoji={module.icon} size={rs(90)} />
-          </View>
-        )}
+        {/* Module icon. Aura used to break out of the circle for the Prism Orb; with the
+            orb retired (2026-07-25) every module — aura included — uses this one tile. */}
+        <View
+          style={[
+            styles.iconCircle,
+            {
+              backgroundColor: `${accent}2E`,
+              borderColor: `${accent}66`,
+            },
+          ]}
+        >
+          {/* 90dp icon circle → 56dp glyph (the inset the emoji rendered at). */}
+          <ModuleIcon id={module.id} size={rs(56)} />
+        </View>
 
         {/* Title — per-module accent; prism stays white ink + violet glow */}
         <Text
@@ -329,7 +324,6 @@ export default function ModuleDetailScreen() {
         visible={showUnlock && locked}
         moduleId={module.id}
         moduleName={t(`modules.${module.id}.title`)}
-        moduleIcon={module.icon}
         color={module.color}
         cost={module.unlockCost ?? 0}
         balance={stars}
@@ -393,12 +387,6 @@ const styles = StyleSheet.create({
     borderRadius: rs(57),
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  // AURA_PRISM_V2: the bare large orb (its SVG box carries its own glow margin).
-  iconOrbPrism: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: rs(6),
   },
   // Short centred spectrum rules under the category pill / CTA.
   pillHairline: { width: rs(120), alignSelf: 'center', marginTop: rs(10) },
