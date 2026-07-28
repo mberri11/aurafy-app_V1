@@ -22,7 +22,7 @@ import { Platform } from 'react-native';
  * you've confirmed test ads render, or your AdMob account can be flagged for
  * clicking your own live ads.
  */
-export const USE_TEST_ADS = true;
+export const USE_TEST_ADS = __DEV__;
 
 // ── Google's official TEST unit IDs (identical to the ones in the AdMob docs) ──
 // Android values match exactly what you provided.
@@ -81,6 +81,14 @@ export const INTERSTITIAL = {
   /** Probability an eligible exit shows the ad. 0.15 = launch value; a raise to
    *  0.20+ is a v1.0.1 decision gated on retention data. */
   CHANCE: 0.15,
+  /**
+   * Probability for the DAILY-QUOTE placement specifically (after tapping Done).
+   * Higher than the generic exit chance because it fires at most ONCE PER LOCAL DAY —
+   * only on a genuine claim, never when the user re-opens an already-read quote — so
+   * the real-world frequency is ~1 ad every other day, not per session.
+   * Simo's call, 2026-07-26: "1/2 is fair". Drop to 0.33 / 0.25 to soften.
+   */
+  QUOTE_DONE_CHANCE: 0.5,
   /** Never show before the user has this many completed readings (protect onboarding). */
   MIN_READINGS_BEFORE: 3,
   /** Hard floor between two interstitials, ms. */

@@ -19,7 +19,7 @@ import React, { memo, useState } from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
 
 import { AD_UNIT_IDS } from '@/src/config/ads';
-import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
+import { ADS_AVAILABLE, useNonPersonalizedOnly } from '@/src/ads/adsRuntime';
 import { logger } from '@/src/utils/logger';
 
 interface Props {
@@ -29,6 +29,10 @@ interface Props {
 
 const AdBanner = memo(function AdBanner({ style }: Props) {
   const [failed, setFailed] = useState(false);
+  // Above the early return so hook order stays stable when `failed` flips. Subscribed
+  // rather than read once, so a banner mounted before the UMP consent flow resolves
+  // picks up the real personalization stance instead of the pre-consent default.
+  const npaOnly = useNonPersonalizedOnly();
 
   // Collapse to nothing in Expo Go or after a load failure. This early return also
   // ensures the native module is never require()d in Expo Go.
@@ -42,7 +46,7 @@ const AdBanner = memo(function AdBanner({ style }: Props) {
       <BannerAd
         unitId={AD_UNIT_IDS.banner}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+        requestOptions={{ requestNonPersonalizedAdsOnly: npaOnly }}
         onAdFailedToLoad={(err: unknown) => {
           logger.error('Banner ad failed to load:', err);
           setFailed(true);

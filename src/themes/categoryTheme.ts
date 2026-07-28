@@ -105,8 +105,8 @@ const MODULE_THEMES: Record<string, CategoryTheme> = {
   red_green_flag: { accent: '#F0563C', accentSoft: '#FBAB8C' },
   attachment_style: { accent: '#22D3EE', accentSoft: '#67E8F9' },
   // Gold — matches its Home card. It shares that gold with who_admires, so the GLYPH
-  // is the only thing keeping the two apart: UserRectangle (a framed reflection) vs
-  // Sparkle. Never give these two the same iconName.
+  // is the only thing keeping the two apart: Mirror (self-reflection) vs Sparkle.
+  // Never give these two the same iconName.
   am_i_problem: { accent: '#F5C542', accentSoft: '#F8DE7E' },
   am_i_healing: { accent: '#2FEAAC', accentSoft: '#86EFCC' },
   // Twilight indigo + persona masks — Jungian shadow work. (birth_chart's placeholder

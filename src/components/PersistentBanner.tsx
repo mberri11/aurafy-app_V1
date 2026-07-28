@@ -15,7 +15,7 @@
 import React, { memo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
+import { ADS_AVAILABLE, useNonPersonalizedOnly } from '@/src/ads/adsRuntime';
 import { AD_UNIT_IDS } from '@/src/config/ads';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { logger } from '@/src/utils/logger';
@@ -31,6 +31,11 @@ export const PERSISTENT_BANNER_RESERVE = ADS_AVAILABLE ? rs(60) : 0;
 const PersistentBanner = memo(function PersistentBanner() {
   const theme = useTheme();
   const [failed, setFailed] = useState(false);
+  // Above the early return so hook order stays stable when `failed` flips. This banner
+  // mounts with the tab shell, i.e. possibly BEFORE the UMP consent flow resolves —
+  // subscribing re-renders it with the real stance instead of stranding it on the
+  // pre-consent default for the whole session.
+  const npaOnly = useNonPersonalizedOnly();
 
   // Collapse to nothing in Expo Go or after a load failure. This early return also
   // ensures the native module is never require()d in Expo Go.
@@ -47,7 +52,7 @@ const PersistentBanner = memo(function PersistentBanner() {
       <BannerAd
         unitId={AD_UNIT_IDS.banner}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+        requestOptions={{ requestNonPersonalizedAdsOnly: npaOnly }}
         onAdFailedToLoad={(err: unknown) => {
           logger.error('Persistent banner failed to load:', err);
           setFailed(true);

@@ -147,7 +147,13 @@ const styles = StyleSheet.create({
     minHeight: rs(56),
   },
   gradient: {
-    height: rs(56),
+    // minHeight, NOT height: a label that wraps to two lines (long module names in the
+    // Insights cross-sell, and most non-EN locales) used to overflow a fixed 56 and
+    // spill outside the pill. Single-line CTAs are unaffected — 20px of text + 28px of
+    // padding is under 56, so minHeight still wins and every existing button keeps its
+    // exact size.
+    minHeight: rs(56),
+    paddingVertical: rs(14),
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
@@ -165,6 +171,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     fontFamily: 'HankenGrotesk_600SemiBold',
+    // A wrapped label centres every line instead of leaving the orphan word ("…reading")
+    // jammed against the start edge. flexShrink lets it wrap INSIDE the row rather than
+    // shoving the trailing arrow past the pill's edge.
+    textAlign: 'center',
+    flexShrink: 1,
   },
   labelBold: {
     fontWeight: '700',
@@ -183,7 +194,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   outlineInner: {
-    height: rs(52),
+    // Same fixed-height → minHeight fix as the primary fill above.
+    minHeight: rs(52),
+    paddingVertical: rs(12),
     borderRadius: 997,
     alignItems: 'center',
     justifyContent: 'center',

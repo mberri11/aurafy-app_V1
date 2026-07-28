@@ -25,58 +25,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { WEEKLY_CURRICULUM_ENABLED } from '@/src/config/flags';
+// The day-count lives in the leaf date util, NOT here (moved 2026-07-28): the daily
+// QUOTE ritual needs it, and this module pulls in WEEKS + the curriculum flag at import
+// time. Keeping it here chained the live quote screen to curriculum content it never uses.
+import { getDaysSinceAnchor } from '@/src/utils/date';
 import { WEEKS } from './index';
 import type { WeekDay, WeeklyTheme } from './types';
-
-const DAY_MS = 86_400_000;
-
-/**
- * Standard ISO-8601 week number (1..53), computed in UTC off the date's calendar
- * Y/M/D so DST never shifts the boundary. Retained as a generic date utility — it
- * NO LONGER drives curriculum indexing (that is anchor-relative now, see below).
- */
-export function isoWeekNumber(date: Date = new Date()): number {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  // Shift to the Thursday of this week (ISO weeks are Thursday-anchored).
-  const dayNum = (d.getUTCDay() + 6) % 7; // Mon=0 … Sun=6
-  d.setUTCDate(d.getUTCDate() - dayNum + 3);
-  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
-  const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
-  firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
-  return 1 + Math.round((d.getTime() - firstThursday.getTime()) / (7 * DAY_MS));
-}
-
-/**
- * Whole local days elapsed since the user's anchor. `0` when the anchor is unset
- * (brand-new user) or when the clock reads BEFORE the anchor (backwards-clock
- * tamper → clamp to Day 0, never negative). THE single app-wide day-count
- * definition — do not recompute elsewhere.
- *
- * The anchor is set to the START of the user's first-ritual local day (see
- * userStore.completeDailyRitual), so this advances at local midnight — keeping the
- * daily article/question in step with the calendar day and the localDateKey gate.
- */
-export function getDaysSinceAnchor(anchor: number | null, date: Date = new Date()): number {
-  if (anchor === null) return 0;
-  const diff = date.getTime() - anchor;
-  if (diff < 0) return 0;
-  return Math.floor(diff / DAY_MS);
-}
 
 /** Day index within the active 7-day cycle, 0..6 (anchor-relative). */
 export function getDayIndex(anchor: number | null, date: Date = new Date()): number {
   return getDaysSinceAnchor(anchor, date) % 7;
-}
-
-/**
- * How many week slots the user has ENTERED since their anchor (week 0 counts as
- * entered on day 0), UNWRAPPED — unlike getActiveWeekIndex this never applies
- * `% WEEKS.length`, so once a week is reached it stays reached even after the
- * registry cycles. Gates feed visibility: a week's articles show only when the
- * week's ordinal in `WEEKS` is <= this count (no pre-reading future weeks).
- */
-export function getReachedWeekCount(anchor: number | null, date: Date = new Date()): number {
-  return Math.floor(getDaysSinceAnchor(anchor, date) / 7);
 }
 
 /**

@@ -5,14 +5,15 @@
 // the local calendar date, so every device shows the same featured article on a
 // given day and the same article all day.
 //
-// Distinct from the existing Daily QUESTION (src/data/dailyQuestions.ts), which
-// picks by day-of-year. This picks by a hash of the full YYYY-MM-DD key over the
-// `featured` article pool, so the two never move in lockstep.
+// Two resolution paths, in order: the curriculum walker's pairing for today (the
+// primary path — see below), falling back to a hash of the full YYYY-MM-DD key over
+// the `featured` article pool when no week is active.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ARTICLES, type Article } from './index';
-// C-10 PILOT — when the weekly curriculum is active, the daily article comes from
-// the walker's pairing so it's the SAME day's pair as the daily question.
+// The daily article is the `articleId` half of the active week's day. The `questionId`
+// half no longer resolves to anything — the daily-question content was retired with the
+// weekly curriculum (2026-07-28); the ritual is the daily quote screen now.
 import { getTodayPairing } from '../../data/weeks/walker';
 // The local-day key moved to the utils layer (2026-07-25) — the ritual date gate must
 // not depend on the article content layer. Import it from '@/src/utils/date', never

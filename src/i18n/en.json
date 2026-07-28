@@ -347,10 +347,7 @@
     "emptyMessage": "Every name, color and pattern you uncover is kept here — a private map of what you've learned about yourself.",
     "ctaButton": "Start a reading",
     "titleLine": "{{name}} — {{pct}}% confidence",
-    "titleLineSignal": "{{name}} — {{pct}}% signal",
-    "weeklyEyebrow": "Weekly reading",
-    "sevenDayBadge": "7-Day",
-    "nights": "{{count}} nights · completed {{date}}"
+    "titleLineSignal": "{{name}} — {{pct}}% signal"
   },
   "settings": {
     "title": "Settings",
@@ -374,7 +371,7 @@
     "resetConfirmTitle": "Reset all data?",
     "resetConfirmMessage": "A full factory reset. Your Stars, history, settings and onboarding will all be erased.",
     "resetConfirmAction": "Reset everything",
-    "version": "Aurafy v1.0.0",
+    "version": "Aurafy v{{version}}",
     "soundEffectsDesc": "Chimes on tap, bell on reveal",
     "volume": "Volume",
     "notifications": "Notifications",
@@ -470,7 +467,7 @@
     "rewardToday": "+1 ✦ today",
     "minRead": "{{n}} min read",
     "min": "{{n}} min",
-    "takeReading": "Take the {{module}} reading",
+    "takeReading": "Take the reading:\n{{module}}",
     "empty": "No articles here yet.",
     "sponsoredTitle": "Find your cosmic match tonight",
     "sponsoredBrand": "Astra · Dating",
@@ -487,14 +484,6 @@
     "stepRead": "Read",
     "stepEarn": "Earn",
     "ritualDone": "Come back tomorrow"
-  },
-  "weekly": {
-    "eyebrow": "Your week revealed",
-    "bonusTitle": "+{{amount}} ✦ streak bonus",
-    "bonusSubtitle": "Seven nights, unbroken. Your balance is now {{balance}} ✦.",
-    "share": "Share my week",
-    "save": "Save to history",
-    "empty": "No weekly result yet."
   },
   "share": {
     "getYours": "Get your reading"

@@ -15,8 +15,8 @@
 // BUNDLE RULE: every icon below is DEEP-imported (`phosphor-react-native/src/icons/X`).
 // Metro does not tree-shake, so a barrel import (`from 'phosphor-react-native'`) would
 // pull all ~1500 icons — roughly 14 MB of source — into the bundle. Adding an icon =
-// add its name to `PhosphorIconName` (src/types) + a deep import + a registry row;
-// the `Record<PhosphorIconName, Icon>` type makes a half-done addition a build error.
+// add its name to `ModuleIconName` (src/types) + a deep import + a registry row;
+// the `Record<ModuleIconName, Icon>` type makes a half-done addition a build error.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { memo } from 'react';
@@ -38,10 +38,13 @@ import { PawPrintIcon } from 'phosphor-react-native/src/icons/PawPrint';
 import { PersonIcon } from 'phosphor-react-native/src/icons/Person';
 import { PlantIcon } from 'phosphor-react-native/src/icons/Plant';
 import { ScanIcon } from 'phosphor-react-native/src/icons/Scan';
-import { SealQuestionIcon } from 'phosphor-react-native/src/icons/SealQuestion';
-import { ShieldWarningIcon } from 'phosphor-react-native/src/icons/ShieldWarning';
+import { ScissorsIcon } from 'phosphor-react-native/src/icons/Scissors';
 import { SmileySadIcon } from 'phosphor-react-native/src/icons/SmileySad';
 import { SparkleIcon } from 'phosphor-react-native/src/icons/Sparkle';
+
+// The one glyph Phosphor does not ship — drawn in-house to Phosphor's grammar so the
+// set stays single-family. See its header before reaching for a second icon library.
+import MirrorIcon from './MirrorIcon';
 
 import { MODULES } from '../data/modules';
 import {
@@ -54,12 +57,12 @@ import {
 } from '../themes/categoryTheme';
 import { resolveModuleCardStyle } from '../themes/moduleCardStyle';
 import { useTheme } from '../themes/ThemeProvider';
-import type { PhosphorIconName } from '../types';
+import type { ModuleIconName } from '../types';
 
 /** name → component. Typed against the union, so the two can never drift.
  *  NOTE: `MaskSadIcon` is deliberately absent — it is not a module's own glyph, only
  *  the back half of shadow_self's composed pair (see ShadowMaskGlyph). */
-const PHOSPHOR: Record<PhosphorIconName, Icon> = {
+const PHOSPHOR: Record<ModuleIconName, Icon> = {
   Baby: BabyIcon,
   Eye: EyeIcon,
   Flame: FlameIcon,
@@ -69,6 +72,7 @@ const PHOSPHOR: Record<PhosphorIconName, Icon> = {
   Infinity: InfinityIcon,
   Lightning: LightningIcon,
   MaskHappy: MaskHappyIcon,
+  Mirror: MirrorIcon,
   MoonStars: MoonStarsIcon,
   // PawPrint + Scan are registered AHEAD of their modules (energy_animal /
   // new_person_scanner, approved 2026-07-24 but not yet in modules.ts). Wire them by
@@ -77,8 +81,7 @@ const PHOSPHOR: Record<PhosphorIconName, Icon> = {
   Person: PersonIcon,
   Plant: PlantIcon,
   Scan: ScanIcon,
-  SealQuestion: SealQuestionIcon,
-  ShieldWarning: ShieldWarningIcon,
+  Scissors: ScissorsIcon,
   SmileySad: SmileySadIcon,
   Sparkle: SparkleIcon,
 };
@@ -87,7 +90,7 @@ const PHOSPHOR: Record<PhosphorIconName, Icon> = {
  * Aurafy's icon weight (Simo, 2026-07-24). Duotone = a low-opacity filled body under
  * the regular stroke, both in the accent — structurally the same two-tone treatment the
  * module tiles already use (accent-tinted plate + brighter ink). It keeps interior
- * detail at rs(90)/rs(150) where `fill` would flatten MoonStars / ShieldWarning into a
+ * detail at rs(90)/rs(150) where `fill` would flatten MoonStars / SmileySad into a
  * silhouette, and still carries enough body to read at rs(26) in a History row.
  */
 const WEIGHT: IconWeight = 'duotone';
@@ -98,9 +101,9 @@ const DUOTONE_OPACITY = 0.35;
 
 /** Fallback glyph for an id that is not a real module (defensive — every MODULES row
  *  declares an `iconName`, so this only fires on a bad/legacy id). */
-const FALLBACK: PhosphorIconName = 'Sparkle';
+const FALLBACK: ModuleIconName = 'Sparkle';
 
-const MODULE_ICON_NAME: Record<string, PhosphorIconName> = Object.fromEntries(
+const MODULE_ICON_NAME: Record<string, ModuleIconName> = Object.fromEntries(
   MODULES.map((m) => [m.id, m.iconName]),
 );
 
@@ -151,18 +154,43 @@ function DualFlagGlyph({ size }: { size: number }) {
   );
 }
 
+/** shadow_self's pair is ACHROMATIC (Simo, 2026-07-27) — persona vs shadow, so the
+ *  comedy mask you show reads WHITE and the tragedy mask you hide reads BLACK. Like
+ *  aura's locked pearl/silver, these ignore the module accent and the theme's glyph
+ *  tint; the module's indigo stays on the card, bar and glow.
+ *
+ *  The black mask can't be pure ink or it dissolves into the #07091A field, so its
+ *  duotone BODY is lifted to a charcoal while the stroke stays black — from a step
+ *  back it reads as a black mask with an edge, not as a hole. It also sits behind the
+ *  white one, which gives its silhouette a second contrast edge. */
+const SHADOW_MASK_WHITE = '#FFFFFF';
+const SHADOW_MASK_BLACK = '#08070D';
+const SHADOW_MASK_BLACK_BODY = '#3E3D4B';
+const SHADOW_MASK_BLACK_OPACITY = 0.85;
+
 /** shadow_self is a PAIR (Simo, 2026-07-25): the tragedy mask tilted away behind, the
  *  comedy mask in front — "the face you show over the side you hide". The front mask is
  *  drawn second so it overlaps, and the outward tilt gives the classic theatre pairing. */
-function ShadowMaskGlyph({ size, color }: { size: number; color: string }) {
+function ShadowMaskGlyph({ size }: { size: number }) {
   const s = size * 0.68; // pair spans ≈1.15× one glyph after the overlap
   return (
     <View style={styles.row}>
       <View style={styles.tiltBack}>
-        <MaskSadIcon size={s} color={color} weight={WEIGHT} duotoneOpacity={DUOTONE_OPACITY} />
+        <MaskSadIcon
+          size={s}
+          color={SHADOW_MASK_BLACK}
+          weight={WEIGHT}
+          duotoneColor={SHADOW_MASK_BLACK_BODY}
+          duotoneOpacity={SHADOW_MASK_BLACK_OPACITY}
+        />
       </View>
       <View style={[styles.tiltFront, { marginStart: -s * 0.31 }]}>
-        <MaskHappyIcon size={s} color={color} weight={WEIGHT} duotoneOpacity={DUOTONE_OPACITY} />
+        <MaskHappyIcon
+          size={s}
+          color={SHADOW_MASK_WHITE}
+          weight={WEIGHT}
+          duotoneOpacity={DUOTONE_OPACITY}
+        />
       </View>
     </View>
   );
@@ -204,8 +232,10 @@ const ModuleIcon = memo(function ModuleIcon({
   // undefined → Phosphor falls back to the stroke colour, i.e. a single-tone glyph.
   const duotoneColor = auraResting ? AURA_V2.silver : undefined;
 
+  // Achromatic locked pair — deliberately ignores `tint` (module accent / theme glyph
+  // tint / any caller override), same as aura's resting pearl-on-silver.
   if (id === 'shadow_self') {
-    return <ShadowMaskGlyph size={size} color={tint} />;
+    return <ShadowMaskGlyph size={size} />;
   }
 
   const Glyph = PHOSPHOR[MODULE_ICON_NAME[id] ?? FALLBACK];

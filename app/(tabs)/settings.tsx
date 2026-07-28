@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
 import { router } from 'expo-router';
+import Constants from 'expo-constants';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -172,12 +173,6 @@ export default function SettingsScreen() {
           // `I18nManager.isRTL` under Expo Go + New Arch); it applies on the relaunch.
           I18nManager.allowRTL(willBeRTL);
           I18nManager.forceRTL(willBeRTL);
-          // ── TEMP (Simo, 2026-07-07, testing only — REMOVE before release) ──
-          // A language change re-enters through onboarding like a first launch, so
-          // every language can be checked from the very first screen. Only the
-          // onboarding flag flips — stars/history/streak are untouched. Restore the
-          // old behavior by deleting this one line (relaunch lands on Home again).
-          useUserStore.setState({ hasOnboarded: false });
           // Clean relaunch so the change applies in place. (Dev: JS reload. Prod:
           // no-op until expo-updates lands in Phase D; strings already switched
           // live via changeLanguage, only the RTL flip waits for the next launch.)
@@ -423,7 +418,10 @@ export default function SettingsScreen() {
           <Row
             label={t('settings.howAurafyWorks')}
             chevron
-            onPress={() => router.push('/onboarding')}
+            // `replay` puts onboarding in REVIEW mode: no language picker (language is
+            // set right here in Settings), no Skip, and the last slide returns here
+            // instead of re-entering the app. See app/onboarding.tsx.
+            onPress={() => router.push({ pathname: '/onboarding', params: { replay: '1' } })}
           />
           <Divider />
           <Row label={t('settings.rateApp')} chevron onPress={handleRate} />
@@ -467,7 +465,8 @@ export default function SettingsScreen() {
 
         <View style={styles.footer}>
           <Text style={[styles.version, { color: theme.textMuted }]}>
-            {t('settings.version')} · {t('settings.madeWith')}{' '}
+            {t('settings.version', { version: Constants.expoConfig?.version ?? '1.1.0' })} ·{' '}
+            {t('settings.madeWith')}{' '}
           </Text>
           <MaterialCommunityIcons name="heart" size={rs(12)} color={theme.textMuted} />
         </View>

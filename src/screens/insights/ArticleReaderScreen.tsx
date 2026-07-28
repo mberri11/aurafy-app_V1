@@ -31,8 +31,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 
 import { useTheme } from '@/src/themes/ThemeProvider';
+import { AURA_V2, lightenHex } from '@/src/themes/categoryTheme';
+import SpectrumHairline from '@/src/components/SpectrumHairline';
 import { useUserStore } from '@/src/store/userStore';
 import GradientButton from '@/src/components/GradientButton';
+import AdBanner from '@/src/ads/AdBanner';
 import {
   getArticle,
   getArticleContent,
@@ -47,6 +50,20 @@ import ArticleBlocks from './components/ArticleBlocks';
 import OrbitArt from './components/OrbitArt';
 
 const HERO_BG = '#241733';
+
+/**
+ * Ink for the end-of-article CTA. Deliberately a FIXED near-black rather than
+ * `theme.bg2`: the pill is filled with the article's CATEGORY colour, which is a fixed
+ * palette (CATEGORY_COLORS) that does not follow the app theme. Pairing a fixed fill
+ * with a theme-dependent ink is what dropped the aura CTA to 3.9:1 on Desert Oracle and
+ * Elven Grove. Against this ink every one of the 7 category colours clears WCAG AA
+ * (worst = aura at 5.07:1) in every theme.
+ */
+const CTA_INK = '#08070D';
+
+/** The aura module's CTA fill, lifted verbatim from app/module/[id].tsx so the article's
+ *  cross-sell and the "Begin Reading" button it leads to are the same pearl pill. */
+const AURA_CTA: [string, string] = [AURA_V2.pearl, '#D6D5E0'];
 
 export default function ArticleReaderScreen() {
   const { t, i18n } = useTranslation();
@@ -97,6 +114,13 @@ export default function ArticleReaderScreen() {
   }
 
   const accent = CATEGORY_COLORS[article.category];
+  // AURA_PRISM_V2 — aura articles wear the module's black identity, not a tinted card:
+  // a flat obsidian hero under a pearl bloom, the spectrum hairline as the end rule, and
+  // the pearl CTA. Everything else on the screen already follows `accent`, which is the
+  // achromatic silver for this category.
+  const prism = article.category === 'aura';
+  const heroBg = prism ? AURA_V2.obsidian : HERO_BG;
+  const bloom = prism ? AURA_V2.pearl : accent;
   const catLabel = t(`insights.categories.${article.category}`).toUpperCase();
   const readLabel = t('insights.minRead', { n: article.readMinutes });
   // Articles with relatedModuleId '' have no cross-sell (C-10 brief) — don't resolve a
@@ -133,13 +157,15 @@ export default function ArticleReaderScreen() {
         </View>
 
         {/* Orbit hero */}
-        <View style={[styles.hero, { backgroundColor: HERO_BG }]}>
+        <View style={[styles.hero, { backgroundColor: heroBg }]}>
           <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
             <Defs>
+              {/* Aura's pearl bloom is deliberately fainter than a chromatic accent's —
+                  a near-white at 0.5 would wash the obsidian out to grey. */}
               <RadialGradient id="ar_bloom" cx="50%" cy="45%" r="60%">
-                <Stop offset="0%" stopColor={accent} stopOpacity={0.5} />
-                <Stop offset="55%" stopColor={accent} stopOpacity={0.12} />
-                <Stop offset="100%" stopColor={HERO_BG} stopOpacity={0} />
+                <Stop offset="0%" stopColor={bloom} stopOpacity={prism ? 0.22 : 0.5} />
+                <Stop offset="55%" stopColor={bloom} stopOpacity={prism ? 0.06 : 0.12} />
+                <Stop offset="100%" stopColor={heroBg} stopOpacity={0} />
               </RadialGradient>
             </Defs>
             <Rect x="0" y="0" width="100%" height="100%" fill="url(#ar_bloom)" />
@@ -163,18 +189,35 @@ export default function ArticleReaderScreen() {
             Hidden when the article has no linked module (relatedModuleId ''). */}
         {article.relatedModuleId ? (
           <>
-            <View style={[styles.endDivider, { backgroundColor: theme.surfaceBorder }]} />
+            {/* Aura's signature motif stands in for the plain rule — the same spectrum
+                hairline the module card, the category pill and the quiz fill carry. */}
+            {prism ? (
+              <SpectrumHairline height={2} radius={1} style={styles.endDividerPrism} />
+            ) : (
+              <View style={[styles.endDivider, { backgroundColor: theme.surfaceBorder }]} />
+            )}
             <GradientButton
               label={t('insights.takeReading', { module: moduleTitle })}
               onPress={openModule}
-              labelColor={theme.bg2}
+              labelColor={CTA_INK}
               bold
               trailingIcon={isRTL ? 'arrow-left' : 'arrow-right'}
+              // Themed to the ARTICLE's category, not the brand cyan→violet→mint every
+              // other CTA wears — the button is the payoff of what was just read, so a
+              // jealousy piece hands off in lilac and an aura piece in violet.
+              // Lighter tone → accent (never accent → darker): the label is dark, so the
+              // pill has to stay bright across its whole width to keep contrast.
+              colors={prism ? AURA_CTA : [lightenHex(accent, 0.22), accent]}
             />
           </>
         ) : null}
 
-
+        {/* Banner — the reader is a linger/scroll surface, so it takes one (ad strategy:
+            never on quiz/loading/result/module). It sits at the very END, after the
+            cross-sell, so it can never come between the reader and the CTA. This route
+            is on the ROOT stack, not the tab shell, so there is no PersistentBanner here
+            to double up with. Collapses to nothing in Expo Go and on a load failure. */}
+        <AdBanner style={styles.bannerSlot} />
       </Animated.ScrollView>
     </View>
   );
@@ -231,5 +274,8 @@ const styles = StyleSheet.create({
   },
 
   endDivider: { height: StyleSheet.hairlineWidth, marginTop: rs(24), marginBottom: rs(22) },
+  // Same rhythm as endDivider; the hairline owns its own 2px height.
+  endDividerPrism: { marginTop: rs(24), marginBottom: rs(22) },
 
+  bannerSlot: { marginTop: rs(24) },
 });

@@ -51,6 +51,7 @@ import { syncReminders } from '@/src/utils/notifications';
 import { shareImage } from '@/src/utils/share';
 import AdBanner from '@/src/ads/AdBanner';
 import { maybeShowInterstitial } from '@/src/ads/interstitialGate';
+import { INTERSTITIAL } from '@/src/config/ads';
 import QuoteShareCard, { QUOTE_CARD_H, QUOTE_CARD_W } from './QuoteShareCard';
 
 const REVEAL_MS = 250; // reflection unfold — spec'd duration
@@ -94,10 +95,12 @@ export default function DailyQuoteScreen() {
     opacity: revealOpacity.value,
   }));
 
+  // Plain back — NO interstitial here. It used to fire on every exit, which meant simply
+  // re-opening today's quote to re-read it could serve an ad even though nothing was
+  // earned. The placement moved to onDone (genuine claims only).
   const handleBack = useCallback(() => {
-    void maybeShowInterstitial(readingCount, { ignoreMinReadings: true });
     router.back();
-  }, [readingCount]);
+  }, []);
 
   const toggleReflection = useCallback(() => {
     lightTap();
@@ -107,6 +110,8 @@ export default function DailyQuoteScreen() {
   const onDone = useCallback(() => {
     if (claimed) return;
     lightTap();
+    // Captured BEFORE the claim: null anchor = this is the user's first-ever ritual.
+    const firstEverRitual = useUserStore.getState().weekAnchorDate === null;
     const earned = completeDailyRitual();
     setJustClaimed(true);
     revealY.value = withSpring(0, { stiffness: 200, damping: 20 });
@@ -115,7 +120,22 @@ export default function DailyQuoteScreen() {
     void syncReminders();
     // Chime only on a genuine credit (0 = repeat same-day tap or a backwards clock).
     if (earned > 0) playEffect('star');
-  }, [claimed, completeDailyRitual, revealY, revealOpacity]);
+
+    // ── Interstitial: genuine claims only, ~1 in 2, never over the reward ──
+    // `earned > 0` is the whole guard against the case Simo flagged — re-opening an
+    // already-read quote returns 0, so browsing back to re-read it never serves an ad.
+    // Skipped on the very first ritual: a brand-new user's first +1★ should not be
+    // interrupted. The 900ms delay lets the star-earned card land and register first —
+    // an ad that covers the reward reads as a punishment for completing the ritual.
+    if (earned > 0 && !firstEverRitual) {
+      setTimeout(() => {
+        void maybeShowInterstitial(readingCount, {
+          ignoreMinReadings: true,
+          chance: INTERSTITIAL.QUOTE_DONE_CHANCE,
+        });
+      }, 900);
+    }
+  }, [claimed, completeDailyRitual, revealY, revealOpacity, readingCount]);
 
   // ── Share: capture the off-screen 4:5 card and hand the PNG to the share sheet ──
   // Availability is probed ONCE on mount so the button can be disabled up front rather
@@ -159,6 +179,9 @@ export default function DailyQuoteScreen() {
         format: 'png',
         quality: 1,
         result: 'tmpfile', // cache dir — no storage permission, nothing to clean up
+        // See app/result.tsx — without this the share sheet shows the library's
+        // "ReactNative-snapshot-image…" default instead of the brand.
+        fileName: 'Aurafy_quote_',
         width: 1080,
         height: 1350, // 4:5 — the largest ratio IG and TikTok both accept uncropped
       });

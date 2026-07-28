@@ -7,9 +7,9 @@
 // the localDateKey gate and the anchor day-count read that simDate, so each simulated day
 // is internally consistent and gets its own answer record.
 //
-// Scenarios to walk: 7 completions → the day-7 reveal (Complete the 7th → weeklyResult goes
-// PENDING → Claim / Show reveal). Skip days between completions and confirm the streak HOLDS
-// (forgiving — never resets) and still reveals on the 7th answer.
+// Scenarios to walk: 7 completions → the 7th pays the +5 streak bonus and rolls the cycle
+// back to 0. Skip days between completions and confirm the streak HOLDS (forgiving — never
+// resets). The weekly-result reveal was retired with the curriculum (2026-07-28).
 //
 // Reached from Settings → Developer (only rendered when __DEV__).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,11 +28,10 @@ import { auraColorResults } from '@/src/data/results/auraColorResults';
 import { auraOutcomeTheme, spectrumHex } from '@/src/themes/categoryTheme';
 import type { ResultData } from '@/src/types';
 import { useTheme } from '@/src/themes/ThemeProvider';
-import { localDateKey } from '@/src/utils/date';
+import { localDateKey, getDaysSinceAnchor } from '@/src/utils/date';
 import { getTodayQuote, getQuoteContent, getDailyAccentIndex } from '@/src/content/quotes';
 import {
   getDayIndex,
-  getDaysSinceAnchor,
   getActiveWeek,
   getActiveWeekIndex,
   getTodayPairing,
@@ -70,11 +69,9 @@ export default function DevPanelScreen() {
   const streak = useUserStore((s) => s.streak);
   const stars = useUserStore((s) => s.stars);
   const readingCount = useUserStore((s) => s.readingCount);
-  const weeklyResult = useUserStore((s) => s.weeklyResult);
   const dailyAnswers = useUserStore((s) => s.dailyAnswers);
   const lastDailyClaim = useUserStore((s) => s.lastDailyClaim);
   const completeDailyRitual = useUserStore((s) => s.completeDailyRitual);
-  const claimWeeklyResult = useUserStore((s) => s.claimWeeklyResult);
 
   // Simulated clock: real now + offsetDays. Drives every machine computation below.
   const [offsetDays, setOffsetDays] = useState(0);
@@ -153,7 +150,6 @@ export default function DevPanelScreen() {
       streak: 0,
       dailyAnswers: [],
       weekAnchorDate: null,
-      weeklyResult: null,
       lastDailyClaim: null,
       lastDailyQuestion: null,
     });
@@ -212,28 +208,7 @@ export default function DevPanelScreen() {
     ['green', 'blue'],
   ];
 
-  // Show the reveal on demand: if no result is pending (e.g. you didn't walk a full week),
-  // seed one from the active week's first outcome so the screen is viewable immediately.
-  const onShowReveal = () => {
-    const current = useUserStore.getState().weeklyResult;
-    if (!current || current.claimedAt !== 0) {
-      const week = getActiveWeek(weekAnchorDate, simDate);
-      if (week) {
-        useUserStore.setState({
-          weeklyResult: { weekId: week.id, outcomeKey: week.outcomes[0]?.key ?? '', claimedAt: 0 },
-        });
-      }
-    }
-    router.push('/weekly-result');
-  };
-
-  const weeklyStr = !weeklyResult
-    ? 'none'
-    : weeklyResult.claimedAt === 0
-      ? `PENDING · ${weeklyResult.weekId} → ${weeklyResult.outcomeKey}`
-      : `claimed · ${weeklyResult.outcomeKey}`;
-
-  const Stat = ({ k, v, accent }: { k: string; v: string; accent?: boolean }) => (
+  const Stat =({ k, v, accent }: { k: string; v: string; accent?: boolean }) => (
     <View style={[styles.statRow, { borderColor: theme.surfaceBorder }]}>
       <Text style={[styles.statK, { color: theme.textMuted }]}>{k}</Text>
       <Text style={[styles.statV, { color: accent ? theme.gold : theme.text }]}>{v}</Text>
@@ -294,7 +269,6 @@ export default function DevPanelScreen() {
           <Stat k="week / dayIndex" v={`${weekIdx < 0 ? '—' : `w${weekIdx}`} · day ${dayIndex} (Day ${dayIndex + 1}/7)`} />
           <Stat k="streak" v={`${streak} / 7`} accent />
           <Stat k="stars" v={String(stars)} accent />
-          <Stat k="weeklyResult" v={weeklyStr} accent={!!weeklyResult && weeklyResult.claimedAt === 0} />
           <Stat k="quote" v={`${quote.id} · ${quote.tone}`} />
           <Stat k="done today?" v={doneToday ? 'yes ✓' : 'no'} />
         </View>
@@ -331,13 +305,6 @@ export default function DevPanelScreen() {
         <Text style={[styles.section, { color: theme.textDim }]}>RITUAL</Text>
         <View style={styles.row}>
           <Btn label={doneToday ? 'Done ✓' : 'Complete (answer A)'} onPress={onComplete} tone="gold" disabled={doneToday} />
-          <Btn
-            label="Claim weekly (+5)"
-            onPress={claimWeeklyResult}
-            tone="gold"
-            disabled={!weeklyResult || weeklyResult.claimedAt !== 0}
-          />
-          <Btn label="Show reveal →" onPress={onShowReveal} tone="cyan" />
         </View>
 
         {/* ── Notifications (local, offline) ────────────────────────────── */}
@@ -385,7 +352,12 @@ export default function DevPanelScreen() {
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
           <Stat k="readingCount" v={`${readingCount} (min ${INTERSTITIAL.MIN_READINGS_BEFORE})`} accent />
           <Stat k="since last interstitial" v={`${Math.round(msSinceLastInterstitial() / 1000)}s (cooldown ${INTERSTITIAL.COOLDOWN_MS / 1000}s)`} />
-          <Stat k="show chance" v={`${Math.round(INTERSTITIAL.CHANCE * 100)}%`} />
+          <Stat k="show chance · generic exit" v={`${Math.round(INTERSTITIAL.CHANCE * 100)}%`} />
+          <Stat
+            k="show chance · quote Done"
+            v={`${Math.round(INTERSTITIAL.QUOTE_DONE_CHANCE * 100)}% (genuine claim only, 900ms after)`}
+            accent
+          />
         </View>
         <View style={styles.row}>
           <Btn label="Show interstitial" onPress={onShowInterstitial} tone="cyan" />

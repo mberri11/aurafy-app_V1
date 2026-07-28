@@ -193,12 +193,17 @@ export interface Reading {
  * bundled SVG, identical everywhere.
  *
  * This union is the CONTRACT: `ModuleIcon`'s registry is typed
- * `Record<PhosphorIconName, Icon>`, so adding a name here without registering its
+ * `Record<ModuleIconName, Icon>`, so adding a name here without registering its
  * component is a compile error (and vice-versa). Deep-import the component in
  * `src/components/ModuleIcon.tsx` — never barrel-import `phosphor-react-native`,
  * which would pull all ~1500 icons into the bundle (Metro does not tree-shake).
+ *
+ * Named ModuleIconName, not PhosphorIconName: `Mirror` is drawn in-house
+ * (src/components/MirrorIcon.tsx) because Phosphor has none, and it implements
+ * Phosphor's own `Icon` contract so the registry stays uniform. Prefer that route
+ * over a second icon library — see the mirror file's header for why.
  */
-export type PhosphorIconName =
+export type ModuleIconName =
   | 'Baby'
   | 'Eye'
   | 'Flame'
@@ -208,13 +213,13 @@ export type PhosphorIconName =
   | 'Infinity'
   | 'Lightning'
   | 'MaskHappy'
+  | 'Mirror'
   | 'MoonStars'
   | 'PawPrint'
   | 'Person'
   | 'Plant'
   | 'Scan'
-  | 'SealQuestion'
-  | 'ShieldWarning'
+  | 'Scissors'
   | 'SmileySad'
   | 'Sparkle';
 
@@ -228,7 +233,7 @@ export interface Module {
   /** The module's identity glyph — THE single source of truth for every surface
    *  (Home card, detail hero, unlock dialog, loading orb, result, History), all of
    *  which render it through `src/components/ModuleIcon.tsx`. */
-  iconName: PhosphorIconName;
+  iconName: ModuleIconName;
   color: string; // accent hex for glow
   framework: Framework;
   /** Reading modes this module offers, in the reading-mode picker. Absent = all

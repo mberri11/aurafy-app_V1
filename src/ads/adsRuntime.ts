@@ -7,7 +7,9 @@
 // for expo-audio). In Expo Go all ad UI renders nothing and all ad calls no-op.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useSyncExternalStore } from 'react';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
+import type { AdsConsentInterface } from 'react-native-google-mobile-ads';
 import { logger } from '@/src/utils/logger';
 
 /**
@@ -19,6 +21,91 @@ export const ADS_AVAILABLE =
   Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
 
 let initStarted = false;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AD PERSONALIZATION — single source of truth.
+//
+// Every ad request (banner / interstitial / rewarded) reads this instead of
+// hardcoding NPA. Google geotargets the UMP form to EEA/UK, so outside those
+// regions the consent state comes back NOT_REQUIRED and personalized ads are
+// legally servable — forcing NPA there just burns eCPM.
+//
+// Starts TRUE and FAILS CLOSED: until initAds() has actually resolved the consent
+// state (and on any error, refusal, or partial consent) we request NPA only.
+// ─────────────────────────────────────────────────────────────────────────────
+
+let npaOnly = true;
+const npaListeners = new Set<() => void>();
+
+/** Current ad-personalization stance. Pure JS — safe to call in Expo Go. */
+export function isNonPersonalizedOnly(): boolean {
+  return npaOnly;
+}
+
+function setNpaOnly(next: boolean): void {
+  if (npaOnly === next) return;
+  npaOnly = next;
+  logger.log(`Ad personalization: ${next ? 'non-personalized only' : 'personalized'}`);
+  npaListeners.forEach((listener) => {
+    try {
+      listener();
+    } catch {
+      /* one dead subscriber must not stop the rest */
+    }
+  });
+}
+
+function subscribeNpaOnly(listener: () => void): () => void {
+  npaListeners.add(listener);
+  return () => {
+    npaListeners.delete(listener);
+  };
+}
+
+/**
+ * React binding for the flag. The consent flow resolves ASYNCHRONOUSLY during startup,
+ * so a surface that mounted first (the persistent banner, a preloading hook) would
+ * otherwise stay pinned to the pre-consent default for the whole session. Subscribing
+ * re-renders it the moment consent settles, so the ad is re-created with the real value.
+ */
+export function useNonPersonalizedOnly(): boolean {
+  return useSyncExternalStore(subscribeNpaOnly, isNonPersonalizedOnly, isNonPersonalizedOnly);
+}
+
+/**
+ * Map the resolved UMP consent state onto the NPA flag. Returns TRUE (= non-personalized)
+ * for anything that is not an unambiguous yes. Throws are left to the caller, which
+ * treats them as a refusal.
+ */
+async function resolveNpaOnly(AdsConsent: AdsConsentInterface): Promise<boolean> {
+  const info = await AdsConsent.getConsentInfo();
+  // Widened to string on purpose: comparing the string-enum member to a literal is a
+  // TS error, and importing the enum as a VALUE would pull the native module in at
+  // import time (crashes Expo Go).
+  const status: string = info.status;
+
+  // No consent regime in force here (Morocco, most of the world) — the form was never
+  // shown because it was never needed, and personalized ads are servable.
+  if (status === 'NOT_REQUIRED') return false;
+
+  // UNKNOWN / REQUIRED — the form never completed. Fail closed.
+  if (status !== 'OBTAINED') return true;
+
+  // OBTAINED. Under GDPR that can still be a PARTIAL consent (storage accepted,
+  // personalization declined), so the status alone is not enough — read the actual
+  // TCF purposes. Outside GDPR (e.g. a regulated US state) there is no TCF string to
+  // read and Google applies its own restricted-data-processing signal, so honour the
+  // completed consent as-is.
+  const gdprApplies = await AdsConsent.getGdprApplies();
+  if (!gdprApplies) return false;
+
+  const choices = await AdsConsent.getUserChoices();
+  const personalizationAllowed =
+    choices.storeAndAccessInformationOnDevice === true &&
+    choices.createAPersonalisedAdsProfile === true &&
+    choices.selectPersonalisedAds === true;
+  return !personalizationAllowed;
+}
 
 /**
  * Initialize the Mobile Ads SDK exactly once. Safe to call on every app start —
@@ -41,11 +128,14 @@ export function initAds(): void {
       // UMP consent — Google geotargets the form to EEA/UK only, so Morocco/US
       // users never see it. Must never block or fail startup: any consent error
       // is logged and swallowed, then we proceed to initialize() regardless.
+      // The resolved state drives npaOnly; on ANY failure it stays true (closed).
       try {
         await AdsConsent.requestInfoUpdate();
         await AdsConsent.loadAndShowConsentFormIfRequired();
+        setNpaOnly(await resolveNpaOnly(AdsConsent));
       } catch (err) {
-        logger.error('UMP consent flow failed (continuing to init ads):', err);
+        logger.error('UMP consent flow failed (continuing with non-personalized ads):', err);
+        setNpaOnly(true);
       }
 
       // 16+ content rating — matches the app's store listing. Google requires the

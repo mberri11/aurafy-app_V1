@@ -2,7 +2,7 @@
   "expo": {
     "name": "Aurafy",
     "slug": "aurafy",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "aurafy",
@@ -24,9 +24,12 @@
       "softwareKeyboardLayoutMode": "pan",
       "backgroundColor": "#07091A",
       "package": "com.simobr.aurafy",
+      "versionCode": 12,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#16102E"
+        "backgroundImage": "./assets/images/adaptive-icon-bg.png",
+        "monochromeImage": "./assets/images/monochrome-icon.png",
+        "backgroundColor": "#0D0B2B"
       },
       "blockedPermissions": [
         "android.permission.READ_MEDIA_IMAGES",
@@ -78,6 +81,15 @@
         {
           "androidAppId": "ca-app-pub-7799898340675704~6235800504",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
         }
       ]
     ],

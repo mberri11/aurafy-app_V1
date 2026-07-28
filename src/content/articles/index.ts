@@ -18,6 +18,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { Language } from '../../types';
+// Palette source of truth. Safe direction: categoryTheme reaches only ../types (a leaf)
+// and engine/countTier, so it never imports back into content — no cycle.
+import { AURA_V2, moduleTheme } from '../../themes/categoryTheme';
 // Re-exported so Insights screens can pull the locale type from one place.
 export type { Language } from '../../types';
 // C-10 PILOT — Week 1 days 2–7 article metadata (day 1 reuses ten_signs_secret_love).
@@ -60,19 +63,61 @@ export const CATEGORY_ORDER: ArticleCategory[] = [
 ];
 
 /**
- * Accent hex per category — drives the colored tag dot, unread dot, and the
- * orbit-art tint on cards. Mirrors the module accent palette (cosmic theme).
+ * The module each category FRONTS. An article's colour is the colour of the reading it
+ * sells, so the hero, the tag, the block accents and the end CTA all agree with the
+ * module screen the reader lands on.
+ *
+ * Where a category spans several modules, this names the one it leads with (love →
+ * who_loves_me even though a love article may cross-sell who_soulmate).
+ */
+const CATEGORY_MODULE: Record<ArticleCategory, string> = {
+  love: 'who_loves_me',
+  aura: 'aura_color',
+  energy: 'energy_reading',
+  attachment: 'attachment_style',
+  self: 'am_i_problem',
+  jealousy: 'who_jealous',
+  zodiac: 'birth_chart',
+};
+
+/**
+ * Accent hex per category — drives the colored tag dot, unread dot, the orbit-art tint
+ * on cards and the end-of-article CTA.
+ *
+ * DERIVED from MODULE_THEMES (2026-07-27), never hand-written again. The two palettes
+ * had drifted into a straight contradiction: articles painted `energy` in #34D399,
+ * which is who_jealous' "green with envy" emerald, while `jealousy` articles wore a
+ * lilac that belongs to no module at all. Retint a module and its articles now follow
+ * automatically — that is the whole point of deriving rather than copying.
+ *
  * Labels are localized via i18n (`insights.categories.<cat>`), NOT here.
  */
-export const CATEGORY_COLORS: Record<ArticleCategory, string> = {
-  love: '#E84393', // rose
-  aura: '#A855F7', // violet
-  energy: '#34D399', // emerald
-  attachment: '#22D3EE', // cyan
-  self: '#F5C542', // gold
-  jealousy: '#C084FC', // lilac
-  zodiac: '#818CF8', // cosmic indigo (C-10 — zodiac/cosmic weeks)
+/**
+ * Categories whose module identity is NOT its MODULE_THEMES accent.
+ *
+ * aura_color is the one: that table gives it a violet, but the violet is only a
+ * fallback — the module's LOCKED identity (AURA_PRISM_V2) is an obsidian surface, an
+ * achromatic silver/pearl ink and the six-stop spectrum hairline. Aura is the black
+ * module, so its articles are the black articles. SILVER rather than pearl on purpose:
+ * pearl (#F1F0F6) is a hair away from energy's silver (#E2E8F0) and the two categories
+ * would stop being tellable apart in the chip row.
+ */
+const CATEGORY_ACCENT_OVERRIDE: Partial<Record<ArticleCategory, string>> = {
+  aura: AURA_V2.silver,
 };
+
+export const CATEGORY_COLORS: Record<ArticleCategory, string> = Object.fromEntries(
+  CATEGORY_ORDER.map((cat) => {
+    const override = CATEGORY_ACCENT_OVERRIDE[cat];
+    if (override) return [cat, override];
+    const { accent, accentSoft } = moduleTheme(CATEGORY_MODULE[cat]);
+    // energy_reading's accent is pure #FFFFFF — radiant white is a fine glow, but it
+    // cannot carry category identity: the tag text and dot would read as plain white
+    // copy and the hero bloom would blow out. That module's accentSoft is deliberately
+    // DARKER than its accent (a silver), so it is the correct identity tone here.
+    return [cat, accent.toUpperCase() === '#FFFFFF' ? accentSoft : accent];
+  }),
+) as Record<ArticleCategory, string>;
 
 /** A single row inside an ordered-list block (e.g. one of the "10 signs"). */
 export interface ArticleListItem {
@@ -198,7 +243,10 @@ export const ARTICLES: Article[] = [
     id: 'reading_auras_colors', // "Reading Auras: What Each Color Really Means"
     category: 'aura',
     readMinutes: 7,
-    relatedModuleId: 'energy_reading',
+    // aura_color, NOT energy_reading (fixed 2026-07-27): an article about what each
+    // aura COLOUR means must sell the module that names your colour. Rule for every
+    // future row — the CTA has to deliver what the article promised.
+    relatedModuleId: 'aura_color',
     image: 'reading-auras-hero',
     publishedAt: '2026-06-03',
   },
@@ -230,7 +278,8 @@ export const ARTICLES: Article[] = [
     id: 'increase_your_aura', // "How to Increase Your Aura"
     category: 'aura',
     readMinutes: 5,
-    relatedModuleId: 'energy_reading',
+    // aura_color, NOT energy_reading (fixed 2026-07-27) — see reading_auras_colors.
+    relatedModuleId: 'aura_color',
     image: 'increase-your-aura-hero',
     publishedAt: '2026-05-30',
   },

@@ -21,7 +21,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { Language } from '../../types';
-import { getDaysSinceAnchor } from '../../data/weeks/walker';
+import { getDaysSinceAnchor } from '../../utils/date';
 
 export type QuoteTone = 'soft' | 'sharp' | 'grounding';
 

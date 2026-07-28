@@ -195,7 +195,11 @@ Adding a module: `src/data/modules.ts` + `src/data/questions/name.ts` +
 colors. Two themes: `cosmic`, `desertOracle`. Splash bg `#07091A` is also hardcoded in the
 `expo-splash-screen` plugin config in `app.json` (matches `android.backgroundColor` /
 `ios.backgroundColor`) — keep in sync if changed. Note: `android.adaptiveIcon.backgroundColor`
-(`#16102E`) is intentionally different — that's the launcher icon canvas, not the splash.
+(`#0D0B2B`) is intentionally different — that's the launcher icon canvas, not the splash.
+Since 2026-07-27 the launcher icon is a real 3-layer adaptive icon: `backgroundImage`
+(the navy→teal gradient) + `foregroundImage` (the mark alone, no card) + `monochromeImage`
+(Android 13+ themed icons). `backgroundColor` is now only the fallback for launchers that
+ignore `backgroundImage`, which is why it matches the gradient's top-left.
 
 ### Ads (`src/ads/`)
 `AdMobManager` is a **stub** that returns false everywhere. Do not touch during the UI

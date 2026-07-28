@@ -347,10 +347,7 @@
     "emptyMessage": "كل اسم ولون ونمط تكتشفه يُحفظ هنا — خريطة خاصة لِما تعلّمته عن نفسك.",
     "ctaButton": "ابدأ قراءة",
     "titleLine": "{{name}} — ثقة {{pct}}٪",
-    "titleLineSignal": "{{name}} — إشارة {{pct}}٪",
-    "weeklyEyebrow": "قراءة أسبوعية",
-    "sevenDayBadge": "7 أيام",
-    "nights": "{{count}} ليالٍ · اكتمل في {{date}}"
+    "titleLineSignal": "{{name}} — إشارة {{pct}}٪"
   },
   "settings": {
     "title": "الإعدادات",
@@ -374,7 +371,7 @@
     "resetConfirmTitle": "إعادة تعيين كل البيانات؟",
     "resetConfirmMessage": "إعادة ضبط كاملة — النجوم والسجل والإعدادات والمقدمة ستُمحى كلها.",
     "resetConfirmAction": "إعادة تعيين الكل",
-    "version": "Aurafy v1.0.0",
+    "version": "Aurafy v{{version}}",
     "soundEffectsDesc": "رنين عند اللمس، جرس عند الكشف",
     "volume": "مستوى الصوت",
     "notifications": "الإشعارات",
@@ -470,7 +467,7 @@
     "rewardToday": "+1 ✦ اليوم",
     "minRead": "{{n}} دقائق قراءة",
     "min": "{{n}} دقائق",
-    "takeReading": "ابدأ قراءة {{module}}",
+    "takeReading": "ابدأ قراءة:\n{{module}}",
     "empty": "لا توجد مقالات هنا بعد.",
     "sponsoredTitle": "اعثر على توأم روحك الليلة",
     "sponsoredBrand": "Astra · مواعدة",
@@ -487,14 +484,6 @@
     "stepRead": "اقرأ",
     "stepEarn": "اكسب",
     "ritualDone": "عُد غداً"
-  },
-  "weekly": {
-    "eyebrow": "أسبوعك المكشوف",
-    "bonusTitle": "+{{amount}} ✦ مكافأة التتابع",
-    "bonusSubtitle": "سبع ليالٍ متواصلة. رصيدك الآن {{balance}} ✦.",
-    "share": "شارك أسبوعي",
-    "save": "حفظ في السجل",
-    "empty": "لا توجد نتيجة أسبوعية بعد."
   },
   "share": {
     "getYours": "اكتشف قراءتك"

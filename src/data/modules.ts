@@ -62,7 +62,9 @@ export const MODULES: Module[] = [
     id: 'who_cut_off',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    iconName: 'SmileySad',
+    // Scissors — the tie being cut (Simo, 2026-07-27). Took over from SmileySad, which
+    // moved to who_will_hurt_me: a sad face reads as hurt, not as distance.
+    iconName: 'Scissors',
     color: '#FB923C',
     framework: 'sociometry',
   },
@@ -84,7 +86,9 @@ export const MODULES: Module[] = [
     id: 'who_will_hurt_me',
     type: 'multi',
     starsCost: { solo: 1, compare: 2, triangle: 3, circle: 5 },
-    iconName: 'ShieldWarning',
+    // SmileySad — inherited from who_cut_off (Simo, 2026-07-27), replacing
+    // ShieldWarning: the module is about the hurt, not about defending against it.
+    iconName: 'SmileySad',
     color: '#F0563C',
     framework: 'sociometry',
     unlockCost: 30,
@@ -137,10 +141,11 @@ export const MODULES: Module[] = [
     id: 'am_i_problem',
     type: 'solo',
     starsCost: { solo: 1, compare: 1, triangle: 1, circle: 1 },
-    // A question mark struck into a wax seal (Simo, 2026-07-25) — "Am I The Problem?"
-    // as a verdict stamp. Also the ONLY thing separating this module from who_admires,
-    // which shares its gold accent.
-    iconName: 'SealQuestion',
+    // A standing mirror (Simo, 2026-07-27) — "Am I The Problem?" is the question you
+    // ask your own reflection, which the earlier wax-seal stamp never said. Drawn in
+    // house (src/components/MirrorIcon.tsx): Phosphor ships no mirror. Also the ONLY
+    // thing separating this module from who_admires, which shares its gold accent.
+    iconName: 'Mirror',
     color: '#F5C542',
     framework: 'mixed',
   },

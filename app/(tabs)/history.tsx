@@ -1,9 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // History ("Your Readings") — DESIGN-SPEC §7 + Screenshots_new/HIstory_*.png.
-// Category-themed reading cards (accent + motif from the category spine), a
-// distinct cyan "Weekly reading" entry, and an atom-mark empty state. Reading +
-// weekly entries merge into one date-sorted timeline. The screen carries NO banner
+// Category-themed reading cards (accent + motif from the category spine) in one
+// date-sorted timeline, plus an atom-mark empty state. The screen carries NO banner
 // of its own — the app's one banner is persistent above the tab bar.
+//
+// The weekly-result entry type was REMOVED 2026-07-28 with the rest of the weekly
+// curriculum: the ritual is the daily quote now and produces no weekly outcome, so
+// the section could never gain a row.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -16,12 +19,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { useUserStore, WeeklyHistoryEntry } from '@/src/store/userStore';
+import { useUserStore } from '@/src/store/userStore';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { auraOutcomeTheme, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, moduleTheme } from '@/src/themes/categoryTheme';
 import { readingDisplayName } from '@/src/utils/readingDisplay';
-import { getWeekById } from '@/src/data/weeks';
 import { Language, Reading } from '@/src/types';
 import GradientButton from '@/src/components/GradientButton';
 import ModuleIcon from '@/src/components/ModuleIcon';
@@ -30,17 +32,6 @@ import AurafyLogo from '@/src/components/AurafyLogo';
 import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
 import { useIsRTL } from '@/src/utils/rtl';
 import { rs } from '@/src/utils/responsive';
-
-const WEEKLY_CYAN = '#22D3EE'; // weekly entries use a constant brand-cyan treatment (spec §7)
-
-/**
- * Weekly-result entries in the History timeline. OFF since the daily-quote migration
- * (2026-07-25): the ritual is now read-a-quote → Done, which produces no weekly outcome,
- * so this section would always render empty. Kept as a flag rather than a deletion —
- * WeeklyHistoryCard, the merge, the read-only reopen and app/weekly-result.tsx are all
- * still here and still work; set this back to `true` to restore the section intact.
- */
-const WEEKLY_HISTORY_VISIBLE = false;
 
 // ── Reading card (category-themed) ───────────────────────────────────────────
 const ReadingHistoryCard = memo(function ReadingHistoryCard({
@@ -63,7 +54,7 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
     : isDualFlagModule(reading.moduleId)
       ? flagOutcomeTheme(flagOutcomeKey(reading.result))
       : moduleTheme(reading.moduleId);
-  const name = readingDisplayName(reading, lang);
+  const name = readingDisplayName(reading, lang, t);
   const moduleLabel = (t(`modules.${reading.moduleId}.title`) || reading.moduleId).toUpperCase();
   const modeLabel = t(`readingModes.${reading.mode}.title`);
   // One localized line ("{name} — {pct}% confidence") so each locale controls the
@@ -143,61 +134,6 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
   );
 });
 
-// ── Weekly card (distinct cyan/brand treatment) ──────────────────────────────
-const WeeklyHistoryCard = memo(function WeeklyHistoryCard({
-  entry,
-  onPress,
-}: {
-  entry: WeeklyHistoryEntry;
-  onPress: () => void;
-}) {
-  const theme = useTheme();
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language as Language;
-
-  const week = getWeekById(entry.weekId);
-  const outcome = week?.outcomes.find((o) => o.key === entry.outcomeKey);
-  const title = outcome ? outcome.title[lang] ?? outcome.title.en : '';
-  const meta = t('history.nights', { count: 7, date: dayjs(entry.rangeEnd).format('ll') });
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${title} — ${t('history.weeklyEyebrow')}`}
-    >
-      <View style={[styles.card, { borderColor: `${WEEKLY_CYAN}40`, backgroundColor: theme.surface }]}>
-        {/* Flat weekly-cyan wash over the whole card — uniform, corner to corner. */}
-        <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: `${WEEKLY_CYAN}1F` }]} />
-        <View style={[styles.leftBar, { backgroundColor: WEEKLY_CYAN }]} />
-
-        {/* 7-DAY badge, pinned top-right. */}
-        <View style={[styles.badge, { borderColor: `${WEEKLY_CYAN}80` }]}>
-          <Text style={[styles.badgeText, { color: WEEKLY_CYAN }]}>{t('history.sevenDayBadge').toUpperCase()}</Text>
-        </View>
-
-        <View style={styles.cardRow}>
-          <View style={[styles.tile, { backgroundColor: `${WEEKLY_CYAN}1A`, borderColor: `${WEEKLY_CYAN}55` }]}>
-            <MaterialCommunityIcons name="orbit" size={rs(26)} color={WEEKLY_CYAN} />
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={[styles.eyebrow, { color: WEEKLY_CYAN }]} numberOfLines={1}>
-              {t('history.weeklyEyebrow').toUpperCase()}
-            </Text>
-            <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
-              {title}
-            </Text>
-            <Text style={[styles.date, { color: theme.textMuted, marginTop: rs(3) }]} numberOfLines={1}>
-              {meta}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-});
-
 // ── Empty state (atom mark + bloom + CTA) ────────────────────────────────────
 function EmptyState() {
   const { t } = useTranslation();
@@ -225,31 +161,20 @@ function EmptyState() {
 }
 
 // ── Screen ───────────────────────────────────────────────────────────────────
-type Row =
-  | { kind: 'reading'; createdAt: number; reading: Reading }
-  | { kind: 'weekly'; createdAt: number; entry: WeeklyHistoryEntry };
-
 export default function HistoryScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const history = useUserStore((s) => s.history);
-  const weeklyHistory = useUserStore((s) => s.weeklyHistory);
   const setViewOnlyResult = useReadingStore((s) => s.setViewOnlyResult);
 
-  const rows = useMemo<Row[]>(() => {
-    const readings: Row[] = history.map((reading) => ({ kind: 'reading', createdAt: reading.createdAt, reading }));
-    // WEEKLY ENTRIES HIDDEN (2026-07-25, daily-quote migration). The quote ritual no longer
-    // produces a weekly result, so `weeklyHistory` can never gain a new entry — and on the
-    // renamed 'aurafy-user-v2' key it starts empty, so this list is always []. The merge,
-    // WeeklyHistoryCard, the reopen handler and the weekly-result screen are all left INTACT
-    // behind this flag: flip WEEKLY_HISTORY_VISIBLE back to true to restore the section whole
-    // if a weekly payoff returns. Nothing was deleted.
-    const weeks: Row[] = WEEKLY_HISTORY_VISIBLE
-      ? weeklyHistory.map((entry) => ({ kind: 'weekly', createdAt: entry.createdAt, entry }))
-      : [];
-    return [...readings, ...weeks].sort((a, b) => b.createdAt - a.createdAt);
-  }, [history, weeklyHistory]);
+  // Readings only since the weekly curriculum was retired (2026-07-28). `history` is
+  // already stored newest-first; the sort is kept so an out-of-order persisted blob
+  // still renders chronologically.
+  const rows = useMemo<Reading[]>(
+    () => [...history].sort((a, b) => b.createdAt - a.createdAt),
+    [history],
+  );
 
   const handleReadingPress = useCallback(
     (reading: Reading) => {
@@ -261,24 +186,11 @@ export default function HistoryScreen() {
     [setViewOnlyResult],
   );
 
-  // Weekly entries reopen the reveal read-only (no re-claim, no chime) — the
-  // outcome re-resolves from the persisted weekId + outcomeKey, so any past
-  // entry reopens, not just the latest cycle's.
-  const handleWeeklyPress = useCallback((entry: WeeklyHistoryEntry) => {
-    router.push({
-      pathname: '/weekly-result',
-      params: { viewOnly: '1', weekId: entry.weekId, outcomeKey: entry.outcomeKey },
-    });
-  }, []);
-
   const renderItem = useCallback(
-    ({ item }: { item: Row }) =>
-      item.kind === 'weekly' ? (
-        <WeeklyHistoryCard entry={item.entry} onPress={() => handleWeeklyPress(item.entry)} />
-      ) : (
-        <ReadingHistoryCard reading={item.reading} onPress={() => handleReadingPress(item.reading)} />
-      ),
-    [handleReadingPress, handleWeeklyPress],
+    ({ item }: { item: Reading }) => (
+      <ReadingHistoryCard reading={item} onPress={() => handleReadingPress(item)} />
+    ),
+    [handleReadingPress],
   );
 
   return (
@@ -289,7 +201,7 @@ export default function HistoryScreen() {
       <FlatList
         data={rows}
         renderItem={renderItem}
-        keyExtractor={(item) => (item.kind === 'weekly' ? item.entry.id : item.reading.id)}
+        keyExtractor={(item) => item.id}
         // No in-list banner any more: the ad is the persistent one above the tab bar
         // (app/(tabs)/_layout.tsx). We only reserve room so the last reading can
         // scroll clear of it.

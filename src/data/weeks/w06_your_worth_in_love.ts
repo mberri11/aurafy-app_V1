@@ -14,12 +14,10 @@
  *  - Append `w06Articles` to ARTICLES (src/content/articles/index.ts), after ...w05Articles.
  *  - Merge `w06ArticlesEn` into content.en.ts. FR/AR/ES bodies live in content.fr.ts / content.ar.ts /
  *    content.es.ts under the same ids.
- *  - Append `w06Questions` to the daily-question pool (src/data/dailyQuestions.ts), after ...w05Questions.
  *  - Push `w06Week` into WEEKS (src/data/weeks/index.ts), AFTER w05Week, and run validateWeek().
  */
 
 import type { Article, ArticleContent } from '../../content/articles';
-import type { DailyQuestion } from '../dailyQuestions';
 import type { WeeklyTheme } from './types';
 
 /* ───────────────────────── ARTICLES (metadata) — Days 1–7 ───────────────────────── */
@@ -123,116 +121,6 @@ export const w06ArticlesEn: Record<string, ArticleContent> = {
     ],
   },
 };
-
-/* ───────────────────────── DAILY QUESTIONS (7) — each a 4-way vote ───────────────────────── */
-
-export const w06Questions: DailyQuestion[] = [
-  {
-    id: 'w06_q1',
-    text: {
-      en: 'When someone you want treats you carelessly, what happens to your standards?',
-      fr: 'Quand quelqu\'un que tu désires te traite avec négligence, qu\'arrive-t-il à tes exigences ?',
-      ar: 'حين يعاملك شخص تريده بإهمال، ماذا يحدث لمعاييرك؟',
-      es: 'Cuando alguien que deseas te trata con descuido, ¿qué pasa con tus estándares?',
-    },
-    answers: [
-      { label: { en: 'They hold — I can ache for them and still expect better', fr: 'Elles tiennent — je peux souffrir pour lui et quand même attendre mieux', ar: 'تصمد — يمكنني أن أتألم لأجله وأتوقّع الأفضل مع ذلك', es: 'Se mantienen — puedo dolerme por él y aun así esperar algo mejor' }, insight: { en: 'Standards that survive wanting are the only real kind.', fr: "Les exigences qui survivent au désir sont les seules qui soient réelles.", ar: 'المعايير التي تنجو من الرغبة هي النوع الحقيقي الوحيد.', es: 'Los estándares que sobreviven al deseo son el único tipo real.' } },
-      { label: { en: 'They bend — I find a reason their behavior is okay', fr: 'Elles se plient — je trouve une raison pour laquelle son comportement va', ar: 'تنحني — أجد سببًا يجعل سلوكه مقبولًا', es: 'Se doblan — encuentro una razón por la que su comportamiento está bien' }, insight: { en: 'A bar with an exception for everyone you desire was a wish, not a standard.', fr: "Une barre avec une exception pour chaque personne désirée était un souhait, pas une exigence.", ar: 'معيار له استثناء لكل من ترغب فيهم كان أمنية، لا معيارًا.', es: 'Una barra con excepción para cada persona deseada era un deseo, no un estándar.' } },
-      { label: { en: 'I give even more, hoping to earn better treatment', fr: 'Je donne encore plus, espérant gagner un meilleur traitement', ar: 'أعطي أكثر، آملًا في كسب معاملة أفضل', es: 'Doy aún más, esperando ganar un mejor trato' }, insight: { en: 'Answering carelessness with more effort is chasing, not loving.', fr: 'Répondre à la négligence par plus d\'effort, c\'est poursuivre, pas aimer.', ar: 'الردّ على الإهمال بجهد أكبر هو مطاردة، لا حب.', es: 'Responder al descuido con más esfuerzo es perseguir, no amar.' } },
-      { label: { en: 'My whole mood hangs on their next message', fr: 'Tout mon humeur dépend de son prochain message', ar: 'مزاجي كله معلّق على رسالته التالية', es: 'Todo mi ánimo depende de su próximo mensaje' }, insight: { en: 'When one text runs your worth, the worth is being sourced from them.', fr: 'Quand un seul texto dirige ta valeur, cette valeur vient de lui.', ar: 'حين تدير رسالة واحدة قيمتك، فالقيمة تُستمَد منه.', es: 'Cuando un solo mensaje dirige tu valor, ese valor viene de él.' } },
-    ],
-  },
-  {
-    id: 'w06_q2',
-    text: {
-      en: 'Think of your last strong attraction. What did you talk yourself into?',
-      fr: "Pense à ta dernière forte attirance. Qu'est-ce que tu t'es convaincu d'accepter ?",
-      ar: 'فكّر في آخر انجذاب قوي شعرت به. بماذا أقنعت نفسك؟',
-      es: 'Piensa en tu última atracción fuerte. ¿De qué te convenciste?',
-    },
-    answers: [
-      { label: { en: 'Nothing — I held the line even though I wanted them', fr: "Rien — j'ai tenu la ligne même si je le désirais", ar: 'لا شيء — التزمت بالحدّ رغم أنني كنت أريده', es: 'Nada — mantuve el límite aunque lo deseaba' }, insight: { en: 'Holding the line under desire is self-worth doing its actual job.', fr: "Tenir la ligne sous le désir, c'est l'estime de soi qui fait vraiment son travail.", ar: 'الالتزام بالحدّ تحت الرغبة هو تقدير الذات وهو يؤدي عمله الحقيقي.', es: 'Mantener el límite bajo el deseo es la autoestima haciendo su trabajo real.' } },
-      { label: { en: 'A personalized exception for every flag', fr: "Une exception personnalisée pour chaque signal d'alarme", ar: 'استثناء مُخصَّص لكل علامة تحذير', es: 'Una excepción personalizada para cada señal de alarma' }, insight: { en: 'When every failing gets excused, the standard quietly dissolved.', fr: "Quand chaque manquement est excusé, l'exigence s'est discrètement dissoute.", ar: 'حين يُعذَر كل تقصير، يكون المعيار قد ذاب بهدوء.', es: 'Cuando se excusa cada falla, el estándar se disolvió en silencio.' } },
-      { label: { en: 'That over-giving would finally make them choose me', fr: 'Que donner trop finirait par le faire me choisir', ar: 'أن الإفراط في العطاء سيجعله يختارني أخيرًا', es: 'Que dar de más finalmente lo haría elegirme' }, insight: { en: "Believing more output earns their love is the over-giver's trap.", fr: "Croire que plus de production gagne son amour est le piège de celui qui donne trop.", ar: 'الاعتقاد بأن مزيدًا من العطاء يكسب حبه هو فخّ المُفرِط في العطاء.', es: 'Creer que más esfuerzo gana su amor es la trampa de quien da de más.' } },
-      { label: { en: "That if they approved of me, I'd finally feel okay", fr: "Que si il m'approuvait, je me sentirais enfin bien", ar: 'أنه لو وافق عليّ، سأشعر أخيرًا أنني بخير', es: 'Que si él me aprobaba, por fin me sentiría bien' }, insight: { en: 'Making their approval your okayness hands them the thermostat.', fr: "Faire de son approbation ton bien-être, c'est lui remettre le thermostat.", ar: 'جعل موافقته مقياس شعورك بأنك بخير هو تسليمه الترمومتر.', es: 'Hacer que su aprobación sea tu bienestar es entregarle el termostato.' } },
-    ],
-  },
-  {
-    id: 'w06_q3',
-    text: {
-      en: 'Your effort in relationships tends to spike right after…',
-      fr: 'Ton effort dans les relations a tendance à augmenter juste après…',
-      ar: 'جهدك في العلاقات يميل إلى الارتفاع مباشرة بعد…',
-      es: 'Tu esfuerzo en las relaciones tiende a dispararse justo después de…',
-    },
-    answers: [
-      { label: { en: 'They show up for me — I pour into people who pour into me', fr: 'Il est là pour moi — je verse dans les gens qui versent en moi', ar: 'يحضر من أجلي — أصبّ في من يصبّون فيّ', es: 'Él aparece para mí — vierto en la gente que vierte en mí' }, insight: { en: 'Effort that answers presence is generosity that builds.', fr: "Un effort qui répond à la présence est une générosité qui construit.", ar: 'الجهد الذي يستجيب للحضور هو سخاء يبني.', es: 'Un esfuerzo que responde a la presencia es generosidad que construye.' } },
-      { label: { en: 'They pull back — I chase the void with more of myself', fr: 'Il se retire — je poursuis le vide avec plus de moi-même', ar: 'ينسحب — أطارد الفراغ بمزيد من نفسي', es: 'Se retira — persigo el vacío con más de mí mismo' }, insight: { en: 'Effort that spikes at absence is compensatory over-giving.', fr: "Un effort qui monte à l'absence est un don excessif compensatoire.", ar: 'الجهد الذي يرتفع عند الغياب هو إفراط في العطاء تعويضي.', es: 'Un esfuerzo que se dispara ante la ausencia es dar de más compensatorio.' } },
-      { label: { en: "I quietly note I've done more than them again", fr: 'Je note discrètement que j\'ai encore fait plus que lui', ar: 'ألاحظ بهدوء أنني فعلت أكثر منه مجددًا', es: 'Noto en silencio que he hecho más que él otra vez' }, insight: { en: 'A running ledger under your giving means it was a transaction.', fr: 'Un décompte permanent sous ton don signifie que c\'était une transaction.', ar: 'جرد مستمر تحت عطائك يعني أنه كان صفقة.', es: 'Un recuento constante bajo tu dar significa que era una transacción.' } },
-      { label: { en: 'They seem cooler — I perform harder to win them back', fr: 'Il semble plus froid — je joue un rôle plus fort pour le reconquérir', ar: 'يبدو أكثر برودًا — أتظاهر بجهد أكبر لأستعيده', es: 'Se muestra más frío — actúo más fuerte para recuperarlo' }, insight: { en: "Performing for warmth is approval-seeking wearing effort's clothes.", fr: "Jouer un rôle pour la chaleur, c'est la recherche d'approbation habillée en effort.", ar: 'التظاهر من أجل الدفء هو السعي وراء الموافقة مرتديًا ثوب الجهد.', es: 'Actuar para conseguir calidez es buscar aprobación disfrazada de esfuerzo.' } },
-    ],
-  },
-  {
-    id: 'w06_q4',
-    text: {
-      en: 'After you give something big to someone, how do you feel?',
-      fr: 'Après avoir donné quelque chose d\'important à quelqu\'un, comment te sens-tu ?',
-      ar: 'بعد أن تعطي شيئًا كبيرًا لأحدهم، كيف تشعر؟',
-      es: 'Después de darle algo grande a alguien, ¿cómo te sientes?',
-    },
-    answers: [
-      { label: { en: 'Lighter — the gift landed and that was enough', fr: 'Plus léger — le cadeau est arrivé et ça a suffi', ar: 'أخفّ — وصلت الهدية وكان ذلك كافيًا', es: 'Más ligero — el regalo llegó y eso fue suficiente' }, insight: { en: 'Giving that ends when the gift lands is the free kind.', fr: 'Un don qui se termine quand le cadeau arrive est le genre libre.', ar: 'العطاء الذي ينتهي حين تصل الهدية هو النوع الحرّ.', es: 'Dar que termina cuando el regalo llega es del tipo libre.' } },
-      { label: { en: 'Owed — I catch myself waiting for the return', fr: 'Créancier — je me surprends à attendre le retour', ar: 'بأن لي دَينًا — ألاحظ نفسي أنتظر المقابل', es: 'Con derecho a algo — me sorprendo esperando el retorno' }, insight: { en: 'A receipt left in your hand means the gift was a down payment.', fr: 'Un reçu laissé dans ta main signifie que le cadeau était un acompte.', ar: 'إيصال متروك في يدك يعني أن الهدية كانت دفعة أولى.', es: 'Un recibo dejado en tu mano significa que el regalo era un anticipo.' } },
-      { label: { en: 'Drained but unable to stop myself giving more', fr: "Épuisé mais incapable de m'arrêter de donner plus", ar: 'منهَك لكن غير قادر على التوقف عن إعطاء المزيد', es: 'Agotado pero incapaz de dejar de dar más' }, insight: { en: "Giving you can't stop, to someone who won't return it, is self-erasure.", fr: "Un don que tu ne peux pas arrêter, envers quelqu'un qui ne le rendra pas, est un effacement de soi.", ar: 'العطاء الذي لا تستطيع إيقافه، لمن لن يردّه، هو محو للذات.', es: 'Dar que no puedes detener, a alguien que no lo devolverá, es borrarte a ti mismo.' } },
-      { label: { en: 'Anxious until they show they still approve of me', fr: "Anxieux jusqu'à ce qu'il montre qu'il m'approuve toujours", ar: 'قلقًا إلى أن يُظهر أنه ما زال يوافق عليّ', es: 'Ansioso hasta que él muestra que todavía me aprueba' }, insight: { en: 'Giving to secure approval is reassurance-seeking, not generosity.', fr: "Donner pour sécuriser l'approbation est une recherche de réassurance, pas de la générosité.", ar: 'العطاء لتأمين الموافقة هو سعي للطمأنة، لا سخاء.', es: 'Dar para asegurar la aprobación es buscar tranquilidad, no generosidad.' } },
-    ],
-  },
-  {
-    id: 'w06_q5',
-    text: {
-      en: 'Over the last few months in your closest relationship, you have…',
-      fr: 'Au cours des derniers mois, dans ta relation la plus proche, tu as…',
-      ar: 'خلال الأشهر القليلة الماضية في أقرب علاقاتك، لقد…',
-      es: 'Durante los últimos meses, en tu relación más cercana, has…',
-    },
-    answers: [
-      { label: { en: 'Stayed fully myself — bent on wants, never on core', fr: 'Suis resté pleinement moi-même — plié sur les envies, jamais sur le noyau', ar: 'بقيت نفسي تمامًا — انحنيت في الرغبات، لا في الجوهر أبدًا', es: 'Me he mantenido plenamente yo mismo — cediendo en deseos, nunca en el núcleo' }, insight: { en: 'Bending preferences while keeping your core is healthy compromise.', fr: 'Plier les préférences tout en gardant son noyau est un compromis sain.', ar: 'الانحناء في التفضيلات مع الحفاظ على جوهرك تنازل صحي.', es: 'Ceder en preferencias mientras mantienes tu núcleo es un compromiso saludable.' } },
-      { label: { en: 'Traded a preference here and there, nothing vital', fr: "Échangé une préférence par-ci par-là, rien de vital", ar: 'بدّلت تفضيلًا هنا وهناك، لا شيء حيويًا', es: 'He cambiado una preferencia aquí y allá, nada vital' }, insight: { en: 'Small affordable trades are the ordinary cost of togetherness.', fr: 'De petits échanges abordables sont le coût ordinaire de la vie à deux.', ar: 'المقايضات الصغيرة المقدور عليها هي التكلفة العادية للحياة المشتركة.', es: 'Los pequeños intercambios asequibles son el costo ordinario de estar juntos.' } },
-      { label: { en: 'Slowly dropped hobbies, friends, opinions, needs', fr: 'Abandonné lentement des loisirs, des amis, des opinions, des besoins', ar: 'تخلّيت ببطء عن هوايات، وأصدقاء، وآراء، واحتياجات', es: 'Abandoné lentamente pasatiempos, amigos, opiniones, necesidades' }, insight: { en: 'Incremental disappearing is self-abandonment, one small piece at a time.', fr: 'Une disparition progressive est un abandon de soi, un petit morceau à la fois.', ar: 'الاختفاء التدريجي هو تخلٍّ عن الذات، قطعة صغيرة تلو الأخرى.', es: 'Desaparecer de forma incremental es abandonarte a ti mismo, un pedacito a la vez.' } },
-      { label: { en: 'Gone quiet about my needs to keep them comfortable', fr: "Devenu silencieux sur mes besoins pour le garder à l'aise", ar: 'صمتّ عن احتياجاتي لأبقيه مرتاحًا', es: 'Me he callado sobre mis necesidades para mantenerlo cómodo' }, insight: { en: 'Silencing your needs for their comfort trades your self for their ease.', fr: 'Faire taire tes besoins pour son confort échange ton moi contre sa facilité.', ar: 'إسكات احتياجاتك من أجل راحته يستبدل ذاتك براحته.', es: 'Silenciar tus necesidades por su comodidad cambia tu yo por su facilidad.' } },
-    ],
-  },
-  {
-    id: 'w06_q6',
-    text: {
-      en: "Be honest about what you feel for the person on your mind. It's mostly…",
-      fr: 'Sois honnête sur ce que tu ressens pour la personne à qui tu penses. C\'est surtout…',
-      ar: 'كن صادقًا حيال ما تشعر به تجاه الشخص الذي يشغل بالك. إنه في الغالب…',
-      es: 'Sé honesto sobre lo que sientes por la persona en la que piensas. Es sobre todo…',
-    },
-    answers: [
-      { label: { en: 'Wanting them — they add to a life already mine and fine', fr: 'Le désirer — il s\'ajoute à une vie déjà mienne et déjà bien', ar: 'أريده — يضيف إلى حياة هي بالفعل حياتي وبخير', es: 'Lo deseo — se suma a una vida que ya es mía y ya está bien' }, insight: { en: 'Desire from wholeness keeps you sovereign in your own love.', fr: 'Un désir venant de la plénitude te garde souverain dans ton propre amour.', ar: 'الرغبة النابعة من الاكتمال تُبقيك سيّد حبك الخاص.', es: 'El deseo que viene de la plenitud te mantiene soberano en tu propio amor.' } },
-      { label: { en: "Wanting them so much I've quietly excused their worst", fr: "Le désirer tellement que j'ai discrètement excusé le pire chez lui", ar: 'أريده كثيرًا لدرجة أنني عذرت بهدوء أسوأ ما فيه', es: 'Lo deseo tanto que he excusado en silencio lo peor de él' }, insight: { en: 'Desire that rewrites the rules for them is the standards editor at work.', fr: "Un désir qui réécrit les règles pour lui, c'est l'éditeur d'exigences au travail.", ar: 'الرغبة التي تعيد كتابة القواعد من أجله هي محرّر المعايير وهو يعمل.', es: 'Un deseo que reescribe las reglas para él es el editor de estándares trabajando.' } },
-      { label: { en: "Needing to prove I'm worth it — so I keep over-giving", fr: 'Avoir besoin de prouver que je le vaux — alors je continue de trop donner', ar: 'أحتاج إلى إثبات أنني أستحق — لذا أستمر في الإفراط بالعطاء', es: 'Necesito demostrar que lo valgo — así que sigo dando de más' }, insight: { en: "Trying to earn your place through output is the over-giver's engine.", fr: "Essayer de gagner sa place par la production est le moteur de celui qui donne trop.", ar: 'محاولة كسب مكانك بالعطاء هي محرّك المُفرِط في العطاء.', es: 'Intentar ganarte tu lugar a través del esfuerzo es el motor de quien da de más.' } },
-      { label: { en: 'Their approval running my thermostat, hot and cold', fr: 'Son approbation dirige mon thermostat, chaud et froid', ar: 'موافقته تدير ترمومتري، حارًا وباردًا', es: 'Su aprobación dirige mi termostato, cálido y frío' }, insight: { en: "When their opinion sets your temperature, you've handed them the controls.", fr: "Quand son opinion règle ta température, tu lui as remis les commandes.", ar: 'حين يضبط رأيه درجة حرارتك، تكون قد سلّمته زمام التحكّم.', es: 'Cuando su opinión fija tu temperatura, le has entregado los controles.' } },
-    ],
-  },
-  {
-    id: 'w06_q7',
-    text: {
-      en: '"If I asked for more or walked away, I\'d end up alone." How true does that feel?',
-      fr: '« Si je demandais plus ou si je partais, je finirais seul. » À quel point ça sonne vrai ?',
-      ar: '"لو طلبت المزيد أو رحلت، سأنتهي وحيدًا." إلى أي مدى يبدو هذا صحيحًا؟',
-      es: '«Si pidiera más o me fuera, terminaría solo.» ¿Cuán cierto se siente eso?',
-    },
-    answers: [
-      { label: { en: 'False — self-respect filters IN the right people', fr: "Faux — le respect de soi filtre et fait entrer les bonnes personnes", ar: 'خطأ — احترام الذات يُصفّي فيدخل الأشخاص المناسبون', es: 'Falso — el respeto propio deja entrar a la gente correcta' }, insight: { en: 'Knowing standards attract the well-matched is worth standing on solid ground.', fr: "Savoir que les exigences attirent les bien assortis vaut la peine de tenir un sol solide.", ar: 'معرفة أن المعايير تجذب المتوافقين تستحق الوقوف على أرض صلبة.', es: 'Saber que los estándares atraen a los bien emparejados vale la pena para pararse en terreno sólido.' } },
-      { label: { en: "Mostly false — I've seen better people show up when I rise", fr: "Surtout faux — j'ai vu de meilleures personnes se présenter quand je m'élève", ar: 'خطأ في الغالب — رأيت أشخاصًا أفضل يظهرون حين أرتقي', es: 'Mayormente falso — he visto aparecer mejores personas cuando me elevo' }, insight: { en: 'Watching the room improve when you rise is the filter working.', fr: "Voir la pièce s'améliorer quand tu t'élèves, c'est le filtre qui fonctionne.", ar: 'مشاهدة الغرفة تتحسّن حين ترتقي هو المصفاة وهي تعمل.', es: 'Ver que la sala mejora cuando te elevas es el filtro funcionando.' } },
-      { label: { en: 'Painfully true — so I keep over-giving to not lose them', fr: 'Douloureusement vrai — alors je continue de trop donner pour ne pas le perdre', ar: 'صحيح بشكل مؤلم — لذا أستمر في الإفراط بالعطاء كي لا أخسره', es: 'Dolorosamente cierto — así que sigo dando de más para no perderlo' }, insight: { en: 'Believing you must stay lowered to be loved keeps you giving into a void.', fr: 'Croire que tu dois rester rabaissé pour être aimé te fait donner dans le vide.', ar: 'الاعتقاد بأنك يجب أن تبقى منخفض المستوى لتُحَب يُبقيك تعطي في فراغ.', es: 'Creer que debes mantenerte rebajado para ser amado te mantiene dando al vacío.' } },
-      { label: { en: 'True — losing their approval feels like losing everything', fr: 'Vrai — perdre son approbation ressemble à tout perdre', ar: 'صحيح — فقدان موافقته يشبه فقدان كل شيء', es: 'Cierto — perder su aprobación se siente como perderlo todo' }, insight: { en: 'When their approval feels like your whole worth, that fear runs the show.', fr: 'Quand son approbation ressemble à toute ta valeur, cette peur mène la danse.', ar: 'حين تبدو موافقته وكأنها كل قيمتك، هذا الخوف هو من يدير العرض.', es: 'Cuando su aprobación se siente como todo tu valor, ese miedo dirige el espectáculo.' } },
-    ],
-  },
-];
 
 /* ───────────────────────── WEEKLY THEME (days + 4 outcomes + answer mapping) ───────────────────────── */
 

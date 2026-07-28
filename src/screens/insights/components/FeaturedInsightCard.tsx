@@ -138,10 +138,13 @@ export default function FeaturedInsightCard({
         <View style={[styles.ritualArt, { backgroundColor: theme.bg2 }]}>
           <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
             <Defs>
-              <RadialGradient id="fic_ritual_bloom" cx="50%" cy="50%" r="62%">
-                <Stop offset="0%" stopColor={accent} stopOpacity={0.5} />
-                <Stop offset="55%" stopColor={accent} stopOpacity={0.12} />
-                <Stop offset="100%" stopColor={theme.bg2} stopOpacity={0} />
+              {/* Wider + stronger than the feed hero's: this band is only 86dp tall, so
+                  a 62%-radius bloom at 0.5 barely tinted the plate and the day's colour
+                  never carried. Lighter core → accent mid → fade. */}
+              <RadialGradient id="fic_ritual_bloom" cx="50%" cy="48%" r="78%">
+                <Stop offset="0%" stopColor={lightenHex(accent, 0.2)} stopOpacity={0.62} />
+                <Stop offset="45%" stopColor={accent} stopOpacity={0.26} />
+                <Stop offset="100%" stopColor={accent} stopOpacity={0} />
               </RadialGradient>
             </Defs>
             <Rect x="0" y="0" width="100%" height="100%" fill="url(#fic_ritual_bloom)" />
@@ -153,7 +156,12 @@ export default function FeaturedInsightCard({
             {rewardPill}
           </View>
 
-          <OrbitArt size={rs(66)} accent={accent} />
+          {/* Secondary is derived from the accent, NOT left to OrbitArt's default cyan.
+              That default paints one of the two crossed orbits + both electron dots a
+              fixed #22D3EE, so the atom looked identical in every theme and on every day
+              — the half that never changed dominated the half that did. Feed article
+              cards keep the cyan default (their contrast is category-vs-cyan by design). */}
+          <OrbitArt size={rs(66)} accent={accent} secondary={lightenHex(accent, 0.34)} />
         </View>
 
         <View style={styles.ritualPanel}>

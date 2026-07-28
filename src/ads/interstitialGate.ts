@@ -31,13 +31,17 @@ export function noteRewardedShown(): void {
  * result-exit, weekly-reveal and article-exit spots.
  *
  * `ignoreMinReadings` skips the onboarding-protection floor for MILESTONE transitions
- * (the weekly reveal, closing an article) — those already imply an engaged user, and the
- * module-reading count doesn't reflect their engagement. The result-exit placement keeps
- * the floor (it's the flow the floor was designed to protect).
+ * (the weekly reveal, finishing the daily quote) — those already imply an engaged user,
+ * and the module-reading count doesn't reflect their engagement. The result-exit
+ * placement keeps the floor (it's the flow the floor was designed to protect).
+ *
+ * `chance` overrides the global probability for placements whose natural frequency is
+ * already self-limiting (the daily quote fires at most once per local day, so it can
+ * carry a much higher per-event chance without raising the ads-per-session rate).
  */
 export async function maybeShowInterstitial(
   readingCount: number,
-  opts: { ignoreMinReadings?: boolean } = {},
+  opts: { ignoreMinReadings?: boolean; chance?: number } = {},
 ): Promise<boolean> {
   const now = Date.now();
   if (
@@ -45,7 +49,7 @@ export async function maybeShowInterstitial(
     (!opts.ignoreMinReadings && readingCount < INTERSTITIAL.MIN_READINGS_BEFORE) ||
     now - lastInterstitialAt < INTERSTITIAL.COOLDOWN_MS ||
     now - lastRewardedAt < INTERSTITIAL.SUPPRESS_AFTER_REWARDED_MS ||
-    Math.random() >= INTERSTITIAL.CHANCE
+    Math.random() >= (opts.chance ?? INTERSTITIAL.CHANCE)
   ) {
     return false;
   }

@@ -23,6 +23,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { auraSkin, AURA_V2, darkenHex, FLAG_BAND_THEME, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, moduleTheme } from '@/src/themes/categoryTheme';
 import ModuleIcon from '@/src/components/ModuleIcon';
+import AuraOrb from '@/src/components/AuraOrb';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
 import { AdMobManager } from '@/src/ads/AdMobManager';
@@ -186,6 +187,11 @@ export default function ResultScreen() {
         format: 'png',
         quality: 1,
         result: 'tmpfile',
+        // Names the saved/shared file. Without it the library's default prefix
+        // ("ReactNative-snapshot-image…") is what lands in the user's gallery and in
+        // whatever they share it to. Android-only option, ≥3 chars; the platform still
+        // appends random digits, which is what keeps repeat saves from colliding.
+        fileName: 'Aurafy_reading_',
         width: 1080,
         height: 1920,
       }),
@@ -328,6 +334,10 @@ export default function ResultScreen() {
     : skin?.cta ?? [accent, darkenHex(accent, 0.22)];
   const ctaText = chromaticAura ? AURA_V2.obsidian : skin?.ctaText ?? theme.background;
   const ctaBorder = skin?.ctaBorder;
+  // The runner-up hue, when the reading landed close enough to a second colour
+  // (AURA_SECONDARY_THRESHOLD in scoringEngine). Drives the orb's rim arc, which is
+  // how a two-colour aura shows its second colour; null → the arc renders silver.
+  const auraSecondary = isAura ? result.secondaryColor ?? null : null;
   const rareLabelKey =
     result.dominantDimension === 'black'
       ? 'result.aura.rareKeeper'
@@ -475,14 +485,22 @@ export default function ResultScreen() {
       >
         {/* Eyebrow + luminous reveal name over the faint category motif */}
         <Animated.View style={[styles.header, titleStyle]}>
-          {/* Oversized category motif ghosted behind the name (spec §0 secondary accent). */}
+          {/* Oversized module motif ghosted behind the name (spec §0 secondary accent).
+              Aura is the exception: the reveal keeps the PRISM ORB in the outcome colour
+              (+ the secondary hue on its rim arc), not the Flame glyph — the Flame is the
+              module's mark on Home/detail/History, the orb is what carries the colour the
+              user actually got. See src/components/AuraOrb.tsx. */}
           <View pointerEvents="none" style={styles.motifWrap}>
-            <ModuleIcon
-              id={result.moduleId}
-              size={rs(150)}
-              color={accent}
-              auraOutcome={result.moduleId === 'aura_color' ? result.dominantDimension : undefined}
-            />
+            {isAura ? (
+              <AuraOrb
+                size={rs(150)}
+                mode="outcome"
+                outcomeKey={result.dominantDimension}
+                secondary={auraSecondary}
+              />
+            ) : (
+              <ModuleIcon id={result.moduleId} size={rs(150)} color={accent} />
+            )}
           </View>
           {/* Accent sparkles scattered around the reveal (per the Result PNGs). */}
           <MaterialCommunityIcons
@@ -643,9 +661,16 @@ export default function ResultScreen() {
               // so the card reads in the reading's palette; avatars keep person colours.
               // On a tie EVERY max-scorer gets the winner treatment — equal scores
               // already draw equal bars, the emphasis must match.
-              const isWinner = isTie
-                ? (result.tiedWinnerIds ?? []).includes(p.id)
-                : p.id === result.winner?.id;
+              //
+              // POLARITY reads crown NOBODY. There is no winner to crown: the stored
+              // `result.winner` is only the reddest participant, so highlighting it put
+              // an arbitrary name in bold accent — visibly wrong on a draw (both at
+              // net 0 / MIXED, yet one name rendered gold), and wrong in general
+              // whenever the screen themes GREEN off a green standout while the accent
+              // landed on the reddest person. The band chip + signed net say it all.
+              const isWinner =
+                !isFlag &&
+                (isTie ? (result.tiedWinnerIds ?? []).includes(p.id) : p.id === result.winner?.id);
               return (
                 <View key={p.id} style={styles.compRow}>
                   <View style={[styles.avatar, { backgroundColor: p.color }]}>

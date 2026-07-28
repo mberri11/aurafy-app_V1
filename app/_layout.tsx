@@ -225,15 +225,6 @@ function RootLayoutNav() {
           animation: "slide_from_right",
         }}
       />
-      {/* C-10 weekly result reveal — full-screen ceremony, fade in, no swipe-dismiss. */}
-      <Stack.Screen
-        name="weekly-result"
-        options={{
-          headerShown: false,
-          animation: "fade",
-          gestureEnabled: false,
-        }}
-      />
       </Stack>
     </View>
   );

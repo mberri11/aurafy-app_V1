@@ -31,29 +31,6 @@ export function getWeekById(id: string): WeeklyTheme | undefined {
   return WEEKS.find((w) => w.id === id);
 }
 
-// articleId → the absolute day-offset since the user's anchor at which the walker FIRST
-// serves it as the daily pick (weekOrdinal*7 + dayIndex). This is DAY-granular, unlike
-// the week ordinal above, so the Insights feed can reveal an article on the exact day it
-// becomes the daily — not the whole week at once (which would still leak later days).
-const REVEAL_DAY_BY_ARTICLE: Record<string, number> = {};
-WEEKS.forEach((week, ordinal) => {
-  week.days.forEach((day, dayIndex) => {
-    if (!(day.articleId in REVEAL_DAY_BY_ARTICLE)) {
-      REVEAL_DAY_BY_ARTICLE[day.articleId] = ordinal * 7 + dayIndex;
-    }
-  });
-});
-
-/**
- * The day-offset (from the user's anchor) at which a curriculum article first becomes
- * the daily pick, or undefined for editorial articles (always feed-visible). Gate an
- * article into the Insights feed with `getDaysSinceAnchor(anchor) >= getArticleRevealDay(id)`
- * so an upcoming daily pick stays hidden until the exact day it is served.
- */
-export function getArticleRevealDay(articleId: string): number | undefined {
-  return REVEAL_DAY_BY_ARTICLE[articleId];
-}
-
 /**
  * DEV-ONLY structural check for an authored week. Returns a list of problems
  * (empty = valid). Not wired into runtime — call it when content lands (e.g. a

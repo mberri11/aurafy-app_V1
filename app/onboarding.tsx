@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -316,6 +316,16 @@ export default function OnboardingScreen() {
   const setLanguage = useSettingsStore((s) => s.setLanguage);
   const [slide, setSlide] = useState(0);
 
+  // REVIEW MODE — reached from Settings ▸ About ▸ "How Aurafy Works" rather than from
+  // first launch. Same slides, but it is a re-read, not a setup flow:
+  //   • no language picker — the user already has a language, and Settings (where they
+  //     just were) owns that switch. Two competing pickers is how you get a live RTL
+  //     relaunch fired from a help screen.
+  //   • no Skip — there is nothing to skip past to; the app is already unlocked.
+  //   • the last slide returns to Settings instead of onboarding them again.
+  const { replay } = useLocalSearchParams<{ replay?: string }>();
+  const isReplay = replay === '1';
+
   // Language selection — the EXACT mechanism of the Settings switcher (store +
   // i18n + dayjs + unconditional native RTL flags; see settings.tsx). LTR↔LTR
   // switches apply live (strings re-render in place); crossing the Arabic RTL
@@ -355,6 +365,14 @@ export default function OnboardingScreen() {
     router.replace('/(tabs)');
   }, [setOnboarded]);
 
+  // Review mode's exit: straight back to Settings. Deliberately NOT `begin` — that
+  // fires requestIntro(), the first-launch cosmic reveal, and router.replace()s the
+  // Settings route away, so a user reading the help screen would be dumped onto Home
+  // watching the intro animation again.
+  const closeReview = useCallback(() => {
+    router.back();
+  }, []);
+
   const handleNext = useCallback(() => {
     setSlide((s) => (s < TOTAL_SLIDES - 1 ? s + 1 : s));
   }, []);
@@ -383,17 +401,20 @@ export default function OnboardingScreen() {
 
       {/* Skip — absolute top corner; trailing edge per direction (top-left in Arabic).
           Explicit physical side keyed on language so it mirrors even when the native RTL
-          flag hasn't applied yet (Expo Go live language switch). */}
-      <View style={[styles.skipBar, { top: insets.top + rs(8) }, isRTL ? styles.skipBarRTL : styles.skipBarLTR]}>
-        <Pressable
-          onPress={finish}
-          accessibilityLabel={t('common.skip')}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          style={({ pressed }) => pressed && { opacity: 0.6 }}
-        >
-          <Text style={[styles.skipText, { color: theme.textMuted }]}>{t('common.skip')}</Text>
-        </Pressable>
-      </View>
+          flag hasn't applied yet (Expo Go live language switch).
+          Hidden in review mode — system back returns to Settings. */}
+      {!isReplay && (
+        <View style={[styles.skipBar, { top: insets.top + rs(8) }, isRTL ? styles.skipBarRTL : styles.skipBarLTR]}>
+          <Pressable
+            onPress={finish}
+            accessibilityLabel={t('common.skip')}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            style={({ pressed }) => pressed && { opacity: 0.6 }}
+          >
+            <Text style={[styles.skipText, { color: theme.textMuted }]}>{t('common.skip')}</Text>
+          </Pressable>
+        </View>
+      )}
 
       <View
         style={[
@@ -454,8 +475,9 @@ export default function OnboardingScreen() {
 
         {/* ── Language selector — first slide only (design reference: 4 flag
             chips above the dots; selected = theme accent). Plain `row`: it
-            auto-mirrors under native RTL, per the no-manual-row-reverse rule. */}
-        {slide === 0 && (
+            auto-mirrors under native RTL, per the no-manual-row-reverse rule.
+            Setup flow only — review mode defers to the Settings switcher. */}
+        {slide === 0 && !isReplay && (
           <View style={styles.langBlock}>
             <Text style={[styles.langHeading, { color: theme.textDim }]}>
               {t('onboarding.chooseLanguage')}
@@ -526,8 +548,10 @@ export default function OnboardingScreen() {
 
         {/* ── Primary CTA ───────────────────────────────────────────────── */}
         <GradientButton
-          label={isLast ? t('common.begin') : t('common.continue')}
-          onPress={isLast ? begin : handleNext}
+          label={
+            isLast ? (isReplay ? t('common.done') : t('common.begin')) : t('common.continue')
+          }
+          onPress={isLast ? (isReplay ? closeReview : begin) : handleNext}
           labelColor="#0A0B1A"
         />
       </View>

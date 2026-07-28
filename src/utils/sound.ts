@@ -31,14 +31,13 @@
 // degrades to a silent no-op instead of crashing the whole app at startup.
 import type { AudioPlayer } from 'expo-audio';
 
-export type EffectKey = 'tap' | 'reveal' | 'revealWeekly' | 'star';
+export type EffectKey = 'tap' | 'reveal' | 'star';
 
 // One-shot sources. NB: `Loading.mp3` is capitalized on disk — Metro's require is
 // case-sensitive on Android, so the case here must match the filename exactly.
 const EFFECT_SOURCES: Record<EffectKey, number> = {
   tap: require('../../assets/sounds/tap.mp3'),
   reveal: require('../../assets/sounds/reveal.mp3'),
-  revealWeekly: require('../../assets/sounds/reveal-weekly.mp3'),
   star: require('../../assets/sounds/star.mp3'),
 };
 // Named ambient loops. Generalized from the single loading pad so the quiz can play
@@ -57,15 +56,17 @@ const LOOP_SOURCES: Record<LoopKey, number> = {
 // it would be hostile UX. What we control is the MIX LEVEL of our OWN players. That's
 // what LOOP_BASE / EFFECT_BASE are: a fraction of whatever the device is set to. On a
 // loud device the pad is proportionally loud but STILL recessed behind the taps/chimes,
-// because the ratio (0.6 one-shot vs 0.22 pad ≈ a third) is fixed. That is the correct
+// because the ratio (0.6 one-shot vs 0.20 pad ≈ a third) is fixed. That is the correct
 // and only correct behavior — do NOT attempt any native volume manipulation, and do
 // NOT raise the quiz pads above 0.25 (they must sit under the tap, playing while the
 // user reads and thinks). Every value below is ALSO scaled by masterVolume() (the
 // Settings slider), so the slider stays meaningful.
 const LOOP_BASE: Record<LoopKey, number> = {
   loading: 0.4, // unchanged — existing brief value for the loading pad
-  quizRelationship: 0.18, // deliberately low — background, never competes with the tap
-  quizSelf: 0.18,
+  // Nudged 0.18 → 0.20 (Simo, 2026-07-27) — the pads read a touch too quiet under the
+  // questions. Still background, still well under the 0.25 ceiling above.
+  quizRelationship: 0.2,
+  quizSelf: 0.2,
 };
 const EFFECT_BASE = 0.6;
 const FADE_IN_MS = 600;

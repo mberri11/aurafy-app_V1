@@ -347,10 +347,7 @@
     "emptyMessage": "Cada nombre, color y patrón que descubres se guarda aquí: un mapa privado de lo que has aprendido sobre ti.",
     "ctaButton": "Comenzar una lectura",
     "titleLine": "{{name}} — {{pct}} % de confianza",
-    "titleLineSignal": "{{name}} — {{pct}} % de señal",
-    "weeklyEyebrow": "Lectura semanal",
-    "sevenDayBadge": "7 días",
-    "nights": "{{count}} noches · completado el {{date}}"
+    "titleLineSignal": "{{name}} — {{pct}} % de señal"
   },
   "settings": {
     "title": "Ajustes",
@@ -374,7 +371,7 @@
     "resetConfirmTitle": "¿Restablecer todos los datos?",
     "resetConfirmMessage": "Un restablecimiento total: estrellas, historial, ajustes e introducción se borrarán.",
     "resetConfirmAction": "Restablecer todo",
-    "version": "Aurafy v1.0.0",
+    "version": "Aurafy v{{version}}",
     "soundEffectsDesc": "Tintineos al tocar, campana al revelar",
     "volume": "Volumen",
     "notifications": "Notificaciones",
@@ -470,7 +467,7 @@
     "rewardToday": "+1 ✦ hoy",
     "minRead": "{{n}} min de lectura",
     "min": "{{n}} min",
-    "takeReading": "Hacer la lectura {{module}}",
+    "takeReading": "Hacer la lectura:\n{{module}}",
     "empty": "Aún no hay artículos aquí.",
     "sponsoredTitle": "Encuentra tu pareja cósmica esta noche",
     "sponsoredBrand": "Astra · Citas",
@@ -487,14 +484,6 @@
     "stepRead": "Leer",
     "stepEarn": "Gana",
     "ritualDone": "Vuelve mañana"
-  },
-  "weekly": {
-    "eyebrow": "Tu semana revelada",
-    "bonusTitle": "+{{amount}} ✦ bono de racha",
-    "bonusSubtitle": "Siete noches, sin interrupción. Tu saldo ahora es {{balance}} ✦.",
-    "share": "Compartir mi semana",
-    "save": "Guardar en el historial",
-    "empty": "Aún no hay resultado semanal."
   },
   "share": {
     "getYours": "Haz tu lectura"

@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 import { AD_UNIT_IDS } from '@/src/config/ads';
-import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
+import { ADS_AVAILABLE, useNonPersonalizedOnly } from '@/src/ads/adsRuntime';
 import { noteRewardedShown } from '@/src/ads/interstitialGate';
 
 export type AdReward = { type: string; amount: number } | null;
@@ -29,9 +29,13 @@ function useRewardedAdImpl(): UseRewardedAd {
   // exported hook). The module is cached, so useLibRewardedAd is a stable reference and
   // calling it here keeps hook order consistent.
   const { useRewardedAd: useLibRewardedAd } = require('react-native-google-mobile-ads');
+  // See useInterstitialAd for why this is subscribed rather than read once: the options
+  // are frozen into the ad instance at creation, so a late consent resolution has to
+  // re-render this hook to get a correctly-configured ad request.
+  const npaOnly = useNonPersonalizedOnly();
   const { isLoaded, isClosed, isEarnedReward, reward, error, load, show } = useLibRewardedAd(
     AD_UNIT_IDS.rewarded,
-    { requestNonPersonalizedAdsOnly: true },
+    { requestNonPersonalizedAdsOnly: npaOnly },
   );
 
   const onRewardRef = useRef<RewardCb | null>(null);

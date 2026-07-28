@@ -4,7 +4,7 @@ import type {
 } from 'react-native-google-mobile-ads';
 
 import { AD_UNIT_IDS } from '@/src/config/ads';
-import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
+import { ADS_AVAILABLE, isNonPersonalizedOnly } from '@/src/ads/adsRuntime';
 import { logger } from '../utils/logger';
 
 /**
@@ -19,7 +19,14 @@ import { logger } from '../utils/logger';
  * 1★ path). Declarative surfaces (banner, dev-panel test buttons) use the hooks instead.
  */
 
-const REQUEST_OPTS = { requestNonPersonalizedAdsOnly: true };
+/**
+ * Built fresh on every ad request, NOT frozen at import time: this module is imported
+ * during bootstrap, long before the UMP consent flow resolves the personalization
+ * stance. A module-level const would permanently bake in the pre-consent default.
+ */
+function requestOpts() {
+  return { requestNonPersonalizedAdsOnly: isNonPersonalizedOnly() };
+}
 
 // Lazy accessor for the native library — never touched at import time (Expo Go safe).
 function lib() {
@@ -52,7 +59,7 @@ class AdMobManagerClass {
     if (!ADS_AVAILABLE) return;
     try {
       const { RewardedAd, RewardedAdEventType, AdEventType } = lib();
-      const ad: RewardedAdT = RewardedAd.createForAdRequest(AD_UNIT_IDS.rewarded, REQUEST_OPTS);
+      const ad: RewardedAdT = RewardedAd.createForAdRequest(AD_UNIT_IDS.rewarded, requestOpts());
       this.rewarded = ad;
       this.rewardedLoaded = false;
       ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
@@ -130,7 +137,7 @@ class AdMobManagerClass {
       const { InterstitialAd, AdEventType } = lib();
       const ad: InterstitialAdT = InterstitialAd.createForAdRequest(
         AD_UNIT_IDS.interstitial,
-        REQUEST_OPTS,
+        requestOpts(),
       );
       this.interstitial = ad;
       this.interstitialLoaded = false;

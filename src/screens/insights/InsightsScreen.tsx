@@ -74,8 +74,8 @@ export default function InsightsScreen() {
   // anchor-day arrived, which left the feed looking near-empty on a fresh install.
   // The star economy is untouched: only TODAY's daily pick (getDailyInsightId) can
   // earn the once-per-day bonus, so browsing a future daily early grants nothing.
-  // The reveal-day plumbing (getArticleRevealDay / days-since-anchor) stays in the
-  // codebase for a possible future opt-in, just no longer filters the feed.
+  // The reveal-day plumbing was deleted outright with the weekly curriculum
+  // (2026-07-28); this predicate is the only thing left of the gate.
   const isRevealed = (_a: Article) => true;
 
   // Build the LATEST list: non-sponsored, revealed, newest-first, filtered by the active

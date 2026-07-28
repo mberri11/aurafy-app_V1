@@ -10,12 +10,10 @@
  *  - Append `w05Articles` to ARTICLES (src/content/articles/index.ts), after ...w04Articles.
  *  - Merge `w05ArticlesEn` into content.en.ts. FR/AR/ES bodies live in content.fr.ts / content.ar.ts /
  *    content.es.ts under the same ids.
- *  - Append `w05Questions` to the daily-question pool (src/data/dailyQuestions.ts), after ...w04Questions.
  *  - Push `w05Week` into WEEKS (src/data/weeks/index.ts), AFTER w04Week, and run validateWeek().
  */
 
 import type { Article, ArticleContent } from '../../content/articles';
-import type { DailyQuestion } from '../dailyQuestions';
 import type { WeeklyTheme } from './types';
 
 /* ───────────────────────── ARTICLES (metadata) — Days 1–7 ───────────────────────── */
@@ -118,116 +116,6 @@ export const w05ArticlesEn: Record<string, ArticleContent> = {
     ],
   },
 };
-
-/* ───────────────────────── DAILY QUESTIONS (7) — each a 4-way vote ───────────────────────── */
-
-export const w05Questions: DailyQuestion[] = [
-  {
-    id: 'w05_q1',
-    text: {
-      en: 'Compare this thing today to three months ago. What changed?',
-      fr: "Compare cette chose aujourd'hui à il y a trois mois. Qu'est-ce qui a changé ?",
-      ar: 'قارن هذا الشيء اليوم بما كان عليه قبل ثلاثة أشهر. ماذا تغيّر؟',
-      es: 'Compara esta cosa hoy con hace tres meses. ¿Qué cambió?',
-    },
-    answers: [
-      { label: { en: 'More defined, more woven into real life', fr: 'Plus défini, plus tissé dans la vraie vie', ar: 'أكثر تحديدًا، أكثر نسجًا في الحياة الحقيقية', es: 'Más definida, más entretejida en la vida real' }, insight: { en: "A thing that keeps deepening is a thing that's actually going somewhere.", fr: "Une chose qui continue de s'approfondir est une chose qui va réellement quelque part.", ar: 'الشيء الذي يستمر في التعمّق هو شيء يصل فعليًا إلى مكان ما.', es: 'Algo que sigue profundizándose es algo que realmente va hacia algún lado.' } },
-      { label: { en: 'Exactly the same, just older', fr: 'Exactement pareil, juste plus vieux', ar: 'نفسه تمامًا، فقط أقدم', es: 'Exactamente igual, solo más vieja' }, insight: { en: "Same-but-older isn't a journey; it's a parking spot with a view.", fr: "Pareil-mais-plus-vieux n'est pas un voyage ; c'est une place de parking avec une vue.", ar: 'نفسه-لكن-أقدم ليست رحلة؛ إنها موقف سيارات بإطلالة.', es: 'Igual-pero-más-vieja no es un viaje; es un lugar de estacionamiento con vista.' } },
-      { label: { en: 'They warm up whenever I start to leave, then it resets', fr: 'Il se réchauffe chaque fois que je commence à partir, puis ça se réinitialise', ar: 'يصبح دافئًا كلّما بدأت بالرحيل، ثم يُعاد الأمر لنقطة الصفر', es: 'Se pone cálido cada vez que empiezo a irme, luego se reinicia' }, insight: { en: 'Progress that only appears when you exit is a leash, not movement.', fr: "Un progrès qui n'apparaît que quand tu pars est une laisse, pas un mouvement.", ar: 'التقدّم الذي يظهر فقط حين ترحل هو مقود، لا حركة.', es: 'Un progreso que solo aparece cuando te vas es una correa, no movimiento.' } },
-      { label: { en: "I'm more invested; they're exactly where they started", fr: "Je suis plus investi ; il en est exactement là où il a commencé", ar: 'أنا أكثر استثمارًا؛ وهو بالضبط في المكان الذي بدأ منه', es: 'Estoy más invertido; él está exactamente donde empezó' }, insight: { en: 'When only one side deepens, the other side already chose their level.', fr: "Quand un seul côté s'approfondit, l'autre a déjà choisi son niveau.", ar: 'حين يتعمّق جانب واحد فقط، يكون الجانب الآخر قد اختار مستواه بالفعل.', es: 'Cuando solo un lado se profundiza, el otro ya eligió su nivel.' } },
-    ],
-  },
-  {
-    id: 'w05_q2',
-    text: {
-      en: 'What happens when the word "us" comes near the conversation?',
-      fr: 'Que se passe-t-il quand le mot « nous » s\'approche de la conversation ?',
-      ar: 'ماذا يحدث حين تقترب كلمة "نحن" من المحادثة؟',
-      es: '¿Qué pasa cuando la palabra «nosotros» se acerca a la conversación?',
-    },
-    answers: [
-      { label: { en: 'We talk about it — nervously, but honestly', fr: 'On en parle — nerveusement, mais honnêtement', ar: 'نتحدث عن الأمر — بتوتر، لكن بصدق', es: 'Hablamos de ello — con nervios, pero con honestidad' }, insight: { en: 'Engaging the word, even scared, is someone moving toward you.', fr: 'S\'engager avec le mot, même effrayé, c\'est quelqu\'un qui se rapproche de toi.', ar: 'الانخراط في الكلمة، حتى بخوف، هو شخص يتحرّك نحوك.', es: 'Involucrarse con la palabra, aunque con miedo, es alguien acercándose a ti.' } },
-      { label: { en: 'A smooth swerve — subject changed, every time', fr: 'Un virage fluide — sujet changé, à chaque fois', ar: 'انعطاف سلس — يتغيّر الموضوع، في كل مرة', es: 'Un giro suave — cambia de tema, cada vez' }, insight: { en: 'A practiced swerve around "us" is the un-naming defending itself.', fr: 'Un virage entraîné autour de « nous » est le non-nommage qui se défend.', ar: 'الانعطاف المُتقَن حول "نحن" هو عدم التسمية يدافع عن نفسه.', es: 'Un giro practicado alrededor de «nosotros» es el no-nombramiento defendiéndose.' } },
-      { label: { en: '"Why do we need labels?" on schedule', fr: '« Pourquoi a-t-on besoin d\'étiquettes ? » à l\'heure pile', ar: '"لماذا نحتاج إلى تسميات؟" في موعدها بالضبط', es: '«¿Por qué necesitamos etiquetas?» puntual' }, insight: { en: 'The anti-label speech, right on cue, is a script — not a philosophy.', fr: "Le discours anti-étiquette, pile au bon moment, est un script — pas une philosophie.", ar: 'خطاب معاداة التسميات، في توقيته بالضبط، هو نصّ محفوظ — لا فلسفة.', es: 'El discurso anti-etiquetas, justo a tiempo, es un guion, no una filosofía.' } },
-      { label: { en: '"Not yet" — with no reason it\'d ever become yes', fr: '« Pas encore » — sans raison que ça devienne un jour oui', ar: '"ليس بعد" — دون سبب يجعله يومًا يتحوّل إلى نعم', es: '«Todavía no» — sin razón para que algún día se vuelva sí' }, insight: { en: 'A "not yet" with no conditions is a no wearing softer clothes.', fr: '« Pas encore » sans conditions est un non habillé plus doucement.', ar: '"ليس بعد" دون شروط هو "لا" يرتدي ثيابًا أنعم.', es: 'Un «todavía no» sin condiciones es un no vestido con ropa más suave.' } },
-    ],
-  },
-  {
-    id: 'w05_q3',
-    text: {
-      en: 'Where do you exist in their world?',
-      fr: 'Où existes-tu dans son monde ?',
-      ar: 'أين توجد في عالمه؟',
-      es: '¿Dónde existes en su mundo?',
-    },
-    answers: [
-      { label: { en: 'Everywhere — friends, family, future plans', fr: "Partout — les amis, la famille, les projets d'avenir", ar: 'في كل مكان — الأصدقاء، العائلة، خطط المستقبل', es: 'En todas partes — amigos, familia, planes futuros' }, insight: { en: 'Being woven into the public life is being treated as real.', fr: 'Être tissé dans la vie publique, c\'est être traité comme réel.', ar: 'أن تُنسَج في الحياة العلنية هو أن تُعامَل كشيء حقيقي.', es: 'Estar entretejido en la vida pública es ser tratado como real.' } },
-      { label: { en: "Nowhere new lately — we've plateaued where we started", fr: "Nulle part de nouveau dernièrement — on a plafonné là où on a commencé", ar: 'لا مكان جديد مؤخرًا — ثبتنا حيث بدأنا', es: 'En ningún lugar nuevo últimamente — nos estancamos donde empezamos' }, insight: { en: 'A private thing that stopped moving is parked, not building.', fr: 'Une chose privée qui a arrêté de bouger est garée, pas en construction.', ar: 'شيء خاص توقف عن الحركة هو متوقّف، لا يُبنى.', es: 'Algo privado que dejó de moverse está estacionado, no construyéndose.' } },
-      { label: { en: 'Only in private — no posts, no people, no future tense', fr: 'Seulement en privé — pas de publications, pas de gens, pas de futur', ar: 'فقط في الخاص — لا منشورات، لا أشخاص، لا زمن مستقبل', es: 'Solo en privado — sin publicaciones, sin gente, sin tiempo futuro' }, insight: { en: 'Kept out of the public life is often kept as a placeholder.', fr: 'Être tenu à l\'écart de la vie publique, c\'est souvent être gardé comme bouche-trou.', ar: 'أن تُستبعَد من الحياة العلنية غالبًا يعني أنك محفوظ كبديل مؤقت.', es: 'Ser mantenido fuera de la vida pública a menudo es ser mantenido como relleno.' } },
-      { label: { en: 'In the gaps — when their "better" option isn\'t around', fr: 'Dans les interstices — quand son option « meilleure » n\'est pas là', ar: 'في الفجوات — حين لا يكون خياره "الأفضل" موجودًا', es: 'En los huecos — cuando su opción «mejor» no está cerca' }, insight: { en: "Existing in someone's gaps is a circle that never closes.", fr: "Exister dans les interstices de quelqu'un est un cercle qui ne se referme jamais.", ar: 'أن توجد في فجوات أحدهم هو دائرة لا تُغلَق أبدًا.', es: 'Existir en los huecos de alguien es un círculo que nunca se cierra.' } },
-    ],
-  },
-  {
-    id: 'w05_q4',
-    text: {
-      en: 'How far ahead can the two of you actually plan?',
-      fr: 'Jusqu\'où pouvez-vous réellement planifier tous les deux ?',
-      ar: 'إلى أي مدى يمكنكما التخطيط فعليًا؟',
-      es: '¿Hasta dónde pueden planear realmente ustedes dos?',
-    },
-    answers: [
-      { label: { en: 'Real future — trips, milestones, next year', fr: "Un vrai avenir — voyages, étapes importantes, l'année prochaine", ar: 'مستقبل حقيقي — رحلات، محطات مهمة، العام القادم', es: 'Futuro real — viajes, hitos, el próximo año' }, insight: { en: 'A shared long horizon is a relationship in everything but paperwork.', fr: 'Un horizon partagé et long est une relation en tout sauf la paperasse.', ar: 'أفق مشترك طويل هو علاقة في كل شيء إلا الأوراق الرسمية.', es: 'Un horizonte compartido y largo es una relación en todo menos el papeleo.' } },
-      { label: { en: 'Plans exist — but they cancel the moment something better calls', fr: "Des projets existent — mais ils s'annulent dès qu'une meilleure option appelle", ar: 'توجد خطط — لكنها تُلغى لحظة ظهور شيء أفضل', es: 'Existen planes — pero se cancelan en cuanto llama algo mejor' }, insight: { en: 'Plans that lose to a better offer show whose priority you are.', fr: "Des projets qui perdent face à une meilleure offre montrent de qui tu es la priorité.", ar: 'الخطط التي تخسر أمام عرض أفضل تُظهر لمن تكون أنت الأولوية.', es: 'Los planes que pierden frente a una oferta mejor muestran de quién eres la prioridad.' } },
-      { label: { en: "This weekend, maybe. It's been that way for months.", fr: "Ce week-end, peut-être. Ça dure comme ça depuis des mois.", ar: 'ربما نهاية هذا الأسبوع. الأمر كذلك منذ أشهر.', es: 'Este fin de semana, tal vez. Ha sido así por meses.' }, insight: { en: 'A horizon frozen short for months is a thing parked, not moving.', fr: "Un horizon figé si court depuis des mois est une chose garée, pas en mouvement.", ar: 'أفق مجمَّد قصيرًا منذ أشهر هو شيء متوقّف، لا يتحرّك.', es: 'Un horizonte congelado y corto durante meses es algo estacionado, no en movimiento.' } },
-      { label: { en: "We don't plan — I stay free in case they want me", fr: "On ne planifie pas — je reste libre au cas où il voudrait de moi", ar: 'لا نخطّط — أبقى متاحًا في حال أراد أن يراني', es: 'No planeamos — me quedo libre por si me quiere' }, insight: { en: 'Staying on standby for someone is the shape of holding a place.', fr: "Rester en attente pour quelqu'un, c'est la forme même du bouche-trou.", ar: 'البقاء في وضع الاستعداد لأجل أحدهم هو شكل حجز المكان.', es: 'Quedarse en espera por alguien es la forma que toma ser el relleno.' } },
-    ],
-  },
-  {
-    id: 'w05_q5',
-    text: {
-      en: 'When they give you a scrap of attention, how does it land?',
-      fr: "Quand il te donne un fragment d'attention, comment ça te touche ?",
-      ar: 'حين يمنحك فتاتًا من الانتباه، كيف يقع عليك؟',
-      es: 'Cuando te da una pizca de atención, ¿cómo te llega?',
-    },
-    answers: [
-      { label: { en: 'Like a normal part of something steady', fr: "Comme une partie normale de quelque chose de stable", ar: 'كجزء طبيعي من شيء ثابت', es: 'Como una parte normal de algo estable' }, insight: { en: "When contact feels ordinary, you're being fed, not managed.", fr: "Quand le contact semble ordinaire, tu es nourri, pas géré.", ar: 'حين يبدو التواصل عاديًا، فأنت تُطعَم، لا تُدار.', es: 'Cuando el contacto se siente ordinario, te están alimentando, no gestionando.' } },
-      { label: { en: 'Warm and building — each one adds to the last', fr: 'Chaleureux et croissant — chacun s\'ajoute au précédent', ar: 'دافئ ومتراكم — كل واحد يضيف إلى ما قبله', es: 'Cálida y creciente — cada una se suma a la anterior' }, insight: { en: 'Attention that accumulates is a thing on its way up.', fr: 'Une attention qui s\'accumule est une chose en train de monter.', ar: 'الانتباه المتراكم هو شيء في طريقه للأعلى.', es: 'Una atención que se acumula es algo que va en ascenso.' } },
-      { label: { en: "It arrives exactly when I'm about to give up", fr: "Elle arrive exactement quand je suis sur le point d'abandonner", ar: 'تصل تحديدًا حين أوشك على الاستسلام', es: 'Llega exactamente cuando estoy a punto de rendirme' }, insight: { en: 'Warmth timed to your exit is a breadcrumb, not a feeling.', fr: 'Une chaleur chronométrée sur ta sortie est une miette, pas un sentiment.', ar: 'الدفء المُوقَّت مع خروجك هو فتات، لا شعور.', es: 'Una calidez cronometrada con tu salida es una migaja, no un sentimiento.' } },
-      { label: { en: 'Nice, then nothing — same flat line for months', fr: 'Agréable, puis rien — la même ligne plate depuis des mois', ar: 'لطيف، ثم لا شيء — نفس الخط الثابت منذ أشهر', es: 'Agradable, y luego nada — la misma línea plana durante meses' }, insight: { en: 'A warm moment that never shifts the pattern is a stall.', fr: 'Un moment chaleureux qui ne change jamais le schéma est une stagnation.', ar: 'لحظة دافئة لا تغيّر النمط أبدًا هي توقّف تام.', es: 'Un momento cálido que nunca cambia el patrón es un estancamiento.' } },
-    ],
-  },
-  {
-    id: 'w05_q6',
-    text: {
-      en: 'If you asked "what are we" tomorrow, what would honestly happen?',
-      fr: 'Si tu demandais « qu\'est-ce qu\'on est » demain, que se passerait-il honnêtement ?',
-      ar: 'إن سألت "ما نحن" غدًا، ماذا سيحدث بصدق؟',
-      es: 'Si preguntaras «qué somos» mañana, ¿qué pasaría honestamente?',
-    },
-    answers: [
-      { label: { en: "Relief and a yes — I think they've wanted to", fr: 'Du soulagement et un oui — je pense qu\'il en avait envie', ar: 'ارتياح ونعم — أظن أنه كان يريد ذلك', es: 'Alivio y un sí — creo que él lo ha querido' }, insight: { en: 'A partner who answers with relief was waiting for you to ask.', fr: 'Un partenaire qui répond avec soulagement attendait que tu demandes.', ar: 'الشريك الذي يجيب بارتياح كان ينتظر أن تسأل.', es: 'Una pareja que responde con alivio estaba esperando que preguntaras.' } },
-      { label: { en: '"Why label it? We\'re good as we are" — and nothing shifts', fr: '« Pourquoi étiqueter ça ? On est bien comme ça » — et rien ne bouge', ar: '"لماذا نسمّيها؟ نحن بخير كما نحن" — ولا شيء يتغيّر', es: '«¿Para qué etiquetarlo? Estamos bien así» — y nada cambia' }, insight: { en: 'Choosing the label-free status quo keeps the thing parked by choice.', fr: 'Choisir le statu quo sans étiquette garde la chose garée, par choix.', ar: 'اختيار الوضع الراهن بلا تسمية يُبقي الشيء متوقّفًا، بالاختيار.', es: 'Elegir el estatus quo sin etiqueta mantiene la cosa estacionada, por elección.' } },
-      { label: { en: 'Panic, deflection, maybe distance after', fr: 'De la panique, de l\'esquive, peut-être de la distance après', ar: 'ذعر، تملّص، ربما مسافة بعد ذلك', es: 'Pánico, evasión, quizás distancia después' }, insight: { en: 'Fleeing the question is answering it in the quietest voice.', fr: 'Fuir la question, c\'est y répondre de la voix la plus discrète.', ar: 'الهروب من السؤال هو الإجابة عليه بأهدأ صوت.', es: 'Huir de la pregunta es responderla con la voz más silenciosa.' } },
-      { label: { en: '"Let\'s not ruin a good thing" — and nothing moves', fr: '« Ne gâchons pas une bonne chose » — et rien ne bouge', ar: '"لنتجنّب إفساد شيء جيد" — ولا شيء يتحرّك', es: '«No arruinemos algo bueno» — y nada se mueve' }, insight: { en: 'Guarding the gray against the question is choosing the parking spot.', fr: 'Protéger le gris contre la question, c\'est choisir la place de parking.', ar: 'حماية المنطقة الرمادية من السؤال هي اختيار موقف السيارات.', es: 'Proteger el gris de la pregunta es elegir el lugar de estacionamiento.' } },
-    ],
-  },
-  {
-    id: 'w05_q7',
-    text: {
-      en: 'Strip the hope out of it. What does your gut actually report?',
-      fr: "Enlève l'espoir de l'équation. Que rapporte réellement ton instinct ?",
-      ar: 'أزل الأمل من المعادلة. بماذا يبلّغك حدسك فعليًا؟',
-      es: 'Quita la esperanza de la ecuación. ¿Qué reporta realmente tu instinto?',
-    },
-    answers: [
-      { label: { en: "We're becoming real — I can feel it building", fr: 'On devient réel — je le sens se construire', ar: 'نصبح حقيقيَّين — أشعر بأن الأمر يُبنى', es: 'Nos estamos volviendo reales — puedo sentir que se construye' }, insight: { en: 'A gut that feels it building is usually counting real evidence.', fr: "Un instinct qui sent que ça se construit compte généralement de vraies preuves.", ar: 'الحدس الذي يشعر بالبناء يُحصي عادة أدلة حقيقية.', es: 'Un instinto que siente que se está construyendo suele estar contando evidencia real.' } },
-      { label: { en: 'Stuck — lovely, but going in a circle', fr: 'Coincé — agréable, mais en train de tourner en rond', ar: 'عالق — جميل، لكنه يسير في دائرة', es: 'Atascado — bonito, pero dando vueltas en círculo' }, insight: { en: 'Naming the circle is the first step out of it.', fr: 'Nommer le cercle est le premier pas pour en sortir.', ar: 'تسمية الدائرة هي الخطوة الأولى للخروج منها.', es: 'Nombrar el círculo es el primer paso para salir de él.' } },
-      { label: { en: "I'm the option, not the choice", fr: "Je suis l'option, pas le choix", ar: 'أنا الخيار الاحتياطي، لا الاختيار', es: 'Soy la opción, no la elección' }, insight: { en: 'Admitting you\'re the option takes courage — and ends the confusion.', fr: 'Admettre que tu es l\'option demande du courage — et met fin à la confusion.', ar: 'الاعتراف بأنك الخيار الاحتياطي يتطلّب شجاعة — وينهي الارتباك.', es: 'Admitir que eres la opción requiere valor — y termina con la confusión.' } },
-      { label: { en: "I'm holding a place for someone who isn't me", fr: "Je tiens une place pour quelqu'un qui n'est pas moi", ar: 'أنا أحجز مكانًا لشخص ليس أنا', es: 'Estoy ocupando un lugar para alguien que no soy yo' }, insight: { en: 'Seeing the waiting room clearly is how you finally leave it.', fr: "Voir clairement la salle d'attente, c'est comme ça qu'on finit par la quitter.", ar: 'رؤية غرفة الانتظار بوضوح هي كيف تغادرها أخيرًا.', es: 'Ver la sala de espera con claridad es cómo finalmente la dejas.' } },
-    ],
-  },
-];
 
 /* ───────────────────────── WEEKLY THEME (days + 4 outcomes + answer mapping) ───────────────────────── */
 

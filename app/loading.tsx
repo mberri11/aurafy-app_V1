@@ -24,6 +24,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '@/src/themes/ThemeProvider';
 import { AURA_V2, AURA_SPECTRUM_STOPS, FLAG_DUO, FLAG_DUO_STOPS, categoryForModule, flagOutcomeKey, flagOutcomeTheme, isDualFlagModule, isPrismModule, moduleTheme } from '@/src/themes/categoryTheme';
+import AuraOrb from '@/src/components/AuraOrb';
 import { useReadingStore } from '@/src/store/readingStore';
 import { useUserStore } from '@/src/store/userStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
@@ -615,23 +616,29 @@ export default function LoadingScreen() {
             <View style={[styles.handle, { backgroundColor: theme.borderStrong }]} />
 
             {/* Glowing category orb + expanding pulse ring (ad_gate_animation frames).
-                Aura used to swap in the Prism Orb here; with the orb retired
-                (2026-07-25) it takes the same glowing sphere as every other module. */}
+                Aura keeps the base PRISM ORB here (AURA_PRISM_V2) — the gate sits on the
+                obsidian field with the spectrum dots, and a flat violet sphere read as a
+                different module. Restored 2026-07-26; the Flame glyph stays the module's
+                mark everywhere pre-quiz. */}
             <View style={styles.orbWrap}>
               <Animated.View
                 style={[styles.orbRing, { borderColor: prism ? AURA_V2.silver : gateAccent }, ringStyle]}
               />
-              <Svg width={ORB_SIZE} height={ORB_SIZE}>
-                <Defs>
-                  <RadialGradient id="gate_orb" cx="38%" cy="32%" r="78%">
-                    <Stop offset="0%" stopColor={gateSoft} stopOpacity={1} />
-                    <Stop offset="55%" stopColor={gateAccent} stopOpacity={0.9} />
-                    <Stop offset="100%" stopColor={theme.background} stopOpacity={0.92} />
-                  </RadialGradient>
-                </Defs>
-                <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={ORB_SIZE / 2} fill="url(#gate_orb)" />
-                <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={rs(2.6)} fill="#FFFFFF" />
-              </Svg>
+              {prism ? (
+                <AuraOrb size={ORB_SIZE} mode="base" />
+              ) : (
+                <Svg width={ORB_SIZE} height={ORB_SIZE}>
+                  <Defs>
+                    <RadialGradient id="gate_orb" cx="38%" cy="32%" r="78%">
+                      <Stop offset="0%" stopColor={gateSoft} stopOpacity={1} />
+                      <Stop offset="55%" stopColor={gateAccent} stopOpacity={0.9} />
+                      <Stop offset="100%" stopColor={theme.background} stopOpacity={0.92} />
+                    </RadialGradient>
+                  </Defs>
+                  <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={ORB_SIZE / 2} fill="url(#gate_orb)" />
+                  <Circle cx={ORB_SIZE / 2} cy={ORB_SIZE / 2} r={rs(2.6)} fill="#FFFFFF" />
+                </Svg>
+              )}
             </View>
 
             <Text style={[styles.gateEyebrow, { color: prism ? AURA_V2.pearl : gateAccent }]}>
