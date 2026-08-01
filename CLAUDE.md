@@ -339,8 +339,8 @@ send; keep the share **button** for organic growth, just no stars); the daily ar
 |---|---|---|
 | Reading | **solo −1 · compare −2 · triangle −3 · circle −5** | Circle = 4–10 people. |
 | Unlock full result + share card | **−1** *(or watch a rewarded ad)* | Option C gate on `result.tsx` — headline is free, insight bullets + saveable/shareable card unlock here. |
-| Theme unlock | **−30** | Was 50. |
-| Module unlock | **−20 to −30** | Aura + future locked modules. |
+| Theme unlock | **−15 to −20** | Desert Oracle −20 · Elven Grove −15 (lowered 2026-07-30, were 30 / 25; theme unlock was 50 before that). |
+| Module unlock | **−15 to −20** | Who will hurt me −20 · Shadow self −20 · Red/green flag −15 (lowered 2026-07-30, were 30 / 30 / 25). |
 | OST unlock | **−20 to −30** | Ambient soundtracks. |
 | Extra daily reading | **−3** | 2nd daily question same day. Does **not** count toward the streak or weekly report. |
 

@@ -37,8 +37,8 @@ interface ThemeEntry {
 
 const THEMES: ThemeEntry[] = [
   { id: 'cosmic', gradient: cosmicTheme.gradient, cost: 0 },
-  { id: 'desertOracle', gradient: desertOracleTheme.gradient, cost: 30 },
-  { id: 'elvenGrove', gradient: elvenGroveTheme.gradient, cost: 25 },
+  { id: 'desertOracle', gradient: desertOracleTheme.gradient, cost: 20 },
+  { id: 'elvenGrove', gradient: elvenGroveTheme.gradient, cost: 15 },
 ];
 
 // Placeholder themes — locked, "Soon". Subtle 2-stops sampled around the design's
@@ -202,8 +202,11 @@ export default function ThemeGalleryScreen() {
           setUnlock(null);
         }}
         onNeedMore={() => {
+          // Let the Modal commit visible=false before the route changes —
+          // dismissing and navigating in the same frame is what used to leave a
+          // dim stuck over the window.
           setUnlock(null);
-          router.push('/(tabs)/stars');
+          requestAnimationFrame(() => router.push('/(tabs)/stars'));
         }}
         onClose={() => setUnlock(null)}
       />

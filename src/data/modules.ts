@@ -79,7 +79,7 @@ export const MODULES: Module[] = [
     comingSoon: true,
   },
   {
-    // Star-unlocked module (30★) — LIVE (content shipped 2026-07-12). Warm scarlet
+    // Star-unlocked module (20★) — LIVE (content shipped 2026-07-12). Warm scarlet
     // "warning" accent (warmed from pure red 2026-07-12 — read cool on the loader),
     // distinct from who_hates_me's pink and who_cut_off's orange. Matches
     // MODULE_THEMES.who_will_hurt_me.
@@ -91,10 +91,10 @@ export const MODULES: Module[] = [
     iconName: 'SmileySad',
     color: '#F0563C',
     framework: 'sociometry',
-    unlockCost: 30,
+    unlockCost: 20,
   },
   {
-    // Star-unlocked module (25★) — LIVE (content shipped 2026-07-19). Same warm
+    // Star-unlocked module (15★) — LIVE (content shipped 2026-07-19). Same warm
     // scarlet as who_will_hurt_me per Simo's ship spec; flag motif keeps them
     // apart. Matches MODULE_THEMES.red_green_flag.
     id: 'red_green_flag',
@@ -103,7 +103,7 @@ export const MODULES: Module[] = [
     iconName: 'FlagPennant',
     color: '#F0563C',
     framework: 'mixed',
-    unlockCost: 25,
+    unlockCost: 15,
     // SOLO + COMPARE only: at 3+ people the signed 20 picks spread too thin and
     // every read collapses to "no clear signal" (see availableModes doc).
     availableModes: ['solo', 'compare'],
@@ -160,7 +160,7 @@ export const MODULES: Module[] = [
     comingSoon: true,
   },
   {
-    // Star-unlocked module (30★) — LIVE (content shipped 2026-07-12). Jungian shadow-work
+    // Star-unlocked module (20★) — LIVE (content shipped 2026-07-12). Jungian shadow-work
     // solo read; twilight indigo. Matches MODULE_THEMES.shadow_self.
     // The glyph is a PAIR (Simo, 2026-07-25): MaskSad tilted behind + MaskHappy in
     // front — the face you show over the side you hide. `iconName` names the front
@@ -171,7 +171,7 @@ export const MODULES: Module[] = [
     iconName: 'MaskHappy',
     color: '#6366F1',
     framework: 'mixed',
-    unlockCost: 30,
+    unlockCost: 20,
   },
   {
     // Placeholder — locked "Coming soon" card on Home (no reading content yet).

@@ -14,8 +14,8 @@
 // Reached from Settings → Developer (only rendered when __DEV__).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
 import { Redirect, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -45,7 +45,15 @@ import {
   type NotifyKind,
 } from '@/src/utils/notifications';
 import { rs } from '@/src/utils/responsive';
-import { ADS_AVAILABLE } from '@/src/ads/adsRuntime';
+import {
+  ADS_AVAILABLE,
+  debugForceEeaConsent,
+  getConsentDebugSnapshot,
+  openPrivacyOptionsForm,
+  setDevForcePrivacyRow,
+  useDevForcePrivacyRow,
+  type ConsentDebugSnapshot,
+} from '@/src/ads/adsRuntime';
 import { useInterstitialAd } from '@/src/ads/useInterstitialAd';
 import { useRewardedAd } from '@/src/ads/useRewardedAd';
 import AdBanner from '@/src/ads/AdBanner';
@@ -87,6 +95,39 @@ export default function DevPanelScreen() {
   const onForceEligible = () => {
     forceEligible();
     setGateTick((n) => n + 1);
+  };
+
+  // ── UMP consent harness ────────────────────────────────────────────────────
+  // Session-only field (no persistence on purpose): the hashed test-device id is
+  // read out of logcat, and keeping it in state means no rebuild between the run
+  // that PRINTS the id and the run that USES it.
+  const forcePrivacyRow = useDevForcePrivacyRow();
+  const [testDeviceId, setTestDeviceId] = useState('');
+  const [consent, setConsent] = useState<ConsentDebugSnapshot | null>(null);
+  const [consentMsg, setConsentMsg] = useState('—');
+
+  const refreshConsent = () => {
+    void getConsentDebugSnapshot().then(setConsent);
+  };
+  useEffect(refreshConsent, []);
+
+  const onForceEea = () => {
+    const ids = testDeviceId.trim() ? [testDeviceId.trim()] : [];
+    setConsentMsg('running…');
+    void debugForceEeaConsent(ids).then((msg) => {
+      setConsentMsg(msg);
+      refreshConsent();
+      if (ids.length === 0) {
+        Alert.alert(
+          'No test device id',
+          'debugGeography only applies to REGISTERED test devices. Run `adb logcat | grep -i addTestDeviceHashedId`, paste the id into the field, and force EEA again.',
+        );
+      }
+    });
+  };
+
+  const onOpenPrivacyForm = () => {
+    void openPrivacyOptionsForm().then(refreshConsent);
   };
 
   const notReadyMsg = ADS_AVAILABLE
@@ -366,6 +407,59 @@ export default function DevPanelScreen() {
           <Btn label="Force eligible" onPress={onForceEligible} />
         </View>
 
+        {/* ── UMP consent (rehearse the EEA flow from a non-EEA device) ─── */}
+        <Text style={[styles.section, { color: theme.textDim }]}>CONSENT (UMP)</Text>
+        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+          <Stat k="status" v={consent?.status ?? (ADS_AVAILABLE ? 'unreadable' : 'n/a (Expo Go)')} />
+          <Stat
+            k="privacyOptions requirement"
+            v={consent?.privacyOptionsRequirementStatus ?? '—'}
+            accent={consent?.privacyOptionsRequirementStatus === 'REQUIRED'}
+          />
+          <Stat
+            k="settings row shows"
+            v={
+              consent?.privacyOptionsRequirementStatus === 'REQUIRED'
+                ? 'yes ✓ (required)'
+                : forcePrivacyRow
+                  ? 'yes — DEV forced (UI only)'
+                  : 'no (hidden)'
+            }
+            accent={forcePrivacyRow}
+          />
+          <Stat k="consent form available" v={consent?.isConsentFormAvailable ? 'yes ✓' : 'no'} />
+          <Stat
+            k="ad personalization"
+            v={consent ? (consent.npaOnly ? 'non-personalized' : 'personalized') : '—'}
+          />
+          <Stat k="last action" v={consentMsg} />
+        </View>
+        {/* Hashed device id — printed to LOGCAT (not Metro) by the native SDK. */}
+        <TextInput
+          value={testDeviceId}
+          onChangeText={setTestDeviceId}
+          placeholder="hashed test device id (from adb logcat)"
+          placeholderTextColor={theme.textDim}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          style={[
+            styles.input,
+            { backgroundColor: theme.surface, borderColor: theme.surfaceBorder, color: theme.text },
+          ]}
+        />
+        <View style={styles.row}>
+          <Btn label="Reset + force EEA" onPress={onForceEea} tone="rose" />
+          <Btn label="Open privacy form" onPress={onOpenPrivacyForm} tone="cyan" />
+          <Btn label="Refresh" onPress={refreshConsent} />
+          {/* UI-only: reveals the Settings row so its placement + 4 translations can be
+              checked without an EEA test device. Does not fake the consent state. */}
+          <Btn
+            label={`Force settings row: ${forcePrivacyRow ? 'ON' : 'off'}`}
+            onPress={() => setDevForcePrivacyRow(!forcePrivacyRow)}
+            tone={forcePrivacyRow ? 'gold' : 'glass'}
+          />
+        </View>
+
         {/* ── Stars (set balance for testing) ───────────────────────────── */}
         <Text style={[styles.section, { color: theme.textDim }]}>SET STARS</Text>
         <View style={styles.row}>
@@ -470,6 +564,15 @@ const styles = StyleSheet.create({
   statK: { fontSize: rs(12.5), fontFamily: 'HankenGrotesk_500Medium' },
   statV: { fontSize: rs(12.5), fontFamily: 'HankenGrotesk_700Bold', flexShrink: 1, textAlign: 'right' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: rs(8) },
+  input: {
+    borderRadius: rs(10),
+    borderWidth: 1,
+    paddingHorizontal: rs(12),
+    paddingVertical: rs(9),
+    marginBottom: rs(8),
+    fontSize: rs(12.5),
+    fontFamily: 'HankenGrotesk_500Medium',
+  },
   btn: {
     paddingHorizontal: rs(14),
     paddingVertical: rs(10),

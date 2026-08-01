@@ -107,6 +107,180 @@ async function resolveNpaOnly(AdsConsent: AdsConsentInterface): Promise<boolean>
   return !personalizationAllowed;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSENT REVOCATION — the persistent re-entry point AdMob requires.
+//
+// The startup flow above handles the FIRST consent decision only. A European
+// regulations message published with ad-unit deployment obliges the app to also
+// expose a way to REOPEN that choice later, which is what these two provide.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * TRUE only when Google says this user must be offered a persistent way to revisit
+ * their consent choice (EEA/UK/CH). Never throws: a missing native module (Expo Go),
+ * or consent info that was never requested, resolves FALSE so the caller simply
+ * hides the entry point rather than showing a row that opens nothing.
+ */
+export async function isPrivacyOptionsRequired(): Promise<boolean> {
+  if (!ADS_AVAILABLE) return false;
+  try {
+    const { AdsConsent } = require('react-native-google-mobile-ads');
+    const info = await AdsConsent.getConsentInfo();
+    // Widened to string for the same reason as resolveNpaOnly: importing
+    // AdsConsentPrivacyOptionsRequirementStatus as a VALUE would pull the native
+    // module in at import time and crash Expo Go.
+    const requirement: string = info.privacyOptionsRequirementStatus;
+    return requirement === 'REQUIRED';
+  } catch (err) {
+    logger.error('Privacy options requirement check failed:', err);
+    return false;
+  }
+}
+
+/**
+ * Reopen the UMP privacy options form so the user can CHANGE a choice already made.
+ *
+ * Re-resolving npaOnly afterwards is the whole point: without it the session would
+ * keep serving ads under the value read at STARTUP, so a user who just withdrew
+ * personalization would still receive personalized ads until the next cold start.
+ * Never throws to the caller.
+ */
+export async function openPrivacyOptionsForm(): Promise<void> {
+  if (!ADS_AVAILABLE) return;
+  try {
+    const { AdsConsent } = require('react-native-google-mobile-ads');
+    await AdsConsent.showPrivacyOptionsForm();
+    try {
+      setNpaOnly(await resolveNpaOnly(AdsConsent));
+    } catch (err) {
+      // The form COMPLETED, so the choice may have just changed and we can no longer
+      // read which way — fail closed, matching the startup flow's discipline.
+      logger.error('Re-reading consent after privacy options failed (assuming non-personalized):', err);
+      setNpaOnly(true);
+    }
+  } catch (err) {
+    // The form never opened, so nothing was changed — leave the existing stance
+    // alone rather than penalising a user who had validly consented.
+    logger.error('Privacy options form failed to open:', err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UMP DEBUG HARNESS — drives the dev panel's CONSENT section.
+//
+// From Morocco the real geography resolves to NOT_REQUIRED, so neither the consent
+// form nor the Settings "Privacy options" row can ever appear on device. Google's
+// debugGeography override is the only way to rehearse the EEA flow — and it is a
+// PARAMETER to requestInfoUpdate, not an AdMob console setting.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// DEV ONLY — force the Settings "Privacy options" row visible without an EEA test
+// device, so its rendering, placement in LEGAL and four translations (incl. AR RTL)
+// can be checked. This does NOT fake the consent state: tapping the row still calls
+// the real form, which outside the EEA rejects with "not required". It proves the UI,
+// never the requirement check. Same external-store shape as the npaOnly flag above,
+// so Settings re-renders the moment the dev panel toggles it.
+let devForceRow = false;
+const devForceRowListeners = new Set<() => void>();
+
+function getDevForcePrivacyRow(): boolean {
+  return devForceRow;
+}
+
+/** No-ops outside __DEV__ — a production build can never flip this on. */
+export function setDevForcePrivacyRow(next: boolean): void {
+  if (!__DEV__ || devForceRow === next) return;
+  devForceRow = next;
+  devForceRowListeners.forEach((listener) => {
+    try {
+      listener();
+    } catch {
+      /* one dead subscriber must not stop the rest */
+    }
+  });
+}
+
+function subscribeDevForcePrivacyRow(listener: () => void): () => void {
+  devForceRowListeners.add(listener);
+  return () => {
+    devForceRowListeners.delete(listener);
+  };
+}
+
+export function useDevForcePrivacyRow(): boolean {
+  return useSyncExternalStore(
+    subscribeDevForcePrivacyRow,
+    getDevForcePrivacyRow,
+    getDevForcePrivacyRow,
+  );
+}
+
+export interface ConsentDebugSnapshot {
+  status: string;
+  privacyOptionsRequirementStatus: string;
+  isConsentFormAvailable: boolean;
+  /** The live ad-personalization stance this consent state produced. */
+  npaOnly: boolean;
+}
+
+/** Read-only view of the SDK's current consent state. Null when unreadable. */
+export async function getConsentDebugSnapshot(): Promise<ConsentDebugSnapshot | null> {
+  if (!ADS_AVAILABLE) return null;
+  try {
+    const { AdsConsent } = require('react-native-google-mobile-ads');
+    const info = await AdsConsent.getConsentInfo();
+    return {
+      status: String(info.status),
+      privacyOptionsRequirementStatus: String(info.privacyOptionsRequirementStatus),
+      isConsentFormAvailable: info.isConsentFormAvailable === true,
+      npaOnly,
+    };
+  } catch (err) {
+    logger.error('Consent snapshot failed:', err);
+    return null;
+  }
+}
+
+/**
+ * DEV ONLY — wipe the stored consent state and re-request it as if the device sat in
+ * the EEA, then show the first-consent form. Returns a short line for the dev panel.
+ *
+ * Google honours `debugGeography` **only on registered test devices**, so `testDeviceIds`
+ * must carry this device's hashed id. That id is printed by the NATIVE SDK to logcat
+ * (never Metro) as `addTestDeviceHashedId("…")` the first time an unregistered device
+ * requests consent — so run this once with the field empty, read the id out of
+ * `adb logcat`, paste it in, and run it again.
+ *
+ * Hard-gated on __DEV__: AdsConsent.reset() would destroy a real user's recorded consent,
+ * and this route file is registered in production builds too.
+ */
+export async function debugForceEeaConsent(testDeviceIds: string[]): Promise<string> {
+  if (!__DEV__) return 'Disabled outside __DEV__.';
+  if (!ADS_AVAILABLE) return 'Needs a dev/EAS build — no native module in Expo Go.';
+  try {
+    const { AdsConsent, AdsConsentDebugGeography } = require('react-native-google-mobile-ads');
+    AdsConsent.reset();
+    await AdsConsent.requestInfoUpdate({
+      debugGeography: AdsConsentDebugGeography.EEA,
+      testDeviceIdentifiers: testDeviceIds,
+    });
+    await AdsConsent.loadAndShowConsentFormIfRequired();
+    try {
+      setNpaOnly(await resolveNpaOnly(AdsConsent));
+    } catch (err) {
+      logger.error('Re-reading consent after force-EEA failed (assuming non-personalized):', err);
+      setNpaOnly(true);
+    }
+    const info = await AdsConsent.getConsentInfo();
+    return `${info.status} · privacyOptions ${info.privacyOptionsRequirementStatus}`;
+  } catch (err) {
+    // The usual cause is an unregistered device: the override is ignored and the form
+    // never shows. Check logcat for the hashed id line.
+    logger.error('Force-EEA consent failed:', err);
+    return `Failed: ${err instanceof Error ? err.message : String(err)}`;
+  }
+}
+
 /**
  * Initialize the Mobile Ads SDK exactly once. Safe to call on every app start —
  * no-ops in Expo Go and no-ops on repeat calls. Fire-and-forget: never blocks or

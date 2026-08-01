@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { AppText as Text } from '@/src/components/AppText';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FLAG_DUO, isDualFlagModule } from '../themes/categoryTheme';
 import { useTranslation } from 'react-i18next';
@@ -73,13 +72,6 @@ export default function ModuleUnlockDialog({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
       <Pressable style={styles.backdrop} onPress={onClose} accessibilityRole="button">
-        <BlurView
-          intensity={40}
-          tint="dark"
-          experimentalBlurMethod="dimezisBlurView"
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-        />
         <Animated.View style={cardStyle}>
           <Pressable
             style={[styles.card, { backgroundColor: theme.bg2, borderColor: theme.borderStrong }]}
@@ -188,7 +180,10 @@ export default function ModuleUnlockDialog({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(4,5,15,0.35)',
+    // Opaque-ish scrim instead of a BlurView — same reason as ThemeUnlockDialog:
+    // `dimezisBlurView` leaves a stuck native dim over the window when the Modal
+    // is dismissed in the same frame as a navigation.
+    backgroundColor: 'rgba(4,5,15,0.62)',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: rs(40),

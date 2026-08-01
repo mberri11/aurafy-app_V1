@@ -9,7 +9,6 @@ import {
 import { AppText as Text } from '@/src/components/AppText';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../themes/ThemeProvider';
@@ -71,13 +70,6 @@ export default function ThemeUnlockDialog({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
       <Pressable style={styles.backdrop} onPress={onClose} accessibilityRole="button">
-        <BlurView
-          intensity={40}
-          tint="dark"
-          experimentalBlurMethod="dimezisBlurView"
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-        />
         <Animated.View style={cardStyle}>
           <Pressable
             style={[styles.card, { backgroundColor: theme.bg2, borderColor: theme.borderStrong }]}
@@ -178,7 +170,12 @@ export default function ThemeUnlockDialog({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(4,5,15,0.35)',
+    // Opaque-ish scrim instead of a BlurView: expo-blur's experimental
+    // `dimezisBlurView` backend attaches a native surface that can fail to
+    // detach when this Modal is dismissed in the same frame as a router.push,
+    // leaving the whole window dimmed until the app is killed. Higher alpha
+    // carries the same depth without a native layer.
+    backgroundColor: 'rgba(4,5,15,0.62)',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: rs(40),

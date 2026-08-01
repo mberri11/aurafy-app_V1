@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   I18nManager,
   Linking,
@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 import Constants from 'expo-constants';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useUserStore } from '@/src/store/userStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
 import { useTheme } from '@/src/themes/ThemeProvider';
@@ -24,6 +24,11 @@ import Slider from '@/src/components/Slider';
 import TimeWheelSheet from '@/src/components/TimeWheelSheet';
 import ConfirmSheet, { type ConfirmSheetIcon } from '@/src/components/ConfirmSheet';
 import { PERSISTENT_BANNER_RESERVE } from '@/src/components/PersistentBanner';
+import {
+  isPrivacyOptionsRequired,
+  openPrivacyOptionsForm,
+  useDevForcePrivacyRow,
+} from '@/src/ads/adsRuntime';
 import i18n from '@/src/i18n';
 import { clear as storageClear } from '@/src/utils/storage';
 import { reloadApp } from '@/src/utils/reloadApp';
@@ -44,6 +49,13 @@ const MODE_OPTIONS: ReadingMode[] = ['solo', 'compare', 'triangle', 'circle'];
 
 const PRIVACY_URL = 'https://aurafyapp.github.io/aurafy-legal/privacy.html';
 const TERMS_URL = 'https://aurafyapp.github.io/aurafy-legal/terms.html';
+// Socials stay plain https: Instagram/TikTok/X all publish verified Android App Links,
+// so these open the installed app when present and the browser otherwise. Custom
+// schemes (instagram://, tiktok://) would need <queries> in the native manifest for
+// zero added benefit.
+const INSTAGRAM_URL = 'https://www.instagram.com/aurafy_app';
+const TIKTOK_URL = 'https://www.tiktok.com/@aurafy.app';
+const X_URL = 'https://x.com/aurafy_appX';
 // market:// opens the Play Store app straight to the listing (Rate). The https form is
 // what we SHARE — it resolves in any app/browser and still deep-links to Play on device.
 const STORE_URL = 'market://details?id=com.simobr.aurafy';
@@ -71,6 +83,7 @@ function Row({
   label,
   sublabel,
   value,
+  leading,
   right,
   chevron,
   destructive,
@@ -80,6 +93,8 @@ function Row({
   label: string;
   sublabel?: string;
   value?: string;
+  /** Optional glyph shown before the label (used by the FOLLOW rows). */
+  leading?: React.ReactNode;
   right?: React.ReactNode;
   chevron?: boolean;
   destructive?: boolean;
@@ -90,6 +105,7 @@ function Row({
   const isRTL = useIsRTL();
   const inner = (
     <View style={[styles.row, disabled && styles.rowDisabled]}>
+      {leading ? <View style={styles.rowIcon}>{leading}</View> : null}
       <View style={styles.rowText}>
         <Text style={[styles.rowLabel, { color: destructive ? theme.rose : theme.text }]}>{label}</Text>
         {sublabel ? <Text style={[styles.rowSub, { color: theme.textMuted }]}>{sublabel}</Text> : null}
@@ -149,6 +165,21 @@ export default function SettingsScreen() {
   const { clearHistory, resetAll: resetUser } = useUserStore();
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [sheet, setSheet] = useState<SheetConfig | null>(null);
+  // Consent revocation is offered ONLY where Google says it's required (EEA/UK/CH).
+  // Everywhere else the row stays absent — a row that opens nothing is worse than none.
+  const [privacyOptionsAvailable, setPrivacyOptionsAvailable] = useState(false);
+  // Dev-panel override — always false in production (see setDevForcePrivacyRow).
+  const devForcePrivacyRow = useDevForcePrivacyRow();
+
+  useEffect(() => {
+    let cancelled = false;
+    void isPrivacyOptionsRequired().then((required) => {
+      if (!cancelled) setPrivacyOptionsAvailable(required);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleLanguageChange = useCallback(
     (lang: Language) => {
@@ -256,22 +287,22 @@ export default function SettingsScreen() {
     void Linking.openURL(url).catch(() => {});
   }, []);
 
-  // Rate Aurafy — prefer the native in-app review popup (rate without leaving the app);
-  // fall back to opening the Play Store listing when it's unavailable (quota/emulator).
+  // Rate Aurafy — ALWAYS opens the Play Store listing. Deliberately not wired to
+  // expo-store-review: Google's In-App Review API is quota-limited and silently shows
+  // nothing while still resolving successfully, so an explicit "Rate" tap could do
+  // literally nothing. Google's own guidance is to keep that API off user-initiated
+  // rate controls (it stays a dep for a future natural-moment prompt).
+  // `openUrl` swallows errors, so the market:// leg is called directly to let the
+  // https fallback fire when the Play Store app is absent.
   const handleRate = useCallback(() => {
     void (async () => {
       try {
-        const StoreReview = await import('expo-store-review');
-        if ((await StoreReview.isAvailableAsync()) && (await StoreReview.hasAction())) {
-          await StoreReview.requestReview();
-          return;
-        }
+        await Linking.openURL(STORE_URL);
       } catch {
-        // fall through to the store listing
+        await Linking.openURL(STORE_URL_HTTPS).catch(() => {});
       }
-      openUrl(STORE_URL);
     })();
-  }, [openUrl]);
+  }, []);
 
   const handleContactUs = useCallback(() => {
     const subject = encodeURIComponent(CONTACT_SUBJECT);
@@ -423,7 +454,42 @@ export default function SettingsScreen() {
             // instead of re-entering the app. See app/onboarding.tsx.
             onPress={() => router.push({ pathname: '/onboarding', params: { replay: '1' } })}
           />
+        </GlassCard>
+
+        {/* FOLLOW — platform names are proper nouns, so they're NOT run through t().
+            Brand marks come from Ionicons (Feather/MCI have no TikTok glyph) and are
+            tinted with theme.text, monochrome — brand hexes would clash with the
+            cosmic palette and can't be hardcoded anyway. */}
+        <SectionHeader title={t('settings.follow')} />
+        <GlassCard style={styles.card}>
+          <Row
+            label="Instagram"
+            sublabel="@aurafy_app"
+            leading={<Ionicons name="logo-instagram" size={rs(18)} color={theme.text} />}
+            chevron
+            onPress={() => openUrl(INSTAGRAM_URL)}
+          />
           <Divider />
+          <Row
+            label="TikTok"
+            sublabel="@aurafy.app"
+            leading={<Ionicons name="logo-tiktok" size={rs(18)} color={theme.text} />}
+            chevron
+            onPress={() => openUrl(TIKTOK_URL)}
+          />
+          <Divider />
+          <Row
+            label="X"
+            sublabel="@aurafy_appX"
+            leading={<Ionicons name="logo-x" size={rs(18)} color={theme.text} />}
+            chevron
+            onPress={() => openUrl(X_URL)}
+          />
+        </GlassCard>
+
+        {/* SUPPORT */}
+        <SectionHeader title={t('settings.support')} />
+        <GlassCard style={styles.card}>
           <Row label={t('settings.rateApp')} chevron onPress={handleRate} />
           <Divider />
           <Row
@@ -432,11 +498,25 @@ export default function SettingsScreen() {
             onPress={() => void shareAppLink(`${t('settings.shareMessage')}\n${STORE_URL_HTTPS}`)}
           />
           <Divider />
+          <Row label={t('settings.contactUs')} chevron onPress={handleContactUs} />
+        </GlassCard>
+
+        {/* LEGAL */}
+        <SectionHeader title={t('settings.legal')} />
+        <GlassCard style={styles.card}>
           <Row label={t('settings.privacyPolicy')} chevron onPress={() => openUrl(PRIVACY_URL)} />
           <Divider />
           <Row label={t('settings.termsOfUse')} chevron onPress={() => openUrl(TERMS_URL)} />
-          <Divider />
-          <Row label={t('settings.contactUs')} chevron onPress={handleContactUs} />
+          {privacyOptionsAvailable || devForcePrivacyRow ? (
+            <>
+              <Divider />
+              <Row
+                label={t('settings.privacyOptions')}
+                chevron
+                onPress={() => void openPrivacyOptionsForm()}
+              />
+            </>
+          ) : null}
         </GlassCard>
 
         {/* DATA */}
@@ -538,6 +618,8 @@ const styles = StyleSheet.create({
     gap: rs(12),
   },
   rowDisabled: { opacity: 0.4 },
+  // Fixed slot so the three FOLLOW labels align despite differing glyph widths.
+  rowIcon: { width: rs(22), alignItems: 'center' },
   rowText: { flex: 1, gap: rs(3) },
   rowLabel: { fontSize: rs(14), fontFamily: 'HankenGrotesk_500Medium' },
   rowSub: { fontSize: rs(12), fontFamily: 'HankenGrotesk_400Regular' },

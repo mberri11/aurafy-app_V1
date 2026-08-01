@@ -329,8 +329,10 @@ export default function ModuleDetailScreen() {
         balance={stars}
         onConfirm={handleConfirmUnlock}
         onNeedMore={() => {
+          // Defer the push one frame so the Modal dismisses first (see
+          // theme-gallery.tsx — same stuck-overlay guard).
           setShowUnlock(false);
-          router.push('/(tabs)/stars');
+          requestAnimationFrame(() => router.push('/(tabs)/stars'));
         }}
         onClose={() => setShowUnlock(false)}
       />
