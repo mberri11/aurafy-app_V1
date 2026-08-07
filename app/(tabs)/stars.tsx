@@ -60,6 +60,10 @@ function useReasonLabel() {
           return t('stars.reasonStreak');
         case 'refund':
           return t('stars.reasonRefund');
+        // Distinct from a plain refund on purpose — the ledger should say WHY the
+        // stars came back (a reading that recorded no signal at all).
+        case 'zero_signal_refund':
+          return t('stars.reasonZeroRefund');
         default:
           return reason;
       }

@@ -9,9 +9,33 @@ export const whoJealousResults: MultiResults = {
   },
   tieTemplate: {
     en: 'The envy is tied — {names} are watching you with the same quiet edge.',
-    fr: 'The envy is tied — {names} are watching you with the same quiet edge.',
-    ar: 'The envy is tied — {names} are watching you with the same quiet edge.',
-    es: 'The envy is tied — {names} are watching you with the same quiet edge.',
+    fr: "L'envie est à égalité — {names} t'observent avec la même pointe silencieuse.",
+    ar: 'الغيرة متعادلة — {names} يراقبانك بالحدّة الصامتة نفسها.',
+    es: 'La envidia está empatada — {names} te miran con el mismo filo silencioso.',
+  },
+  clusterTitle: {
+    en: 'Envy All Around',
+    fr: "L'envie tout autour",
+    ar: 'غيرة من كل جهة',
+    es: 'Envidia por todas partes',
+  },
+  clusterLine: {
+    en: "The envy doesn't sit with one person — a little of it is coming from every direction.",
+    fr: "L'envie ne tient pas à une seule personne — il en vient un peu de chaque direction.",
+    ar: 'الغيرة لا تخصّ شخصًا واحدًا — يأتي قليل منها من كل اتجاه.',
+    es: 'La envidia no está en una sola persona — llega un poco desde cada dirección.',
+  },
+  zeroTitle: {
+    en: 'No Envy Registered',
+    fr: 'Aucune envie enregistrée',
+    ar: 'لم تُسجَّل أي غيرة',
+    es: 'Ninguna envidia registrada',
+  },
+  zeroLine: {
+    en: "Nothing registered this time — which isn't the same as nothing being there.",
+    fr: "Rien ne s'est enregistré cette fois — ce qui ne veut pas dire qu'il n'y a rien.",
+    ar: 'لم يُسجَّل شيء هذه المرة — وهذا لا يعني أن لا شيء موجود.',
+    es: 'Nada se registró esta vez — lo cual no significa que no haya nada.',
   },
   shareLines: {
     envy_mirroring: {

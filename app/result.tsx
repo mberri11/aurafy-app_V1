@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BackHandler,
+  LayoutChangeEvent,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -13,6 +14,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedScrollHandler,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
@@ -111,6 +115,10 @@ export default function ResultScreen() {
 
   useEffect(() => {
     if (!result || isViewOnly) return;
+    // A zero-signal read has no content — saving it would leave a dead row in History
+    // that reopens to "No Signal" and nothing else. The attempt was refunded in
+    // loading.tsx, so it costs the user nothing and leaves no trace.
+    if (result.isZeroSignal) return;
     const reading: Reading = {
       id: generateId(),
       moduleId: currentModuleId,
@@ -206,9 +214,49 @@ export default function ResultScreen() {
       // capture unavailable — fall through to the text share
     }
     const insights = result.insights.map((i) => i[language] ?? i.en).join('\n\n');
-    const text = `My Aurafy reading:\n\n${insights}\n\n— ${result.confidence}% confidence`;
+    // A clustered ("too close to call") or zero-signal ("no signal recorded") read makes
+    // no confidence claim on screen — appending "— 50% confidence" here contradicted it.
+    // Drop the suffix entirely rather than substituting another number. Read off `result`
+    // (not the render-scope flags, which are declared further down) so the deps stay [result].
+    const noConfidenceClaim = result.isClustered === true || result.isZeroSignal === true;
+    const text = noConfidenceClaim
+      ? `My Aurafy reading:\n\n${insights}`
+      : `My Aurafy reading:\n\n${insights}\n\n— ${result.confidence}% confidence`;
     await shareResult(text);
   }, [result, language, t, captureCard]);
+
+  // Top-edge scrim (mirrors the bottom bar's fade). Its OPACITY rides the scroll
+  // instead of being painted permanently: the ambient field gradient + the bloom/orb
+  // Svg glows are painted BELOW the ScrollView, so a permanently-opaque strip would
+  // flatten that glow inside the status-bar band and change the header at rest. Fading
+  // it in over the first rs(24) of scroll keeps position 0 pixel-for-pixel as it is,
+  // and only masks the band once there is scrolling content to mask.
+  //
+  // rs() is a PLAIN JS function — calling it inside a worklet crashes the screen
+  // ("Tried to synchronously call a non-worklet function on the UI thread"), so every
+  // dp value is resolved here on the JS thread and the worklets close over numbers only.
+  const SCRIM_FADE_IN = rs(24); // scroll distance over which the scrim reaches full
+  const SCRIM_TAIL = rs(8); // fade-out height below the status bar
+  const scrimH = insets.top + SCRIM_TAIL;
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+  const topScrimStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, SCRIM_FADE_IN], [0, 1], Extrapolation.CLAMP),
+  }));
+
+  // The sticky action bar's REAL height, measured. Its height is not one number: it
+  // changes with the tier (Share row present only when unlocked), with the zero-signal
+  // single-button row, with a button label that wraps to two lines (GradientButton is
+  // minHeight, not height), with the transient "saved" line, and with the bottom inset.
+  // The old hardcoded paddingBottom was a guess against all of that and lost — insight
+  // text scrolled to rest underneath the buttons. onLayout is exact in every state.
+  const [actionBarH, setActionBarH] = useState(0);
+  const onActionBarLayout = useCallback((e: LayoutChangeEvent) => {
+    const h = Math.round(e.nativeEvent.layout.height);
+    setActionBarH((prev) => (prev === h ? prev : h));
+  }, []);
 
   // Save-to-gallery beside Share, with a transient confirmation line.
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
@@ -276,6 +324,20 @@ export default function ResultScreen() {
     router.navigate('/(tabs)');
   }, [maybeInterstitialOnExit]);
 
+  // Zero-signal: the only sensible next step is to answer again. Straight back to
+  // person-entry for the SAME module/mode, with the refunded star (or the restored free
+  // trial) already back in the wallet, so the retake costs what the first attempt did.
+  // dismissAll first, for the same reason handleTryAnother does it — otherwise the dead
+  // quiz/loading screens stay alive under the new one.
+  const handleRetake = useCallback(() => {
+    lightTap();
+    router.dismissAll();
+    router.navigate({
+      pathname: '/person-entry',
+      params: { moduleId: currentModuleId, mode: currentMode },
+    });
+  }, [currentModuleId, currentMode]);
+
   const handleSaveExit = useCallback(() => {
     lightTap();
     maybeInterstitialOnExit();
@@ -318,6 +380,10 @@ export default function ResultScreen() {
   // outcome colour itself (violet button for Violet, gold for Gold…); rares keep their
   // obsidian/pearl pill.
   const chromaticAura = isAura && !!skin && !isRare;
+  // Top scrim ink: fieldGradient[0] is literally what the ambient base paints at y = 0,
+  // so the scrim is invisible against it — the action bar's flat theme.background would
+  // read as a band up here, where the field gradient is at its lightest.
+  const topScrimColor = isAura ? AURA_V2.obsidian : theme.fieldGradient[0];
   // RED/GREEN dual identity: red_green_flag re-colors per OUTCOME like aura does —
   // green (none/low), amber (medium "Mixed Signals"), red (high + every circle read).
   // Accent-pair only; name/bar/CTA keep the standard white-name + accent treatment.
@@ -356,7 +422,17 @@ export default function ResultScreen() {
   // arbitrary single winner. Readings persisted before ties shipped carry neither
   // field → [] → normal single-winner path.
   const tiedWinners = result.tiedWinners ?? [];
-  const isTie = isMulti && tiedWinners.length > 1;
+  // CLUSTERED: a flat read across 3+ people. Nobody is crowned — the big title is the
+  // name-free clusterTitle and the confidence row becomes "too close to call". Older
+  // persisted readings carry neither field → normal winner/tie path.
+  // ZERO-SIGNAL: nobody was picked once. It reuses clusterTitle (holding the zeroTitle),
+  // so it must be excluded from isClustered — the two say different things and show
+  // different lines where the confidence bar was.
+  const clusterTitle = result.clusterTitle?.[language] ?? result.clusterTitle?.en ?? null;
+  const isZeroSignal = isMulti && !isCount && result.isZeroSignal === true;
+  const isClustered = isMulti && !isCount && !isZeroSignal && !!clusterTitle;
+  // Zero-signal leaves everyone tied at 0 — that is an absence, not a tie verdict.
+  const isTie = isMulti && !isClustered && !isZeroSignal && tiedWinners.length > 1;
   // Verdict line under the reveal name — the winner template minus the name itself
   // ("Simo loves you the most." → "loves you the most.", per the Result PNGs). Shown for
   // EVERY multi reading with a winner, not just single-person ones. On a tie,
@@ -367,17 +443,17 @@ export default function ResultScreen() {
   // red_green_flag: the big title shows the VERDICT (band name / group-verdict
   // title), never a person's name — the name lives in the subtitle + share card.
   const isFlag = isDualFlagModule(result.moduleId);
-  const winnerSubtitle = isTie
-    ? winnerSentence
-    : isCount
-      ? winnerSentence // the tiered template already reads as a full descriptive sentence
-      : isFlag
-        ? winnerSentence // the group-verdict sentence already reads whole and names people
-        : isMulti && result.winner
-          ? result.verdictLine?.[language] ??
-            result.verdictLine?.en ??
-            winnerSentence.replace(`${result.winner.name} `, '')
-          : null;
+  const winnerSubtitle =
+    // clustered → the clusterLine; zero-signal → the zeroLine; tie → the tie verdict;
+    // count → the tiered template; flag → the group-verdict sentence. All already read
+    // as whole, self-contained sentences.
+    isClustered || isZeroSignal || isTie || isCount || isFlag
+      ? winnerSentence
+      : isMulti && result.winner
+        ? result.verdictLine?.[language] ??
+          result.verdictLine?.en ??
+          winnerSentence.replace(`${result.winner.name} `, '')
+        : null;
 
   // red_green_flag big title = the VERDICT, never a name:
   //   • SOLO    → the single person's real band title (result.bands[thePerson])
@@ -403,25 +479,43 @@ export default function ResultScreen() {
       : isCount
         ? `${result.confidence}%`
         : isMulti
-          ? isTie
-            ? joinNames(tiedWinners.map((p) => p.name), language)
-            : result.winner?.name ?? ''
+          ? // Clustered and zero-signal reads crown NOBODY — the name-free verdict IS
+            // the title (clusterTitle carries both).
+            clusterTitle ??
+            (isTie
+              ? joinNames(tiedWinners.map((p) => p.name), language)
+              : result.winner?.name ?? '')
           : (verdictWord?.[language] ?? verdictWord?.en ?? '');
 
   const confidence = result.confidence;
-  // §3: percentile of this confidence against the user's own past readings (strictly
-  // lower count, so a reading never ranks above itself when viewed from History).
-  const showPercentile = priorConfidences.length >= 5;
+  // §3: percentile of this confidence against the user's OTHER past readings. The
+  // numerator is a strict `<`, so an equal-scoring reading never counts as beaten and
+  // a reading can never rank above itself.
+  //
+  // The pool must also EXCLUDE the reading being described, on both routes. A fresh
+  // reading gets that for free — the snapshot is taken before the save effect runs —
+  // but a History reopen finds itself already in `history` and was padding its own
+  // denominator, so the same reading read 100% at reveal and 83% when reopened. Drop
+  // one entry on the reopen and the two agree.
+  const priorCount = priorConfidences.length - (isViewOnly ? 1 : 0);
+  const showPercentile = priorCount >= 5;
   const percentile = showPercentile
-    ? Math.round((priorConfidences.filter((c) => c < confidence).length / priorConfidences.length) * 100)
+    ? Math.round((priorConfidences.filter((c) => c < confidence).length / priorCount) * 100)
     : 0;
   const bullets = result.insights.slice(1);
-  const maxScore = Math.max(...Object.values(result.scores), 1);
-  // Total signal actually recorded (with the "No one" option, this can be less than
-  // the question count — questions that pointed at nobody award nothing). Drives the
-  // comparison LABEL; the bar itself stays leader-relative so a clear winner in a
-  // 5-person circle still reads strong instead of a weak-looking 40%.
-  const totalSignal = Object.values(result.scores).reduce((sum, v) => sum + v, 0);
+  // EVERY number on the comparison card — bar length, the "N signals" count and the
+  // share percentage — comes from the same UNWEIGHTED pick counts that decide the
+  // winner. Nothing on this screen may be derived from the weighted `scores`: that is
+  // exactly what let a bar contradict the verdict above it. Readings persisted before
+  // pickCounts existed fall back to `scores`, which for them WAS the displayed number.
+  const cardCounts = result.pickCounts ?? result.scores;
+  // Leader-relative bar, so a clear winner in a 5-person circle still reads strong
+  // instead of a weak-looking 40%. Floors at 1 so a zero-signal read divides safely
+  // (0/1 = an empty track for everyone).
+  const maxPicks = Math.max(...Object.values(cardCounts), 1);
+  // Total signal actually recorded — with the "No one" option this can be less than
+  // the question count, since questions that pointed at nobody award nothing.
+  const pickTotal = Object.values(cardCounts).reduce((sum, v) => sum + v, 0);
   // Persons for the comparison card: live session persons for a fresh reading,
   // the persisted persons for a History reopen (session state is empty there —
   // this is what fixed the empty "THE FULL PICTURE" card).
@@ -472,13 +566,21 @@ export default function ResultScreen() {
       </Svg>
 
 
-      <ScrollView
+      <Animated.ScrollView
         style={styles.flex}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[
           styles.content,
           {
             paddingTop: insets.top + rs(28),
-            paddingBottom: isViewOnly ? insets.bottom + rs(124) : insets.bottom + rs(184),
+            // Clear the sticky bar by MEASUREMENT, not by a constant. actionBarH already
+            // includes the bar's own padding and the bottom inset; rs(24) is breathing
+            // room so the last line rests clear of it rather than touching. The old
+            // constants stand in only for the single frame before first layout.
+            paddingBottom: actionBarH
+              ? actionBarH + rs(24)
+              : insets.bottom + (isViewOnly ? rs(124) : rs(184)),
           },
         ]}
         showsVerticalScrollIndicator={false}
@@ -533,8 +635,10 @@ export default function ResultScreen() {
               multi-layer glow read as a blurry doubled name on device. */}
           <Text
             style={[styles.bigTitle, { color: nameColor, textShadowColor: nameGlow }]}
-            // Tied reveals join 2+ names — let them wrap before auto-shrinking.
-            numberOfLines={isTie ? 3 : 1}
+            // Tied reveals join 2+ names — let them wrap before auto-shrinking. Cluster
+            // and zero-signal titles run 2–4 words, so give them a second line rather
+            // than shrinking "Quiet Admiration Everywhere" to fit one.
+            numberOfLines={isClustered || isZeroSignal ? 2 : isTie ? 3 : 1}
             adjustsFontSizeToFit
           >
             {bigTitle}
@@ -553,44 +657,60 @@ export default function ResultScreen() {
           )}
         </Animated.View>
 
-        {/* Confidence */}
+        {/* Confidence — a clustered read has no confidence to claim and a zero-signal
+            read has nothing to be confident ABOUT, so for both the headline, the
+            percentile and the bar are replaced by one honest line. */}
         <GlassCard style={styles.card}>
-          {(() => {
-            // Count path relabels this as "Signal strength: N%" — the same honest ratio,
-            // just not phrased as a confidence-in-a-verdict claim. Same bar, same number.
-            const head = t(isCount ? 'result.count.signalStrength' : 'result.confidenceHeadline', {
-              confidence,
-            });
-            const token = `${confidence}%`;
-            const parts = head.split(token);
-            return (
-              <Text style={[styles.confHead, { color: theme.text }]}>
-                {parts[0]}
-                <Text
-                  style={{
-                    // Aura: the % takes the literal outcome ink (Black = near-black lit by a
-                    // silver halo so it stays legible; White = white; chromatics = their hue).
-                    color: isAura ? nameColor : accent,
-                    fontFamily: 'HankenGrotesk_700Bold',
-                    ...(isRare
-                      ? { textShadowColor: nameGlow, textShadowRadius: rs(7), textShadowOffset: { width: 0, height: 0 } }
-                      : null),
-                  }}
-                >
-                  {token}
-                </Text>
-                {parts.slice(1).join(token)}
-              </Text>
-            );
-          })()}
-          {showPercentile && (
-            <Text style={[styles.confSub, { color: theme.textDim }]}>
-              {t('result.confidenceSub', { pct: percentile })}
+          {isZeroSignal || isClustered ? (
+            <Text style={[styles.confHead, { color: theme.text }]}>
+              {t(isZeroSignal ? 'result.noSignal' : 'result.tooClose')}
             </Text>
+          ) : (
+            <>
+              {(() => {
+                // Count path relabels this as "Signal strength: N%" — the same honest ratio,
+                // just not phrased as a confidence-in-a-verdict claim. Same bar, same number.
+                const head = t(isCount ? 'result.count.signalStrength' : 'result.confidenceHeadline', {
+                  confidence,
+                });
+                const token = `${confidence}%`;
+                const parts = head.split(token);
+                return (
+                  <Text style={[styles.confHead, { color: theme.text }]}>
+                    {parts[0]}
+                    <Text
+                      style={{
+                        // Aura: the % takes the literal outcome ink (Black = near-black lit by a
+                        // silver halo so it stays legible; White = white; chromatics = their hue).
+                        color: isAura ? nameColor : accent,
+                        fontFamily: 'HankenGrotesk_700Bold',
+                        ...(isRare
+                          ? { textShadowColor: nameGlow, textShadowRadius: rs(7), textShadowOffset: { width: 0, height: 0 } }
+                          : null),
+                      }}
+                    >
+                      {token}
+                    </Text>
+                    {parts.slice(1).join(token)}
+                  </Text>
+                );
+              })()}
+              {/* Both ends of the scale are reachable and both read as nonsense as a
+                  percentage: 100 became "Higher than 100% of your readings" (it just
+                  means this is the best one so far — say that), and 0 would claim
+                  "Higher than 0%", which is worth less than silence. */}
+              {showPercentile && percentile > 0 && (
+                <Text style={[styles.confSub, { color: theme.textDim }]}>
+                  {percentile >= 100
+                    ? t('result.confidenceBest')
+                    : t('result.confidenceSub', { pct: percentile })}
+                </Text>
+              )}
+              <View style={[styles.bar, { backgroundColor: barTrack }]}>
+                <View style={[styles.barFill, { width: `${confidence}%`, backgroundColor: barFill }]} />
+              </View>
+            </>
           )}
-          <View style={[styles.bar, { backgroundColor: barTrack }]}>
-            <View style={[styles.barFill, { width: `${confidence}%`, backgroundColor: barFill }]} />
-          </View>
         </GlassCard>
 
         {/* Unlock card (minimal tier) — the rest of the reading sits behind Option C. */}
@@ -646,12 +766,15 @@ export default function ResultScreen() {
           <GlassCard style={styles.card}>
             <Text style={[styles.cardTitle, { color: theme.textDim }]}>{t('result.comparison')}</Text>
             {comparisonPersons.map((p) => {
-              const score = result.scores[p.id] ?? 0;
-              // Bar width = share OF THE LEADER (winner always fills). Label = the raw
-              // tally + share of total, so a 10–10 tie reads "10 / 20 · 50%" for both
+              // ONE number, three renderings: this person's unweighted pick count drives
+              // the bar length, the "N signals" label and the share percentage alike, so
+              // the card can never contradict the verdict above it.
+              const signalCount = cardCounts[p.id] ?? 0;
+              // Bar width = share OF THE LEADER (the winner always fills).
+              const pct = Math.round((signalCount / maxPicks) * 100);
+              // Share of all picks, so a 10–10 tie reads "10 signals · 50%" for both
               // instead of the old "100%" each, which implied "100% a red flag".
-              const pct = Math.round((score / maxScore) * 100);
-              const sharePct = totalSignal > 0 ? Math.round((score / totalSignal) * 100) : 0;
+              const sharePct = pickTotal > 0 ? Math.round((signalCount / pickTotal) * 100) : 0;
               // Polarity read → signed net + this person's OWN band, never a
               // leader-relative bar (that implied "cleared" for anyone behind).
               const net = flagNets?.[p.id] ?? 0;
@@ -668,8 +791,14 @@ export default function ResultScreen() {
               // net 0 / MIXED, yet one name rendered gold), and wrong in general
               // whenever the screen themes GREEN off a green standout while the accent
               // landed on the reddest person. The band chip + signed net say it all.
+              // CLUSTERED and ZERO-SIGNAL reads crown nobody either, for the same reason:
+              // the read is flat (or empty), so putting one arbitrary name in bold accent
+              // contradicts the verdict directly above it. Zero-signal also leaves every
+              // bar at 0 — maxPicks floors at 1, so 0/1 renders as an empty track.
               const isWinner =
                 !isFlag &&
+                !isClustered &&
+                !isZeroSignal &&
                 (isTie ? (result.tiedWinnerIds ?? []).includes(p.id) : p.id === result.winner?.id);
               return (
                 <View key={p.id} style={styles.compRow}>
@@ -724,7 +853,7 @@ export default function ResultScreen() {
                   >
                     {flagBand
                       ? t('result.compNet', { net: net > 0 ? `+${net}` : `${net}` })
-                      : t('result.compScore', { score, total: totalSignal, pct: sharePct })}
+                      : t('result.compSignals', { count: signalCount, pct: sharePct })}
                   </Text>
                 </View>
               );
@@ -777,14 +906,36 @@ export default function ResultScreen() {
 
         {/* Disclaimer */}
         <Text style={[styles.disclaimer, { color: theme.textDim }]}>{t('result.disclaimer')}</Text>
-      </ScrollView>
+      </Animated.ScrollView>
+
+      {/* Top-edge scrim — the mirror of the action bar's fade, so scrolling content
+          stops rendering legibly across the clock and battery icons. Solid for the
+          full status-bar height, then a short rs(8) fade out, in the SAME colour the
+          field gradient paints at y=0 (aura sits on flat obsidian). Opacity is
+          scroll-driven, so at rest at the top it is fully transparent. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.topScrim, { height: scrimH }, topScrimStyle]}
+      >
+        <LinearGradient
+          colors={[topScrimColor, topScrimColor, `${topScrimColor}00`]}
+          locations={[0, insets.top / scrimH, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
 
       {/* Fixed action bar — History reopens (view-only) keep Share + Save; the
           Try-another/Save-&-exit nav row is fresh-reading only. */}
-      <View style={[styles.actionBar, { paddingBottom: insets.bottom + rs(12) }]}>
+      <View
+        style={[styles.actionBar, { paddingBottom: insets.bottom + rs(12) }]}
+        onLayout={onActionBarLayout}
+      >
         <LinearGradient
           colors={[`${theme.background}00`, theme.background]}
-          locations={[0, 0.5]}
+          // Reaches full background BEFORE the first button rather than halfway down
+          // the bar: at 0.5 the fade's tail landed level with the Share/pill gap, so a
+          // line of scrolling text ghosted through at ~4% alpha right there.
+          locations={[0, 0.28]}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
@@ -821,7 +972,27 @@ export default function ResultScreen() {
         {!!savedMsg && (
           <Text style={[styles.savedMsg, { color: theme.textMuted }]}>{savedMsg}</Text>
         )}
-        {!isViewOnly && (
+        {/* Zero-signal replaces the Try-another / Save-&-exit pair with ONE action:
+            there is nothing to save and nothing to try another of — only this reading,
+            answered properly. Hardware back still exits (see the BackHandler above). */}
+        {!isViewOnly && isZeroSignal && (
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              onPress={handleRetake}
+              accessibilityRole="button"
+              accessibilityLabel={t('result.retakeFree')}
+              activeOpacity={0.8}
+              // `pill` is flex:1, so alone in the row it already spans the full width;
+              // the accent border is what marks it as the one primary action.
+              style={[styles.pill, { backgroundColor: theme.surface, borderColor: accent }]}
+            >
+              <Text style={[styles.pillText, { color: theme.text }]} numberOfLines={1}>
+                {t('result.retakeFree')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {!isViewOnly && !isZeroSignal && (
           <View style={styles.actionRow}>
             <TouchableOpacity
               onPress={handleTryAnother}
@@ -861,6 +1032,9 @@ export default function ResultScreen() {
             eyebrow={isRare && rareLabelKey ? t(rareLabelKey) : eyebrow}
             rare={isRare}
             name={bigTitle}
+            // Cluster / zero-signal titles are multi-word verdicts, not names — let them
+            // wrap to 2 lines instead of auto-shrinking. Person names are unaffected.
+            isVerdictTitle={isClustered || isZeroSignal}
             verdictLine={winnerSubtitle ?? winnerSentence}
             quote={result.shareLine?.[language] ?? result.shareLine?.en ?? ''}
           />
@@ -1064,6 +1238,7 @@ const styles = StyleSheet.create({
   },
 
   // Action bar
+  topScrim: { position: 'absolute', top: 0, left: 0, right: 0 },
   actionBar: {
     position: 'absolute',
     left: 0,

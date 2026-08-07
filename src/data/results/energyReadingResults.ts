@@ -9,9 +9,33 @@ export const energyReadingResults: MultiResults = {
   },
   tieTemplate: {
     en: 'The energy is perfectly balanced between {names} — neither outweighs the other.',
-    fr: 'The energy is perfectly balanced between {names} — neither outweighs the other.',
-    ar: 'The energy is perfectly balanced between {names} — neither outweighs the other.',
-    es: 'The energy is perfectly balanced between {names} — neither outweighs the other.',
+    fr: "L'énergie est parfaitement équilibrée entre {names} — aucun des deux ne l'emporte.",
+    ar: 'الطاقة متوازنة تمامًا بين {names} — لا أحد منهما يرجّح على الآخر.',
+    es: 'La energía está perfectamente equilibrada entre {names} — ninguno pesa más que el otro.',
+  },
+  clusterTitle: {
+    en: 'Balanced Field',
+    fr: 'Un champ équilibré',
+    ar: 'طاقة متوازنة',
+    es: 'Un campo equilibrado',
+  },
+  clusterLine: {
+    en: 'The energy around you sits in balance — no one person is lifting or draining you more than the rest.',
+    fr: "L'énergie autour de toi est en équilibre — personne ne t'élève ni ne te vide plus que les autres.",
+    ar: 'الطاقة من حولك متوازنة — لا أحد يرفعك أو يستنزفك أكثر من سواه.',
+    es: 'La energía a tu alrededor está en equilibrio — nadie te eleva ni te agota más que los demás.',
+  },
+  zeroTitle: {
+    en: 'Flat Field',
+    fr: 'Champ plat',
+    ar: 'حقل مسطَّح',
+    es: 'Campo plano',
+  },
+  zeroLine: {
+    en: 'Nothing registered either way — the field came back flat, with nothing to read.',
+    fr: "Rien ne s'est enregistré dans un sens ou dans l'autre — le champ est revenu plat, sans rien à lire.",
+    ar: 'لم يُسجَّل شيء في أي اتجاه — عاد الحقل مسطَّحًا، بلا شيء لقراءته.',
+    es: 'No se registró nada en ningún sentido — el campo volvió plano, sin nada que leer.',
   },
   shareLines: {
     vitality: {

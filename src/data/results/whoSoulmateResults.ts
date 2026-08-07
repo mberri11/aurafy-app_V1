@@ -9,9 +9,33 @@ export const whoSoulmateResults: MultiResults = {
   },
   tieTemplate: {
     en: "Your frequencies match {names} equally — the universe hasn't picked a side yet.",
-    fr: "Your frequencies match {names} equally — the universe hasn't picked a side yet.",
-    ar: "Your frequencies match {names} equally — the universe hasn't picked a side yet.",
-    es: "Your frequencies match {names} equally — the universe hasn't picked a side yet.",
+    fr: "Tes fréquences s'accordent autant à {names} — l'univers n'a pas encore choisi son camp.",
+    ar: 'ترددك يتناغم مع {names} بالقدر نفسه — الكون لم يختر جانبًا بعد.',
+    es: 'Tus frecuencias encajan igual con {names} — el universo aún no ha elegido bando.',
+  },
+  clusterTitle: {
+    en: 'Still Undecided',
+    fr: "Rien n'est décidé",
+    ar: 'لم يُحسم بعد',
+    es: 'Aún sin decidir',
+  },
+  clusterLine: {
+    en: "Your frequency matches several people almost equally — the universe hasn't picked a side yet.",
+    fr: "Ta fréquence s'accorde presque également à plusieurs personnes — l'univers n'a pas encore choisi.",
+    ar: 'تردّدك يتناغم مع أكثر من شخص بالقدر نفسه تقريبًا — الكون لم يختر بعد.',
+    es: 'Tu frecuencia encaja casi por igual con varias personas — el universo aún no ha elegido.',
+  },
+  zeroTitle: {
+    en: 'No Match Found',
+    fr: 'Aucune correspondance',
+    ar: 'لا تطابق',
+    es: 'Sin coincidencia',
+  },
+  zeroLine: {
+    en: "Nothing pointed anywhere — the reading found nothing to match, not a tie it couldn't call.",
+    fr: "Rien n'a pointé nulle part — la lecture n'a trouvé aucune correspondance, pas une égalité impossible à trancher.",
+    ar: 'لم يشر شيء إلى أي جهة — لم تجد القراءة أي تطابق، لا تعادلًا عجزت عن حسمه.',
+    es: 'Nada apuntó a ninguna parte — la lectura no encontró ninguna coincidencia, no un empate que no pudiera resolver.',
   },
   shareLines: {
     resonant_ease: {

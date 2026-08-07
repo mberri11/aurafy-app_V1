@@ -44,6 +44,11 @@ type ShareCardProps =
       eyebrow: string;
       /** Winner name (multi) or the verdict word (solo). */
       name: string;
+      /** TRUE when `name` is a multi-word VERDICT title rather than a person's name —
+       *  a clustered ("Evenly Loved") or zero-signal ("No Warning Signs") read. Those
+       *  get a second line instead of being auto-shrunk onto one. Person names keep the
+       *  1-line clamp unchanged. Layout styles are untouched either way. */
+      isVerdictTitle?: boolean;
       /** Winner template minus the name ("loves you the most.") / solo verdict sentence. */
       verdictLine: string;
       quote: string;
@@ -166,7 +171,7 @@ export default function ShareCard(props: ShareCardProps) {
             isReading ? styles.name : styles.weeklyTitle,
             { color: nameColor, textShadowColor: nameGlow },
           ]}
-          numberOfLines={isReading ? 1 : 2}
+          numberOfLines={isReading ? (props.isVerdictTitle ? 2 : 1) : 2}
           adjustsFontSizeToFit
         >
           {isReading ? props.name : props.title}

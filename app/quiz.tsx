@@ -245,7 +245,10 @@ export default function QuizScreen() {
             // must not be reachable via back once loading takes over.
             runOnJS(router.replace)({
               pathname: '/loading',
-              params: { moduleId: moduleId ?? '', mode: mode ?? 'solo' },
+              // `trial` rides along so loading can undo what THIS attempt charged if the
+              // read turns out to have no signal at all (every answer was "No one") —
+              // free trial restored, or the stars refunded. Same flag person-entry set.
+              params: { moduleId: moduleId ?? '', mode: mode ?? 'solo', trial: trial ?? '0' },
             } as Parameters<typeof router.replace>[0]);
           } else {
             runOnJS(advanceQuestion)(currentIndex + 1);
@@ -262,6 +265,7 @@ export default function QuizScreen() {
       isLastQuestion,
       moduleId,
       mode,
+      trial,
       currentIndex,
       advanceQuestion,
       recordAnswer,

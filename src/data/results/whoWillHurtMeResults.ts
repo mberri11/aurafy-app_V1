@@ -19,6 +19,30 @@ export const whoWillHurtMeResults: MultiResults = {
     ar: 'علامات التحذير منقسمة — {names} يحملونها بالتساوي.',
     es: 'Las señales de advertencia están divididas — {names} las llevan por igual.',
   },
+  clusterTitle: {
+    en: 'No One Stands Out',
+    fr: 'Personne ne se détache',
+    ar: 'لا أحد يبرز',
+    es: 'Nadie destaca',
+  },
+  clusterLine: {
+    en: 'The warning signs are scattered, not concentrated — no single person is carrying more of them than the rest.',
+    fr: "Les signaux d'alerte sont dispersés, pas concentrés — personne n'en porte plus que les autres.",
+    ar: 'علامات التحذير مبعثرة لا مركَّزة — لا أحد يحمل منها أكثر من غيره.',
+    es: 'Las señales de advertencia están dispersas, no concentradas — nadie carga con más que los demás.',
+  },
+  zeroTitle: {
+    en: 'No Warning Signs',
+    fr: "Aucun signal d'alerte",
+    ar: 'لا علامات تحذير',
+    es: 'Ninguna señal de alerta',
+  },
+  zeroLine: {
+    en: "Nothing landed on anyone. No warning signs surfaced — that isn't the same as none existing.",
+    fr: "Rien n'a désigné personne. Aucun signal d'alerte n'est ressorti — ce qui ne veut pas dire qu'il n'y en a pas.",
+    ar: 'لم يقع شيء على أحد. لم تظهر أي علامة تحذير — وهذا لا يعني عدم وجودها.',
+    es: 'Nada señaló a nadie. No salió ninguna señal de alerta — eso no es lo mismo que no exista ninguna.',
+  },
   shareLines: {
     trust_erosion: {
       en: "Secrets don't leak. People do.",

@@ -235,7 +235,17 @@ function scoreMulti(
   }
   // Sum scores per person across all questions
   const scores: Record<string, number> = {};
-  for (const p of persons) scores[p.id] = 0;
+  // UNWEIGHTED pick tally — exactly +1 per answered question, ignoring personWeight.
+  // This is now the PRIMARY signal: it decides the winner, the cluster margin, the
+  // confidence and every number on the comparison card. Weighted `scores` survives as
+  // the tiebreaker and as the input to dominantDimension. (personWeight:2 questions
+  // push the weighted total past the question count — e.g. 23 of 20 — which is why it
+  // must never be the number shown or the number that wins.)
+  const pickCounts: Record<string, number> = {};
+  for (const p of persons) {
+    scores[p.id] = 0;
+    pickCounts[p.id] = 0;
+  }
 
   // Track dimension scores per person for dominant dimension
   const dimensionScores: Record<string, Record<string, number>> = {};
@@ -245,6 +255,7 @@ function scoreMulti(
     const answeredPersonId = answers[q.id];
     if (answeredPersonId && scores[answeredPersonId] !== undefined) {
       scores[answeredPersonId] += weight;
+      pickCounts[answeredPersonId] += 1;
       // Track dimension
       if (!dimensionScores[q.dimension]) dimensionScores[q.dimension] = {};
       if (!dimensionScores[q.dimension][answeredPersonId]) dimensionScores[q.dimension][answeredPersonId] = 0;
@@ -252,38 +263,72 @@ function scoreMulti(
     }
   }
 
-  // Winner = highest total score. A tie (2+ persons at the max) is a REAL outcome:
-  // it is detected below and rendered as a tie — never silently resolved in favor
-  // of whoever was entered first.
-  let winner = persons[0];
-  let maxScore = scores[persons[0].id] ?? 0;
-
-  for (const p of persons) {
-    const s = scores[p.id] ?? 0;
-    if (s > maxScore) {
-      maxScore = s;
-      winner = p;
-    }
-  }
-
-  // Everyone sharing the max score. `winner` stays the first max scorer for
-  // backward compat; rendering gates on tiedWinnerIds instead.
-  const tiedWinners = persons.filter((p) => (scores[p.id] ?? 0) === maxScore);
+  // WINNER = highest UNWEIGHTED pick count — the exact number the comparison card
+  // renders. Deciding the winner on the WEIGHTED `scores` while displaying pick counts
+  // let the screen crown someone the numbers underneath them disagreed with (a
+  // personWeight:2 question could hand the title to a person with fewer actual picks).
+  // One source of truth: what you see is what won.
+  const pickOf = (id: string): number => pickCounts[id] ?? 0;
+  const scoreOf = (id: string): number => scores[id] ?? 0;
+  const maxPicks = persons.reduce((m, p) => Math.max(m, pickOf(p.id)), 0);
+  const topByPicks = persons.filter((p) => pickOf(p.id) === maxPicks);
+  // personWeight demotes to a TIEBREAKER: among people level on picks, the heavier
+  // questions still decide — they just can't outvote the raw count any more. Level on
+  // BOTH is a real tie, detected here and rendered as one, never silently resolved in
+  // favour of whoever was entered first.
+  const maxTieScore = topByPicks.reduce((m, p) => Math.max(m, scoreOf(p.id)), 0);
+  const tiedWinners = topByPicks.filter((p) => scoreOf(p.id) === maxTieScore);
+  // `winner` stays the first max scorer for backward compat; rendering gates on
+  // tiedWinnerIds instead.
+  const winner = tiedWinners[0] ?? persons[0];
   const isTie = tiedWinners.length > 1;
 
-  // Confidence = how *decisively* the winner leads, not their share of the whole quiz.
-  // The old `winnerScore / totalPossible` punished bigger groups: votes split N ways, so a
-  // clear winner among 4 people read low even when unambiguous. Now blend the margin over
-  // the runner-up with the winner's share of all signal — a unanimous winner reads high
-  // regardless of person count, a near-tie reads low (item 5). Floor 60: a winner exists.
-  const sortedScores = persons.map((p) => scores[p.id] ?? 0).sort((a, b) => b - a);
-  const totalSignal = sortedScores.reduce((sum, s) => sum + s, 0);
-  const runnerUpScore = sortedScores[1] ?? 0;
-  const margin = totalSignal > 0 ? (maxScore - runnerUpScore) / totalSignal : 0;
-  const dominance = totalSignal > 0 ? maxScore / totalSignal : 0;
-  // A tie is definitionally zero-margin — pin to the 60 floor exactly instead of
-  // letting the dominance term nudge it around.
-  const confidence = isTie ? 60 : clamp(Math.round(55 + margin * 30 + dominance * 10), 60, 95);
+  const pickValues = Object.values(pickCounts);
+  const totalPicks = pickValues.reduce((sum, v) => sum + v, 0);
+  // ZERO-SIGNAL — every question was answered "No one" (or left unanswered), so NOBODY
+  // was picked even once. That is an ABSENCE of signal, never an evenly-shared outcome,
+  // so it outranks isClustered and applies at ANY person count, a 2-person compare
+  // included.
+  const isZeroSignal = persons.length >= 1 && totalPicks === 0;
+
+  // CLUSTERED — decided by the MARGIN over the runner-up, not by the spread across the
+  // whole group. Spread was the wrong measure: a 6-person read at 5/4/4/4/2/1 has a
+  // spread of 4 (looks decisive) while the leader is ahead by a single pick — a coin
+  // flip crowned as a verdict. Margin catches exactly that. The threshold scales with
+  // expected picks, so a circle where everyone should land ~3 picks isn't held to the
+  // same absolute gap as a 2-way split. Measured on the UNWEIGHTED pickCounts so a
+  // personWeight:2 question can't manufacture a gap the user never created.
+  // 2-person reads never cluster: "both" is a real, readable verdict — they keep the tie path.
+  const expectedPicks = persons.length > 0 ? questions.length / persons.length : questions.length;
+  const clusterMargin = Math.max(1, Math.round(expectedPicks * 0.25));
+  const sortedPicks = [...pickValues].sort((a, b) => b - a);
+  const topPickCount = sortedPicks[0] ?? 0;
+  const runnerUpPickCount = sortedPicks[1] ?? 0;
+  const margin = topPickCount - runnerUpPickCount;
+  const isClustered =
+    !isZeroSignal && persons.length >= 3 && (margin <= clusterMargin || tiedWinners.length >= 3);
+
+  // Confidence = how decisively the winner leads, built from the SAME pick counts the
+  // card shows. The old blend ran on weighted scores behind a 60 floor, so a one-pick
+  // lead still announced "60% confident" — the floor was doing the talking, not the
+  // data. Now a one-pick lead lands in the 50s and only a real gap climbs.
+  const marginRatio = expectedPicks > 0 ? margin / expectedPicks : 0;
+  // Dominance measures the GAP over the runner-up, not the leader's raw share. Share
+  // is re-based around the wrong origin: in a 2-person read the leader always holds
+  // >50% of the picks, so `top / total` handed every 2-person win a built-in +10 and an
+  // 11–10 coin flip still announced 62%. The gap is 0 for a dead heat and rises only as
+  // the lead becomes real — which generalizes correctly to 3+ people too.
+  const dominance = totalPicks > 0 ? Math.abs(topPickCount - runnerUpPickCount) / totalPicks : 0;
+  // Clustered is definitionally a coin-flip → flat 50 (the screen shows "too close to
+  // call" instead of a bar). An exact 2-way tie is zero-margin → 60. Zero signal → 0:
+  // there is nothing to be confident ABOUT, and the screen says so instead of drawing 0%.
+  const confidence = isZeroSignal
+    ? 0
+    : isClustered
+      ? 50
+      : isTie
+        ? 60
+        : clamp(Math.round(48 + marginRatio * 35 + dominance * 20), 55, 95);
 
   // dominantDimension = dimension with highest winner score concentration
   let dominantDimension = 'general';
@@ -303,6 +348,9 @@ function scoreMulti(
     tiedWinnerIds: isTie ? tiedWinners.map((p) => p.id) : [],
     tiedWinners: isTie ? tiedWinners : undefined,
     scores,
+    pickCounts,
+    isClustered,
+    isZeroSignal,
     dominantDimension,
     confidence,
     insights: [], // filled in by resultGenerator

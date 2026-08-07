@@ -9,9 +9,33 @@ export const whoAdmiresResults: MultiResults = {
   },
   tieTemplate: {
     en: 'The admiration is split evenly — {names} both think of you more than you know.',
-    fr: 'The admiration is split evenly — {names} both think of you more than you know.',
-    ar: 'The admiration is split evenly — {names} both think of you more than you know.',
-    es: 'The admiration is split evenly — {names} both think of you more than you know.',
+    fr: "L'admiration est partagée à parts égales — {names} pensent à toi bien plus que tu ne le crois.",
+    ar: 'الإعجاب موزَّع بالتساوي — {names} يفكّران فيك أكثر مما تظن.',
+    es: 'La admiración está repartida por igual — {names} piensan en ti más de lo que crees.',
+  },
+  clusterTitle: {
+    en: 'Quiet Admiration Everywhere',
+    fr: 'Admiration discrète partout',
+    ar: 'إعجاب صامت من الجميع',
+    es: 'Admiración silenciosa por todos lados',
+  },
+  clusterLine: {
+    en: 'The admiration is quiet and shared — more than one person thinks of you far more than they let on.',
+    fr: "L'admiration est discrète et partagée — plus d'une personne pense à toi bien plus qu'elle ne le montre.",
+    ar: 'الإعجاب صامت ومشترك — أكثر من شخص يفكّر فيك أكثر مما يُظهر.',
+    es: 'La admiración es callada y compartida — más de una persona piensa en ti mucho más de lo que demuestra.',
+  },
+  zeroTitle: {
+    en: 'Nothing Registered',
+    fr: 'Rien enregistré',
+    ar: 'لم يُسجَّل شيء',
+    es: 'Nada registrado',
+  },
+  zeroLine: {
+    en: 'No answer landed on anyone — there was no attention here to read, in any direction.',
+    fr: "Aucune réponse n'a désigné personne — il n'y avait aucune attention à lire ici, dans aucune direction.",
+    ar: 'لم تشر أي إجابة إلى أحد — لم يكن هناك أي اهتمام لقراءته، من أي جهة.',
+    es: 'Ninguna respuesta señaló a nadie — aquí no había ninguna atención que leer, en ninguna dirección.',
   },
   shareLines: {
     quiet_attention: {

@@ -25,26 +25,60 @@ export function generateMultiResult(
   // Tie → the tie verdict replaces the winner statement as insights[0]; the same
   // downstream pipeline (result screen, History reopen, share card) renders it.
   const tiedNames = (result.tiedWinners ?? []).map((p) => p.name);
-  const isTie = (result.tiedWinnerIds?.length ?? 0) > 1 && tiedNames.length > 1;
-  const populatedTemplate = isTie
-    ? localizeTemplateLocalized(moduleResults.tieTemplate, '{names}', {
-        en: joinNames(tiedNames, 'en'),
-        fr: joinNames(tiedNames, 'fr'),
-        ar: joinNames(tiedNames, 'ar'),
-        es: joinNames(tiedNames, 'es'),
-      })
-    : localizeTemplate(moduleResults.winnerTemplate, result.winner?.name ?? '');
+  // CLUSTERED (flat read across 3+ people) outranks both other branches: nobody is
+  // crowned, so the verdict is the name-free clusterLine and the big title becomes
+  // clusterTitle. A 3+-way tie is clustered BY DEFINITION (scoreMulti sets the flag on
+  // `tiedWinners.length >= 3`) — the `tiedNames.length >= 3` term is belt-and-braces so
+  // a result arriving without the flag still can't dump five names into the giant serif
+  // title with a "both…" subtitle.
+  // ZERO-SIGNAL outranks everything: nobody was picked once, so there is no winner, no
+  // tie and no even split to describe — only an absence to report honestly.
+  const isZeroSignal = result.isZeroSignal === true;
+  const isClustered = !isZeroSignal && (result.isClustered === true || tiedNames.length >= 3);
+  // Tie is now strictly the EXACTLY-2 case, which is what "both" was ever written for.
+  const isTie =
+    !isZeroSignal && !isClustered && (result.tiedWinnerIds?.length ?? 0) > 1 && tiedNames.length > 1;
+  const populatedTemplate = isZeroSignal
+    ? moduleResults.zeroLine
+    : isClustered
+      ? moduleResults.clusterLine
+      : isTie
+        ? localizeTemplateLocalized(moduleResults.tieTemplate, '{names}', {
+            en: joinNames(tiedNames, 'en'),
+            fr: joinNames(tiedNames, 'fr'),
+            ar: joinNames(tiedNames, 'ar'),
+            es: joinNames(tiedNames, 'es'),
+          })
+        : localizeTemplate(moduleResults.winnerTemplate, result.winner?.name ?? '');
 
-  const insights = selectInsights(moduleResults.insights, result.dominantDimension, seed);
+  // A zero-signal read draws NO bullets: every pool line describes a signal that was
+  // never recorded, so any of them would be affirming copy invented out of nothing.
+  // insights[0] (the zeroLine) stands alone.
+  const insights = isZeroSignal
+    ? []
+    : selectInsights(moduleResults.insights, result.dominantDimension, seed);
 
   return {
     ...result,
     // Store the localized winner statement as the first insight
     insights: [populatedTemplate, ...insights],
-    // The name-free verdict subtitle, derived from the RAW template (ties carry none —
-    // their insights[0] is already the full tie verdict).
-    verdictLine: isTie ? undefined : stripNamePlaceholder(moduleResults.winnerTemplate),
-    shareLine: moduleResults.shareLines[result.dominantDimension],
+    // Carried on the result (not looked up at render time) so a History reopen and the
+    // share card show the same title as the reveal. clusterTitle carries the zero-signal
+    // title too — one field, so neither the screen nor the card needs a second branch.
+    isClustered: isClustered || undefined,
+    clusterTitle: isZeroSignal
+      ? moduleResults.zeroTitle
+      : isClustered
+        ? moduleResults.clusterTitle
+        : undefined,
+    // The name-free verdict subtitle, derived from the RAW template (ties, clustered and
+    // zero-signal reads carry none — their insights[0] is already the full name-free verdict).
+    verdictLine:
+      isTie || isClustered || isZeroSignal
+        ? undefined
+        : stripNamePlaceholder(moduleResults.winnerTemplate),
+    // No pull-quote on a zero-signal card either — the share lines are all affirming.
+    shareLine: isZeroSignal ? undefined : moduleResults.shareLines[result.dominantDimension],
   };
 }
 

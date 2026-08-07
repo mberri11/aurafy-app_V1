@@ -117,6 +117,27 @@ export interface ResultData {
   tiedWinners?: Person[];
   verdict?: 'positive' | 'neutral' | 'negative';
   scores: Record<string, number>; // personId -> score (multi/solo) or category -> tally (categorical)
+  /** UNWEIGHTED pick tally per person (generic multi only): +1 per answered question,
+   *  ignoring `personWeight`. DISPLAY ONLY — `scores` stays weighted and still decides
+   *  the winner. Exists because weighted totals can exceed the question count, which the
+   *  result card used to render as a bogus "12 / 23" denominator. Absent on readings
+   *  persisted before this shipped (render falls back to `scores`). */
+  pickCounts?: Record<string, number>;
+  /** Generic multi only: the read came out FLAT across 3+ people (see scoreMulti).
+   *  Nobody is crowned — the screen shows `clusterTitle` instead of a name and
+   *  "too close to call" instead of the confidence bar. */
+  isClustered?: boolean;
+  /** NOBODY was picked even once — every question went to "No one" (or unanswered).
+   *  Outranks `isClustered`: a zero-signal read is an ABSENCE of signal, never an
+   *  evenly-shared outcome, and it applies at any person count. Confidence is 0 and
+   *  no insight bullets are drawn. */
+  isZeroSignal?: boolean;
+  /** The name-free big-title verdict for a clustered OR zero-signal read ("Evenly
+   *  Loved" / "No Signal Read"), localized at generation time from
+   *  MultiResults.clusterTitle or .zeroTitle. One field on purpose, so the result
+   *  screen and the share card need no second branch. Persisted so a History reopen
+   *  renders identically. */
+  clusterTitle?: LocalizedString;
   dominantDimension: string;
   /** For `categorical` results: the runner-up category ("…with an Anxious edge"). */
   secondaryDimension?: string;
@@ -396,6 +417,19 @@ export interface MultiResults {
    *  score. {names} is replaced with the tied names joined naturally per locale
    *  ("X and Y" / "X, Y, and Z" — see joinNames in scoringEngine). */
   tieTemplate: LocalizedString;
+  /** CLUSTERED verdict — used instead of winnerTemplate/tieTemplate when the read comes
+   *  out flat across 3+ people (ResultData.isClustered). Deliberately NAME-FREE: the whole
+   *  point is that nobody stands out, so no {names} token belongs in either field.
+   *  `clusterTitle` = the short serif big-title (2–4 words); `clusterLine` = the one-sentence
+   *  verdict that becomes insights[0]. */
+  clusterTitle: LocalizedString;
+  clusterLine: LocalizedString;
+  /** ZERO-SIGNAL verdict — nobody was picked even once (ResultData.isZeroSignal).
+   *  Also name-free. The copy MUST frame this as the absence of a signal, never as a
+   *  shared or even outcome, and never as reassurance: "nobody resents you" is a claim
+   *  this reading cannot support — "nothing was detected" is. */
+  zeroTitle: LocalizedString;
+  zeroLine: LocalizedString;
   insights: Record<string, LocalizedString[]>;
   /** One designed share-card quote per dimension (same keys as `insights`) —
    *  the social-growth line on the exported card, NOT a truncated insight. */

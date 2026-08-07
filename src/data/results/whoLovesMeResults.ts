@@ -9,9 +9,33 @@ export const whoLovesMeResults: MultiResults = {
   },
   tieTemplate: {
     en: 'The love is split evenly — {names} both hold a real piece of your heart.',
-    fr: 'The love is split evenly — {names} both hold a real piece of your heart.',
-    ar: 'The love is split evenly — {names} both hold a real piece of your heart.',
-    es: 'The love is split evenly — {names} both hold a real piece of your heart.',
+    fr: "L'amour est partagé à parts égales — {names} détiennent chacun un vrai morceau de ton cœur.",
+    ar: 'الحب منقسم بالتساوي — {names} يحمل كلٌّ منهما جزءًا حقيقيًا من قلبك.',
+    es: 'El amor está dividido por igual — {names} guardan cada uno un trozo real de tu corazón.',
+  },
+  clusterTitle: {
+    en: 'Evenly Loved',
+    fr: 'Un amour partagé',
+    ar: 'محبة متساوية',
+    es: 'Un amor repartido',
+  },
+  clusterLine: {
+    en: 'The love is spread almost evenly across your circle — no single person holds the clear lead.',
+    fr: "L'amour se répartit presque également dans ton cercle — personne ne prend vraiment l'avantage.",
+    ar: 'الحب موزَّع بالتساوي تقريبًا بين من حولك — لا أحد يتقدّم بوضوح.',
+    es: 'El amor se reparte casi por igual en tu círculo — nadie lleva una ventaja clara.',
+  },
+  zeroTitle: {
+    en: 'No Signal',
+    fr: 'Aucun signal',
+    ar: 'لا إشارة',
+    es: 'Ninguna señal',
+  },
+  zeroLine: {
+    en: "Nothing pointed anywhere this time — there's no signal here to read.",
+    fr: "Rien n'a pointé nulle part cette fois — il n'y a aucun signal à lire ici.",
+    ar: 'لم يشر شيء إلى أي جهة هذه المرة — لا توجد إشارة لقراءتها هنا.',
+    es: 'Nada apuntó a ninguna parte esta vez — aquí no hay señal que leer.',
   },
   shareLines: {
     secure_base: {

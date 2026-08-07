@@ -9,9 +9,33 @@ export const whoHatesMeResults: MultiResults = {
   },
   tieTemplate: {
     en: 'The resentment is split — {names} carry it in equal measure.',
-    fr: 'The resentment is split — {names} carry it in equal measure.',
-    ar: 'The resentment is split — {names} carry it in equal measure.',
-    es: 'The resentment is split — {names} carry it in equal measure.',
+    fr: 'Le ressentiment est partagé — {names} le portent à parts égales.',
+    ar: 'الاستياء منقسم — {names} يحملانه بالقدر نفسه.',
+    es: 'El resentimiento está dividido — {names} lo llevan en igual medida.',
+  },
+  clusterTitle: {
+    en: 'No Single Source',
+    fr: 'Aucune source unique',
+    ar: 'لا مصدر واحد',
+    es: 'Ninguna fuente única',
+  },
+  clusterLine: {
+    en: "The resentment doesn't trace back to one person — it's spread thin across the whole circle.",
+    fr: 'Le ressentiment ne remonte pas à une seule personne — il se dilue dans tout le cercle.',
+    ar: 'الاستياء لا يعود إلى شخص واحد — بل ينتشر خفيفًا في الدائرة كلها.',
+    es: 'El resentimiento no viene de una sola persona — está repartido por todo el círculo.',
+  },
+  zeroTitle: {
+    en: 'Nothing Detected',
+    fr: 'Rien de détecté',
+    ar: 'لم يُرصد شيء',
+    es: 'Nada detectado',
+  },
+  zeroLine: {
+    en: 'No answer landed on anyone. Nothing was detected — and nothing was ruled out.',
+    fr: "Aucune réponse n'a désigné personne. Rien n'a été détecté — et rien n'a été écarté.",
+    ar: 'لم تشر أي إجابة إلى أحد. لم يُرصد شيء — ولم يُستبعد شيء.',
+    es: 'Ninguna respuesta señaló a nadie. No se detectó nada — y no se descartó nada.',
   },
   shareLines: {
     negative_affect: {

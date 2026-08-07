@@ -307,13 +307,23 @@ const HexLoader = memo(function HexLoader({
 });
 
 export default function LoadingScreen() {
-  const { moduleId, mode } = useLocalSearchParams<{ moduleId: string; mode: ReadingMode }>();
+  const { moduleId, mode, trial } = useLocalSearchParams<{
+    moduleId: string;
+    mode: ReadingMode;
+    trial?: string;
+  }>();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { currentPersons, currentAnswers, currentQuestionIds, setResult, setResultUnlocked } =
     useReadingStore();
   const { spendStars, stars } = useUserStore();
+  const earnStars = useUserStore((s) => s.earnStars);
+  // The SAME restore the mid-quiz abandon uses (quiz.tsx) — not a second path.
+  const restoreFreeTrial = useUserStore((s) => s.restoreFreeTrial);
+  // A zero-signal read must be refunded exactly once, even if the scoring effect
+  // re-runs (its deps include store-derived objects).
+  const refundedRef = useRef(false);
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId), [moduleId]);
   // Per-MODULE theme tints the loader, gate bloom and orb — the same palette the
@@ -420,9 +430,34 @@ export default function LoadingScreen() {
       finalResult = sr ? generateSoloResult(rawResult, sr, seed) : rawResult;
     }
 
+    // ZERO SIGNAL → give the attempt back. Every question went to "No one", so the user
+    // paid (or burned their free trial) for a non-answer; charging for that is the worst
+    // outcome in the app. Undo exactly what person-entry charged: the free trial via the
+    // same restoreFreeTrial the mid-quiz abandon uses, otherwise the mode's cost credited
+    // back through earnStars under its own ledger reason. Once per mount (refundedRef).
+    if (finalResult.isZeroSignal && !refundedRef.current) {
+      refundedRef.current = true;
+      if (trial === '1') {
+        restoreFreeTrial();
+      } else {
+        earnStars(module?.starsCost[(mode as ReadingMode) ?? 'solo'] ?? 1, 'zero_signal_refund');
+      }
+    }
+
     resultRef.current = finalResult;
     setResult(finalResult);
-  }, [moduleId, mode, module, currentAnswers, currentPersons, currentQuestionIds, setResult]);
+  }, [
+    moduleId,
+    mode,
+    module,
+    currentAnswers,
+    currentPersons,
+    currentQuestionIds,
+    setResult,
+    trial,
+    restoreFreeTrial,
+    earnStars,
+  ]);
 
   // Cycle the category copy pool with a fade (out → swap → in), per spec §5.
   useEffect(() => {

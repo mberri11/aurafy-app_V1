@@ -160,7 +160,11 @@ export default function PersonEntryScreen() {
     } else {
       spendStars(cost, 'reading');
     }
-    startReading(moduleId ?? '', resolvedMode, persons);
+    // Names are validated trimmed but were committed raw, so "Steven " leaked a
+    // trailing space into titles/share cards/history. Trim at commit only —
+    // never while typing (updateName), so spaces mid-name still work.
+    const trimmedPersons = persons.map((p) => ({ ...p, name: p.name.trim() }));
+    startReading(moduleId ?? '', resolvedMode, trimmedPersons);
     // trial flag tells the quiz what THIS attempt charged: a mid-quiz abandon
     // restores the free trial, but spent stars are NOT refunded (Simo, 2026-07-19).
     router.push({

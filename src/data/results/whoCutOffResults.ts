@@ -9,9 +9,33 @@ export const whoCutOffResults: MultiResults = {
   },
   tieTemplate: {
     en: 'The drift is equal — {names} are both pulling away at the same quiet pace.',
-    fr: 'The drift is equal — {names} are both pulling away at the same quiet pace.',
-    ar: 'The drift is equal — {names} are both pulling away at the same quiet pace.',
-    es: 'The drift is equal — {names} are both pulling away at the same quiet pace.',
+    fr: 'La dérive est égale — {names} s\'éloignent tous les deux au même rythme silencieux.',
+    ar: 'الابتعاد متساوٍ — {names} ينسحبان بالوتيرة الهادئة نفسها.',
+    es: 'La deriva es igual — {names} se alejan los dos al mismo ritmo callado.',
+  },
+  clusterTitle: {
+    en: 'A Shared Drift',
+    fr: 'Une dérive partagée',
+    ar: 'ابتعاد جماعي',
+    es: 'Una deriva compartida',
+  },
+  clusterLine: {
+    en: "The distance isn't one person's doing — the whole circle has been drifting at the same quiet pace.",
+    fr: "La distance n'est le fait de personne en particulier — tout le cercle s'éloigne au même rythme silencieux.",
+    ar: 'المسافة ليست فعل شخص بعينه — الدائرة كلها تبتعد بالوتيرة الهادئة نفسها.',
+    es: 'La distancia no es cosa de una sola persona — todo el círculo se aleja al mismo ritmo callado.',
+  },
+  zeroTitle: {
+    en: 'No Drift Detected',
+    fr: 'Aucune dérive détectée',
+    ar: 'لم يُرصد أي ابتعاد',
+    es: 'Ninguna deriva detectada',
+  },
+  zeroLine: {
+    en: 'Nothing pointed at anyone — no drift surfaced here, in either direction.',
+    fr: "Rien n'a désigné personne — aucune dérive n'est ressortie ici, dans un sens ou dans l'autre.",
+    ar: 'لم يشر شيء إلى أحد — لم يظهر أي ابتعاد هنا، في أي اتجاه.',
+    es: 'Nada señaló a nadie — aquí no salió ninguna deriva, en ningún sentido.',
   },
   shareLines: {
     withdrawal: {

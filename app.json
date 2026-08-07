@@ -24,7 +24,7 @@
       "softwareKeyboardLayoutMode": "pan",
       "backgroundColor": "#07091A",
       "package": "com.simobr.aurafy",
-      "versionCode": 16,
+      "versionCode": 17,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundImage": "./assets/images/adaptive-icon-bg.png",
