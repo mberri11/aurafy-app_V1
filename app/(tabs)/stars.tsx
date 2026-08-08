@@ -209,13 +209,14 @@ export default function StarsWalletScreen() {
     transform: [{ translateY: toastY.value }],
   }));
 
-  // Rewarded video: +2 flat, capped at 25/day in the store. Gated behind a real
-  // rewarded ad — credit only fires on a fully-watched ad. In Expo Go / when no ad is
-  // loaded, showRewarded resolves false and nothing is credited (no exploit, no crash).
-  // The store's earnRewardedVideo still enforces the 25/day cap on top of the ad gate.
+  // Rewarded video: +3 flat, capped at 20/day in the store (→ +60★/day ceiling). Gated
+  // behind a real rewarded ad — credit only fires on a fully-watched ad. In Expo Go /
+  // when no ad is loaded, showRewarded resolves false and nothing is credited (no
+  // exploit, no crash). The store's earnRewardedVideo still enforces the 20/day cap on
+  // top of the ad gate.
   const handleWatchVideo = useCallback(async () => {
     const watched = await AdMobManager.showRewarded();
-    if (watched && earnRewardedVideo()) showEarnedToast(2);
+    if (watched && earnRewardedVideo()) showEarnedToast(3);
   }, [earnRewardedVideo, showEarnedToast]);
 
   // Daily ritual: the +1 is NOT granted here — the ritual is the daily QUOTE. Tapping this
@@ -278,7 +279,7 @@ export default function StarsWalletScreen() {
           accent={theme.emerald}
           title={t('stars.watchVideo')}
           subtitle={t('stars.watchVideoDesc')}
-          amount="+2"
+          amount="+3"
           onPress={handleWatchVideo}
         />
 

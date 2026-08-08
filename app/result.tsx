@@ -73,7 +73,10 @@ function generateId(): string {
 }
 
 export default function ResultScreen() {
-  const { viewOnly } = useLocalSearchParams<{ viewOnly?: string }>();
+  const { viewOnly, readingId } = useLocalSearchParams<{
+    viewOnly?: string;
+    readingId?: string;
+  }>();
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const isRTL = useIsRTL();
@@ -93,12 +96,30 @@ export default function ResultScreen() {
   const setResultUnlocked = useReadingStore((s) => s.setResultUnlocked);
   const { addReading, incrementReadingCount, spendStars, stars } = useUserStore();
   const readingCount = useUserStore((s) => s.readingCount);
+  const markReadingUnlocked = useUserStore((s) => s.markReadingUnlocked);
 
   const isViewOnly = viewOnly === '1';
   const result = isViewOnly ? viewOnlyResult : currentResult;
+  // The History entry this reopen is showing, subscribed live so unlocking from here
+  // re-renders straight out of the persisted flag (no second copy of the state to sync).
+  const viewOnlyEntry = useUserStore((s) =>
+    readingId ? s.history.find((h) => h.id === readingId) : undefined,
+  );
   // Option C two-tier: minimal (name + verdict + confidence) until unlocked via the
-  // gate or the unlock card below. History reopens are always full — already earned.
-  const unlocked = isViewOnly || resultUnlocked;
+  // gate or the unlock card below.
+  //
+  // A reopen used to be `isViewOnly || resultUnlocked` — unconditionally unlocked —
+  // which made the whole gate optional: Skip → Save & exit → reopen from History gave
+  // the full reading for free. It now reads the flag persisted ON THE READING, so the
+  // state is identical at reveal and on every reopen. `?? true` covers readings saved
+  // before the flag existed (and the dev panel, which pushes no readingId): they were
+  // already viewable in full, so they stay that way.
+  //
+  // Zero-signal short-circuits both branches: Section G refunds that reading, so the
+  // gate must not turn round and charge for the same non-result.
+  const isZeroSignalResult = result?.isZeroSignal === true;
+  const unlocked =
+    isZeroSignalResult || (isViewOnly ? viewOnlyEntry?.unlocked ?? true : resultUnlocked);
   const [adFailed, setAdFailed] = useState(false);
 
   // Reveal animation for the eyebrow + big title
@@ -113,14 +134,27 @@ export default function ResultScreen() {
     useUserStore.getState().history.map((h) => h.result.confidence),
   ).current;
 
+  // Id of the row the save effect wrote, so a later unlock can persist onto it.
+  const savedReadingIdRef = useRef<string | null>(null);
+  // Set by applyUnlock. Normally the save effect commits first (passive effects flush
+  // before any touch can be handled), so this is false when the row is written. It
+  // exists for the inverted order: an unlock landing BEFORE the save would find a null
+  // id, no-op markReadingUnlocked, and then be clobbered by a `false` write. ORing this
+  // in makes losing the unlock structurally impossible instead of merely unlikely.
+  const unlockedBeforeSaveRef = useRef(false);
+
   useEffect(() => {
     if (!result || isViewOnly) return;
     // A zero-signal read has no content — saving it would leave a dead row in History
     // that reopens to "No Signal" and nothing else. The attempt was refunded in
     // loading.tsx, so it costs the user nothing and leaves no trace.
     if (result.isZeroSignal) return;
+    // Kept so an unlock performed AFTER this save (via the unlock card below) can flip
+    // the persisted flag on the row this effect just wrote.
+    const id = generateId();
+    savedReadingIdRef.current = id;
     const reading: Reading = {
-      id: generateId(),
+      id,
       moduleId: currentModuleId,
       mode: currentMode,
       persons: currentPersons,
@@ -130,6 +164,13 @@ export default function ResultScreen() {
       // The exact served set (pooled modules vary it) — lets History reopens show
       // what was actually asked.
       questionIds: currentQuestionIds,
+      // Whatever the gate decided for THIS reading, persisted with it. Skip → false,
+      // so the reopen is locked too instead of handing the full reading over free.
+      // No `|| isZeroSignal` term: the guard above already returned for zero-signal
+      // reads, so one can never reach this object (tsc narrows the flag to
+      // false|undefined here and rejects the comparison outright).
+      // The ref term can only be true if an unlock beat this write — see its comment.
+      unlocked: resultUnlocked || unlockedBeforeSaveRef.current,
     };
     addReading(reading);
     // readingCount keeps ticking for the Phase-4 frequency-capped interstitial; the old
@@ -287,24 +328,36 @@ export default function ResultScreen() {
     flashSavedMsg(t('shareCard.saveDenied'));
   }, [captureCard, flashSavedMsg, t]);
 
+  // One unlock, written to BOTH places: the session flag (drives this render) and the
+  // saved reading's persisted flag (so reopening it later is free forever). On a fresh
+  // reading the target row is the one the save effect wrote; on a History reopen it is
+  // the row that was reopened. Without the persisted half, a user could be charged
+  // again for the same reading on every reopen.
+  const applyUnlock = useCallback(() => {
+    setResultUnlocked(true);
+    unlockedBeforeSaveRef.current = true;
+    const id = isViewOnly ? readingId : savedReadingIdRef.current;
+    if (id) markReadingUnlocked(id);
+  }, [isViewOnly, readingId, setResultUnlocked, markReadingUnlocked]);
+
   // Unlock card actions — same fair trade as the gate: a rewarded ad or 1★.
   const handleUnlockWatch = useCallback(async () => {
     const watched = await AdMobManager.showRewarded();
     if (watched) {
-      setResultUnlocked(true);
+      applyUnlock();
       successNotification();
     } else {
       setAdFailed(true);
     }
-  }, [setResultUnlocked]);
+  }, [applyUnlock]);
 
   const handleUnlockStar = useCallback(() => {
     lightTap();
     if (spendStars(1, 'result_unlock')) {
-      setResultUnlocked(true);
+      applyUnlock();
       successNotification();
     }
-  }, [spendStars, setResultUnlocked]);
+  }, [spendStars, applyUnlock]);
 
   // Frequency-capped interstitial on a user-initiated EXIT of a FRESH reading only
   // (never on share, never on unmount, never on a History reopen). Fire-and-forget:

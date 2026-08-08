@@ -14,8 +14,8 @@ const MAX_TRANSACTIONS = 5;
 const DAILY_RITUAL_REWARD = 1; // +1 per local day for the daily ritual
 const STREAK_LENGTH = 7; // a full streak cycle is 7 consecutive days
 const STREAK_BONUS_REWARD = 5; // +5 paid when the 7th ritual completes (after the reveal)
-const REWARDED_VIDEO_REWARD = 2; // +2 flat per rewarded video
-const REWARDED_VIDEO_DAILY_CAP = 25; // max 25 videos/day → +50★/day ceiling
+const REWARDED_VIDEO_REWARD = 3; // +3 flat per rewarded video
+const REWARDED_VIDEO_DAILY_CAP = 20; // max 20 videos/day → +60★/day ceiling
 // Keep enough recent answers that a full anchor week (≤7) is always intact for the day-7
 // tally even with a stale tail from the previous week (week-filtered before tallying).
 const MAX_DAILY_ANSWERS = 14;
@@ -122,7 +122,7 @@ export interface UserState extends ContentSlice {
    *  Returns false (no charge) when the balance is short; idempotent for an already-owned id. */
   unlockModule: (id: string, cost: number) => boolean;
   earnStars: (amount: number, reason: string) => void;
-  /** Credits +2 for a rewarded video, enforcing the 25/day cap. Returns false when capped. */
+  /** Credits +3 for a rewarded video, enforcing the 20/day cap. Returns false when capped. */
   earnRewardedVideo: () => boolean;
   /** DAILY QUOTE ritual (FORGIVING streak): advances the streak by +1 (a missed day holds it,
    *  never resets — no insurance, no cost) and pays the +1 daily. Completing the 7th ritual of a
@@ -133,6 +133,10 @@ export interface UserState extends ContentSlice {
    *  (1 normally, 6 on the 7th day, 0 if already done today or the clock ran backwards). */
   completeDailyRitual: (at?: Date) => number;
   addReading: (reading: Reading) => void;
+  /** Flips a saved reading's Option C unlock flag to true, so a reading unlocked from a
+   *  History reopen (rewarded ad or 1★) stays unlocked and is never charged for twice.
+   *  Keyed on `Reading.id` — the same key the History list uses. No-op for an unknown id. */
+  markReadingUnlocked: (readingId: string) => void;
   clearHistory: () => void;
   setOnboarded: () => void;
   incrementReadingCount: () => void;
@@ -289,6 +293,18 @@ export const useUserStore = create<UserState>()(
               ? s.completedModuleIds
               : [...s.completedModuleIds, reading.moduleId],
           };
+        });
+      },
+
+      markReadingUnlocked: (readingId: string): void => {
+        set((s) => {
+          const i = s.history.findIndex((h) => h.id === readingId);
+          // Already unlocked (or unknown id) → return the SAME array so no subscriber
+          // re-renders for a no-op write.
+          if (i < 0 || s.history[i].unlocked === true) return s;
+          const history = [...s.history];
+          history[i] = { ...history[i], unlocked: true };
+          return { history };
         });
       },
 

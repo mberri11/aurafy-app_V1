@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -56,14 +56,37 @@ type UnlockTarget = {
   cost: number;
 };
 
+/** Mirrors NAV_GUARD_MS in app/(tabs)/settings.tsx — the two ends of this push/pop
+ *  pair have to block for the same window or a double-pop still slips through. */
+const NAV_GUARD_MS = 700;
+
 export default function ThemeGalleryScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
-  const { themeId, unlockedThemes, setTheme, unlockTheme } = useSettingsStore();
-  const { stars, spendStars } = useUserStore();
+  // Selector-scoped: destructuring the whole store subscribed this screen to EVERY
+  // settings/user write — a haptics toggle or an unrelated stars spend re-rendered the
+  // gallery. Each field now re-renders only on its own change (actions are stable
+  // references, so those two never trigger one).
+  const themeId = useSettingsStore((s) => s.themeId);
+  const unlockedThemes = useSettingsStore((s) => s.unlockedThemes);
+  const setTheme = useSettingsStore((s) => s.setTheme);
+  const unlockTheme = useSettingsStore((s) => s.unlockTheme);
+  const stars = useUserStore((s) => s.stars);
+  const spendStars = useUserStore((s) => s.spendStars);
   const [unlock, setUnlock] = useState<UnlockTarget | null>(null);
+  // Same guard as the push side: a double-tap on back popped twice, taking Settings
+  // with it and briefly re-showing whatever sat underneath.
+  const isNavigatingRef = useRef(false);
+  const handleBack = useCallback(() => {
+    if (isNavigatingRef.current) return;
+    isNavigatingRef.current = true;
+    setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, NAV_GUARD_MS);
+    router.back();
+  }, []);
 
   const handleSelect = useCallback(
     (id: ThemeId, gradient: [string, string, string], cost: number) => {
@@ -94,7 +117,7 @@ export default function ThemeGalleryScreen() {
       {/* Header: back (left) + stars badge (right) */}
       <View style={[styles.header, { paddingTop: insets.top + rs(12) }]}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={handleBack}
           accessibilityLabel={t('common.back')}
           accessibilityRole="button"
           activeOpacity={0.8}

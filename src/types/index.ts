@@ -205,6 +205,15 @@ export interface Reading {
    *  reopen show what was actually asked once pooled modules vary the set. Absent on
    *  readings persisted before question pooling shipped. */
   questionIds?: string[];
+  /** Option C unlock state, as a property OF THIS READING rather than of the session.
+   *  A History reopen used to be unconditionally unlocked, so Skip → Save & exit →
+   *  reopen handed over the full reading for free and made the gate optional.
+   *
+   *  UNDEFINED MEANS UNLOCKED, deliberately: every reading saved before this field
+   *  existed was already viewable in full under the old rules, and retroactively
+   *  locking content someone has already seen is worse than the bypass. Only readings
+   *  saved from this build forward can be locked. */
+  unlocked?: boolean;
 }
 
 /**

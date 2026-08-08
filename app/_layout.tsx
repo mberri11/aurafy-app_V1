@@ -21,7 +21,7 @@ import {
 } from "@expo-google-fonts/noto-naskh-arabic";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, useEffect, useMemo, useState } from "react";
 import { LogBox, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -107,6 +107,30 @@ function IntroOverlayHost() {
 
 function RootLayoutNav() {
   const theme = useTheme();
+  // Memoized for IDENTITY only — the content below is exactly what was passed inline
+  // before. As a literal it was a fresh object (with a fresh nested contentStyle) on
+  // every render of this component, so a setTheme() write handed react-native-screens
+  // brand-new screen options and re-applied the native container background to every
+  // screen — including one mid-pop. Keyed on theme.background because that is the only
+  // theme field read here; the nested contentStyle is built INSIDE the memo so the
+  // inner object is stable too, otherwise a stable outer object achieves nothing.
+  const screenOptions = useMemo(
+    () => ({
+      headerShown: false,
+      // Dark surface under every transition so a screen swap never flashes
+      // white. Theme-aware (Desert renders warm-dark); app.json splash bg
+      // stays the cosmic hex since splash paints before hydration.
+      contentStyle: { backgroundColor: theme.background },
+      // A blurred screen stops re-rendering until it is focused again. Blurred
+      // screens repainting mid-transition is what makes a popped screen able to
+      // draw a frame on its way out; freezing them removes that whole class of
+      // flash. Only the FOCUSED screen ever renders, so the reading flow
+      // (quiz → loading → result) is unaffected — each of those is focused while
+      // it does its work, and loading's scoring/replace runs on the focused screen.
+      freezeOnBlur: true,
+    }),
+    [theme.background],
+  );
   return (
     // Persistent ambient field painted ONCE behind the whole navigator. Screens
     // that keep a transparent container (Home) reveal it during transitions, so a
@@ -114,15 +138,7 @@ function RootLayoutNav() {
     // destination's own gradient/bloom/content commit a frame late.
     <View style={{ flex: 1 }}>
       <CosmicField />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          // Dark surface under every transition so a screen swap never flashes
-          // white. Theme-aware (Desert renders warm-dark); app.json splash bg
-          // stays the cosmic hex since splash paints before hydration.
-          contentStyle: { backgroundColor: theme.background },
-        }}
-      >
+      <Stack screenOptions={screenOptions}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false, animation: "fade" }} />
       {/* Fade so onboarding → home is a dark-to-dark crossfade (the cosmic intro

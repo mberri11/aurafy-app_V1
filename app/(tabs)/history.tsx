@@ -18,6 +18,9 @@ import dayjs from 'dayjs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+// Deep import — never barrel-import phosphor-react-native (Metro does not tree-shake
+// it, and the barrel pulls ~1500 icons into the bundle). See ModuleIcon's header.
+import { LockIcon } from 'phosphor-react-native/src/icons/Lock';
 
 import { useUserStore } from '@/src/store/userStore';
 import { useReadingStore } from '@/src/store/readingStore';
@@ -128,6 +131,12 @@ const ReadingHistoryCard = memo(function ReadingHistoryCard({
               <Text style={[styles.date, { color: theme.textDim }]}>{date}</Text>
             </View>
           </View>
+          {/* Locked rows only — the reading was saved from the gate's Skip, so the
+              reopen shows the minimal tier. Undefined (pre-flag readings) is unlocked
+              and renders NOTHING, so unlocked rows keep their exact current layout. */}
+          {reading.unlocked === false && (
+            <LockIcon size={rs(16)} color={theme.textDim} weight="fill" />
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -181,7 +190,9 @@ export default function HistoryScreen() {
       // Pass the persisted persons so the result's "THE FULL PICTURE" card can
       // render names/colours on a History reopen (they aren't in session state).
       setViewOnlyResult(reading.result, reading.persons);
-      router.push({ pathname: '/result', params: { viewOnly: '1' } });
+      // readingId lets the result screen read (and write back) THIS reading's persisted
+      // Option C unlock flag instead of assuming every reopen is unlocked.
+      router.push({ pathname: '/result', params: { viewOnly: '1', readingId: reading.id } });
     },
     [setViewOnlyResult],
   );

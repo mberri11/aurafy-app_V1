@@ -471,12 +471,6 @@ export default function LoadingScreen() {
     return () => clearInterval(interval);
   }, [textOpacity]);
 
-  // Reveal the ad gate after a beat
-  useEffect(() => {
-    const timer = setTimeout(() => setShowAdGate(true), READY_DELAY);
-    return () => clearTimeout(timer);
-  }, []);
-
   // RED/GREEN outcome gate: the result is computed (resultRef set) BEFORE showAdGate
   // flips, so by the gate's first render the verdict is known — the dual module's
   // gate bloom/ring/orb/eyebrow render in the OUTCOME color (green / amber / red)
@@ -538,6 +532,24 @@ export default function LoadingScreen() {
     lightTap();
     setResultUnlocked(false);
     navigateToResult();
+  }, [setResultUnlocked, navigateToResult]);
+
+  // Reveal the ad gate after a beat — UNLESS the read came back with no signal at all.
+  // That reading was just refunded above; putting a watch-or-pay gate in front of a
+  // "No Signal" screen would charge for the same non-result we just gave back. It goes
+  // straight through, already unlocked, so no ad, no 1★ and no Skip tap is involved.
+  // (Declared after navigateToResult so the dep is initialised — it is a plain
+  // component-scope const, not a hoisted function.)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (resultRef.current?.isZeroSignal) {
+        setResultUnlocked(true);
+        navigateToResult();
+        return;
+      }
+      setShowAdGate(true);
+    }, READY_DELAY);
+    return () => clearTimeout(timer);
   }, [setResultUnlocked, navigateToResult]);
 
   return (

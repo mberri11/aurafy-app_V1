@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   I18nManager,
   Linking,
@@ -133,11 +133,27 @@ function Divider() {
   return <View style={[styles.divider, { backgroundColor: theme.surfaceBorder }]} />;
 }
 
+/** How long a nav call blocks a second one. Long enough to outlast the push
+ *  animation, short enough that a deliberate second tap still works. */
+const NAV_GUARD_MS = 700;
+
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const isRTL = useIsRTL();
   const insets = useSafeAreaInsets();
+  // A second tap on the Themes row pushed /theme-gallery twice, so the back gesture
+  // popped one copy while the other was still animating — the ~1s flash of the gallery
+  // sliding in and straight back out. One push per NAV_GUARD_MS.
+  const isNavigatingRef = useRef(false);
+  const openThemeGallery = useCallback(() => {
+    if (isNavigatingRef.current) return;
+    isNavigatingRef.current = true;
+    setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, NAV_GUARD_MS);
+    router.push('/theme-gallery');
+  }, []);
   const {
     language,
     hapticsEnabled,
@@ -335,7 +351,7 @@ export default function SettingsScreen() {
             label={t('settings.theme')}
             sublabel={t(`themeGallery.${themeId}`)}
             chevron
-            onPress={() => router.push('/theme-gallery')}
+            onPress={openThemeGallery}
           />
           <Divider />
           <Row
